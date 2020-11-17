@@ -1,5 +1,5 @@
+import AppCMS from "pages/_layout";
 import { Component } from "react";
-import AppCMS from "../_layout";
 
 export default class TitlePage extends Component {
     render() {

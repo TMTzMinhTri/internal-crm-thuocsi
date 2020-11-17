@@ -3,7 +3,7 @@ import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagin
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
-import AppCMS from "../../_layout";
+import AppCMS from "pages/_layout";
 import styles from "./pricing.module.css";
 
 export async function getServerSideProps({ query }) {
