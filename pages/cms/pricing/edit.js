@@ -1,9 +1,9 @@
 import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
 import Head from "next/head";
+import AppCMS from "pages/_layout";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import AppCMS from "../../_layout";
-import styles from "./product.module.css";
+import styles from "./pricing.module.css";
 
 export async function getServerSideProps({ query }) {
     return await loadProductData(query)
