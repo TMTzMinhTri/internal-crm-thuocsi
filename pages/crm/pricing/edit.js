@@ -1,6 +1,6 @@
 import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
 import Head from "next/head";
-import AppCMS from "pages/_layout";
+import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import styles from "./pricing.module.css";
@@ -93,7 +93,7 @@ export default function EditPage(props) {
 
     if(props.status !="OK") {
         return (
-            <AppCMS select="/product">
+            <AppCRM select="/product">
                 <Head>
                     <title>Thông tin sản phẩm</title>
                 </Head>
@@ -105,11 +105,11 @@ export default function EditPage(props) {
                         </Box>
                     </FormGroup>
                 </Box>
-            </AppCMS>
+            </AppCRM>
         )
     }
     return (
-        <AppCMS select="/product">
+        <AppCRM select="/product">
             <Head>
                 <title>Thông tin sản phẩm</title>
             </Head>
@@ -388,6 +388,6 @@ export default function EditPage(props) {
                     </Box>
                 </FormGroup>
             </Box>
-        </AppCMS>
+        </AppCRM>
     )
 }
