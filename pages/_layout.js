@@ -2,7 +2,7 @@ import { faUsers } from '@fortawesome/free-solid-svg-icons'
 import App from "@thuocsi/nextjs-components/app/app"
 import { Component } from "react"
 
-export default class AppCMS extends Component {
+export default class AppCRM extends Component {
 
     constructor(props) {
         super(props)

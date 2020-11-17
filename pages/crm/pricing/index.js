@@ -3,7 +3,7 @@ import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagin
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
-import AppCMS from "pages/_layout";
+import AppCRM from "pages/_layout";
 import styles from "./pricing.module.css";
 
 export async function getServerSideProps({ query }) {
@@ -80,7 +80,7 @@ export default function ProductPage(props) {
     )
 
     return (
-        <AppCMS select="/pricing">
+        <AppCRM select="/pricing">
             <Head>
                 <title>Danh sách sản phẩm</title>
             </Head>
@@ -124,6 +124,6 @@ export default function ProductPage(props) {
                     ></MyTablePagination>
                 </Table>
             </TableContainer>
-        </AppCMS>
+        </AppCRM>
     )
 }

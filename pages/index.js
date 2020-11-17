@@ -1,4 +1,4 @@
-import ProductPage, { loadProductData } from "./cms/pricing/index"
+import ProductPage, { loadProductData } from "./crm/pricing/index"
 
 export function getServerSideProps({ query }) {
     return loadProductData(query)

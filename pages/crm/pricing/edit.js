@@ -1,36 +1,46 @@
 import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
 import Head from "next/head";
-import AppCMS from "pages/_layout";
+import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import styles from "./pricing.module.css";
 
-const defaultState = {
-    name: "",
-    sku: "",
-    description: "",
-    origin: "",
-    madeBy: "",
-    storage: "",
-    unit: "Hộp",
-    category: "",
-    indication: "",
-    dosage: "",
-    volume: ""
+export async function getServerSideProps({ query }) {
+    return await loadProductData(query)
 }
 
-export default function NewPage(props) {
+export async function loadProductData(query) {
+    let sku = query.sku || ''
+    
+    const res = await fetch(`http://34.87.48.109/core/product/v1/product?sku=${sku}`, {
+        method: "GET",
+        headers: {
+            "Authorization": "Basic bmFtcGg6MTIzNDU2"
+        }
+    })
+    const result = await res.json()
+    
+    if(result.status != "OK"){
+        return { props: Object.assign({data:[]}, result) }
+    }
+
+    // console.log(result)
+    // Pass data to the page via props
+    return { props: result }
+}
+
+
+export default function EditPage(props) {
     const [units] = useState([
         {
             label: "Hộp",
             value: "Hộp"
         }
     ]);
+    const product = props?.data[0]
     const [categories, setCategories] = useState([])
-    const [state, setState] = useState(defaultState);
+    const [state, setState] = useState(product);
     const { register, handleSubmit, errors } = useForm();
-
-    const {name, unit, category} = state
     
     const handleChange = (event) => {
         // change event.target.id to event.target.name because select box'event do not return id, ex: {value: "value", name: "category"}
@@ -55,7 +65,7 @@ export default function NewPage(props) {
         }
     }
 
-    async function createNewProduct(item) {
+    async function updateProduct(item) {
         const payload = Object.assign({imageUrls: "thuocsi.vn/default.png"},item)
         const res = await fetch(`http://34.87.48.109/core/product/v1/product`, {
             method: 'POST',
@@ -71,7 +81,7 @@ export default function NewPage(props) {
     // func onSubmit used because useForm not working with some fields
     async function onSubmit(){
         try {
-            await createNewProduct(state)
+            await updateProduct(state)
         } catch (error) {
             console.log(error)
         }
@@ -81,24 +91,41 @@ export default function NewPage(props) {
         loadCategoryData({})
     },[]);
 
+    if(props.status !="OK") {
+        return (
+            <AppCRM select="/product">
+                <Head>
+                    <title>Thông tin sản phẩm</title>
+                </Head>
+                <Box component={Paper}>
+                    <FormGroup>
+                        <Box className={styles.contentPadding}>
+                            <Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>
+                            <Box>{props.message}</Box>
+                        </Box>
+                    </FormGroup>
+                </Box>
+            </AppCRM>
+        )
+    }
     return (
-        <AppCMS select="/product">
+        <AppCRM select="/product">
             <Head>
-                <title>Thêm sản phẩm</title>
+                <title>Thông tin sản phẩm</title>
             </Head>
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 24 }}>Thêm sản phẩm mới</Box>
+                        <Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>
                         <Box>
                             <TextField
                                 id="name"
                                 name="name"
+                                value={state.name}
                                 label="Tên sản phẩm"
                                 placeholder=""
                                 helperText={errors.name?.message}
                                 margin="normal"
-                                value={name}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -130,6 +157,7 @@ export default function NewPage(props) {
                                 id="sku"
                                 name="sku"
                                 label="SKU"
+                                value={state.sku}
                                 placeholder=""
                                 helperText={errors.sku? errors.sku.message: "Mã sản phẩm"}
                                 margin="normal"
@@ -139,6 +167,7 @@ export default function NewPage(props) {
                                 style={{ margin: 12, width: '20%' }}
                                 onChange={handleChange}
                                 error={ errors.sku ? true : false }
+                                disabled
                                 required
                                 inputRef={
                                     register({
@@ -158,11 +187,36 @@ export default function NewPage(props) {
                                     })
                                 }
                             />
+                            <TextField
+                                id="createdTime"
+                                name="createdTime"
+                                label="Created at"
+                                value={state.createdTime}
+                                margin="normal"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                style={{ margin: 12, width: '20%' }}
+                                disabled
+                            />
+                            <TextField
+                                id="lastUpdatedTime"
+                                name="lastUpdatedTime"
+                                label="Updated at"
+                                value={state.lastUpdatedTime}
+                                margin="normal"
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                style={{ margin: 12, width: '20%' }}
+                                disabled
+                            />
                         </Box>
                         <Box>
                             <TextField
                                 id="description"
                                 name="description"
+                                value={state.description}
                                 label="Mô tả"
                                 placeholder=""
                                 helperText={errors.description?.message}
@@ -181,6 +235,7 @@ export default function NewPage(props) {
                             <TextField
                                 id="origin"
                                 name="origin"
+                                value={state.origin}
                                 label="Xuất xứ"
                                 placeholder="Quốc gia sản xuất"
                                 helperText={errors.origin?.message}
@@ -203,6 +258,7 @@ export default function NewPage(props) {
                             <TextField
                                 id="madeBy"
                                 name="madeBy"
+                                value={state.madeBy}
                                 label="Nhà sản xuất"
                                 placeholder="Tên nhà sản xuất"
                                 helperText={errors.madeBy?.message}
@@ -225,6 +281,7 @@ export default function NewPage(props) {
                             <TextField
                                 id="storage"
                                 name="storage"
+                                value={state.storage}
                                 label="Bảo quản"
                                 placeholder="Cách bảo quản"
                                 margin="normal"
@@ -242,24 +299,18 @@ export default function NewPage(props) {
                                     labelId="unit-select-label"
                                     id="unit-select"
                                     name="unit"
+                                    value={state.unit}
                                     onChange={handleChange}
-                                    value={unit}
-                                    
                                 >
                                     {units.map(({label, value}) => (
                                         <MenuItem value={value} key={value}>{label}</MenuItem>
                                     ))}
-                                    {/* <MenuItem value={"Hộp"}>Hộp</MenuItem>
-                                    <MenuItem value={"Chai"}>Chai</MenuItem>
-                                    <MenuItem value={"Túi"}>Túi</MenuItem>
-                                    <MenuItem value={"Hũ"}>Hũ</MenuItem>
-                                    <MenuItem value={"Gói"}>Gói</MenuItem>
-                                    <MenuItem value={"Tube"}>Tube</MenuItem> */}
                                 </Select>
                             </FormControl>
                             <TextField
                                 id="volume"
                                 name="volume"
+                                value={state.volume}
                                 label="Thể tích"
                                 placeholder=""
                                 helperText="Ví dụ: 4 chai x 300ml"
@@ -286,8 +337,8 @@ export default function NewPage(props) {
                                     labelId="category-select-label"
                                     id="category"
                                     name="category"
+                                    value={state.category}
                                     onChange={handleChange}
-                                    value={category}
                                 >
                                     {categories.map(({label, value}) => (
                                         <MenuItem value={value} key={value}>{label}</MenuItem>
@@ -299,6 +350,7 @@ export default function NewPage(props) {
                             <TextField
                                 id="indication"
                                 name="indication"
+                                value={state.indication}
                                 label="Chỉ định"
                                 placeholder=""
                                 margin="normal"
@@ -311,6 +363,7 @@ export default function NewPage(props) {
                             <TextField
                                 id="dosage"
                                 name="dosage"
+                                value={state.dosage}
                                 label="Liều lượng"
                                 placeholder=""
                                 margin="normal"
@@ -335,6 +388,6 @@ export default function NewPage(props) {
                     </Box>
                 </FormGroup>
             </Box>
-        </AppCMS>
+        </AppCRM>
     )
 }
