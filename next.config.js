@@ -9,5 +9,5 @@ module.exports = withPlugins([withTM], {
     images: {
         // domains: ['miro.medium.com'],
     },
-    basePath: '/cms' // default path /cms
+    basePath: '/crm' // default path /crm
 });
