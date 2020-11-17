@@ -3,11 +3,33 @@ import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagin
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
-import AppCMS from "../_layout";
+import AppCMS from "../../_layout";
 import styles from "./pricing.module.css";
 
 export async function getServerSideProps({ query }) {
-    return await loadPricingData(query)
+    return await loadProductData(query)
+}
+
+export async function loadProductData(query) {
+    // Fetch data from external API
+    let page = query.page || 0
+    let limit = query.limit || 20
+    let offset = page * limit
+
+    const res = await fetch(`http://34.87.48.109/core/product/v1/product/list?offset=${offset}&limit=${limit}&getTotal=true`, {
+        method: "GET",
+        headers: {
+            "Authorization": "Basic bmFtcGg6MTIzNDU2"
+        }
+    })
+
+    const result = await res.json()
+    if(result.status != "OK") {
+        return { props: {data: [], count: 0, message: result.message} }
+    }
+    console.log(result)
+    // Pass data to the page via props
+    return { props: {data: result.data, count: result.total} }
 }
 
 export async function loadPricingData(query) {
@@ -42,6 +64,21 @@ export default function ProductPage(props) {
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
 
+    const RenderRow = (row) => (
+        <TableRow>
+            <TableCell component="th" scope="row">
+                <Link href={`/pricing/edit?sale_id=${row.productSaleID}`}>
+                    <a><b>{row.data.sku}</b></a>
+                </Link>
+            </TableCell>
+            <TableCell align="left">{row.data.name}</TableCell>
+            <TableCell align="left">{row.status}</TableCell>
+            <TableCell align="left">{row.originalPrice}</TableCell>
+            <TableCell align="left">{row.basePrice}</TableCell>
+            <TableCell align="right">...</TableCell>
+        </TableRow>
+    )
+
     return (
         <AppCMS select="/pricing">
             <Head>
@@ -66,19 +103,8 @@ export default function ProductPage(props) {
                     </TableHead>
                     { props.data.length > 0 ? (
                     <TableBody>
-                        {props.data.map((row) => (
-                            <TableRow key={row.sku}>
-                                <TableCell component="th" scope="row">
-                                    <Link href={`/pricing/edit?sale_id=${row.productSaleID}`}>
-                                        <a><b>{row.sku}</b></a>
-                                    </Link>
-                                </TableCell>
-                                <TableCell align="left">{row.name}</TableCell>
-                                <TableCell align="left">{row.status}</TableCell>
-                                <TableCell align="left">{row.originalPrice}</TableCell>
-                                <TableCell align="left">{row.basePrice}</TableCell>
-                                <TableCell align="right">...</TableCell>
-                            </TableRow>
+                        {props.data.map(row => (
+                            <RenderRow data={row}/>
                         ))}
                     </TableBody>
                     ) : (

@@ -8,5 +8,6 @@ const withTM = require("next-transpile-modules")(
 module.exports = withPlugins([withTM], {
     images: {
         domains: ['miro.medium.com'],
-    }
+    },
+    basePath: '/cms'
 });

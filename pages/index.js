@@ -1,7 +1,7 @@
-import ProductPage, { loadPricingData } from "./pricing/index"
+import ProductPage, { loadProductData } from "./cms/pricing/index"
 
 export function getServerSideProps({ query }) {
-    return loadPricingData(query)
+    return loadProductData(query)
 }
 
 export default function HRMIndexPage(props) {
