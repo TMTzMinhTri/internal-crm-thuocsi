@@ -19,11 +19,11 @@ import React from "react";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return loadPricingData(ctx)
+        return loadProductData(ctx)
     })
 }
 
-export async function loadPricingData(ctx) {
+export async function loadProductData(ctx) {
     // Fetch data from external API
     let query = ctx.query
     let page = query.page || 0
@@ -33,69 +33,68 @@ export async function loadPricingData(ctx) {
     let result = {
         data: [
             {
-                pricingID: '1',
-                name: 'ngoài biển',
+                sku: 'sku',
+                name: 'name',
                 status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
+                vat: '0.1',
+                price: '100000'
             },
             {
-                pricingID: '2',
-                name: 'vip',
+                sku: 'sku',
+                name: 'name',
                 status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
+                vat: '0.1',
+                price: '100000'
             },
             {
-                pricingID: '3',
-                name: 'poor',
+                sku: 'sku',
+                name: 'name',
                 status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
+                vat: '0.1',
+                price: '100000'
             },
             {
-                pricingID: '4',
-                name: 'rick',
+                sku: 'sku',
+                name: 'name',
                 status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
+                vat: '0.1',
+                price: '100000'
             },
             {
-                pricingID: '5',
-                name: 'gold',
+                sku: 'sku',
+                name: 'name',
                 status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
+                vat: '0.1',
+                price: '100000'
             },
             {
-                pricingID: '6',
-                name: 'trên núi',
+                sku: 'sku',
+                name: 'name',
                 status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
+                vat: '0.1',
+                price: '100000'
             },
             {
-                pricingID: '7',
-                name: 'đồng bằng',
+                sku: 'sku',
+                name: 'name',
                 status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
+                vat: '0.1',
+                price: '100000'
             },
-
+            {
+                sku: 'sku',
+                name: 'name',
+                status: 'status 1',
+                vat: '0.1',
+                price: '100000'
+            },
+            {
+                sku: 'sku',
+                name: 'name',
+                status: 'status 1',
+                vat: '0.1',
+                price: '100000'
+            },
         ],
         total: 10,
     }
@@ -103,7 +102,31 @@ export async function loadPricingData(ctx) {
     return {props: {data: result.data, count: result.total}}
 }
 
-export default function PricingPage(props) {
+/*
+export async function loadPricingData(query) {
+    // Fetch data from external API
+    let page = query.page || 0
+    let limit = query.limit || 20
+    let offset = page * limit
+
+    const res = await fetch(`http://34.87.48.109/customer/pricing/v1/product/list?offset=${offset}&limit=${limit}&getTotal=true`, {
+        method: "GET",
+        headers: {
+            "Authorization": "Basic bmFtcGg6MTIzNDU2"
+        }
+    })
+
+    const result = await res.json()
+    if(result.status != "OK") {
+        return { props: {data: [], count: 0, message: result.message} }
+    }
+    console.log(result)
+    // Pass data to the page via props
+    return { props: {data: result.data, count: result.total} }
+}
+*/
+
+export default function ProductPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
@@ -118,13 +141,12 @@ function render(props) {
 
     const RenderRow = (row) => (
         <TableRow>
-            <TableCell component="th" scope="row">{row.data.pricingID}</TableCell>
+            <TableCell component="th" scope="row">{row.data.sku}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left">{row.data.status}</TableCell>
-            <TableCell align="left">{row.data.type}</TableCell>
-            <TableCell align="left">{row.data.value}</TableCell>
-            <TableCell align="left">{row.data.start}</TableCell>
-            <TableCell align="left">{row.data.end}</TableCell>
+            <TableCell align="left">{row.data.vat}</TableCell>
+            <TableCell align="left">{formatNumber(row.data.price)}</TableCell>
+            <TableCell align="left">{formatNumber(row.data.price)}</TableCell>
             <TableCell align="center">
                 <Link href={`/cms/ingredient/edit?ingredientID=${row.ingredientID}`}>
                     <ButtonGroup color="primary" aria-label="contained primary button group">
@@ -136,22 +158,21 @@ function render(props) {
     )
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/product">
             <Head>
-                <title>Danh sách chỉ số</title>
+                <title>Danh sách sản phẩm</title>
             </Head>
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">ID</TableCell>
-                            <TableCell align="left">Tên chỉ số</TableCell>
+                            <TableCell align="left">SKU</TableCell>
+                            <TableCell align="left">Tên sản phẩm</TableCell>
                             <TableCell align="left">Trạng thái</TableCell>
-                            <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Giá trị</TableCell>
-                            <TableCell align="left">Bắt đầu</TableCell>
-                            <TableCell align="left">Kết thúc</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
+                            <TableCell align="left">VAT</TableCell>
+                            <TableCell align="left">Giá bán lẻ của NXS</TableCell>
+                            <TableCell align="left">Giá bán sau VAT</TableCell>
+                            <TableCell align="center">Tác vụ</TableCell>
                         </TableRow>
                     </TableHead>
                     {props.data.length > 0 ? (
@@ -169,7 +190,7 @@ function render(props) {
                     )}
 
                     <MyTablePagination
-                        labelUnit="chỉ số"
+                        labelUnit="sản phẩm"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}

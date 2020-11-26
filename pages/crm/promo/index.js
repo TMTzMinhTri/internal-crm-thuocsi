@@ -19,11 +19,11 @@ import React from "react";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return loadPricingData(ctx)
+        return loadPromoData(ctx)
     })
 }
 
-export async function loadPricingData(ctx) {
+export async function loadPromoData(ctx) {
     // Fetch data from external API
     let query = ctx.query
     let page = query.page || 0
@@ -33,69 +33,50 @@ export async function loadPricingData(ctx) {
     let result = {
         data: [
             {
-                pricingID: '1',
-                name: 'ngoài biển',
-                status: 'status 1',
-                type: 'location',
-                value: '0.1',
+                promoID: '1',
+                name: 'Thứ sáu đen tối',
+                code: '123_321#2',
+                type: 'black friday',
+                timeShow: '12/03/2021',
                 start: '12/12/2012',
                 end: '20/02/2020'
             },
             {
-                pricingID: '2',
-                name: 'vip',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
+                promoID: '2',
+                name: 'Thứ 5 trong sáng',
+                code: '123312^#2',
+                type: 'light day',
+                timeShow: '12/03/2021',
                 start: '12/12/2012',
                 end: '20/02/2020'
             },
             {
-                pricingID: '3',
-                name: 'poor',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
+                promoID: '3',
+                name: 'Noel',
+                code: '7&311#2',
+                type: 'meri chris',
+                timeShow: '12/03/2021',
                 start: '12/12/2012',
                 end: '20/02/2020'
             },
             {
-                pricingID: '4',
-                name: 'rick',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
+                promoID: '4',
+                name: 'Tết tết',
+                code: '31265#2',
+                type: 'holiday',
+                timeShow: '12/03/2021',
                 start: '12/12/2012',
                 end: '20/02/2020'
             },
             {
-                pricingID: '5',
-                name: 'gold',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
+                promoID: '5',
+                name: 'Super',
+                code: '312432#2',
+                type: 'super',
+                timeShow: '12/03/2021',
                 start: '12/12/2012',
                 end: '20/02/2020'
             },
-            {
-                pricingID: '6',
-                name: 'trên núi',
-                status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                pricingID: '7',
-                name: 'đồng bằng',
-                status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-
         ],
         total: 10,
     }
@@ -103,7 +84,7 @@ export async function loadPricingData(ctx) {
     return {props: {data: result.data, count: result.total}}
 }
 
-export default function PricingPage(props) {
+export default function PromoPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
@@ -118,11 +99,11 @@ function render(props) {
 
     const RenderRow = (row) => (
         <TableRow>
-            <TableCell component="th" scope="row">{row.data.pricingID}</TableCell>
+            <TableCell component="th" scope="row">{row.data.promoID}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.status}</TableCell>
+            <TableCell align="left">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.type}</TableCell>
-            <TableCell align="left">{row.data.value}</TableCell>
+            <TableCell align="left">{row.data.timeShow}</TableCell>
             <TableCell align="left">{row.data.start}</TableCell>
             <TableCell align="left">{row.data.end}</TableCell>
             <TableCell align="center">
@@ -136,19 +117,19 @@ function render(props) {
     )
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/promo">
             <Head>
-                <title>Danh sách chỉ số</title>
+                <title>Danh sách mã giảm giá</title>
             </Head>
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">ID</TableCell>
-                            <TableCell align="left">Tên chỉ số</TableCell>
-                            <TableCell align="left">Trạng thái</TableCell>
+                            <TableCell align="left">Tên</TableCell>
+                            <TableCell align="left">Mã giảm giá</TableCell>
                             <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Giá trị</TableCell>
+                            <TableCell align="left">Thời gian hiển thị</TableCell>
                             <TableCell align="left">Bắt đầu</TableCell>
                             <TableCell align="left">Kết thúc</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -169,12 +150,12 @@ function render(props) {
                     )}
 
                     <MyTablePagination
-                        labelUnit="chỉ số"
+                        labelUnit="mã giảm giá"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/pricing?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/promo?page=${page}&limit=${rowsPerPage}`)
                         }}
                     />
                 </Table>
