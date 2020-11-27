@@ -20,8 +20,8 @@ module.exports = withPlugins([withTM], {
             {
                 source: '/backend/:path*',
                 destination: `http://thuocsi-in.vn/backend/:path*`
-            },
-            { source: '/crm/_next/:path*', destination: '/_next/:path*' }
+            }
+            // { source: '/crm/_next/:path*', destination: '/_next/:path*' }
         ]
     }
 });
