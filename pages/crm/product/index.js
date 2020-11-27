@@ -33,6 +33,7 @@ export async function loadProductData(ctx) {
     let result = {
         data: [
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -40,6 +41,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -47,6 +49,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -54,6 +57,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -61,6 +65,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -68,6 +73,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -75,6 +81,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -82,6 +89,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -89,6 +97,7 @@ export async function loadProductData(ctx) {
                 price: '100000'
             },
             {
+                productID: 1,
                 sku: 'sku',
                 name: 'name',
                 status: 'status 1',
@@ -101,30 +110,6 @@ export async function loadProductData(ctx) {
     // Pass data to the page via props
     return {props: {data: result.data, count: result.total}}
 }
-
-/*
-export async function loadPricingData(query) {
-    // Fetch data from external API
-    let page = query.page || 0
-    let limit = query.limit || 20
-    let offset = page * limit
-
-    const res = await fetch(`http://34.87.48.109/customer/pricing/v1/product/list?offset=${offset}&limit=${limit}&getTotal=true`, {
-        method: "GET",
-        headers: {
-            "Authorization": "Basic bmFtcGg6MTIzNDU2"
-        }
-    })
-
-    const result = await res.json()
-    if(result.status != "OK") {
-        return { props: {data: [], count: 0, message: result.message} }
-    }
-    console.log(result)
-    // Pass data to the page via props
-    return { props: {data: result.data, count: result.total} }
-}
-*/
 
 export default function ProductPage(props) {
     return renderWithLoggedInUser(props, render)
@@ -148,7 +133,7 @@ function render(props) {
             <TableCell align="left">{formatNumber(row.data.price)}</TableCell>
             <TableCell align="left">{formatNumber(row.data.price)}</TableCell>
             <TableCell align="center">
-                <Link href={`/cms/ingredient/edit?ingredientID=${row.ingredientID}`}>
+                <Link href={`/crm/product/edit?productID=${row.data.productID}`}>
                     <ButtonGroup color="primary" aria-label="contained primary button group">
                         <Button variant="contained" size="small" color="primary">Xem</Button>
                     </ButtonGroup>
@@ -195,7 +180,7 @@ function render(props) {
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/pricing?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/crm/product?page=${page}&limit=${rowsPerPage}`)
                         }}
                     />
                 </Table>
