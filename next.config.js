@@ -14,5 +14,14 @@ module.exports = withPlugins([withTM], {
     useFileSystemPublicRoutes: true,
     env: {
         WEB_HOST: process.env.WEB_HOST
+    },
+    async rewrites() {
+        return [
+            {
+                source: '/backend/:path*',
+                destination: `http://thuocsi-in.vn/backend/:path*`
+            },
+            { source: '/crm/_next/:path*', destination: '/_next/:path*' }
+        ]
     }
 });
