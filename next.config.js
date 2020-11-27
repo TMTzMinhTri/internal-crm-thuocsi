@@ -10,7 +10,7 @@ module.exports = withPlugins([withTM], {
     images: {
         // domains: ['miro.medium.com'],
     },
-    // basePath: '/crm',
+    assetPrefix: process.env.ENV==='local'?'/':'/crm',
     env: {
         WEB_HOST: process.env.WEB_HOST
     }
