@@ -15,7 +15,13 @@ import Link from "next/link";
 import Router, {useRouter} from "next/router";
 import AppCRM from "pages/_layout";
 import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-lib/login";
-import React from "react";
+import React, {useState} from "react";
+import styles from "./promo.module.css";
+import Grid from "@material-ui/core/Grid";
+import InputBase from "@material-ui/core/InputBase";
+import SearchIcon from '@material-ui/icons/Search';
+import IconButton from "@material-ui/core/IconButton";
+import {useForm} from "react-hook-form";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -94,9 +100,32 @@ export function formatNumber(num) {
 
 function render(props) {
     let router = useRouter()
+    const {register, handleSubmit, errors} = useForm();
+    let [search, setSearch] = useState('')
+    let q = router.query.q || ''
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
 
+    function searchPromotion(formData) {
+        let q = formData.q
+        Router.push(`/crm/promotion?q=${q}`)
+    }
+
+    async function handleChange(event) {
+        const target = event.target;
+        const value = target.value;
+        setSearch(value)
+    }
+
+    function onSearch(formData) {
+        try {
+            searchPromotion(formData)
+            setSearch('')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
     const RenderRow = (row) => (
         <TableRow>
             <TableCell component="th" scope="row">{row.data.promoID}</TableCell>
@@ -107,7 +136,7 @@ function render(props) {
             <TableCell align="left">{row.data.start}</TableCell>
             <TableCell align="left">{row.data.end}</TableCell>
             <TableCell align="center">
-                <Link href={`/cms/ingredient/edit?ingredientID=${row.ingredientID}`}>
+                <Link href={`/cms/promotion/edit?promotionID=${row.promotionID}`}>
                     <ButtonGroup color="primary" aria-label="contained primary button group">
                         <Button variant="contained" size="small" color="primary">Xem</Button>
                     </ButtonGroup>
@@ -121,6 +150,48 @@ function render(props) {
             <Head>
                 <title>Danh sách mã giảm giá</title>
             </Head>
+            <div className={styles.grid}>
+                <Grid container spacing={3} direction="row"
+                      justify="space-evenly"
+                      alignItems="center"
+                >
+                    <Grid item xs={12} sm={6} md={6}>
+                        <form>
+                            <Paper component="form" className={styles.search}>
+                                <InputBase
+                                    id="q"
+                                    name="q"
+                                    className={styles.input}
+                                    value={search}
+                                    onChange={handleChange}
+                                    inputRef={register}
+                                    placeholder="Tìm kiếm mã giảm giá"
+                                    inputProps={{'aria-label': 'Tìm kiếm mã giảm giá'}}
+                                />
+                                <IconButton className={styles.iconButton} aria-label="search"
+                                            onClick={handleSubmit(onSearch)}>
+                                    <SearchIcon/>
+                                </IconButton>
+                            </Paper>
+                        </form>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Link href="/crm/promo/new">
+                            <ButtonGroup color="primary" aria-label="contained primary button group"
+                                         className={styles.rightGroup}>
+                                <Button variant="contained" color="primary">Thêm mã giảm giá</Button>
+                            </ButtonGroup>
+                        </Link>
+                    </Grid>
+                </Grid>
+            </div>
+            {
+                q === '' ? (
+                    <span/>
+                ) : (
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
+                )
+            }
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>

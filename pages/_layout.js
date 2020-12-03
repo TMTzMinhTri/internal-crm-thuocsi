@@ -1,6 +1,6 @@
-import {faUsers} from '@fortawesome/free-solid-svg-icons'
+import {faUsers, faReceipt, faMoneyCheckAlt, faGifts, faPercentage, faDollarSign} from '@fortawesome/free-solid-svg-icons'
 import App from "@thuocsi/nextjs-components/app/app"
-import {Component} from "react"
+import React, {Component} from "react"
 
 export default class AppCRM extends Component {
 
@@ -9,22 +9,40 @@ export default class AppCRM extends Component {
         this.state = {
             menu: [
                 {
-                    key: "PRODUCT",
-                    name: "Sản phẩm",
-                    link: "/crm/product",
+                    key: "ORDER",
+                    name: "Đơn hàng",
+                    link: "/cms/product",
+                    icon: faReceipt
+                },
+                {
+                    key: "CUSTOMER",
+                    name: "Khách hàng",
+                    link: "/cms/product",
                     icon: faUsers
+                },
+                {
+                    key: "PRODUCT",
+                    name: "Bảng giá",
+                    link: "/cms/product",
+                    icon: faMoneyCheckAlt
                 },
                 {
                     key: "PRICING",
                     name: "Chỉ số giá",
                     link: "/crm/pricing",
-                    icon: faUsers
+                    icon: faDollarSign
                 },
                 {
                     key: "PROMO",
-                    name: "Mã giảm giá",
+                    name: "Khuyến mãi",
                     link: "/crm/promo",
-                    icon: faUsers
+                    icon: faPercentage
+                },
+                {
+                    key: "POINT",
+                    name: "Điểm thưởng",
+                    link: "/crm/pricing",
+                    icon: faGifts
                 },
             ]
         }
