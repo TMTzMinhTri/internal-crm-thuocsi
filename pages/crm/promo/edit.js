@@ -3,7 +3,7 @@ import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import styles from "./pricing.module.css";
+import styles from "./promo.module.css";
 
 export async function getServerSideProps({ query }) {
     return await loadProductData(query)
