@@ -16,7 +16,7 @@ import Router, {useRouter} from "next/router";
 import AppCRM from "pages/_layout";
 import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
 import React, {useState} from "react";
-import styles from "./promotion-code.module.css";
+import styles from "./customer.module.css";
 import Grid from "@material-ui/core/Grid";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from '@material-ui/icons/Search';
@@ -39,7 +39,7 @@ export async function loadPromoData(ctx) {
     let result = {
         data: [
             {
-                promotionCodeID: '1',
+                customerID: '1',
                 name: 'Thứ sáu đen tối',
                 code: '123_321#2',
                 type: 'black friday',
@@ -48,7 +48,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promotionCodeID: '2',
+                customerID: '2',
                 name: 'Thứ 5 trong sáng',
                 code: '123312^#2',
                 type: 'light day',
@@ -57,7 +57,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promotionCodeID: '3',
+                customerID: '3',
                 name: 'Noel',
                 code: '7&311#2',
                 type: 'meri chris',
@@ -66,7 +66,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promotionCodeID: '4',
+                customerID: '4',
                 name: 'Tết tết',
                 code: '31265#2',
                 type: 'holiday',
@@ -75,7 +75,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promotionCodeID: '5',
+                customerID: '5',
                 name: 'Super',
                 code: '312432#2',
                 type: 'super',
@@ -90,7 +90,7 @@ export async function loadPromoData(ctx) {
     return {props: {data: result.data, count: result.total}}
 }
 
-export default function PromoPage(props) {
+export default function PromotionPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
@@ -108,7 +108,7 @@ function render(props) {
 
     function searchPromotion(formData) {
         let q = formData.q
-        Router.push(`/crm/promotion-codetion-code?q=${q}`)
+        Router.push(`/crm/customer?q=${q}`)
     }
 
     async function handleChange(event) {
@@ -128,7 +128,7 @@ function render(props) {
     
     const RenderRow = (row) => (
         <TableRow>
-            <TableCell component="th" scope="row">{row.data.promotionCodeID}</TableCell>
+            <TableCell component="th" scope="row">{row.data.customerID}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.type}</TableCell>
@@ -136,9 +136,9 @@ function render(props) {
             <TableCell align="left">{row.data.start}</TableCell>
             <TableCell align="left">{row.data.end}</TableCell>
             <TableCell align="center">
-                <Link href={`/cms/promotion-code/edit?promotionCodeID=${row.promotionCodeID}`}>
+                <Link href={`/cms/customer/edit?customerID=${row.customerID}`}>
                     <ButtonGroup color="primary" aria-label="contained primary button group">
-                        <Button variant="contained" size="small" color="primary">Xem</Button>
+                        <Button variant="contained" size="small" color="primary">Cập nhật</Button>
                     </ButtonGroup>
                 </Link>
             </TableCell>
@@ -146,9 +146,9 @@ function render(props) {
     )
 
     return (
-        <AppCRM select="/crm/promotion-code">
+        <AppCRM select="/crm/customer">
             <Head>
-                <title>Danh sách mã giảm giá</title>
+                <title>Danh sách khách hàng</title>
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
@@ -165,8 +165,8 @@ function render(props) {
                                     value={search}
                                     onChange={handleChange}
                                     inputRef={register}
-                                    placeholder="Tìm kiếm mã giảm giá"
-                                    inputProps={{'aria-label': 'Tìm kiếm mã giảm giá'}}
+                                    placeholder="Tìm kiếm khách hàng"
+                                    inputProps={{'aria-label': 'Tìm kiếm khách hàng'}}
                                 />
                                 <IconButton className={styles.iconButton} aria-label="search"
                                             onClick={handleSubmit(onSearch)}>
@@ -176,10 +176,10 @@ function render(props) {
                         </form>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/promotion-code/new">
+                        <Link href="/crm/customer/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
                                          className={styles.rightGroup}>
-                                <Button variant="contained" color="primary">Thêm mã giảm giá</Button>
+                                <Button variant="contained" color="primary">Thêm khách hàng</Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
@@ -197,12 +197,12 @@ function render(props) {
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">ID</TableCell>
-                            <TableCell align="left">Tên</TableCell>
-                            <TableCell align="left">Mã giảm giá</TableCell>
-                            <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Thời gian hiển thị</TableCell>
-                            <TableCell align="left">Bắt đầu</TableCell>
-                            <TableCell align="left">Kết thúc</TableCell>
+                            <TableCell align="left">Tên khách hàng</TableCell>
+                            <TableCell align="left">Email</TableCell>
+                            <TableCell align="left">Cấp độ</TableCell>
+                            <TableCell align="left">Điểm</TableCell>
+                            <TableCell align="left">Số điện thoại</TableCell>
+                            <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -221,12 +221,12 @@ function render(props) {
                     )}
 
                     <MyTablePagination
-                        labelUnit="mã giảm giá"
+                        labelUnit="khách hàng"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/promo?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/customer?page=${page}&limit=${rowsPerPage}`)
                         }}
                     />
                 </Table>

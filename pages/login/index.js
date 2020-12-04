@@ -1,5 +1,5 @@
 import {parseBody} from "next/dist/next-server/server/api-utils"
-import {APIStatus} from "@thuocsi/nextjs-lib/common";
+import {APIStatus} from "@thuocsi/nextjs-components/lib/common";
 import Head from "next/head";
 import {Box, Button, Paper, TextField} from "@material-ui/core";
 import styles from "./login.module.css";
