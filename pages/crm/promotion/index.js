@@ -16,7 +16,7 @@ import Router, {useRouter} from "next/router";
 import AppCRM from "pages/_layout";
 import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-lib/login";
 import React, {useState} from "react";
-import styles from "./promo.module.css";
+import styles from "./promotion.module.css";
 import Grid from "@material-ui/core/Grid";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from '@material-ui/icons/Search';
@@ -39,7 +39,7 @@ export async function loadPromoData(ctx) {
     let result = {
         data: [
             {
-                promoID: '1',
+                promotionID: '1',
                 name: 'Thứ sáu đen tối',
                 code: '123_321#2',
                 type: 'black friday',
@@ -48,7 +48,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promoID: '2',
+                promotionID: '2',
                 name: 'Thứ 5 trong sáng',
                 code: '123312^#2',
                 type: 'light day',
@@ -57,7 +57,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promoID: '3',
+                promotionID: '3',
                 name: 'Noel',
                 code: '7&311#2',
                 type: 'meri chris',
@@ -66,7 +66,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promoID: '4',
+                promotionID: '4',
                 name: 'Tết tết',
                 code: '31265#2',
                 type: 'holiday',
@@ -75,7 +75,7 @@ export async function loadPromoData(ctx) {
                 end: '20/02/2020'
             },
             {
-                promoID: '5',
+                promotionID: '5',
                 name: 'Super',
                 code: '312432#2',
                 type: 'super',
@@ -90,7 +90,7 @@ export async function loadPromoData(ctx) {
     return {props: {data: result.data, count: result.total}}
 }
 
-export default function PromoPage(props) {
+export default function PromotionPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
@@ -128,7 +128,7 @@ function render(props) {
     
     const RenderRow = (row) => (
         <TableRow>
-            <TableCell component="th" scope="row">{row.data.promoID}</TableCell>
+            <TableCell component="th" scope="row">{row.data.promotionID}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.type}</TableCell>
@@ -146,9 +146,9 @@ function render(props) {
     )
 
     return (
-        <AppCRM select="/crm/promo">
+        <AppCRM select="/crm/promotion">
             <Head>
-                <title>Danh sách mã giảm giá</title>
+                <title>Danh sách khuyến mãi</title>
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
@@ -165,8 +165,8 @@ function render(props) {
                                     value={search}
                                     onChange={handleChange}
                                     inputRef={register}
-                                    placeholder="Tìm kiếm mã giảm giá"
-                                    inputProps={{'aria-label': 'Tìm kiếm mã giảm giá'}}
+                                    placeholder="Tìm kiếm khuyến mãi"
+                                    inputProps={{'aria-label': 'Tìm kiếm khuyến mãi'}}
                                 />
                                 <IconButton className={styles.iconButton} aria-label="search"
                                             onClick={handleSubmit(onSearch)}>
@@ -176,10 +176,10 @@ function render(props) {
                         </form>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/promo/new">
+                        <Link href="/crm/promotion/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
                                          className={styles.rightGroup}>
-                                <Button variant="contained" color="primary">Thêm mã giảm giá</Button>
+                                <Button variant="contained" color="primary">Thêm khuyến mãi</Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
@@ -198,7 +198,7 @@ function render(props) {
                         <TableRow>
                             <TableCell align="left">ID</TableCell>
                             <TableCell align="left">Tên</TableCell>
-                            <TableCell align="left">Mã giảm giá</TableCell>
+                            <TableCell align="left">Mã khuyến mãi</TableCell>
                             <TableCell align="left">Loại</TableCell>
                             <TableCell align="left">Thời gian hiển thị</TableCell>
                             <TableCell align="left">Bắt đầu</TableCell>
@@ -221,12 +221,12 @@ function render(props) {
                     )}
 
                     <MyTablePagination
-                        labelUnit="mã giảm giá"
+                        labelUnit="khuyến mãi"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/promo?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/promotion?page=${page}&limit=${rowsPerPage}`)
                         }}
                     />
                 </Table>
