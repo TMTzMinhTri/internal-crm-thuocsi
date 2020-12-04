@@ -11,19 +11,19 @@ export default class AppCRM extends Component {
                 {
                     key: "ORDER",
                     name: "Đơn hàng",
-                    link: "/cms/product",
+                    link: "/crm/order",
                     icon: faReceipt
                 },
                 {
                     key: "CUSTOMER",
                     name: "Khách hàng",
-                    link: "/cms/product",
+                    link: "/crm/customer",
                     icon: faUsers
                 },
                 {
                     key: "PRODUCT",
                     name: "Bảng giá",
-                    link: "/cms/product",
+                    link: "/crm/product",
                     icon: faMoneyCheckAlt
                 },
                 {

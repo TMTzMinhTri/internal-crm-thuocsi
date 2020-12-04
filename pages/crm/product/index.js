@@ -14,7 +14,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Router, {useRouter} from "next/router";
 import AppCRM from "pages/_layout";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-lib/login";
+import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
 import React from "react";
 
 export async function getServerSideProps(ctx) {

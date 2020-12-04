@@ -12,7 +12,7 @@ import HighlightOffOutlinedIcon from '@material-ui/icons/HighlightOffOutlined';
 import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
 import ListItem from "@material-ui/core/ListItem";
 import List from "@material-ui/core/List";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-lib/login";
+import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {

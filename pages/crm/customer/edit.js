@@ -1,47 +1,36 @@
-import {
-    Box,
-    Button,
-    CardHeader,
-    FormControl,
-    FormGroup,
-    InputLabel,
-    MenuItem,
-    Paper,
-    Select,
-    TextField
-} from "@material-ui/core";
+import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import styles from "./pricing.module.css";
-import {renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
-import Card from "@material-ui/core/Card";
+import styles from "./customer.module.css";
 
 export async function getServerSideProps({ query }) {
     return await loadProductData(query)
 }
 
-export async function loadProductData(ctx) {
-    let result = {
-        status: "OK",
-        data: [
-            {
-                sku: 'sku',
-                name: 'name',
-                status: 'status 1',
-                vat: '0.1',
-                price: '100000'
-            },
-            ]}
+export async function loadProductData(query) {
+    let sku = query.sku || ''
+    
+    const res = await fetch(`http://34.87.48.109/core/product/v1/product?sku=${sku}`, {
+        method: "GET",
+        headers: {
+            "Authorization": "Basic bmFtcGg6MTIzNDU2"
+        }
+    })
+    const result = await res.json()
+    
+    if(result.status != "OK"){
+        return { props: Object.assign({data:[]}, result) }
+    }
+
+    // console.log(result)
+    // Pass data to the page via props
     return { props: result }
 }
 
-export default function EditPage(props) {
-    return renderWithLoggedInUser(props, render)
-}
 
-function render(props) {
+export default function EditPage(props) {
     const [units] = useState([
         {
             label: "Hộp",
@@ -104,7 +93,7 @@ function render(props) {
 
     if(props.status !="OK") {
         return (
-            <AppCRM select="/crm/product">
+            <AppCRM select="/product">
                 <Head>
                     <title>Thông tin sản phẩm</title>
                 </Head>
@@ -120,26 +109,14 @@ function render(props) {
         )
     }
     return (
-        <AppCRM select="/crm/product">
+        <AppCRM select="/product">
             <Head>
                 <title>Thông tin sản phẩm</title>
             </Head>
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        {/*<Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>*/}
-                        <Card className={styles.rootCard}>
-                            <CardHeader
-                                title="Thông tin sản phẩm"
-                                subheader="sub header"
-                            />
-                        </Card>
-                        <Card className={styles.rootCard}>
-                            <CardHeader
-                                title="Thông tin giá"
-                                subheader="sub header"
-                            />
-                        </Card>
+                        <Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>
                         <Box>
                             <TextField
                                 id="name"
