@@ -1,9 +1,9 @@
+import styles from "./promotion-code.module.css";
 import {Box,RadioGroup,FormControlLabel,Radio, Button, CardContent, CardHeader, FormGroup, Paper, TextField} from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, {useState} from 'react';
 import {useForm} from 'react-hook-form';
-import styles from "./promo.module.css";
 import Grid from "@material-ui/core/Grid";
 import Divider from "@material-ui/core/Divider";
 import InputAdornment from "@material-ui/core/InputAdornment";
@@ -13,7 +13,6 @@ import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOut
 import ListItem from "@material-ui/core/ListItem";
 import List from "@material-ui/core/List";
 import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-lib/login";
-import Input from "@material-ui/core/Input";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -79,7 +78,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/promo">
+        <AppCRM select="/crm/promotion-code">
             <Head>
                 <title>Thêm mã giảm giá</title>
             </Head>

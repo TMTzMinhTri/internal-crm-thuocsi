@@ -1,4 +1,4 @@
-import {faUsers, faReceipt, faMoneyCheckAlt, faGifts, faPercentage, faDollarSign} from '@fortawesome/free-solid-svg-icons'
+import {faUsers, faReceipt, faMoneyCheckAlt, faGifts, faPercentage,faQrcode, faDollarSign} from '@fortawesome/free-solid-svg-icons'
 import App from "@thuocsi/nextjs-components/app/app"
 import React, {Component} from "react"
 
@@ -33,10 +33,16 @@ export default class AppCRM extends Component {
                     icon: faDollarSign
                 },
                 {
-                    key: "PROMO",
+                    key: "DISCOUNT",
                     name: "Khuyến mãi",
-                    link: "/crm/promo",
+                    link: "/crm/promotion",
                     icon: faPercentage
+                },
+                {
+                    key: "PROMO",
+                    name: "Mã giảm giá",
+                    link: "/crm/promotion-code",
+                    icon: faQrcode
                 },
                 {
                     key: "POINT",

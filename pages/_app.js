@@ -1,9 +1,9 @@
-import React from 'react';
-import App from 'next/app';
+import React, {useEffect} from 'react';
+import {createMuiTheme, ServerStyleSheets, ThemeProvider} from '@material-ui/core';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
-import styles from "./global.css"
-import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import Loader from '@thuocsi/nextjs-components/loader/loader';
+import {ToastProvider} from "@thuocsi/nextjs-components/toast/providers/ToastProvider";
+import styles from "./global.css"
 
 export var theme = createMuiTheme({
     palette: {
@@ -15,30 +15,35 @@ export var theme = createMuiTheme({
     }
 })
 
-export default class MyApp extends App {
-    constructor(props) {
-        super(props)
-        this.state = {
-            showLoader: true
-        }
-    }
+export default function App(props) {
+    const [showLoader, setShowLoader] = React.useState(true)
 
-    componentDidMount() {
-        setTimeout(() => {
-            this.setState({ showLoader: false })
-        }, 500)
-    }
+    useEffect(() => {
+            setTimeout(() => {
+                setShowLoader(false)
+            }, 500)
+        }, []
+    )
+    const {Component, pageProps} = props
 
-
-    render() {
-        const { Component, pageProps } = this.props
-        return (
+    // use ServerStyleSheets to remove affect of injected CSS
+    // ref: https://material-ui.com/guides/server-rendering/
+    const sheets = new ServerStyleSheets();
+    if (pageProps.loggedIn) {
+        return sheets.collect(
             <ThemeProvider theme={theme}>
-                <Layout show={!this.state.showLoader}>
-                    <Component {...pageProps} />
-                </Layout>
-                <Loader show={this.state.showLoader}></Loader>
+                <ToastProvider>
+                    <Layout className={styles.blank} loggedInUserInfo={pageProps.loggedInUserInfo}>
+                        <Component {...pageProps} />
+                    </Layout>
+                </ToastProvider>
+                <Loader show={showLoader}></Loader>
             </ThemeProvider>
         )
+    } else {
+        return sheets.collect(<ThemeProvider theme={theme}>
+            <Component {...pageProps} />
+        </ThemeProvider>)
     }
+
 }
