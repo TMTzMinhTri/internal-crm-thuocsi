@@ -1,7 +1,7 @@
-import {parseBody} from "next/dist/next-server/server/api-utils"
-import {APIStatus} from "@thuocsi/nextjs-components/lib/common";
+import { Box, Button, Paper, TextField } from "@material-ui/core";
+import { APIStatus } from "@thuocsi/nextjs-components/lib/common";
+import { parseBody } from "next/dist/next-server/server/api-utils";
 import Head from "next/head";
-import {Box, Button, Paper, TextField} from "@material-ui/core";
 import styles from "./login.module.css";
 
 /*
@@ -35,6 +35,7 @@ export async function getServerSideProps(ctx) {
         })
         const result = await response.json()
 
+        console.log(result)
         // if OK, do set cookie & redirect page to relative target
         if (result.status === APIStatus.OK) {
             let data = result.data[0]

@@ -1,21 +1,30 @@
 import {
     Button,
     ButtonGroup,
-    Paper,
-    Table,
+    Divider,
+    FormControl, Grid,
+    IconButton, InputBase,
+    InputLabel, Paper,
+    Select, Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
+    TextField
 } from "@material-ui/core";
+import FilterListIcon from '@material-ui/icons/FilterList';
+import SearchIcon from '@material-ui/icons/Search';
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import PanelCollapse from "components/panel/panel";
 import Head from "next/head";
 import Link from "next/link";
-import Router, {useRouter} from "next/router";
+import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
-import React from "react";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import styles from "./pricing.module.css";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -115,6 +124,35 @@ function render(props) {
     let router = useRouter()
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
+    let [search, setSearch] = useState('');
+    let [open, setOpen] = useState(false);
+    const {register, handleSubmit, errors, control} = useForm();
+    let q = router.query.q || ''
+
+    async function handleChange(event) {
+        const target = event.target;
+        const value = target.value;
+        setSearch(value)
+    }
+
+    function onSearch(formData) {
+        try {
+            searchPromotion(formData)
+            setSearch('')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
+    function onCollapse() {
+        // func set expand panel search
+        setOpen(!open);
+    }
+
+    function fnSearch(data) {
+        // TODO example
+        alert(data)
+    }
 
     const RenderRow = (row) => (
         <TableRow>
@@ -138,8 +176,152 @@ function render(props) {
     return (
         <AppCRM select="/crm/pricing">
             <Head>
-                <title>Danh sách chỉ số</title>
+                <title>Danh sách cài đặt</title>
             </Head>
+            <div className={styles.grid}>
+                <Grid container spacing={3} direction="row"
+                      justify="space-evenly"
+                      alignItems="center"
+                >
+                    <Grid item xs={12} sm={6} md={6}>
+                        <form>
+                            <Paper component="form" className={styles.search}>
+                                <InputBase
+                                    id="q"
+                                    name="q"
+                                    className={styles.input}
+                                    value={search}
+                                    onChange={handleChange}
+                                    inputRef={register}
+                                    placeholder="Tìm kiếm khuyến mãi"
+                                    inputProps={{'aria-label': 'Tìm kiếm khuyến mãi'}}
+                                />
+                                <IconButton className={open===true?styles.iconButtonHidden:styles.iconButton} aria-label="search"
+                                            onClick={handleSubmit(onSearch)}>
+                                    <SearchIcon/>
+                                </IconButton>
+                                <Divider className={styles.divider} orientation="vertical" />
+                                <IconButton className={styles.iconButton} aria-label="filter-list"
+                                            onClick={onCollapse}>
+                                    <FilterListIcon/>
+                                </IconButton>
+                            </Paper>
+                        </form>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Link href="/crm/promotion/new">
+                            <ButtonGroup color="primary" aria-label="contained primary button group"
+                                         className={styles.rightGroup}>
+                                <Button variant="contained" color="primary" className={styles.btnAction}>Filter</Button>
+                                <Button variant="contained" color="primary" className={styles.btnAction}>Thêm khuyến mãi</Button>
+                            </ButtonGroup>
+                        </Link>
+                    </Grid>
+                </Grid>
+            </div>
+            {
+                q === '' ? (
+                    <span/>
+                ) : (
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
+                )
+            }
+
+            {
+                open === true ? (
+                    <Grid item xs={12} sm={12} md={12}>
+                        <PanelCollapse expand={open} setOpen={setOpen} setExecute={fnSearch}>
+                            <Grid container spacing={2} direction="row"
+                                justify="space-evenly"
+                                alignItems="center"
+                            >
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                        <Select
+                                            labelId="category-select-label"
+                                            id="category"
+                                            name="category"
+                                            variant="outlined"
+                                        >
+                                            
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                        <Select
+                                            labelId="category-select-label"
+                                            id="category"
+                                            name="category"
+                                            variant="outlined"
+                                            margin="normal"
+                                        >
+                                            
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <TextField
+                                            id="volume"
+                                            name="volume"
+                                            label="Thể tích"
+                                            placeholder=""
+                                            helperText="Ví dụ: 4 chai x 300ml"
+                                            
+                                            variant="outlined"
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            style={{width: '100%', marginTop: '20px' }}
+                                            required
+                                            inputRef={
+                                                register({
+                                                    required: "Volume Required",
+                                                })
+                                            }
+                                        />
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                        <Select
+                                            labelId="category-select-label"
+                                            id="category"
+                                            name="category"
+                                        >
+                                            
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                            <Controller 
+                                                name="unit"
+                                                control={control}
+                                            
+                                                as={
+                                                    <Select label="unit" variant="outlined">
+                                                        
+                                                    </Select>
+                                                }
+                                            />
+                                        </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}></Grid>
+                            </Grid>
+                        </PanelCollapse>
+                    </Grid>
+                ):(
+                    <div></div>
+                )
+            }
+        
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
