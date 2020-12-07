@@ -1,18 +1,18 @@
-import AppCRM from "../../_layout";
-import Head from "next/head";
-import {Box, Button, CardContent, FormGroup, Paper, TextField} from "@material-ui/core";
-import styles from "./customer.module.css";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
-import Divider from "@material-ui/core/Divider";
-import React, {useState} from "react";
-import {Controller, useForm} from "react-hook-form";
+import { Box, Button, CardContent, FormGroup, Paper, TextField } from "@material-ui/core";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import MenuItem from "@material-ui/core/MenuItem";
+import Divider from "@material-ui/core/Divider";
 import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
+import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import Head from "next/head";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import AppCRM from "../../_layout";
+import styles from "./customer.module.css";
 
 const levels = [
     {
@@ -44,7 +44,7 @@ const statuses = [
     },
 ]
 
-export function renderForm(props) {
+export default function renderForm(props) {
     const [loading, setLoading] = useState(false);
     const {register, handleSubmit, errors, control} = useForm();
     const onSubmit = async (formData) => {
