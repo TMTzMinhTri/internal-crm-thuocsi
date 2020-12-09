@@ -22,75 +22,78 @@ import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from '@material-ui/icons/Search';
 import IconButton from "@material-ui/core/IconButton";
 import {useForm} from "react-hook-form";
+import {getCustomerClient} from "../../../client/customer";
+import Tooltip from "@material-ui/core/Tooltip";
+import EditIcon from '@material-ui/icons/Edit';
+// import {levels, statuses} from "./form"
+
+const levels = [
+    {
+        value: "Infinity",
+        label: "Không giới hạn"
+    },
+    {
+        value: "Diamond",
+        label: "Kim cương",
+    },
+    {
+        value: "Platinum",
+        label: "Bạch kim",
+    },
+    {
+        value: "Gold",
+        label: "Vàng",
+    },
+    {
+        value: "Sliver",
+        label: "Bạc",
+    },
+];
+
+const statuses = [
+    {
+        value: "ACTIVE",
+        label: "Đang hoạt động",
+    },
+    {
+        value: "DRAFT",
+        label: "Nháp",
+    },
+    {
+        value: "NEW",
+        label: "Mới",
+    },
+    {
+        value: "GUEST",
+        label: "Khách",
+    },
+]
+
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return loadPromoData(ctx)
+        return loadCustomerData(ctx)
     })
 }
 
-export async function loadPromoData(ctx) {
-    // Fetch data from external API
+export async function loadCustomerData(ctx) {
+    let data = {props: {}}
     let query = ctx.query
+    let q = typeof (query.q) === "undefined" ? '' : query.q
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
 
-    let result = {
-        data: [
-            {
-                customerID: '1',
-                name: 'Thứ sáu đen tối',
-                code: '123_321#2',
-                type: 'black friday',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                customerID: '2',
-                name: 'Thứ 5 trong sáng',
-                code: '123312^#2',
-                type: 'light day',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                customerID: '3',
-                name: 'Noel',
-                code: '7&311#2',
-                type: 'meri chris',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                customerID: '4',
-                name: 'Tết tết',
-                code: '31265#2',
-                type: 'holiday',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                customerID: '5',
-                name: 'Super',
-                code: '312432#2',
-                type: 'super',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-        ],
-        total: 10,
+    let customerClient = getCustomerClient(ctx, data)
+    let resp = await customerClient.getCustomer(offset, limit, q)
+    if (resp.status !== 'OK') {
+        return {props: {data: [], count: 0, message: resp.message}}
     }
     // Pass data to the page via props
-    return {props: {data: result.data, count: result.total}}
+    return {props: {data: resp.data, count: resp.total}}
 }
 
-export default function PromotionPage(props) {
+export default function CustomerPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
@@ -106,7 +109,7 @@ function render(props) {
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
 
-    function searchPromotion(formData) {
+    function searchCustomer(formData) {
         let q = formData.q
         Router.push(`/crm/customer?q=${q}`)
     }
@@ -119,27 +122,31 @@ function render(props) {
 
     function onSearch(formData) {
         try {
-            searchPromotion(formData)
+            searchCustomer(formData)
             setSearch('')
         } catch (error) {
             console.log(error)
         }
     }
-    
+
     const RenderRow = (row) => (
         <TableRow>
             <TableCell component="th" scope="row">{row.data.customerID}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.code}</TableCell>
-            <TableCell align="left">{row.data.type}</TableCell>
-            <TableCell align="left">{row.data.timeShow}</TableCell>
-            <TableCell align="left">{row.data.start}</TableCell>
-            <TableCell align="left">{row.data.end}</TableCell>
+            <TableCell align="left">{row.data.email}</TableCell>
+            <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label}</TableCell>
+            <TableCell align="left">{row.data.point}</TableCell>
+            <TableCell align="left">{row.data.phone}</TableCell>
+            <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
             <TableCell align="center">
-                <Link href={`/cms/customer/edit?customerID=${row.customerID}`}>
-                    <ButtonGroup color="primary" aria-label="contained primary button group">
-                        <Button variant="contained" size="small" color="primary">Cập nhật</Button>
-                    </ButtonGroup>
+                <Link href={`/crm/customer/edit?customerID=${row.data.customerID}`}>
+                    <a>
+                        <Tooltip title="Cập nhật thông tin">
+                            <IconButton>
+                                <EditIcon fontSize="small"/>
+                            </IconButton>
+                        </Tooltip>
+                    </a>
                 </Link>
             </TableCell>
         </TableRow>
