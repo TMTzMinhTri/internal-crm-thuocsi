@@ -24,6 +24,7 @@
         "react-hook-form": "^6.12.2"
     },
     "devDependencies": {
-        "@material-ui/icons": "^4.11.2"
+        "@material-ui/icons": "^4.11.2",
+        "components": "^0.1.0"
     }
 }

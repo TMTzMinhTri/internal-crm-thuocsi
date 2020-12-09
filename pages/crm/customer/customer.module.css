@@ -60,3 +60,8 @@
 .rootCard {
     margin: 10px;
 }
+
+.formControl {
+    margin: 1px;
+    height: 30px;
+}
