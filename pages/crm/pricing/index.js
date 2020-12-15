@@ -50,60 +50,6 @@ export async function loadPricingData(ctx) {
                 start: '12/12/2012',
                 end: '20/02/2020'
             },
-            {
-                pricingID: '2',
-                name: 'vip',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                pricingID: '3',
-                name: 'poor',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                pricingID: '4',
-                name: 'rick',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                pricingID: '5',
-                name: 'gold',
-                status: 'status 1',
-                type: 'customer',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                pricingID: '6',
-                name: 'trên núi',
-                status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                pricingID: '7',
-                name: 'đồng bằng',
-                status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
 
         ],
         total: 10,
@@ -193,8 +139,8 @@ function render(props) {
                                     value={search}
                                     onChange={handleChange}
                                     inputRef={register}
-                                    placeholder="Tìm kiếm khuyến mãi"
-                                    inputProps={{'aria-label': 'Tìm kiếm khuyến mãi'}}
+                                    placeholder="Tìm kiếm theo tên sản phẩm"
+                                    inputProps={{'aria-label': 'Tìm kiếm theo tên sản phẩm'}}
                                 />
                                 <IconButton className={open===true?styles.iconButtonHidden:styles.iconButton} aria-label="search"
                                             onClick={handleSubmit(onSearch)}>
@@ -210,11 +156,10 @@ function render(props) {
                     </Grid>
                     
                     <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/promotion/new">
+                        <Link href="/crm/pricing/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
                                          className={styles.rightGroup}>
-                                <Button variant="contained" color="primary" className={styles.btnAction}>Filter</Button>
-                                <Button variant="contained" color="primary" className={styles.btnAction}>Thêm khuyến mãi</Button>
+                                <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài đặt</Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
@@ -299,15 +244,15 @@ function render(props) {
                                     </FormControl>
                                 </Grid>
                                 <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
-                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
-                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                    <FormControl  style={{width: '100%'}} size="small" variant="outlined">
+                                        <InputLabel id="category-select-label1" size="small">Loại sản phẩm</InputLabel>
                                             <Controller 
                                                 name="unit"
                                                 control={control}
-                                            
+                                                
                                                 as={
-                                                    <Select label="unit" variant="outlined">
-                                                        
+                                                    <Select labelId="category-select-label1">
+                                                        <MenuItem value={1}>1</MenuItem>
                                                     </Select>
                                                 }
                                             />
