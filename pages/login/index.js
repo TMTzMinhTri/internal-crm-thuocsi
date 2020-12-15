@@ -35,7 +35,7 @@ export async function getServerSideProps(ctx) {
         })
         const result = await response.json()
 
-        console.log(result)
+        // console.log(result)
         // if OK, do set cookie & redirect page to relative target
         if (result.status === APIStatus.OK) {
             let data = result.data[0]

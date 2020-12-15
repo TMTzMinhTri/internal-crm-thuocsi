@@ -1,339 +1,246 @@
-import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
+import {
+    Box,
+    Button, FormControl,
+    FormControlLabel,
+    Grid,
+    IconButton,
+    InputLabel, List, ListItem,
+    ListItemIcon,
+    MenuItem, Paper,
+    Radio, RadioGroup, Select, TextField,
+    Typography
+} from "@material-ui/core";
+import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
+import HighlightOffOutlinedIcon from '@material-ui/icons/HighlightOffOutlined';
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import { getPricingClient } from "client/price";
+import { filterListObjectName, SellPrices } from "components/global";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import FormAddCondition from "./form";
 import styles from "./pricing.module.css";
 
-const defaultState = {
-    name: "",
-    sku: "",
-    description: "",
-    origin: "",
-    madeBy: "",
-    storage: "",
-    unit: "Hộp",
-    category: "",
-    indication: "",
-    dosage: "",
-    volume: ""
+export async function getServerSideProps(ctx) {
+    return await doWithLoggedInUser(ctx, (ctx) => {
+        return loadTags(ctx) 
+    })
 }
 
-export default function NewPage(props) {
-    const [units] = useState([
-        {
-            label: "Hộp",
-            value: "Hộp"
-        }
-    ]);
-    const [categories, setCategories] = useState([])
-    const [state, setState] = useState(defaultState);
-    const { register, handleSubmit, errors } = useForm();
-
-    const {name, unit, category} = state
+export async function loadTags(ctx) {
+    let data = {props: {}}
+    let _client = getPricingClient(ctx, {})
+    let tagDefs = ['condUserType']
+    data.props.conditions = {}
+    let conditions = await _client.getConditionSellTypeByTag({
+        q: 'all',
+    })
     
-    const handleChange = (event) => {
-        // change event.target.id to event.target.name because select box'event do not return id, ex: {value: "value", name: "category"}
-        setState({...state, [event.target.name]: event.target.value})
+    if (conditions.status !== "OK") {
+        for(let tag of tagDefs) {
+            data.props.conditions[tag] = []
+        }
+    } else {
+        data.props.conditions = conditions?.data[0]
     }
 
-    async function loadCategoryData(query) {
-        let page = query.page || 0
-        let limit = query.limit || 100
-        let offset = page * limit
+    return data
+}
+
+export default function NewFromPage(props) {
+    return renderWithLoggedInUser(props, render)
+}
+
+const TagItem = ({conditions, tag, control, register, idx,setValue, eventAddMore}) => {
+    let tagInfo = conditions[`${tag}`]
+    return (
+        <ListItem>
+            <FormControl  style={{width: '100%'}} size="small" variant="outlined">
+                
+                {
+                    Array.isArray(tagInfo?.data) === true ?(
+                        <div>
+                            <InputLabel id="customer-select-label">{tagInfo.name}</InputLabel>
+                            <Controller 
+                                name={tag}
+                                control={control}
+                                inputRef={register}
+                                style={{width: '100%'}}
+                                as={
+                                    <Select label={tagInfo.name}>
+                                        {
+                                            
+                                            tagInfo.data.map((tg,index) => (
+                                                <MenuItem value={tg.value}>{tg.label}</MenuItem>
+                                            ))
+                                        }
+                                    </Select>
+                                }
+                            />
+                        </div>
+                        
+                    ):(
+                        <TextField
+                            id={tag}
+                            name={tag}
+                            variant="outlined"
+                            size="small"
+                            type="number"
+                            label={tagInfo.name}
+                            placeholder=""
+                            defaultValue={1000}
+                            // helperText={errors.name?.message}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                            style={{width: '100%'}}
+                            // error={errors.name ? true : false}
+                            required
+                            inputRef={
+                                register({
+                                    required: "Vui lòng nhập",
+                                    valueAsNumber: true, // important
+                                })
+                            }
+                        />
+                    )
+                }
+                
+            </FormControl>
+            <ListItemIcon>
+                <IconButton edge="end" aria-label="add" color="primary" onClick={eventAddMore}>
+                    <AddCircleOutlineOutlinedIcon />
+                </IconButton>
+                {
+                    idx > 1?(
+                        <IconButton edge="end" aria-label="delete" color="secondary">
+                            <HighlightOffOutlinedIcon />
+                        </IconButton>
+                    ):(
+                        <div></div>
+                    )
+                }
+                
+            </ListItemIcon>
+        </ListItem>
+    )
+}
+
+function render(props) {
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
+    const [open, setOpen] = useState(false);
+    const [conditions, setConditions] = useState(["condUserType"])
     
-        const res = await fetch(`http://34.87.48.109/core/product/v1/category/list?offset=${offset}&limit=${limit}`, {
-            method: "GET",
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
+    // func onSubmit used because useForm not working with some fields
+    function onSubmit(formData){
+        // TODO
+        console.log(formData)
+    }
+
+    function handleOpenModal() {
+        setOpen(!open);
+    }
+
+    function updateConditions(val) {
+        val.forEach((item,idx) => {
+            if(conditions.indexOf(item) < 0) {
+                setConditions([...conditions,item])
             }
         })
-        const result = await res.json()
-        setCategories(result.data.map(({ name }) => ({ label: name, value: name })))
-        if(result.data.length > 0) {
-            setState({...state, ["category"]: result.data[0].name})
-        }
     }
 
-    async function createNewProduct(item) {
-        const payload = Object.assign({imageUrls: "thuocsi.vn/default.png"},item)
-        const res = await fetch(`http://34.87.48.109/core/product/v1/product`, {
-            method: 'POST',
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
-            },
-            body: JSON.stringify(payload)
-        })
-        const result = await res.json()
-        console.log(result)
-    }
+    const handleChangeSetting = (event) => {
+        alert(event.target.value);
+        setValue("condSettingType", event.target.value);
+    };
 
-    // func onSubmit used because useForm not working with some fields
-    async function onSubmit(){
-        try {
-            await createNewProduct(state)
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    useEffect(() => {
-        loadCategoryData({})
-    },[]);
+    let lstOptions = filterListObjectName(props?.conditions)
 
     return (
-        <AppCRM select="/product">
+        <AppCRM select="/crm/pricing">
             <Head>
-                <title>Thêm sản phẩm</title>
+                <title>Thêm cài đặt giá</title>
             </Head>
-            <Box component={Paper}>
-                <FormGroup>
+            <Box component={Paper} display="block">
+                <form onSubmit={handleSubmit(onSubmit)} noValidate>
                     <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 24 }}>Thêm sản phẩm mới</Box>
-                        <Box>
-                            <TextField
-                                id="name"
-                                name="name"
-                                label="Tên sản phẩm"
-                                placeholder=""
-                                helperText={errors.name?.message}
-                                margin="normal"
-                                value={name}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '25%' }}
-                                onChange={({target: {value,name}}) => {
-                                    setState({...state,[name]:value})
-                                }}
-                                error={ errors.name ? true : false }
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Name Required",
-                                        maxLength: {
-                                            value: 250,
-                                            message: "Name must be less than 250 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "Name must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "Name must be characters"
+                        <Box style={{ fontSize: 24, margin: 10}}>Thông tin cài đặt giá</Box>
+                        <Grid container spacing={3} className={styles.resetMargin}>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <Typography gutterBottom>
+                                    Loại cài đặt:
+                                </Typography>
+                                <Controller
+                                    rules={{ required: true }}
+                                    control={control}
+                                    defaultValue={SellPrices[0].value}
+                                    name="condSettingType"
+                                    as={
+                                        <RadioGroup
+                                        aria-label="condSettingType"
+                                        onChange={handleChangeSetting}
+                                        >
+                                        <Grid spacing={3} container justify="space-around" alignItems="center">
+                                            {
+                                                SellPrices.map((row) => (
+                                                    <Grid item xs={6} sm={6} md={3}>
+                                                        <FormControlLabel value={row.value} control={<Radio color="primary"/>}
+                                                                        label={row.label}/>
+                                                        
+                                                    </Grid>
+                                                ))
+                                            }
+                                            <Grid item xs={6} sm={6} md={3}></Grid>
+                                        </Grid>
+                                        </RadioGroup>
+                                    }
+                                    />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <Typography gutterBottom>
+                                    Điều kiện:
+                                </Typography>
+                                <Grid item xs={4} sm={3} md={3}>
+                                    <List dense={true}>
+                                        {
+                                            conditions.map((tag, idx) => (
+                                                <TagItem conditions={props.conditions} tag={tag} control={control} register={register} idx={idx} eventAddMore={handleOpenModal}/>
+                                            ))
                                         }
-                                    })
-                                }
-                            />
-                            <TextField
-                                id="sku"
-                                name="sku"
-                                label="SKU"
-                                placeholder=""
-                                helperText={errors.sku? errors.sku.message: "Mã sản phẩm"}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                onChange={handleChange}
-                                error={ errors.sku ? true : false }
-                                required
-                                inputRef={
-                                    register({
-                                        required: "SKU Required",
-                                        maxLength: {
-                                            value: 50,
-                                            message: "SKU must be less than 50 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "SKU must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "SKU must be characters"
-                                        }
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="description"
-                                name="description"
-                                label="Mô tả"
-                                placeholder=""
-                                helperText={errors.description?.message}
-                                margin="normal"
-                                multiline
-                                rowsMax={4}
-                                onChange={handleChange}
-                                error={ errors.description ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="origin"
-                                name="origin"
-                                label="Xuất xứ"
-                                placeholder="Quốc gia sản xuất"
-                                helperText={errors.origin?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.origin ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Origin Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="madeBy"
-                                name="madeBy"
-                                label="Nhà sản xuất"
-                                placeholder="Tên nhà sản xuất"
-                                helperText={errors.madeBy?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.madeBy ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "MakeBy Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="storage"
-                                name="storage"
-                                label="Bảo quản"
-                                placeholder="Cách bảo quản"
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="unit-select-label">Đơn vị tính</InputLabel>
-                                <Select
-                                    labelId="unit-select-label"
-                                    id="unit-select"
-                                    name="unit"
-                                    onChange={handleChange}
-                                    value={unit}
-                                    
-                                >
-                                    {units.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                    {/* <MenuItem value={"Hộp"}>Hộp</MenuItem>
-                                    <MenuItem value={"Chai"}>Chai</MenuItem>
-                                    <MenuItem value={"Túi"}>Túi</MenuItem>
-                                    <MenuItem value={"Hũ"}>Hũ</MenuItem>
-                                    <MenuItem value={"Gói"}>Gói</MenuItem>
-                                    <MenuItem value={"Tube"}>Tube</MenuItem> */}
-                                </Select>
-                            </FormControl>
-                            <TextField
-                                id="volume"
-                                name="volume"
-                                label="Thể tích"
-                                placeholder=""
-                                helperText="Ví dụ: 4 chai x 300ml"
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.volume ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Volume Required",
-                                    })
-                                }
-                            />
-                            
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="category-select-label">Loại sản phẩm</InputLabel>
-                                <Select
-                                    labelId="category-select-label"
-                                    id="category"
-                                    name="category"
-                                    onChange={handleChange}
-                                    value={category}
-                                >
-                                    {categories.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="indication"
-                                name="indication"
-                                label="Chỉ định"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                            />
-                            <TextField
-                                id="dosage"
-                                name="dosage"
-                                label="Liều lượng"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '22%' }}
-                            />
-                        </Box>
+                                    </List>
+                                </Grid>
+                            </Grid>
+                        </Grid>
                         <Box>
                             <Button
-                                variant="contained" 
-                                color="primary" 
+                                variant="contained"
+                                color="primary"
                                 onClick={handleSubmit(onSubmit)}
-                                style={{ margin: 8 }}>
-                                    Lưu
+                                style={{margin: 8}}>
+                                Lưu
                             </Button>
-                            <Button variant="contained" style={{ margin: 8 }}>Làm mới</Button>
+                            <Button variant="contained" style={{margin: 8}}>Làm mới</Button>
+
+                            
+                            <pre>SELECTED: {JSON.stringify(conditions, null, 2)}</pre>
+
+                            <pre>FORM: {JSON.stringify(getValues(), null, 2)}</pre>
+
+                            <pre>FORM: {JSON.stringify(props.conditions, null, 2)}</pre>
                         </Box>
-                        
                     </Box>
-                </FormGroup>
+                </form>
+                {
+                    open===true?(
+                        FormAddCondition(open,lstOptions,updateConditions,setOpen,conditions)
+                        
+                    ):(
+                        FormAddCondition(open,lstOptions,updateConditions,setOpen,conditions)
+                    )
+                }
+                
             </Box>
         </AppCRM>
     )

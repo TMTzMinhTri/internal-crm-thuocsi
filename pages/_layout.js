@@ -1,4 +1,4 @@
-import { faDollarSign, faGifts, faMoneyCheckAlt, faPercentage, faQrcode, faReceipt, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { faMoneyCheckAlt, faUsers } from '@fortawesome/free-solid-svg-icons'
 import App from "@thuocsi/nextjs-components/app/app"
 import React, { Component } from "react"
 
@@ -8,12 +8,12 @@ export default class AppCRM extends Component {
         super(props)
         this.state = {
             menu: [
-                {
-                    key: "ORDER",
-                    name: "Đơn hàng",
-                    link: "/crm/order",
-                    icon: faReceipt
-                },
+                // {
+                //     key: "ORDER",
+                //     name: "Đơn hàng",
+                //     link: "/crm/order",
+                //     icon: faReceipt
+                // },
                 {
                     key: "CUSTOMER",
                     name: "Khách hàng",
@@ -26,30 +26,30 @@ export default class AppCRM extends Component {
                     link: "/crm/product",
                     icon: faMoneyCheckAlt
                 },
-                {
-                    key: "PRICING",
-                    name: "Bảng giá",
-                    link: "/crm/pricing",
-                    icon: faDollarSign
-                },
-                {
-                    key: "DISCOUNT",
-                    name: "Khuyến mãi",
-                    link: "/crm/promotion",
-                    icon: faPercentage
-                },
-                {
-                    key: "PROMO",
-                    name: "Mã giảm giá",
-                    link: "/crm/promotion-code",
-                    icon: faQrcode
-                },
-                {
-                    key: "POINT",
-                    name: "Điểm thưởng",
-                    link: "/crm/pricing",
-                    icon: faGifts
-                },
+                // {
+                //     key: "PRICING",
+                //     name: "Bảng giá",
+                //     link: "/crm/pricing",
+                //     icon: faDollarSign
+                // },
+                // {
+                //     key: "DISCOUNT",
+                //     name: "Khuyến mãi",
+                //     link: "/crm/promotion",
+                //     icon: faPercentage
+                // },
+                // {
+                //     key: "PROMO",
+                //     name: "Mã giảm giá",
+                //     link: "/crm/promotion-code",
+                //     icon: faQrcode
+                // },
+                // {
+                //     key: "POINT",
+                //     name: "Điểm thưởng",
+                //     link: "/crm/pricing",
+                //     icon: faGifts
+                // },
             ]
         }
     }
