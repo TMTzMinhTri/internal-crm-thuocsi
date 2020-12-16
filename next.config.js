@@ -10,8 +10,6 @@ module.exports = withPlugins([withTM], {
     images: {
         // domains: ['miro.medium.com'],
     },
-    // assetPrefix: process.env.ENV==='local'?'/':'/crm',
-    // useFileSystemPublicRoutes: true,
     env: {
         WEB_HOST: process.env.WEB_HOST
     },
@@ -19,9 +17,8 @@ module.exports = withPlugins([withTM], {
         return [
             {
                 source: '/backend/:path*',
-                destination: `http://thuocsi-in.vn/backend/:path*`
+                destination: `${process.env.API_HOST}/:path*`
             }
-            // { source: '/crm/_next/:path*', destination: '/_next/:path*' }
         ]
     }
 });

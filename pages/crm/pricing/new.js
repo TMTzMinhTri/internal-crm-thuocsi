@@ -70,7 +70,6 @@ const TagItem = ({conditions, tag, control, register, idx,setValue, eventAddMore
                                 as={
                                     <Select label={tagInfo.name}>
                                         {
-                                            
                                             tagInfo.data.map((tg,index) => (
                                                 <MenuItem value={tg.value}>{tg.label}</MenuItem>
                                             ))
@@ -152,7 +151,7 @@ function render(props) {
     }
 
     const handleChangeSetting = (event) => {
-        alert(event.target.value);
+        // alert(event.target.value);
         setValue("condSettingType", event.target.value);
     };
 
