@@ -1,5 +1,5 @@
-import {APIClient} from "@thuocsi/nextjs-components/lib/utils";
-const URI = `/customer/customer/v1`
+import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
+const URI = `/marketplace/customer/v1`
 // const URI = ``
 
 class CustomerClient extends APIClient {
