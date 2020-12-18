@@ -1,4 +1,4 @@
-import {APIClient} from "@thuocsi/nextjs-components/lib/utils";
+import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 const PREFIX = `/marketplace/pricing/v1`
 // const PREFIX = ``
 
@@ -57,7 +57,7 @@ class PriceClient extends APIClient {
     createNewPricing(data) {
         return this.callFromClient(
             "POST",
-            `${prefix}/selling`,
+            `${PREFIX}/selling`,
             data
         )
     }
