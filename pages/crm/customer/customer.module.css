@@ -41,21 +41,7 @@
 
 .iconButton {
     padding: 10px;
-    display: unset !important;
 }
-
-.iconButtonHidden {
-    display: none !important;
-}
-
-.hidden {
-    display: none !important;
-}
-
-.unSetHidden {
-    display: unset !important;
-}
-
 
 .textSearch {
     color: green;
@@ -75,18 +61,7 @@
     margin: 10px;
 }
 
-.btnAction {
-    margin-left: 5px !important;
-}
-.divider {
-    height: 28px;
-    margin: 4px;
-}
-
-.gridForm {
-    margin-top: 10px !important;
-}
-
-.addMore0{
-    display: none;
+.formControl {
+    margin: 1px;
+    height: 30px;
 }

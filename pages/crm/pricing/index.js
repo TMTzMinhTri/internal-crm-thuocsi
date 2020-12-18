@@ -1,112 +1,292 @@
-import { Button, ButtonGroup, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core";
+import {
+    Button,
+    ButtonGroup,
+    Divider,
+    FormControl, Grid,
+    IconButton, InputBase,
+    InputLabel, Paper,
+    Select, Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField
+} from "@material-ui/core";
+import FilterListIcon from '@material-ui/icons/FilterList';
+import SearchIcon from '@material-ui/icons/Search';
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import PanelCollapse from "components/panel/panel";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
 
-export async function getServerSideProps({ query }) {
-    return await loadProductData(query)
+export async function getServerSideProps(ctx) {
+    return await doWithLoggedInUser(ctx, (ctx) => {
+        return loadPricingData(ctx)
+    })
 }
 
-export async function loadProductData(query) {
+export async function loadPricingData(ctx) {
     // Fetch data from external API
+    let query = ctx.query
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
 
-    const res = await fetch(`http://34.87.48.109/core/product/v1/product/list?offset=${offset}&limit=${limit}&getTotal=true`, {
-        method: "GET",
-        headers: {
-            "Authorization": "Basic bmFtcGg6MTIzNDU2"
-        }
-    })
+    let result = {
+        data: [
+            {
+                pricingID: '1',
+                name: 'ngoài biển',
+                status: 'status 1',
+                type: 'location',
+                value: '0.1',
+                start: '12/12/2012',
+                end: '20/02/2020'
+            },
 
-    const result = await res.json()
-    if(result.status != "OK") {
-        return { props: {data: [], count: 0, message: result.message} }
+        ],
+        total: 10,
     }
-    console.log(result)
     // Pass data to the page via props
-    return { props: {data: result.data, count: result.total} }
+    return {props: {data: result.data, count: result.total}}
 }
 
-export async function loadPricingData(query) {
-    // Fetch data from external API
-    let page = query.page || 0
-    let limit = query.limit || 20
-    let offset = page * limit
-
-    const res = await fetch(`http://34.87.48.109/customer/pricing/v1/product/list?offset=${offset}&limit=${limit}&getTotal=true`, {
-        method: "GET",
-        headers: {
-            "Authorization": "Basic bmFtcGg6MTIzNDU2"
-        }
-    })
-
-    const result = await res.json()
-    if(result.status != "OK") {
-        return { props: {data: [], count: 0, message: result.message} }
-    }
-    console.log(result)
-    // Pass data to the page via props
-    return { props: {data: result.data, count: result.total} }
+export default function PricingPage(props) {
+    return renderWithLoggedInUser(props, render)
 }
-
 
 export function formatNumber(num) {
     return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
-export default function ProductPage(props) {
+function render(props) {
     let router = useRouter()
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
+    let [search, setSearch] = useState('');
+    let [open, setOpen] = useState(false);
+    const {register, handleSubmit, errors, control} = useForm();
+    let q = router.query.q || ''
+
+    async function handleChange(event) {
+        const target = event.target;
+        const value = target.value;
+        setSearch(value)
+    }
+
+    function onSearch(formData) {
+        try {
+            searchPromotion(formData)
+            setSearch('')
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    
+    function onCollapse() {
+        // func set expand panel search
+        setOpen(!open);
+    }
+
+    function fnSearch(data) {
+        // TODO example
+        alert(data)
+    }
 
     const RenderRow = (row) => (
         <TableRow>
-            <TableCell component="th" scope="row">
-                <Link href={`/pricing/edit?sale_id=${row.productSaleID}`}>
-                    <a><b>{row.data.sku}</b></a>
+            <TableCell component="th" scope="row">{row.data.pricingID}</TableCell>
+            <TableCell align="left">{row.data.name}</TableCell>
+            <TableCell align="left">{row.data.status}</TableCell>
+            <TableCell align="left">{row.data.type}</TableCell>
+            <TableCell align="left">{row.data.value}</TableCell>
+            <TableCell align="left">{row.data.start}</TableCell>
+            <TableCell align="left">{row.data.end}</TableCell>
+            <TableCell align="center">
+                <Link href={`/cms/ingredient/edit?ingredientID=${row.ingredientID}`}>
+                    <ButtonGroup color="primary" aria-label="contained primary button group">
+                        <Button variant="contained" size="small" color="primary">Xem</Button>
+                    </ButtonGroup>
                 </Link>
             </TableCell>
-            <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.status}</TableCell>
-            <TableCell align="left">{row.originalPrice}</TableCell>
-            <TableCell align="left">{row.basePrice}</TableCell>
-            <TableCell align="right">...</TableCell>
         </TableRow>
     )
 
     return (
-        <AppCRM select="/pricing">
+        <AppCRM select="/crm/pricing">
             <Head>
-                <title>Danh sách sản phẩm</title>
+                <title>Danh sách cài đặt</title>
             </Head>
-            <Link href="/pricing/new">
-                <ButtonGroup color="primary" aria-label="contained primary button group" className={styles.rightGroup}>
-                    <Button variant="contained" color="primary" disabled>Thêm sản phẩm</Button>
-                </ButtonGroup>
-            </Link>
+            <div className={styles.grid}>
+                <Grid container spacing={3} direction="row"
+                      justify="space-evenly"
+                      alignItems="center"
+                >
+                    <Grid item xs={12} sm={6} md={6}>
+                        <form>
+                            <Paper component="form" className={styles.search}>
+                                <InputBase
+                                    id="q"
+                                    name="q"
+                                    className={styles.input}
+                                    value={search}
+                                    onChange={handleChange}
+                                    inputRef={register}
+                                    placeholder="Tìm kiếm theo tên sản phẩm"
+                                    inputProps={{'aria-label': 'Tìm kiếm theo tên sản phẩm'}}
+                                />
+                                <IconButton className={open===true?styles.iconButtonHidden:styles.iconButton} aria-label="search"
+                                            onClick={handleSubmit(onSearch)}>
+                                    <SearchIcon/>
+                                </IconButton>
+                                <Divider className={styles.divider} orientation="vertical" />
+                                <IconButton className={styles.iconButton} aria-label="filter-list"
+                                            onClick={onCollapse}>
+                                    <FilterListIcon/>
+                                </IconButton>
+                            </Paper>
+                        </form>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Link href="/crm/pricing/new">
+                            <ButtonGroup color="primary" aria-label="contained primary button group"
+                                         className={styles.rightGroup}>
+                                <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài đặt</Button>
+                            </ButtonGroup>
+                        </Link>
+                    </Grid>
+                </Grid>
+            </div>
+            {
+                q === '' ? (
+                    <span/>
+                ) : (
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
+                )
+            }
+
+            {
+                open === true ? (
+                    <Grid item xs={12} sm={12} md={12}>
+                        <PanelCollapse expand={open} setOpen={setOpen} setExecute={fnSearch}>
+                            <Grid container spacing={2} direction="row"
+                                justify="space-evenly"
+                                alignItems="center"
+                            >
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                        <Select
+                                            labelId="category-select-label"
+                                            id="category"
+                                            name="category"
+                                            variant="outlined"
+                                        >
+                                            
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                        <Select
+                                            labelId="category-select-label"
+                                            id="category"
+                                            name="category"
+                                            variant="outlined"
+                                            margin="normal"
+                                        >
+                                            
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <TextField
+                                            id="volume"
+                                            name="volume"
+                                            label="Thể tích"
+                                            placeholder=""
+                                            helperText="Ví dụ: 4 chai x 300ml"
+                                            
+                                            variant="outlined"
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            style={{width: '100%', marginTop: '20px' }}
+                                            required
+                                            inputRef={
+                                                register({
+                                                    required: "Volume Required",
+                                                })
+                                            }
+                                        />
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
+                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
+                                        <Select
+                                            labelId="category-select-label"
+                                            id="category"
+                                            name="category"
+                                        >
+                                            
+                                        </Select>
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
+                                    <FormControl  style={{width: '100%'}} size="small" variant="outlined">
+                                        <InputLabel id="category-select-label1" size="small">Loại sản phẩm</InputLabel>
+                                            <Controller 
+                                                name="unit"
+                                                control={control}
+                                                
+                                                as={
+                                                    <Select labelId="category-select-label1">
+                                                        <MenuItem value={1}>1</MenuItem>
+                                                    </Select>
+                                                }
+                                            />
+                                        </FormControl>
+                                </Grid>
+                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}></Grid>
+                            </Grid>
+                        </PanelCollapse>
+                    </Grid>
+                ):(
+                    <div></div>
+                )
+            }
+        
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">SKU</TableCell>
-                            <TableCell align="left">Tên sản phẩm</TableCell>
+                            <TableCell align="left">ID</TableCell>
+                            <TableCell align="left">Tên chỉ số</TableCell>
                             <TableCell align="left">Trạng thái</TableCell>
-                            <TableCell align="left">Giá gốc</TableCell>
-                            <TableCell align="left">Giá bán</TableCell>
-                            <TableCell align="right">Tác vụ</TableCell>
+                            <TableCell align="left">Loại</TableCell>
+                            <TableCell align="left">Giá trị</TableCell>
+                            <TableCell align="left">Bắt đầu</TableCell>
+                            <TableCell align="left">Kết thúc</TableCell>
+                            <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    { props.data.length > 0 ? (
-                    <TableBody>
-                        {props.data.map(row => (
-                            <RenderRow data={row}/>
-                        ))}
-                    </TableBody>
+                    {props.data.length > 0 ? (
+                        <TableBody>
+                            {props.data.map(row => (
+                                <RenderRow data={row}/>
+                            ))}
+                        </TableBody>
                     ) : (
                         <TableBody>
                             <TableRow>
@@ -116,12 +296,14 @@ export default function ProductPage(props) {
                     )}
 
                     <MyTablePagination
-                        labelUnit="sản phẩm"
+                        labelUnit="chỉ số"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}
-                        onChangePage={(event, page, rowsPerPage) => { Router.push(`/pricing?page=${page}&limit=${rowsPerPage}`) }}
-                    ></MyTablePagination>
+                        onChangePage={(event, page, rowsPerPage) => {
+                            Router.push(`/pricing?page=${page}&limit=${rowsPerPage}`)
+                        }}
+                    />
                 </Table>
             </TableContainer>
         </AppCRM>

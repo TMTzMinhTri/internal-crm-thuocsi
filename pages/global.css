@@ -1,6 +1,7 @@
 body {
     background-color: #f8faf8;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin-top: 0px;
 }
 
 .panel {
@@ -10,8 +11,6 @@ body {
     padding: 12px;
     clear: both;
 }
-
-.panel-content {}
 
 .MuiTableCell-head {
     font-weight: 700 !important;

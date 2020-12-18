@@ -1,339 +1,398 @@
-import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
+import {
+    Accordion,
+    AccordionActions, AccordionDetails, AccordionSummary, Box,
+    Button,
+
+
+
+
+
+    Divider, FormControl, Grid,
+    InputAdornment,
+    MenuItem, Paper,
+    Select, TextField,
+    Tooltip, Typography
+} from "@material-ui/core";
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import { useToast } from '@thuocsi/nextjs-components/toast/useToast';
+import { getPriceClient } from "client/price";
+import { getProductClient } from "client/product";
+import { SellPrices } from "components/global";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import styles from "./pricing.module.css";
 
-const defaultState = {
-    name: "",
-    sku: "",
-    description: "",
-    origin: "",
-    madeBy: "",
-    storage: "",
-    unit: "Hộp",
-    category: "",
-    indication: "",
-    dosage: "",
-    volume: ""
+export async function getServerSideProps(ctx) {
+    return await doWithLoggedInUser(ctx, (ctx) => {
+        return loadListProduct(ctx)
+    })
 }
 
-export default function NewPage(props) {
-    const [units] = useState([
-        {
-            label: "Hộp",
-            value: "Hộp"
-        }
-    ]);
-    const [categories, setCategories] = useState([])
-    const [state, setState] = useState(defaultState);
-    const { register, handleSubmit, errors } = useForm();
+export async function loadListProduct(ctx) {
+    let data = {props: {}}
+    let _client = getProductClient(ctx, {})
+    data.props.products = []
+    let products = await _client.getListProduct({})
 
-    const {name, unit, category} = state
+    console.log("conditions: ",products)
     
-    const handleChange = (event) => {
-        // change event.target.id to event.target.name because select box'event do not return id, ex: {value: "value", name: "category"}
-        setState({...state, [event.target.name]: event.target.value})
+    if (products.status !== "OK") {
+        data.props.products = []
+    } else {
+        data.props.products = products?.data
     }
 
-    async function loadCategoryData(query) {
-        let page = query.page || 0
-        let limit = query.limit || 100
-        let offset = page * limit
-    
-        const res = await fetch(`http://34.87.48.109/core/product/v1/category/list?offset=${offset}&limit=${limit}`, {
-            method: "GET",
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
-            }
-        })
-        const result = await res.json()
-        setCategories(result.data.map(({ name }) => ({ label: name, value: name })))
-        if(result.data.length > 0) {
-            setState({...state, ["category"]: result.data[0].name})
-        }
-    }
+    return data
+}
 
-    async function createNewProduct(item) {
-        const payload = Object.assign({imageUrls: "thuocsi.vn/default.png"},item)
-        const res = await fetch(`http://34.87.48.109/core/product/v1/product`, {
-            method: 'POST',
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
-            },
-            body: JSON.stringify(payload)
-        })
-        const result = await res.json()
-        console.log(result)
-    }
+export default function NewFromPage(props) {
+    return renderWithLoggedInUser(props, render)
+}
 
+
+const RenderPriceConfig = ({name,control, register, setValue,hidden}) => {
+    return (
+        <div>    
+            {/* gia ban */}
+            <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={4}>
+                    <Typography gutterBottom>
+                        Loại cài đặt:
+                    </Typography>
+                    <FormControl className={styles.formControl} size="small" variant="outlined"
+                                            style={{width: '100%'}}>
+                        {/* <InputLabel id="department-select-label">Loại sản phẩm</InputLabel> */}
+                        <Controller
+                        disa
+                        rules={{ required: true }}
+                        control={control}
+                        size="small"
+                        defaultValue={SellPrices[0].value}
+                        name={`${name}.type`}
+                        variant="outlined"
+                        // error={!!errors.categoryID}
+                        as={
+                            <Select disabled={hidden}>
+                                {SellPrices.map((row) => (
+                                    <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
+                                ))}
+                            </Select>
+                        }
+                        />
+                    </FormControl>
+                    
+                </Grid>
+                <Grid item xs={12} sm={12} md={12}/>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Typography gutterBottom>
+                        Giá bán:
+                    </Typography>
+                    <TextField
+                        id={`${name}.price`}
+                        name={`${name}.price`}
+                        variant="outlined"
+                        size="small"
+                        type="number"
+                        disabled={hidden}
+                        // label=""
+                        placeholder=""
+                        defaultValue={1000}
+                        // helperText={errors.name?.message}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        InputProps={{
+                            endAdornment: <InputAdornment
+                                position="end">đ</InputAdornment>,
+                        }}
+                        // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                        style={{width: '100%'}}
+                        // error={errors.name ? true : false}
+                        required
+                        inputRef={
+                            register({
+                                required: "Vui lòng nhập",
+                                valueAsNumber: true, // important
+                            })
+                        }
+                    />
+                </Grid>
+                {/* so luong ap dung */}
+                <Grid item xs={12} sm={6} md={3}>
+                    <Typography gutterBottom>
+                        Số lượng tối thiểu áp dụng:
+                    </Typography>
+                    <TextField
+                        id={`${name}.minNumber`}
+                        name={`${name}.minNumber`}
+                        variant="outlined"
+                        size="small"
+                        type="number"
+                        disabled={hidden}
+                        // label=""
+                        placeholder=""
+                        defaultValue={1}
+                        // helperText={errors.name?.message}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                        style={{width: '100%'}}
+                        // error={errors.name ? true : false}
+                        required
+                        inputRef={
+                            register({
+                                required: "Vui lòng nhập",
+                                valueAsNumber: true, // important
+                            })
+                        }
+                    />
+                </Grid>
+                <Grid item xs={12} sm={12} md={12}/>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Typography gutterBottom>
+                        Ti lệ phần trăm giảm giá:
+                    </Typography>
+                    <TextField
+                        id={`${name}.percentageDiscount`}
+                        name={`${name}.percentageDiscount`}
+                        variant="outlined"
+                        size="small"
+                        type="number"
+                        disabled={hidden}
+                        // label=""
+                        placeholder=""
+                        defaultValue={0}
+                        // helperText={errors.name?.message}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        InputProps={{
+                            endAdornment: <InputAdornment
+                                position="end">%</InputAdornment>,
+                        }}
+                        // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                        style={{width: '100%'}}
+                        // error={errors.name ? true : false}
+                        required
+                        inputRef={
+                            register({
+                                required: "Vui lòng nhập",
+                                valueAsNumber: true, // important
+                            })
+                        }
+                    />
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                    <Typography gutterBottom>
+                        Giảm giá tuyệt đối:
+                    </Typography>
+                    <TextField
+                        id={`${name}.absoluteDiscount`}
+                        name={`${name}.absoluteDiscount`}
+                        variant="outlined"
+                        size="small"
+                        type="number"
+                        disabled={hidden}
+                        // label=""
+                        placeholder=""
+                        defaultValue={0}
+                        // helperText={errors.name?.message}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        InputProps={{
+                            endAdornment: <InputAdornment
+                                position="end">đ</InputAdornment>,
+                        }}
+                        // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                        style={{width: '100%'}}
+                        // error={errors.name ? true : false}
+                        required
+                        inputRef={
+                            register({
+                                required: "Vui lòng nhập",
+                                valueAsNumber: true, // important
+                            })
+                        }
+                    />
+                </Grid>
+            </Grid>
+        </div>
+    )
+}
+
+function render(props) {
+    // console.log(props)
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
+    const [loading, setLoading] = useState(false);
+    const { error, warn, info, success } = useToast();
+    const [ids, setIds] = useState([]);
+    const [expanded, setExpanded] = React.useState(false);
+    let sellerCode = "MedX"
     // func onSubmit used because useForm not working with some fields
-    async function onSubmit(){
-        try {
-            await createNewProduct(state)
-        } catch (error) {
-            console.log(error)
+    async function createNewPricing(formData){
+        // TODO
+        console.log(formData)
+        setLoading(true);
+        let _client = getPriceClient()
+        let result = await _client.createNewPricing(formData)
+        setLoading(false);
+        if (result.status === "OK") {
+            success(result.message?'Thao tác thành công':'Thông báo không xác định')
+        } else {
+            error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
         }
     }
 
-    useEffect(() => {
-        loadCategoryData({})
-    },[]);
+    // func submit data
+    async function onSubmit(formData) {
+        try {
+            formData.sellerCode = sellerCode
+            console.log(formData)
+            await createNewPricing(formData)
+        } catch (err) {
+            setLoading(false);
+            error(err.message || err.toString())
+        }
+    }
+
+    const handleChangeSetting = (event) => {
+        setValue("condSettingType", event.target.value);
+    };
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+      };
+
+
+    let lstOptions = props?.products
 
     return (
-        <AppCRM select="/product">
+        <AppCRM select="/crm/pricing">
             <Head>
-                <title>Thêm sản phẩm</title>
+                <title>Thêm cài đặt giá</title>
             </Head>
-            <Box component={Paper}>
-                <FormGroup>
+            <Box component={Paper} display="block">
+                <form noValidate>
                     <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 24 }}>Thêm sản phẩm mới</Box>
-                        <Box>
-                            <TextField
-                                id="name"
-                                name="name"
-                                label="Tên sản phẩm"
-                                placeholder=""
-                                helperText={errors.name?.message}
-                                margin="normal"
-                                value={name}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '25%' }}
-                                onChange={({target: {value,name}}) => {
-                                    setState({...state,[name]:value})
-                                }}
-                                error={ errors.name ? true : false }
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Name Required",
-                                        maxLength: {
-                                            value: 250,
-                                            message: "Name must be less than 250 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "Name must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "Name must be characters"
-                                        }
-                                    })
-                                }
-                            />
-                            <TextField
-                                id="sku"
-                                name="sku"
-                                label="SKU"
-                                placeholder=""
-                                helperText={errors.sku? errors.sku.message: "Mã sản phẩm"}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                onChange={handleChange}
-                                error={ errors.sku ? true : false }
-                                required
-                                inputRef={
-                                    register({
-                                        required: "SKU Required",
-                                        maxLength: {
-                                            value: 50,
-                                            message: "SKU must be less than 50 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "SKU must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "SKU must be characters"
-                                        }
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="description"
-                                name="description"
-                                label="Mô tả"
-                                placeholder=""
-                                helperText={errors.description?.message}
-                                margin="normal"
-                                multiline
-                                rowsMax={4}
-                                onChange={handleChange}
-                                error={ errors.description ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="origin"
-                                name="origin"
-                                label="Xuất xứ"
-                                placeholder="Quốc gia sản xuất"
-                                helperText={errors.origin?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.origin ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Origin Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="madeBy"
-                                name="madeBy"
-                                label="Nhà sản xuất"
-                                placeholder="Tên nhà sản xuất"
-                                helperText={errors.madeBy?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.madeBy ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "MakeBy Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="storage"
-                                name="storage"
-                                label="Bảo quản"
-                                placeholder="Cách bảo quản"
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="unit-select-label">Đơn vị tính</InputLabel>
-                                <Select
-                                    labelId="unit-select-label"
-                                    id="unit-select"
-                                    name="unit"
-                                    onChange={handleChange}
-                                    value={unit}
+                        <Box style={{ fontSize: 24, margin: 10}}>Thông tin cài đặt giá</Box>
+                        <Grid container spacing={3} className={styles.resetMargin}>
+                            <Grid item item xs={12} sm={6} md={4}>
+                                <Typography gutterBottom>
+                                    Sản phẩm:
+                                </Typography>
+                                <Controller 
+                                    render={({ onChange, ...props }) => (
+                                        <Autocomplete 
+                                            id="code"
+                                            options={lstOptions}
+                                            getOptionLabel={option => option.name}
+                                            noOptionsText={'Không tìm thấy kết quả phù hợp'}
+                                            renderInput={params => (
+                                                <TextField 
+                                                    {...params}
+                                                    error={!!errors.code}
+                                                    helperText={errors.code?"Vui lòng chọn sản phẩm":""}
+                                                    placeholder="Chọn sản phẩm"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    // onChange={e => setSearchTerm(e.target.value)}
+                                                />
+                                            )}
+                                            onChange={(e, data) => onChange(data.productID)}
+                                            {...props}
+                                        />
+                                    )}
                                     
-                                >
-                                    {units.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                    {/* <MenuItem value={"Hộp"}>Hộp</MenuItem>
-                                    <MenuItem value={"Chai"}>Chai</MenuItem>
-                                    <MenuItem value={"Túi"}>Túi</MenuItem>
-                                    <MenuItem value={"Hũ"}>Hũ</MenuItem>
-                                    <MenuItem value={"Gói"}>Gói</MenuItem>
-                                    <MenuItem value={"Tube"}>Tube</MenuItem> */}
-                                </Select>
-                            </FormControl>
-                            <TextField
-                                id="volume"
-                                name="volume"
-                                label="Thể tích"
-                                placeholder=""
-                                helperText="Ví dụ: 4 chai x 300ml"
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.volume ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Volume Required",
-                                    })
+                                    name="code"
+                                    control={control}
+                                    onChange={([, { id }]) => id}
+                                    rules={{
+                                        validate: d => {
+                                          return typeof(d) != 'undefined';
+                                        }
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item item xs={12} sm={12} md={12}>
+                                <Typography gutterBottom variant={'h6'}>
+                                    Cài đặt giá bán lẻ:
+                                    <Tooltip title="Cài đặt bán lẻ, bắt buộc nhập" placement="right-start">
+                                        <HelpOutlinedIcon fontSize="small"/>
+                                    </Tooltip>
+                                </Typography>
+                                {/* Setup gia ban le */}
+                                {/* <pre>z{JSON.stringify(getValues().code?true:false )}</pre> */}
+                                <RenderPriceConfig name={'retailPrice[0]'} control={control} register={register} hidden={getValues().code?false:true}/>
+                                
+                            </Grid>
+                            <Grid item item xs={12} sm={12} md={12}>
+                                <Typography gutterBottom>
+                                    Cài đặt giá bán buôn:
+                                    <Tooltip title="Danh sách cài đặt bán buôn (bán sỉ)" placement="right-start">
+                                        <HelpOutlinedIcon fontSize="small"/>
+                                    </Tooltip>
+                                </Typography>
+                                {
+                                    ids.map((num, idx) => (
+                                        //expanded === 'panel1'
+                                        <Accordion expanded={expanded === `panel${idx}`} onChange={handleChange(`panel${idx}`)}>
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon />}
+                                                aria-controls="panel1bh-content"
+                                                onClick={(e) => e.stopPropagation()}
+                                                id="panel1bh-header"
+                                            >
+                                                <Typography color="textSecondary">
+                                                    Cài đặt giá bán buôn (bán sỉ) thứ {idx+1}
+                                                </Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <RenderPriceConfig name={`retailPrice[${idx}]`} control={control} register={register}/>
+                                            </AccordionDetails>
+                                            <AccordionActions>
+                                                <Button size="small" color="secondary" variant="contained" startIcon={<DeleteIcon />} onClick={() => setIds(ids.filter(id => id !== num))}>Xoá</Button>
+                                            </AccordionActions>
+                                        </Accordion>
+                                    ))
                                 }
-                            />
-                            
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="category-select-label">Loại sản phẩm</InputLabel>
-                                <Select
-                                    labelId="category-select-label"
-                                    id="category"
-                                    name="category"
-                                    onChange={handleChange}
-                                    value={category}
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    disabled={getValues().code?false:true}
+                                    style={{marginTop: '10px'}}
+                                    onClick={() => {
+                                        setIds([...ids,ids.length + 1])
+                                        setExpanded(`panel${ids.length}`)
+                                    }}
+                                    startIcon={<AddIcon />}
                                 >
-                                    {categories.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="indication"
-                                name="indication"
-                                label="Chỉ định"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                            />
-                            <TextField
-                                id="dosage"
-                                name="dosage"
-                                label="Liều lượng"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '22%' }}
-                            />
-                        </Box>
+                                    Thêm giá bán buôn
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <Divider style={{margin: '10px'}}/>
                         <Box>
                             <Button
-                                variant="contained" 
-                                color="primary" 
+                                variant="contained"
+                                color="primary"
+                                disabled={getValues().code?false:true}
                                 onClick={handleSubmit(onSubmit)}
-                                style={{ margin: 8 }}>
-                                    Lưu
+                                style={{margin: 8}}>
+                                Lưu
                             </Button>
-                            <Button variant="contained" style={{ margin: 8 }}>Làm mới</Button>
+                            <Button variant="contained" style={{margin: 8}}>Làm mới</Button>
                         </Box>
-                        
                     </Box>
-                </FormGroup>
+                </form>
             </Box>
         </AppCRM>
     )
