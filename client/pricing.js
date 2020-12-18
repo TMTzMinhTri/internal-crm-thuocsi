@@ -11,11 +11,19 @@ class PricingClient extends APIClient {
         return this.callFromNextJS(
             "GET",
             `${prefix}/selling/list`, {
-                q,
-                offset,
-                limit,
-                getTotal: true
-            })
+            q,
+            offset,
+            limit,
+            getTotal: true
+        })
+    }
+
+    getListProductByProductCode(productCodes) {
+        return this.callFromNextJS(
+            "POST",
+            `/marketplace/product/v1/product/list`, {
+            productCodes
+        });
     }
 }
 

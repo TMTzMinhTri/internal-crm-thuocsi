@@ -46,15 +46,21 @@ export async function loadPricingData(ctx) {
 
     let result = { data: {}, count: 0 };
     result = await _client.getListPricing(offset, limit, q);
+    let mixData = {}
     if (result.status === 'OK') {
         if(result.data.length > 0){
-
-        }
-        return {
-            props: {
-                data: result.data,
-                count: result.total
-            }
+            const productCodes = result.data.map((item) => item.productCode);
+            const listProducts = await _client.getListProductByProductCode(productCodes);
+            if(listProducts.status === 'OK'){
+                mixData = result.data.map(t1 => ({...t1, ...listProducts.data.find(t2 => t2.code === t1.productCode)}))
+                return { props: { data: mixData, count: result.total } }
+            }  
+            return {
+                props: {
+                    data: result.data,
+                    count: result.total
+                }
+            }         
         }
     }
     // Pass data to the page via props
@@ -70,7 +76,6 @@ export function formatNumber(num) {
 }
 
 function render(props) {
-    console.log(props.data)
     let router = useRouter();
     const { register, handleSubmit, errors, control } = useForm();
 
@@ -180,6 +185,7 @@ function render(props) {
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">SKU</TableCell>
+                            <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="left">Loại</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -191,12 +197,13 @@ function render(props) {
                                 sellingData.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell align="left">{row.sku}</TableCell>
+                                        <TableCell align="left">{row.name || '---'}</TableCell>
                                         <TableCell align="left">{ProductStatus[row.status]}</TableCell>
                                         <TableCell align="left">{
                                             showType(row.retailPrice.type)
                                         }</TableCell>
                                         <TableCell align="center">
-                                            <Link href={`/cms/ingredient/edit?ingredientID=${row.ingredientID}`}>
+                                            <Link href={`/cms/pricing/edit?pricingID=${row.sellPriceId}`}>
                                                 <Tooltip title="Cập nhật thông tin">
                                                     <IconButton>
                                                         <EditIcon fontSize="small" />
