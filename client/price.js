@@ -1,16 +1,17 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-class PricingClient {
+const prefix = `/marketplace/pricing/v1`
+class PricingClient extends APIClient {
 
     constructor(ctx, data) {
-        this.client = new APIClient(ctx, data)
+        super(ctx, data)
     }
 
-    // TODO
-    async getConditionSellTypeByTag(query){
-        return await this.client.makeRequest(
-            "GET",
-            // `${process.env.API_HOST}/customer/v1/selling-type`,query)
-            `http://localhost/selling-type`,query)
+    createNewPricing(data) {
+        return this.callFromClient(
+            "POST",
+            `${prefix}/selling`,
+            data
+        )
     }
 }
 

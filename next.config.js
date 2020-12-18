@@ -18,6 +18,10 @@ module.exports = withPlugins([withTM], {
             {
                 source: '/backend/:path*',
                 destination: `${process.env.API_HOST}/:path*`
+            },
+            {
+                source: '/a/:path*',
+                destination: `http://localhost/:path*`
             }
         ]
     }
