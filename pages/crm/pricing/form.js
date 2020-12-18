@@ -4,7 +4,7 @@ import {
     FormLabel
 } from "@material-ui/core";
 import ModalCustom from "components/modal/dialogs";
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 
 function FormAddCondition(
@@ -19,6 +19,11 @@ function FormAddCondition(
     // You can set default checkbox with set useState(array values)
     const [checkedValues, setCheckedValues] = useState([]);
    
+    
+    useEffect(() => {
+        setCheckedValues([])
+    }, [])
+
     function handleSelect(checkedId) {
         const newIds = checkedValues?.includes(checkedId)
           ? checkedValues?.filter(name => name !== checkedId)
@@ -29,6 +34,7 @@ function FormAddCondition(
 
     function fnModalExcute(){
         onlose(false)
+        setCheckedValues([])
         callback(getValues().item_ids)  
     }
 

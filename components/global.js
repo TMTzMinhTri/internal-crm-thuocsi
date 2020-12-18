@@ -1,15 +1,11 @@
 export const SellPrices = [
     {
-        label: "Giá sản phẩm",
-        value: "PRICE"
+        label: "Đảm bảo doanh thu của người bán hàng",
+        value: "FIXED_REVENUE"
     },
     {
-        label: "Khuyến mãi",
-        value: "PROMO"
-    },
-    {
-        label: "Ngành hàng",
-        value: "BRAND"
+        label: "Đảm bảo giá bán đến tay người mua",
+        value: "FIXED_PRICE"
     }
 ];
 
