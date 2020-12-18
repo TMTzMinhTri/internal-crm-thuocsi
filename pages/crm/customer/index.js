@@ -233,7 +233,7 @@ function render(props) {
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/customer?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}`)
                         }}
                     />
                 </Table>

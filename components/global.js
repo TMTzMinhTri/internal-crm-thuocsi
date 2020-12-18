@@ -36,6 +36,21 @@ export const condUserType = [
     },
 ]
 
+export const ProductTypes = [
+    {
+        value: "all",
+        label: "Tất cả"
+    },
+    {
+        value: "hasPrice",
+        label: "Đã được cài giá"
+    },
+    {
+        value: "noPrice",
+        label: "Chưa được cài giá"
+    }
+]
+
 
 export function filterObjectName(obj) {
     let tags = []
@@ -96,4 +111,14 @@ function mSort(property) {
         var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
     }
+}
+
+export const ssrPipe = (...functions) => async (input) => {
+    return {
+        props: await functions.reduce((chain, func) => chain.then(func), Promise.resolve(input)),
+    }
+}
+
+export const ProductStatus = {
+    "NEW" : "Mới",
 }

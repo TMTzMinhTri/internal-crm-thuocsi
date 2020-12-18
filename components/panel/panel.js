@@ -4,6 +4,7 @@ import {
     ExpansionPanel, ExpansionPanelActions, ExpansionPanelDetails
 } from "@material-ui/core";
 import styles from "./panel.module.css";
+import ExpansionPanelSummary from "@material-ui/core/ExpansionPanelSummary";
 /*
     Input: children: pages component
            expand:bool - collapse default open or close
@@ -25,11 +26,11 @@ const PanelCollapse = ({
     return (
         <div>
             <form>
-                <ExpansionPanel defaultExpanded={expand} style={{marginBottom:'1%'}}>
-                    {/* <ExpansionPanelSummary>
-                        <p>Tìm kiếm với: </p>
-                    </ExpansionPanelSummary> */}
-                    <ExpansionPanelDetails className={styles.details}>
+                <ExpansionPanel defaultExpanded={expand}>
+                     <ExpansionPanelSummary>
+                        <b>Bảng tìm kiếm</b>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
                         {children}
                     </ExpansionPanelDetails>
                     <Divider />

@@ -20,7 +20,7 @@ import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { useToast } from '@thuocsi/nextjs-components/toast/useToast';
-import { getPricingClient } from "client/price";
+import { getPriceClient } from "client/price";
 import { getProductClient } from "client/product";
 import { SellPrices } from "components/global";
 import Head from "next/head";
@@ -242,7 +242,7 @@ function render(props) {
         // TODO
         console.log(formData)
         setLoading(true);
-        let _client = getPricingClient()
+        let _client = getPriceClient()
         let result = await _client.createNewPricing(formData)
         setLoading(false);
         if (result.status === "OK") {
