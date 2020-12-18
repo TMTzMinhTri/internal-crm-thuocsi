@@ -48,6 +48,14 @@
     display: none !important;
 }
 
+.hidden {
+    display: none !important;
+}
+
+.unSetHidden {
+    display: unset !important;
+}
+
 
 .textSearch {
     color: green;
