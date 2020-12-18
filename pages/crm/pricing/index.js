@@ -2,29 +2,31 @@ import {
     Button,
     ButtonGroup,
     Divider,
-    FormControl, Grid,
+    Grid,
     IconButton, InputBase,
-    InputLabel, Paper,
-    Select, Table,
+    Paper,
+    Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    TextField
+    Tooltip
 } from "@material-ui/core";
 import FilterListIcon from '@material-ui/icons/FilterList';
 import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import PanelCollapse from "components/panel/panel";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
+import { getPricingClient } from 'client/pricing';
+import EditIcon from "@material-ui/icons/Edit";
+import { SellPrices, ProductStatus } from "components/global";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -38,24 +40,25 @@ export async function loadPricingData(ctx) {
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
+    let q = query.q || ''
 
-    let result = {
-        data: [
-            {
-                pricingID: '1',
-                name: 'ngoài biển',
-                status: 'status 1',
-                type: 'location',
-                value: '0.1',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
+    let _client = getPricingClient(ctx, {})
 
-        ],
-        total: 10,
+    let result = { data: {}, count: 0 };
+    result = await _client.getListPricing(offset, limit, q);
+    if (result.status === 'OK') {
+        if(result.data.length > 0){
+
+        }
+        return {
+            props: {
+                data: result.data,
+                count: result.total
+            }
+        }
     }
     // Pass data to the page via props
-    return {props: {data: result.data, count: result.total}}
+    return { props: { data: [], count: 0 } }
 }
 
 export default function PricingPage(props) {
@@ -67,13 +70,23 @@ export function formatNumber(num) {
 }
 
 function render(props) {
-    let router = useRouter()
-    let page = parseInt(router.query.page) || 0
-    let limit = parseInt(router.query.limit) || 20
-    let [search, setSearch] = useState('');
+    console.log(props.data)
+    let router = useRouter();
+    const { register, handleSubmit, errors, control } = useForm();
+
+    let page = parseInt(router.query.page) || 0;
+    let limit = parseInt(router.query.limit) || 20;
+    let q = router.query.q && router.query.q !== '' ? `q=${router.query.q}` : '';
+
+    let [sellingData, setSellingData] = useState([]);
+    let [countSelling, setCountSelling] = useState(0);
+    let [search, setSearch] = useState(router.query.q || '');
     let [open, setOpen] = useState(false);
-    const {register, handleSubmit, errors, control} = useForm();
-    let q = router.query.q || ''
+
+    useEffect(() => {
+        setSellingData(props.data);
+        setCountSelling(props.count);
+    }, [props]);
 
     async function handleChange(event) {
         const target = event.target;
@@ -83,13 +96,12 @@ function render(props) {
 
     function onSearch(formData) {
         try {
-            searchPromotion(formData)
-            setSearch('')
+            Router.push(`/crm/pricing?${q}`)
         } catch (error) {
             console.log(error)
         }
     }
-    
+
     function onCollapse() {
         // func set expand panel search
         setOpen(!open);
@@ -100,24 +112,12 @@ function render(props) {
         alert(data)
     }
 
-    const RenderRow = (row) => (
-        <TableRow>
-            <TableCell component="th" scope="row">{row.data.pricingID}</TableCell>
-            <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.status}</TableCell>
-            <TableCell align="left">{row.data.type}</TableCell>
-            <TableCell align="left">{row.data.value}</TableCell>
-            <TableCell align="left">{row.data.start}</TableCell>
-            <TableCell align="left">{row.data.end}</TableCell>
-            <TableCell align="center">
-                <Link href={`/cms/ingredient/edit?ingredientID=${row.ingredientID}`}>
-                    <ButtonGroup color="primary" aria-label="contained primary button group">
-                        <Button variant="contained" size="small" color="primary">Xem</Button>
-                    </ButtonGroup>
-                </Link>
-            </TableCell>
-        </TableRow>
-    )
+    function showType(type){
+        let a = SellPrices.filter((item) => {
+            return item.value === type;
+        });
+        return a[0].label;
+    }
 
     return (
         <AppCRM select="/crm/pricing">
@@ -126,39 +126,42 @@ function render(props) {
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
-                      justify="space-evenly"
-                      alignItems="center"
+                    justify="space-evenly"
+                    alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <form>
-                            <Paper component="form" className={styles.search}>
-                                <InputBase
-                                    id="q"
-                                    name="q"
-                                    className={styles.input}
-                                    value={search}
-                                    onChange={handleChange}
-                                    inputRef={register}
-                                    placeholder="Tìm kiếm theo tên sản phẩm"
-                                    inputProps={{'aria-label': 'Tìm kiếm theo tên sản phẩm'}}
-                                />
-                                <IconButton className={open===true?styles.iconButtonHidden:styles.iconButton} aria-label="search"
-                                            onClick={handleSubmit(onSearch)}>
-                                    <SearchIcon/>
-                                </IconButton>
-                                <Divider className={styles.divider} orientation="vertical" />
-                                <IconButton className={styles.iconButton} aria-label="filter-list"
-                                            onClick={onCollapse}>
-                                    <FilterListIcon/>
-                                </IconButton>
-                            </Paper>
-                        </form>
+                        <Paper component="form" className={styles.search}>
+                            <InputBase
+                                id="q"
+                                name="q"
+                                className={styles.input}
+                                value={search}
+                                onChange={handleChange}
+                                inputRef={register}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter') {
+                                        onSearch()
+                                    }
+                                }}
+                                placeholder="Tìm kiếm theo tên sản phẩm"
+                                inputProps={{ 'aria-label': 'Tìm kiếm theo tên sản phẩm' }}
+                            />
+                            <IconButton className={open === true ? styles.iconButtonHidden : styles.iconButton} aria-label="search"
+                                onClick={handleSubmit(onSearch)}>
+                                <SearchIcon />
+                            </IconButton>
+                            <Divider className={styles.divider} orientation="vertical" />
+                            <IconButton className={styles.iconButton} aria-label="filter-list"
+                                onClick={onCollapse}>
+                                <FilterListIcon />
+                            </IconButton>
+                        </Paper>
                     </Grid>
-                    
+
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/pricing/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
-                                         className={styles.rightGroup}>
+                                className={styles.rightGroup}>
                                 <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài đặt</Button>
                             </ButtonGroup>
                         </Link>
@@ -167,133 +170,51 @@ function render(props) {
             </div>
             {
                 q === '' ? (
-                    <span/>
+                    <span />
                 ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
-                )
+                        <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{search}'</i></div>
+                    )
             }
-
-            {
-                open === true ? (
-                    <Grid item xs={12} sm={12} md={12}>
-                        <PanelCollapse expand={open} setOpen={setOpen} setExecute={fnSearch}>
-                            <Grid container spacing={2} direction="row"
-                                justify="space-evenly"
-                                alignItems="center"
-                            >
-                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
-                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
-                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
-                                        <Select
-                                            labelId="category-select-label"
-                                            id="category"
-                                            name="category"
-                                            variant="outlined"
-                                        >
-                                            
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
-                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
-                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
-                                        <Select
-                                            labelId="category-select-label"
-                                            id="category"
-                                            name="category"
-                                            variant="outlined"
-                                            margin="normal"
-                                        >
-                                            
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
-                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
-                                        <TextField
-                                            id="volume"
-                                            name="volume"
-                                            label="Thể tích"
-                                            placeholder=""
-                                            helperText="Ví dụ: 4 chai x 300ml"
-                                            
-                                            variant="outlined"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            style={{width: '100%', marginTop: '20px' }}
-                                            required
-                                            inputRef={
-                                                register({
-                                                    required: "Volume Required",
-                                                })
-                                            }
-                                        />
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
-                                    <FormControl className={styles.formControl} style={{width: '100%', margin: '-10px'}}>
-                                        <InputLabel id="category-select-label" style={{marginLeft: '5%'}}>Loại sản phẩm</InputLabel>
-                                        <Select
-                                            labelId="category-select-label"
-                                            id="category"
-                                            name="category"
-                                        >
-                                            
-                                        </Select>
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}>
-                                    <FormControl  style={{width: '100%'}} size="small" variant="outlined">
-                                        <InputLabel id="category-select-label1" size="small">Loại sản phẩm</InputLabel>
-                                            <Controller 
-                                                name="unit"
-                                                control={control}
-                                                
-                                                as={
-                                                    <Select labelId="category-select-label1">
-                                                        <MenuItem value={1}>1</MenuItem>
-                                                    </Select>
-                                                }
-                                            />
-                                        </FormControl>
-                                </Grid>
-                                <Grid item xs={10} sm={6} md={4} className={styles.gridForm}></Grid>
-                            </Grid>
-                        </PanelCollapse>
-                    </Grid>
-                ):(
-                    <div></div>
-                )
-            }
-        
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">ID</TableCell>
-                            <TableCell align="left">Tên chỉ số</TableCell>
+                            <TableCell align="left">SKU</TableCell>
                             <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Giá trị</TableCell>
-                            <TableCell align="left">Bắt đầu</TableCell>
-                            <TableCell align="left">Kết thúc</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {props.data.length > 0 ? (
+                    {sellingData.length > 0 ? (
                         <TableBody>
-                            {props.data.map(row => (
-                                <RenderRow data={row}/>
-                            ))}
+                            {
+                                sellingData.map((row, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell align="left">{row.sku}</TableCell>
+                                        <TableCell align="left">{ProductStatus[row.status]}</TableCell>
+                                        <TableCell align="left">{
+                                            showType(row.retailPrice.type)
+                                        }</TableCell>
+                                        <TableCell align="center">
+                                            <Link href={`/cms/ingredient/edit?ingredientID=${row.ingredientID}`}>
+                                                <Tooltip title="Cập nhật thông tin">
+                                                    <IconButton>
+                                                        <EditIcon fontSize="small" />
+                                                    </IconButton>
+                                                </Tooltip>
+                                            </Link>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            }
                         </TableBody>
                     ) : (
-                        <TableBody>
-                            <TableRow>
-                                <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    )}
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        )}
 
                     <MyTablePagination
                         labelUnit="chỉ số"
@@ -301,7 +222,8 @@ function render(props) {
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/pricing?page=${page}&limit=${rowsPerPage}`)
+                            let qq = q ? '&'+q : '';
+                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}${qq}`)
                         }}
                     />
                 </Table>
