@@ -1,4 +1,4 @@
-import {APIClient} from "@thuocsi/nextjs-components/lib/utils";
+import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 const PREFIX = `/marketplace/product/v1`
 // const PREFIX = ``
 
