@@ -186,8 +186,11 @@ function render(props) {
                         <TableRow>
                             <TableCell align="left">SKU</TableCell>
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
-                            <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="left">Loại</TableCell>
+                            <TableCell align="left">Giá bán lẻ</TableCell>
+                            <TableCell align="left">Giá bán buôn</TableCell>
+                            <TableCell align="left">Cập nhật</TableCell>
+                            <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -197,11 +200,16 @@ function render(props) {
                                 sellingData.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell align="left">{row.sku}</TableCell>
-                                        <TableCell align="left">{row.name || '---'}</TableCell>
-                                        <TableCell align="left">{ProductStatus[row.status]}</TableCell>
+                                        <TableCell align="left">{row.productCode || '---'}</TableCell>
                                         <TableCell align="left">{
                                             showType(row.retailPrice.type)
                                         }</TableCell>
+                                        <TableCell align="left">{formatNumber(row.retailPrice.price)}</TableCell>
+                                        <TableCell align="left">
+                                            array whosalePrice
+                                        </TableCell>
+                                        <TableCell align="left">{row.lastUpdatedTime}</TableCell>
+                                        <TableCell align="left">{ProductStatus[row.status]}</TableCell>
                                         <TableCell align="center">
                                             <Link href={`/cms/pricing/edit?pricingID=${row.sellPriceId}`}>
                                                 <Tooltip title="Cập nhật thông tin">
