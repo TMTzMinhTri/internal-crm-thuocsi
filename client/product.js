@@ -11,7 +11,7 @@ class ProductClient extends APIClient {
     getListProduct(query){
         return this.callFromNextJS(
             "GET",
-            `${prefix}/product/list`,query)
+            `${PREFIX}/product/list`,query)
     }
 
     getProductList(offset, limit, q) {
