@@ -21,17 +21,16 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
-import {useToast} from '@thuocsi/nextjs-components/toast/useToast';
-import {getPriceClient} from "client/price";
-import {getProductClient} from "client/product";
-import {SellPrices} from "components/global";
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import { useToast } from '@thuocsi/nextjs-components/toast/useToast';
+import { getPriceClient } from "client/price";
+import { getProductClient } from "client/product";
+import { SellPrices } from "components/global";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
-import React, {useState} from 'react';
-import {Controller, useForm} from 'react-hook-form';
+import React, { useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import styles from "./pricing.module.css";
-import CircularProgress from "@material-ui/core/CircularProgress";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -396,42 +395,6 @@ function render(props) {
                                             return typeof (d) != 'undefined';
                                         }
                                     }}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={6} md={4}>
-                                <Typography gutterBottom>
-                                    SKU:
-                                </Typography>
-                                <TextField
-                                    id="sku"
-                                    name="sku"
-                                    variant="outlined"
-                                    size="small"
-                                    placeholder=""
-                                    helperText={errors.sku?.message}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    style={{width: '100%'}}
-                                    error={!!errors.sku}
-                                    required
-                                    inputRef={
-                                        register({
-                                            required: "Vui lòng nhập SKU",
-                                            maxLength: {
-                                                value: 50,
-                                                message: "SKU có chiều dài tối đa 50 kí tự"
-                                            },
-                                            minLength: {
-                                                value: 6,
-                                                message: "SKU có chiều dài tối thiểu 6 kí tự"
-                                            },
-                                            pattern: {
-                                                value: /[A-Za-z]/,
-                                                message: "SKU phải là kí tự"
-                                            }
-                                        })
-                                    }
                                 />
                             </Grid>
                             <Grid item xs={12} sm={12} md={12}>
