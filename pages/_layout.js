@@ -1,4 +1,4 @@
-import { faMoneyCheckAlt, faUsers, faDollarSign } from '@fortawesome/free-solid-svg-icons'
+import { faDollarSign, faUsers } from '@fortawesome/free-solid-svg-icons'
 import App from "@thuocsi/nextjs-components/app/app"
 import React, { Component } from "react"
 
@@ -20,15 +20,15 @@ export default class AppCRM extends Component {
                     link: "/crm/customer",
                     icon: faUsers
                 },
-                {
-                    key: "PRODUCT",
-                    name: "Sản phẩm",
-                    link: "/crm/product",
-                    icon: faMoneyCheckAlt
-                },
+                // {
+                //     key: "PRODUCT",
+                //     name: "Sản phẩm",
+                //     link: "/crm/product",
+                //     icon: faMoneyCheckAlt
+                // },
                 {
                     key: "PRICING",
-                    name: "Bảng giá",
+                    name: "Sản phẩm",
                     link: "/crm/pricing",
                     icon: faDollarSign
                 },
