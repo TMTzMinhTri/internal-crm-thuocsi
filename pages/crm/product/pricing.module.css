@@ -1,0 +1,22 @@
+.rightGroup {
+    float: right;
+    margin-bottom: 12px;
+}
+
+.contentPadding {
+    padding: 12px;
+}
+
+.form {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.formControl {
+    width: 200px;
+    margin: 10px;
+}
+
+.rootCard {
+    margin: 10px;
+}
