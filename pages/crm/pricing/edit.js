@@ -1,392 +1,512 @@
-import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
+import {
+    Accordion,
+    AccordionActions,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    Divider,
+    FormControl,
+    Grid,
+    InputAdornment,
+    MenuItem,
+    Paper,
+    Select,
+    TextField,
+    Tooltip,
+    Typography
+} from "@material-ui/core";
+import AddIcon from '@material-ui/icons/Add';
+import DeleteIcon from '@material-ui/icons/Delete';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import HelpOutlinedIcon from '@material-ui/icons/HelpOutlined';
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
+import {useToast} from '@thuocsi/nextjs-components/toast/useToast';
+import {getPriceClient} from "client/price";
+import {getProductClient} from "client/product";
+import {SellPrices} from "components/global";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, {useState} from 'react';
+import {Controller, useForm} from 'react-hook-form';
 import styles from "./pricing.module.css";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
-export async function getServerSideProps({ query }) {
-    return await loadProductData(query)
+export async function getServerSideProps(ctx) {
+    return await doWithLoggedInUser(ctx, (ctx) => {
+        return loadListProduct(ctx)
+    })
 }
 
-export async function loadProductData(query) {
-    let sku = query.sku || ''
-    
-    const res = await fetch(`http://34.87.48.109/core/product/v1/product?sku=${sku}`, {
-        method: "GET",
-        headers: {
-            "Authorization": "Basic bmFtcGg6MTIzNDU2"
-        }
-    })
-    const result = await res.json()
-    
-    if(result.status != "OK"){
-        return { props: Object.assign({data:[]}, result) }
+export async function loadListProduct(ctx) {
+    let data = {props: {}}
+    let _client = getProductClient(ctx, {})
+    data.props.products = []
+    let products = await _client.getListProduct({})
+
+    if (products.status !== "OK") {
+        data.props.products = []
+    } else {
+        data.props.products = products?.data
     }
 
-    // console.log(result)
-    // Pass data to the page via props
-    return { props: result }
+    return data
 }
-
 
 export default function EditPage(props) {
-    const [units] = useState([
-        {
-            label: "Hộp",
-            value: "Hộp"
-        }
-    ]);
-    const product = props?.data[0]
-    const [categories, setCategories] = useState([])
-    const [state, setState] = useState(product);
-    const { register, handleSubmit, errors } = useForm();
-    
-    const handleChange = (event) => {
-        // change event.target.id to event.target.name because select box'event do not return id, ex: {value: "value", name: "category"}
-        setState({...state, [event.target.name]: event.target.value})
-    }
+    return renderWithLoggedInUser(props, render)
+}
 
-    async function loadCategoryData(query) {
-        let page = query.page || 0
-        let limit = query.limit || 100
-        let offset = page * limit
-    
-        const res = await fetch(`http://34.87.48.109/core/product/v1/category/list?offset=${offset}&limit=${limit}`, {
-            method: "GET",
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
+const RenderPriceConfig = ({name, control, register, setValue, hidden, errors, index}) => {
+    let arrName = name + `[${index}]`
+    return (
+        <div>
+            {/* gia ban */}
+            {
+                name === 'retailPrice' ? (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Typography gutterBottom>
+                                Loại cài đặt:
+                            </Typography>
+                            <FormControl className={styles.formControl} size="small" variant="outlined"
+                                         style={{width: '100%'}}>
+                                {/* <InputLabel id="department-select-label">Loại sản phẩm</InputLabel> */}
+                                <Controller
+                                    disa
+                                    rules={{required: true}}
+                                    control={control}
+                                    size="small"
+                                    defaultValue={SellPrices[0].value}
+                                    name={`${name}.type`}
+                                    variant="outlined"
+                                    // error={!!errors.categoryID}
+                                    as={
+                                        <Select disabled={hidden}>
+                                            {SellPrices.map((row) => (
+                                                <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    }
+                                />
+                            </FormControl>
+
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={12}/>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Giá bán:
+                            </Typography>
+                            <TextField
+                                id={`${name}.price`}
+                                name={`${name}.price`}
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                defaultValue={1000}
+                                helperText={errors[name]?.price?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    endAdornment: <InputAdornment
+                                        position="end">đ</InputAdornment>,
+                                }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{width: '100%'}}
+                                error={!!errors[name]?.price}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập giá bán",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                ) : (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Typography gutterBottom>
+                                Loại cài đặt:
+                            </Typography>
+                            <FormControl className={styles.formControl} size="small" variant="outlined"
+                                         style={{width: '100%'}}>
+                                {/* <InputLabel id="department-select-label">Loại sản phẩm</InputLabel> */}
+                                <Controller
+                                    disa
+                                    rules={{required: true}}
+                                    control={control}
+                                    size="small"
+                                    defaultValue={SellPrices[0].value}
+                                    name={`${arrName}.type`}
+                                    variant="outlined"
+                                    // error={!!errors.categoryID}
+                                    as={
+                                        <Select disabled={hidden}>
+                                            {SellPrices.map((row) => (
+                                                <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    }
+                                />
+                            </FormControl>
+
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={12}/>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Giá bán:
+                            </Typography>
+                            <TextField
+                                id={`${arrName}.price`}
+                                name={`${arrName}.price`}
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                defaultValue={1000}
+                                error={errors[name] ? !!errors[name][index]?.price : false}
+                                helperText={errors[name] ? errors[name][index]?.price?.message: ''}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    endAdornment: <InputAdornment
+                                        position="end">đ</InputAdornment>,
+                                }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{width: '100%'}}
+                                // error={errors.name ? true : false}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập giá bán",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
+                        {/* so luong ap dung */}
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Số lượng tối thiểu áp dụng:
+                            </Typography>
+                            <TextField
+                                id={`${arrName}.minNumber`}
+                                name={`${arrName}.minNumber`}
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                defaultValue={1}
+                                error={errors[name] ? !!errors[name][index]?.minNumber : false}
+                                helperText={errors[name] ? errors[name][index]?.minNumber?.message: ''}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{width: '100%'}}
+                                // error={errors.name ? true : false}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={12}/>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Ti lệ phần trăm giảm giá:
+                            </Typography>
+                            <TextField
+                                id={`${arrName}.percentageDiscount`}
+                                name={`${arrName}.percentageDiscount`}
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                error={errors[name] ? !!errors[name][index]?.percentageDiscount : false}
+                                helperText={errors[name] ? errors[name][index]?.percentageDiscount?.message: ''}
+                                defaultValue={0}
+                                // helperText={errors.name?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    endAdornment: <InputAdornment
+                                        position="end">%</InputAdornment>,
+                                }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{width: '100%'}}
+                                // error={errors.name ? true : false}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Giảm giá tuyệt đối:
+                            </Typography>
+                            <TextField
+                                id={`${name}.absoluteDiscount`}
+                                name={`${name}.absoluteDiscount`}
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                defaultValue={0}
+                                // helperText={errors.name?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    endAdornment: <InputAdornment
+                                        position="end">đ</InputAdornment>,
+                                }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{width: '100%'}}
+                                // error={errors.name ? true : false}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                )
             }
-        })
-        const result = await res.json()
-        setCategories(result.data.map(({ name }) => ({ label: name, value: name })))
-        if(result.data.length > 0) {
-            setState({...state, ["category"]: result.data[0].name})
-        }
-    }
+        </div>
+    )
+}
 
-    async function updateProduct(item) {
-        const payload = Object.assign({imageUrls: "thuocsi.vn/default.png"},item)
-        const res = await fetch(`http://34.87.48.109/core/product/v1/product`, {
-            method: 'POST',
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
-            },
-            body: JSON.stringify(payload)
-        })
-        const result = await res.json()
-        console.log(result)
-    }
+function render(props) {
+    const {register, handleSubmit, errors, reset, watch, control, getValues, setValue} = useForm({mode: 'onChange'});
+    const [loading, setLoading] = useState(false);
+    const {error, warn, info, success} = useToast();
+    const [ids, setIds] = useState([]);
+    const [idDeleteds, setIdDeleteds] = useState([]);
+    const [expanded, setExpanded] = React.useState(false);
+    let sellerCode = "MedX"
 
     // func onSubmit used because useForm not working with some fields
-    async function onSubmit(){
-        try {
-            await updateProduct(state)
-        } catch (error) {
-            console.log(error)
+    async function createNewPricing(formData) {
+        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index,1))
+        setLoading(true);
+        let _client = getPriceClient()
+        let result = await _client.createNewPricing(formData)
+        setLoading(false);
+        if (result.status === "OK") {
+            success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định')
+        } else {
+            error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
         }
     }
 
-    useEffect(() => {
-        loadCategoryData({})
-    },[]);
-
-    if(props.status !="OK") {
-        return (
-            <AppCRM select="/product">
-                <Head>
-                    <title>Thông tin sản phẩm</title>
-                </Head>
-                <Box component={Paper}>
-                    <FormGroup>
-                        <Box className={styles.contentPadding}>
-                            <Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>
-                            <Box>{props.message}</Box>
-                        </Box>
-                    </FormGroup>
-                </Box>
-            </AppCRM>
-        )
+    // func submit data
+    async function onSubmit(formData) {
+        try {
+            formData.sellerCode = sellerCode
+            await createNewPricing(formData)
+        } catch (err) {
+            setLoading(false);
+            error(err.message || err.toString())
+        }
     }
+
+    const handleChangeSetting = (event) => {
+        setValue("condSettingType", event.target.value);
+    };
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
+
+
+    let lstOptions = props?.products
+
     return (
-        <AppCRM select="/product">
+        <AppCRM select="/crm/pricing">
             <Head>
-                <title>Thông tin sản phẩm</title>
+                <title>Thêm cài đặt giá</title>
             </Head>
-            <Box component={Paper}>
-                <FormGroup>
+            <Box component={Paper} display="block">
+                <form noValidate>
                     <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>
-                        <Box>
-                            <TextField
-                                id="name"
-                                name="name"
-                                value={state.name}
-                                label="Tên sản phẩm"
-                                placeholder=""
-                                helperText={errors.name?.message}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '25%' }}
-                                onChange={({target: {value,name}}) => {
-                                    setState({...state,[name]:value})
-                                }}
-                                error={ errors.name ? true : false }
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Name Required",
-                                        maxLength: {
-                                            value: 250,
-                                            message: "Name must be less than 250 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "Name must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "Name must be characters"
+                        <Box style={{fontSize: 24, margin: 10}}>Thông tin cài đặt giá</Box>
+                        <Grid container spacing={3} className={styles.resetMargin}>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <Typography gutterBottom>
+                                    Sản phẩm:
+                                </Typography>
+                                <Controller
+                                    render={({onChange, ...props}) => (
+                                        <Autocomplete
+                                            id="productCode"
+                                            options={lstOptions}
+                                            getOptionLabel={option => option.name}
+                                            noOptionsText={'Không tìm thấy kết quả phù hợp'}
+                                            renderInput={params => (
+                                                <TextField
+                                                    {...params}
+                                                    error={!!errors.code}
+                                                    helperText={errors.code ? "Vui lòng chọn sản phẩm" : ""}
+                                                    placeholder="Chọn sản phẩm"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    // onChange={e => setSearchTerm(e.target.value)}
+                                                />
+                                            )}
+                                            onChange={(e, data) => onChange(data.code)}
+                                            {...props}
+                                        />
+                                    )}
+
+                                    name="productCode"
+                                    control={control}
+                                    onChange={([, {id}]) => id}
+                                    rules={{
+                                        validate: d => {
+                                            return typeof (d) != 'undefined';
                                         }
-                                    })
+                                    }}
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <Typography gutterBottom>
+                                    SKU:
+                                </Typography>
+                                <TextField
+                                    id="sku"
+                                    name="sku"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder=""
+                                    helperText={errors.sku?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    style={{width: '100%'}}
+                                    error={!!errors.sku}
+                                    required
+                                    inputRef={
+                                        register({
+                                            required: "Vui lòng nhập SKU",
+                                            maxLength: {
+                                                value: 50,
+                                                message: "SKU có chiều dài tối đa 50 kí tự"
+                                            },
+                                            minLength: {
+                                                value: 6,
+                                                message: "SKU có chiều dài tối thiểu 6 kí tự"
+                                            },
+                                            pattern: {
+                                                value: /[A-Za-z]/,
+                                                message: "SKU phải là kí tự"
+                                            }
+                                        })
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <Typography gutterBottom variant={'h6'}>
+                                    Cài đặt giá bán lẻ:
+                                    <Tooltip title="Cài đặt bán lẻ, bắt buộc nhập" placement="right-start">
+                                        <HelpOutlinedIcon fontSize="small"/>
+                                    </Tooltip>
+                                </Typography>
+                                {/* Setup gia ban le */}
+                                {/* <pre>z{JSON.stringify(getValues().productCode?true:false )}</pre> */}
+                                <RenderPriceConfig name={'retailPrice'} control={control} register={register}
+                                                   hidden={!getValues().productCode} errors={errors} index={0}/>
+
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <Typography gutterBottom>
+                                    Cài đặt giá bán buôn:
+                                    <Tooltip title="Danh sách cài đặt bán buôn (bán sỉ)" placement="right-start">
+                                        <HelpOutlinedIcon fontSize="small"/>
+                                    </Tooltip>
+                                </Typography>
+                                {
+                                    ids.map((num, idx) => (
+                                        <Accordion expanded={expanded === `panel${idx}`} style={{display: idDeleteds.includes(num) ? 'none' : ''}} onChange={handleChange(`panel${idx}`)}>
+                                            <AccordionSummary
+                                                expandIcon={<ExpandMoreIcon/>}
+                                                aria-controls="panel1bh-content"
+                                                onClick={(e) => e.stopPropagation()}
+                                                id="panel1bh-header"
+                                            >
+                                                <Typography color="textSecondary">
+                                                    Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
+                                                </Typography>
+                                            </AccordionSummary>
+                                            <AccordionDetails>
+                                                <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                                                   register={register} errors={errors} index={idx}/>
+                                            </AccordionDetails>
+                                            <AccordionActions>
+                                                <Button size="small" color="secondary" variant="contained"
+                                                        startIcon={<DeleteIcon/>}
+                                                    // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                                        onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                            </AccordionActions>
+                                        </Accordion>
+                                    ))
                                 }
-                            />
-                            <TextField
-                                id="sku"
-                                name="sku"
-                                label="SKU"
-                                value={state.sku}
-                                placeholder=""
-                                helperText={errors.sku? errors.sku.message: "Mã sản phẩm"}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                onChange={handleChange}
-                                error={ errors.sku ? true : false }
-                                disabled
-                                required
-                                inputRef={
-                                    register({
-                                        required: "SKU Required",
-                                        maxLength: {
-                                            value: 50,
-                                            message: "SKU must be less than 50 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "SKU must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "SKU must be characters"
-                                        }
-                                    })
-                                }
-                            />
-                            <TextField
-                                id="createdTime"
-                                name="createdTime"
-                                label="Created at"
-                                value={state.createdTime}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                disabled
-                            />
-                            <TextField
-                                id="lastUpdatedTime"
-                                name="lastUpdatedTime"
-                                label="Updated at"
-                                value={state.lastUpdatedTime}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                disabled
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="description"
-                                name="description"
-                                value={state.description}
-                                label="Mô tả"
-                                placeholder=""
-                                helperText={errors.description?.message}
-                                margin="normal"
-                                multiline
-                                rowsMax={4}
-                                onChange={handleChange}
-                                error={ errors.description ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="origin"
-                                name="origin"
-                                value={state.origin}
-                                label="Xuất xứ"
-                                placeholder="Quốc gia sản xuất"
-                                helperText={errors.origin?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.origin ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Origin Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="madeBy"
-                                name="madeBy"
-                                value={state.madeBy}
-                                label="Nhà sản xuất"
-                                placeholder="Tên nhà sản xuất"
-                                helperText={errors.madeBy?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.madeBy ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "MakeBy Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="storage"
-                                name="storage"
-                                value={state.storage}
-                                label="Bảo quản"
-                                placeholder="Cách bảo quản"
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="unit-select-label">Đơn vị tính</InputLabel>
-                                <Select
-                                    labelId="unit-select-label"
-                                    id="unit-select"
-                                    name="unit"
-                                    value={state.unit}
-                                    onChange={handleChange}
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    disabled={!getValues().productCode || ids.length - idDeleteds.length === 5}
+                                    style={{marginTop: '10px'}}
+                                    onClick={() => {
+                                        setIds([...ids, ids.length + 1])
+                                        setExpanded(`panel${ids.length}`)
+                                    }}
+                                    startIcon={<AddIcon/>}
                                 >
-                                    {units.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <TextField
-                                id="volume"
-                                name="volume"
-                                value={state.volume}
-                                label="Thể tích"
-                                placeholder=""
-                                helperText="Ví dụ: 4 chai x 300ml"
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.volume ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Volume Required",
-                                    })
-                                }
-                            />
-                            
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="category-select-label">Loại sản phẩm</InputLabel>
-                                <Select
-                                    labelId="category-select-label"
-                                    id="category"
-                                    name="category"
-                                    value={state.category}
-                                    onChange={handleChange}
-                                >
-                                    {categories.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="indication"
-                                name="indication"
-                                value={state.indication}
-                                label="Chỉ định"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                            />
-                            <TextField
-                                id="dosage"
-                                name="dosage"
-                                value={state.dosage}
-                                label="Liều lượng"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '22%' }}
-                            />
-                        </Box>
+                                    Thêm giá bán buôn
+                                </Button>
+                            </Grid>
+                        </Grid>
+                        <Divider style={{margin: '10px'}}/>
                         <Box>
                             <Button
-                                variant="contained" 
-                                color="primary" 
+                                variant="contained"
+                                color="primary"
+                                disabled={(!getValues().productCode)}
                                 onClick={handleSubmit(onSubmit)}
-                                style={{ margin: 8 }}>
-                                    Lưu
+                                style={{margin: 8}}>
+                                Lưu
                             </Button>
-                            <Button variant="contained" style={{ margin: 8 }}>Làm mới</Button>
+                            <Button variant="contained" type="reset" style={{margin: 8}}>Làm mới</Button>
                         </Box>
-                        
                     </Box>
-                </FormGroup>
+                </form>
             </Box>
         </AppCRM>
     )

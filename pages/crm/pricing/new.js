@@ -60,7 +60,6 @@ export default function NewFromPage(props) {
 
 const RenderPriceConfig = ({name, control, register, setValue, hidden, errors, index}) => {
     let arrName = name + `[${index}]`
-    console.log(errors)
     return (
         <div>
             {/* gia ban */}
@@ -316,8 +315,7 @@ function render(props) {
 
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
-        // TODO
-        console.log(formData)
+        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index,1))
         setLoading(true);
         let _client = getPriceClient()
         let result = await _client.createNewPricing(formData)
@@ -456,7 +454,7 @@ function render(props) {
                                 </Typography>
                                 {
                                     ids.map((num, idx) => (
-                                        <Accordion expanded={expanded === `panel${idx}`} onChange={handleChange(`panel${idx}`)}>
+                                        <Accordion expanded={expanded === `panel${idx}`} style={{display: idDeleteds.includes(num) ? 'none' : ''}} onChange={handleChange(`panel${idx}`)}>
                                             <AccordionSummary
                                                 expandIcon={<ExpandMoreIcon/>}
                                                 aria-controls="panel1bh-content"
@@ -483,7 +481,7 @@ function render(props) {
                                 <Button
                                     variant="outlined"
                                     color="primary"
-                                    disabled={!getValues().productCode}
+                                    disabled={!getValues().productCode || ids.length - idDeleteds.length === 5}
                                     style={{marginTop: '10px'}}
                                     onClick={() => {
                                         setIds([...ids, ids.length + 1])

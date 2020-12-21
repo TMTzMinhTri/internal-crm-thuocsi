@@ -211,7 +211,7 @@ function render(props) {
                                         <TableCell align="left">{row.lastUpdatedTime}</TableCell>
                                         <TableCell align="left">{ProductStatus[row.status]}</TableCell>
                                         <TableCell align="center">
-                                            <Link href={`/cms/pricing/edit?pricingID=${row.sellPriceId}`}>
+                                            <Link href={`/crm/pricing/edit?pricingID=${row.sellPriceId}`}>
                                                 <Tooltip title="Cập nhật thông tin">
                                                     <IconButton>
                                                         <EditIcon fontSize="small" />
