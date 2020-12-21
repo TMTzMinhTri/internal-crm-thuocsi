@@ -1,4 +1,4 @@
-import { faMoneyCheckAlt, faUsers, faDollarSign } from '@fortawesome/free-solid-svg-icons'
+import { faDollarSign, faMoneyCheckAlt, faUsers } from '@fortawesome/free-solid-svg-icons'
 import App from "@thuocsi/nextjs-components/app/app"
 import React, { Component } from "react"
 
