@@ -76,6 +76,7 @@ export function formatNumber(num) {
 }
 
 function render(props) {
+    console.log(props);
     let router = useRouter();
     const { register, handleSubmit, errors, control } = useForm();
 

@@ -94,7 +94,7 @@ const RenderPriceConfig = ({name, control, register, setValue, hidden, errors, i
 
                         </Grid>
                         <Grid item xs={12} sm={12} md={12}/>
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                             <Typography gutterBottom>
                                 Giá bán:
                             </Typography>
@@ -159,7 +159,7 @@ const RenderPriceConfig = ({name, control, register, setValue, hidden, errors, i
 
                         </Grid>
                         <Grid item xs={12} sm={12} md={12}/>
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                             <Typography gutterBottom>
                                 Giá bán:
                             </Typography>
@@ -195,7 +195,7 @@ const RenderPriceConfig = ({name, control, register, setValue, hidden, errors, i
                             />
                         </Grid>
                         {/* so luong ap dung */}
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                             <Typography gutterBottom>
                                 Số lượng tối thiểu áp dụng:
                             </Typography>
@@ -227,7 +227,7 @@ const RenderPriceConfig = ({name, control, register, setValue, hidden, errors, i
                             />
                         </Grid>
                         <Grid item xs={12} sm={12} md={12}/>
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                             <Typography gutterBottom>
                                 Ti lệ phần trăm giảm giá:
                             </Typography>
@@ -263,7 +263,7 @@ const RenderPriceConfig = ({name, control, register, setValue, hidden, errors, i
                                 }
                             />
                         </Grid>
-                        <Grid item xs={12} sm={6} md={3}>
+                        <Grid item xs={12} sm={6} md={4}>
                             <Typography gutterBottom>
                                 Giảm giá tuyệt đối:
                             </Typography>
@@ -419,7 +419,7 @@ function render(props) {
                                 </Typography>
                                 {
                                     ids.map((num, idx) => (
-                                        <Accordion expanded={expanded === `panel${idx}`} onChange={handleChange(`panel${idx}`)}>
+                                        <Accordion expanded={expanded === `panel${idx}`} key={idx} onChange={handleChange(`panel${idx}`)}>
                                             <AccordionSummary
                                                 expandIcon={<ExpandMoreIcon/>}
                                                 aria-controls="panel1bh-content"

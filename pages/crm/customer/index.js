@@ -129,8 +129,8 @@ function render(props) {
         }
     }
 
-    const RenderRow = (row) => (
-        <TableRow>
+    const RenderRow = (row, i) => (
+        <TableRow key={i}>
             <TableCell component="th" scope="row">{row.data.customerID}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left">{row.data.email}</TableCell>
@@ -163,24 +163,22 @@ function render(props) {
                       alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <form>
-                            <Paper component="form" className={styles.search}>
-                                <InputBase
-                                    id="q"
-                                    name="q"
-                                    className={styles.input}
-                                    value={search}
-                                    onChange={handleChange}
-                                    inputRef={register}
-                                    placeholder="Tìm kiếm khách hàng"
-                                    inputProps={{'aria-label': 'Tìm kiếm khách hàng'}}
-                                />
-                                <IconButton className={styles.iconButton} aria-label="search"
-                                            onClick={handleSubmit(onSearch)}>
-                                    <SearchIcon/>
-                                </IconButton>
-                            </Paper>
-                        </form>
+                        <Paper component="form" className={styles.search}>
+                            <InputBase
+                                id="q"
+                                name="q"
+                                className={styles.input}
+                                value={search}
+                                onChange={handleChange}
+                                inputRef={register}
+                                placeholder="Tìm kiếm khách hàng"
+                                inputProps={{'aria-label': 'Tìm kiếm khách hàng'}}
+                            />
+                            <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={handleSubmit(onSearch)}>
+                                <SearchIcon/>
+                            </IconButton>
+                        </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/customer/new">
@@ -215,8 +213,8 @@ function render(props) {
                     </TableHead>
                     {props.data.length > 0 ? (
                         <TableBody>
-                            {props.data.map(row => (
-                                <RenderRow data={row}/>
+                            {props.data.map((row, i) => (
+                                <RenderRow data={row} key={i}/>
                             ))}
                         </TableBody>
                     ) : (
