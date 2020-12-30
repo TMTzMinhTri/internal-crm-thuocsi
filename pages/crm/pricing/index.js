@@ -1,17 +1,6 @@
 import {
-    Button,
-    ButtonGroup,
-    Divider,
-    Grid,
-    IconButton, InputBase,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Tooltip
+    Button, ButtonGroup, Divider, Grid, IconButton, InputBase, Paper, 
+    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip
 } from "@material-ui/core";
 import FilterListIcon from '@material-ui/icons/FilterList';
 import SearchIcon from '@material-ui/icons/Search';
@@ -46,21 +35,34 @@ export async function loadPricingData(ctx) {
 
     let result = { data: {}, count: 0 };
     result = await _client.getListPricing(offset, limit, q);
-    let mixData = {}
+    let listProductData = {};
     if (result.status === 'OK') {
-        if(result.data.length > 0){
+        if (result.data.length > 0) {
             const productCodes = result.data.map((item) => item.productCode);
-            const listProducts = await _client.getListProductByProductCode(productCodes);
-            if(listProducts.status === 'OK'){
-                mixData = result.data.map(t1 => ({...t1, ...listProducts.data.find(t2 => t2.code === t1.productCode)}))
-                return { props: { data: mixData, count: result.total } }
-            }  
+            const uniqueProductCodes = new Set(productCodes);
+            const listProducts = await _client.getListProductByProductCode([...uniqueProductCodes]);
+            if (listProducts.status === 'OK') {
+                if (listProducts.data.length > 0) {
+                    listProducts.data.map((item) => {
+                        listProductData[item.code] = { ...item };
+                    });
+                }
+
+                return {
+                    props: {
+                        data: {
+                            listProductData,
+                            listPricingData: result.data
+                        }, count: result.total
+                    }
+                }
+            }
             return {
                 props: {
                     data: result.data,
                     count: result.total
                 }
-            }         
+            }
         }
     }
     // Pass data to the page via props
@@ -76,7 +78,6 @@ export function formatNumber(num) {
 }
 
 function render(props) {
-    console.log(props);
     let router = useRouter();
     const { register, handleSubmit, errors, control } = useForm();
 
@@ -84,13 +85,15 @@ function render(props) {
     let limit = parseInt(router.query.limit) || 20;
     let q = router.query.q && router.query.q !== '' ? `q=${router.query.q}` : '';
 
-    let [sellingData, setSellingData] = useState([]);
+    const [productList, setProductData] = useState([]);
+    let [pricingList, setPricingData] = useState([]);
     let [countSelling, setCountSelling] = useState(0);
     let [search, setSearch] = useState(router.query.q || '');
     let [open, setOpen] = useState(false);
 
     useEffect(() => {
-        setSellingData(props.data);
+        setPricingData(props.data.listPricingData);
+        setProductData(props.data.listProductData)
         setCountSelling(props.count);
     }, [props]);
 
@@ -118,7 +121,7 @@ function render(props) {
         alert(data)
     }
 
-    function showType(type){
+    function showType(type) {
         let a = SellPrices.filter((item) => {
             return item.value === type;
         });
@@ -195,13 +198,13 @@ function render(props) {
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {sellingData.length > 0 ? (
+                    {pricingList.length > 0 ? (
                         <TableBody>
                             {
-                                sellingData.map((row, i) => (
+                                pricingList.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell align="left">{row.sku}</TableCell>
-                                        <TableCell align="left">{row.productCode || '---'}</TableCell>
+                                        <TableCell align="left">{productList[row.productCode]?.name || '---'}</TableCell>
                                         <TableCell align="left">{
                                             showType(row.retailPrice.type)
                                         }</TableCell>
@@ -234,11 +237,11 @@ function render(props) {
 
                     <MyTablePagination
                         labelUnit="chỉ số"
-                        count={props.count}
+                        count={countSelling}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            let qq = q ? '&'+q : '';
+                            let qq = q ? '&' + q : '';
                             Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}${qq}`)
                         }}
                     />
