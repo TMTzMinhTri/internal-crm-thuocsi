@@ -8,10 +8,10 @@ class ProductClient extends APIClient {
         super(ctx, data)
     }
 
-    getListProduct(query){
+    getListProduct(query) {
         return this.callFromNextJS(
             "GET",
-            `${PREFIX}/product/list`,query)
+            `${PREFIX}/product/list`, query)
     }
 
     getListProductByIdsOrCodes(ids, codes) {
@@ -24,42 +24,61 @@ class ProductClient extends APIClient {
             })
     }
 
+    getListSKUProduct(offset, limit, q) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/sku/list`,
+            {
+                q,
+                offset,
+                limit,
+                getTotal: true
+            }
+        )
+    }
+
+    postListProducstWithCodes(productCodes) {
+        return this.callFromNextJS(
+            "POST",
+            `${PREFIX}/product/list`,
+            {
+                productCodes
+            })
+    }
+
     getProductList(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
-            `${PREFIX}/product/list`,
-            {
-                q: q,
-                offset: offset,
-                limit: limit,
-                getTotal: true
-            })
+            `${PREFIX}/product/list`, {
+            q: q,
+            offset: offset,
+            limit: limit,
+            getTotal: true
+        })
     }
 
     getProductHasPrice(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
-            `${PREFIX}/product/list`,
-            {
-                q: q,
-                offset: offset,
-                limit: limit,
-                filter: "hasPrice",
-                getTotal: true
-            })
+            `${PREFIX}/product/list`, {
+            q: q,
+            offset: offset,
+            limit: limit,
+            filter: "hasPrice",
+            getTotal: true
+        })
     }
 
     getProductNoPrice(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
-            `${PREFIX}/product/list`,
-            {
-                q: q,
-                offset: offset,
-                limit: limit,
-                filter: "noPrice",
-                getTotal: true
-            })
+            `${PREFIX}/product/list`, {
+            q: q,
+            offset: offset,
+            limit: limit,
+            filter: "noPrice",
+            getTotal: true
+        })
     }
 }
 

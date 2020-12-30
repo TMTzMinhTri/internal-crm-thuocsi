@@ -13,9 +13,9 @@ export async function loadProduct(ctx) {
     let data = {props: {}}
     let _client = getPriceClient(ctx, {})
     let query = ctx.query
-    let id = query.sellPriceId
-    let res = await _client.getSellingPricingByID(id)
-
+    let code = query.sellPriceCode
+    let res = await _client.getSellingPricingByCode(code)
+    console.log(res)
     if (res.status !== "OK") {
         data.props.price = {}
     } else {

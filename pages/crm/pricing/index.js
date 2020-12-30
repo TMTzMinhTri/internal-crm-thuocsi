@@ -75,7 +75,6 @@ export function formatNumber(num) {
 }
 
 function render(props) {
-    console.log(props)
     let router = useRouter();
     const {register, handleSubmit, errors, control} = useForm();
 
@@ -198,7 +197,7 @@ function render(props) {
                                         </TableCell>
                                         <TableCell align="left">{ProductStatus[row.status]}</TableCell>
                                         <TableCell align="center">
-                                            <Link href={`/crm/pricing/edit?sellPriceId=${row.sellPriceId}`}>
+                                            <Link href={`/crm/pricing/edit?sellPriceCode=${row.sellPriceCode}`}>
                                                 <Tooltip title="Cập nhật thông tin">
                                                     <IconButton>
                                                         <EditIcon fontSize="small"/>

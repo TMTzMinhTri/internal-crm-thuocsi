@@ -199,7 +199,7 @@ export default function renderForm(props, toast) {
             <Head>
                 <title>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</title>
             </Head>
-            <Box component={Paper}>
+            <Box component={Paper} display="block">
                 <FormGroup>
                     <form>
                         <Box className={styles.contentPadding}>

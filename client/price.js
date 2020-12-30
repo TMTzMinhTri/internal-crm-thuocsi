@@ -69,6 +69,14 @@ class PriceClient extends APIClient {
             {sellPriceId: id}
         )
     }
+
+    getSellingPricingByCode(code) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/selling`,
+            {sellPriceCode: code}
+        )
+    }
 }
 
 export function getPriceClient(ctx, data) {
