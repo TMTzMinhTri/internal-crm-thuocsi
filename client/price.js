@@ -49,7 +49,7 @@ class PriceClient extends APIClient {
     updatePrice(data) {
         return this.callFromClient(
             "PUT",
-            `${PREFIX}/product`,
+            `${PREFIX}/selling`,
             data
         )
     }
@@ -59,6 +59,14 @@ class PriceClient extends APIClient {
             "POST",
             `${PREFIX}/selling`,
             data
+        )
+    }
+
+    getSellingPricingByID(id) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/selling`,
+            {sellPriceId: id}
         )
     }
 }

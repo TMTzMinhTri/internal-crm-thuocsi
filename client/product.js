@@ -14,6 +14,16 @@ class ProductClient extends APIClient {
             `${PREFIX}/product/list`,query)
     }
 
+    getListProductByIdsOrCodes(ids, codes) {
+        return this.callFromNextJS(
+            "POST",
+            `${PREFIX}/product/list`,
+            {
+                productIds: ids,
+                productCodes: codes
+            })
+    }
+
     getProductList(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
