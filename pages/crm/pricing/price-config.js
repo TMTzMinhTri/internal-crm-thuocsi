@@ -74,6 +74,40 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 }
                             />
                         </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Số lượng tối đa áp dụng:
+                            </Typography>
+                            <TextField
+                                id={`${name}.maxQuantity`}
+                                name={`${name}.maxQuantity`}
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                defaultValue={1}
+                                helperText={errors[name]?.maxQuantity?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                // InputProps={{
+                                //     endAdornment: <InputAdornment
+                                //         position="end">đ</InputAdornment>,
+                                // }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{width: '100%'}}
+                                error={!!errors[name]?.price}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập giá bán",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
                     </Grid>
                 ) : (
                     <Grid container spacing={2}>

@@ -44,12 +44,14 @@ export default function renderForm(props) {
         setLoading(true);
         let _client = getPriceClient()
         formData.tags = [];
-		for (let i = 0; i < formData.tagsName.length; i++) {
-			formData.tags.push(
-				listTag.filter(
-					(tag) => tag.name === formData.tagsName[i]
-				)[0].code
-			);
+        if(formData.tagsName) {
+            for (let i = 0; i < formData.tagsName.length; i++) {
+                formData.tags.push(
+                    listTag.filter(
+                        (tag) => tag.name === formData.tagsName[i]
+                    )[0].code
+                );
+            }
         }
         let result = await _client.createNewPricing(formData)
         setLoading(false);
