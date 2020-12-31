@@ -229,7 +229,7 @@ function render(props) {
                     </TableBodyTS>
                     
                     <MyTablePagination
-                        labelUnit="chỉ số"
+                        labelUnit="cài đặt"
                         count={countSelling}
                         rowsPerPage={limit}
                         page={page}

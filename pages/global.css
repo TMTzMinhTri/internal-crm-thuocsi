@@ -16,3 +16,7 @@ body {
     font-weight: 700 !important;
     text-transform: uppercase;
 }
+
+.backdrop {
+    color: #fff;
+}
