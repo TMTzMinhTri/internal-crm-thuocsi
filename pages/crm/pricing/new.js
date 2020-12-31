@@ -1,5 +1,6 @@
 import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
 import {getProductClient} from "client/product";
+import { getTagClient } from "client/tag";
 import React from 'react';
 import renderForm from "./form";
 
@@ -14,6 +15,10 @@ export async function loadListProduct(ctx) {
     let _client = getProductClient(ctx, {})
     data.props.products = []
     let products = await _client.getListProduct({})
+
+    let _client1 = getTagClient(ctx,{})
+    let listTag = await _client1.getListTag(0,500,"")
+    data.props.listTag= listTag.data || [];
 
     if (products.status !== "OK") {
         data.props.products = []

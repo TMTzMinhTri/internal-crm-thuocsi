@@ -66,7 +66,7 @@ class PriceClient extends APIClient {
         return this.callFromNextJS(
             "GET",
             `${PREFIX}/selling`,
-            {sellPriceId: id}
+            { sellPriceId: id }
         )
     }
 
@@ -74,7 +74,7 @@ class PriceClient extends APIClient {
         return this.callFromNextJS(
             "GET",
             `${PREFIX}/selling`,
-            {sellPriceCode: code}
+            { sellPriceCode: code }
         )
     }
 }

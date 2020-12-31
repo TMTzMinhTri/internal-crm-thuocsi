@@ -44,7 +44,6 @@ export async function loadPricingData(ctx) {
 
     let result = {data: {}, count: 0};
     result = await _client.getListPricing(offset, limit, q);
-    console.log(result)
     let mixData = {}
     if (result.status === 'OK') {
         if (result.data.length > 0) {

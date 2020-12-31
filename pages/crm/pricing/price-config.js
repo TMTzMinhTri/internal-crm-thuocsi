@@ -172,6 +172,37 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 }
                             />
                         </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Số lượng tối đa áp dụng:
+                            </Typography>
+                            <TextField
+                                id={`${arrName}.maxQuantity`}
+                                name={`${arrName}.maxQuantity`}
+                                variant="outlined"
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                defaultValue={1}
+                                error={errors[name] ? !!errors[name][index]?.maxQuantity : false}
+                                helperText={errors[name] ? errors[name][index]?.maxQuantity?.message: ''}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{width: '100%'}}
+                                // error={errors.name ? true : false}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
                         <Grid item xs={12} sm={12} md={12}/>
                         <Grid item xs={12} sm={6} md={3}>
                             <Typography gutterBottom>
