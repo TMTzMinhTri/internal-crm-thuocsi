@@ -136,6 +136,7 @@ function render(props) {
                     alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
+                        <Grid item xs={12} sm={6} md={6}>
                         <Paper component="form" className={styles.search}>
                             <InputBase
                                 id="q"
@@ -162,6 +163,7 @@ function render(props) {
                                 <FilterListIcon />
                             </IconButton>
                         </Paper>
+                        </Grid>
                     </Grid>
 
                     <Grid item xs={12} sm={6} md={6}>
