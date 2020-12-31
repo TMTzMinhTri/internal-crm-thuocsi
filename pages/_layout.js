@@ -22,14 +22,14 @@ export default class AppCRM extends Component {
                 },
                 {
                     key: "PRODUCT",
-                    name: "Sản phẩm",
+                    name: "Sản phẩm #",
                     link: "/crm/product",
                     icon: faMoneyCheckAlt
                 },
                 {
                     key: "PRICING",
-                    name: "Bảng giá",
-                    link: "/crm/pricing",
+                    name: "Sản phẩm",
+                    link: "/crm/sku",
                     icon: faDollarSign
                 },
                 // {

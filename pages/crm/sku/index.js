@@ -1,21 +1,22 @@
 import {
-    Button, ButtonGroup, Divider, Grid, IconButton, InputBase, Paper, 
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Tooltip
+    Button, ButtonGroup, Divider, Grid, IconButton, InputBase, Paper,
+    Table, TableCell, TableContainer, TableHead, TableRow, Tooltip
 } from "@material-ui/core";
+import EditIcon from "@material-ui/icons/Edit";
 import FilterListIcon from '@material-ui/icons/FilterList';
 import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import { getPricingClient } from 'client/pricing';
+import { formatDateTime, formatEllipsisText, formatNumber, ProductStatus, SellPrices } from "components/global";
+import TableBodyTS from "components/table/table";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
-import { getPricingClient } from 'client/pricing';
-import EditIcon from "@material-ui/icons/Edit";
-import { SellPrices, ProductStatus } from "components/global";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -73,13 +74,9 @@ export default function PricingPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
-export function formatNumber(num) {
-    return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
-}
-
 function render(props) {
     let router = useRouter();
-    const { register, handleSubmit, errors, control } = useForm();
+    const { register, handleSubmit } = useForm();
 
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
@@ -105,7 +102,7 @@ function render(props) {
 
     function onSearch(formData) {
         try {
-            Router.push(`/crm/pricing?${q}`)
+            Router.push(`/crm/sku?${q}`)
         } catch (error) {
             console.log(error)
         }
@@ -129,7 +126,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/sku">
             <Head>
                 <title>Danh sách cài đặt</title>
             </Head>
@@ -168,7 +165,7 @@ function render(props) {
                     </Grid>
 
                     <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/pricing/new">
+                        <Link href="/crm/sku/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
                                 className={styles.rightGroup}>
                                 <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài đặt</Button>
@@ -191,50 +188,42 @@ function render(props) {
                             <TableCell align="left">SKU</TableCell>
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Giá bán lẻ</TableCell>
-                            <TableCell align="left">Giá bán buôn</TableCell>
+                            <TableCell align="right">Giá bán lẻ (đ)</TableCell>
+                            <TableCell align="right">Giá bán buôn</TableCell>
                             <TableCell align="left">Cập nhật</TableCell>
-                            <TableCell align="left">Trạng thái</TableCell>
+                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {pricingList.length > 0 ? (
-                        <TableBody>
-                            {
-                                pricingList.map((row, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell align="left">{row.sku}</TableCell>
-                                        <TableCell align="left">{productList[row.productCode]?.name || '---'}</TableCell>
-                                        <TableCell align="left">{
-                                            showType(row.retailPrice.type)
-                                        }</TableCell>
-                                        <TableCell align="left">{formatNumber(row.retailPrice.price)}</TableCell>
-                                        <TableCell align="left">
-                                            array whosalePrice
-                                        </TableCell>
-                                        <TableCell align="left">{row.lastUpdatedTime}</TableCell>
-                                        <TableCell align="left">{ProductStatus[row.status]}</TableCell>
-                                        <TableCell align="center">
-                                            <Link href={`/cms/pricing/edit?pricingID=${row.sellPriceId}`}>
-                                                <Tooltip title="Cập nhật thông tin">
-                                                    <IconButton>
-                                                        <EditIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </Link>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            }
-                        </TableBody>
-                    ) : (
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                    <TableBodyTS data={pricingList} message={props.message}>
+                        {
+                            pricingList.map((row, i) => (
+                                <TableRow key={i}>
+                                    <TableCell align="left">{row.sku}</TableCell>
+                                    <TableCell align="left">{formatEllipsisText(productList[row.productCode]?.name)}</TableCell>
+                                    <TableCell align="left">{
+                                        showType(row.retailPrice.type)
+                                    }</TableCell>
+                                    <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
+                                    <TableCell align="right">
+                                        array whosalePrice
+                                    </TableCell>
+                                    <TableCell align="left">{formatDateTime(row.lastUpdatedTime)}</TableCell>
+                                    <TableCell align="center">{ProductStatus[row.status]}</TableCell>
+                                    <TableCell align="center">
+                                        <Link href={`/cms/sku/edit?pricingID=${row.sellPriceId}`}>
+                                            <Tooltip title="Cập nhật thông tin">
+                                                <IconButton>
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Link>
+                                    </TableCell>
                                 </TableRow>
-                            </TableBody>
-                        )}
-
+                            ))
+                        }
+                    </TableBodyTS>
+                    
                     <MyTablePagination
                         labelUnit="chỉ số"
                         count={countSelling}
@@ -242,7 +231,7 @@ function render(props) {
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
                             let qq = q ? '&' + q : '';
-                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}${qq}`)
+                            Router.push(`/crm/sku?page=${page}&limit=${rowsPerPage}${qq}`)
                         }}
                     />
                 </Table>
