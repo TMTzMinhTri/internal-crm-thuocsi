@@ -187,6 +187,7 @@ function render(props) {
                         <TableRow>
                             <TableCell align="left">SKU</TableCell>
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
+                            <TableCell align="left">Seller</TableCell>
                             <TableCell align="left">Loại</TableCell>
                             <TableCell align="right">Giá bán lẻ (đ)</TableCell>
                             <TableCell align="right">Giá bán buôn</TableCell>
@@ -201,6 +202,7 @@ function render(props) {
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="left">{formatEllipsisText(productList[row.productCode]?.name)}</TableCell>
+                                    <TableCell align="left">{row.sellerCode}</TableCell>
                                     <TableCell align="left">{
                                         showType(row.retailPrice.type)
                                     }</TableCell>
