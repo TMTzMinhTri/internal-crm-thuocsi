@@ -1,4 +1,5 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@material-ui/core";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Typography } from "@material-ui/core";
+import CloseIcon from '@material-ui/icons/Close';
 
 const ModalCustom = ({
                 children,
@@ -27,11 +28,22 @@ const ModalCustom = ({
         onExcute(data)
     }
 
+    function fnK(event){
+        if(event.keyCode == 27) {
+            onClose(false);
+        }
+    }
+
     return (
         <div>
-            <Dialog open={open} scroll="body" fullWidth={true}>
+            <Dialog open={open} scroll="body" fullWidth={true} onKeyDown={fnK}>
                 <DialogTitle id={name+"-dialog-title"} onClose={handleClose}>
-                    {title}
+                    <Typography variant="h6">{title}</Typography>
+                    {onClose ? (
+                        <IconButton aria-label="close" onClick={handleClose} style={{position: 'absolute', top: '1px', right: '1px'}}>
+                            <CloseIcon />
+                        </IconButton>
+                    ) : null}
                 </DialogTitle>
                 <DialogContent dividers>
                     {children}

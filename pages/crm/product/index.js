@@ -78,7 +78,6 @@ export async function loadSKUProduct(ctx) {
     try {
         const res = await productClient.getListSKUProduct(offset, limit, q);
         if (res.status === "OK") {
-            console.log(res.data, q);
             data.skuList = res.data;
             return {
                 ...data,
@@ -132,9 +131,8 @@ export function formatNumber(num) {
 
 function render(props) {
     let router = useRouter();
-
     let [open, setOpen] = useState(false);
-    const [dataTable, setDataTable] = useState(props.dataMix);
+    const [dataTable, setDataTable] = useState(props.dataMix || []);
     let [state, setState] = useState({ productName: '' })
     const { register, handleSubmit, errors, control } = useForm();
 
@@ -161,8 +159,8 @@ function render(props) {
     }
 
     function getFirstImage(val) {
-        if (val.length === 0) {
-            return `/default.png` // default link
+        if (!val) {
+            return `/default.png`; // default link
         }
         return val.split(';')[0]
     }
@@ -283,7 +281,7 @@ function render(props) {
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {props?.products?.length > 0 ? (
+                    {dataTable.length > 0 ? (
                         <TableBody>
                             {dataTable.map((row, i) => (
                                 <RenderRow key={i} data={row} />
@@ -299,7 +297,7 @@ function render(props) {
 
                     <MyTablePagination
                         labelUnit="sản phẩm"
-                        count={props.count}
+                        count={props.count || dataTable.length}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
