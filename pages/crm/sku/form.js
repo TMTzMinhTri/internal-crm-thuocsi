@@ -1,10 +1,3 @@
-import { Controller, useForm } from "react-hook-form";
-import React, { useState } from "react";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { getPriceClient } from "../../../client/price";
-import AppCRM from "../../_layout";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import Head from "next/head";
 import {
     Accordion, AccordionActions,
     AccordionDetails,
@@ -16,18 +9,24 @@ import {
     Tooltip,
     Typography
 } from "@material-ui/core";
-import styles from "./pricing.module.css";
-import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
-import RenderPriceConfig from "./price-config";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
+import DeleteIcon from "@material-ui/icons/Delete";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import RenderPriceConfig from "components/price/price-config";
+import Head from "next/head";
 import Link from "next/link";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { getPriceClient } from "../../../client/price";
+import AppCRM from "../../_layout";
+import styles from "./pricing.module.css";
 
-export default function renderForm(props) {
+export default function renderForm(props, toast) {
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
-    const { error, warn, info, success } = useToast();
+    const { error, warn, info, success } = toast;
     let defaultIds = []
     for (let i = 0; i < props.price?.wholesalePrice?.length; i++) {
         defaultIds.push(i + 1)
@@ -35,7 +34,7 @@ export default function renderForm(props) {
     const [ids, setIds] = useState(defaultIds);
     const [idDeleteds, setIdDeleteds] = useState([]);
     const [expanded, setExpanded] = React.useState(false);
-    const [listTag,setListTag] = useState(props.listTag);
+    const [listTag, setListTag] = useState(props.listTag);
     let sellerCode = "MedX"
 
     // func onSubmit used because useForm not working with some fields
@@ -44,7 +43,7 @@ export default function renderForm(props) {
         setLoading(true);
         let _client = getPriceClient()
         formData.tags = [];
-        if(formData.tagsName) {
+        if (formData.tagsName) {
             for (let i = 0; i < formData.tagsName.length; i++) {
                 formData.tags.push(
                     listTag.filter(
@@ -67,7 +66,7 @@ export default function renderForm(props) {
         formData.sellerCode = props.price?.sellerCode
         formData.productCode = props.product?.code
         formData.tags = [];
-		if(formData.tagsName) {
+        if (formData.tagsName) {
             for (let i = 0; i < formData.tagsName.length; i++) {
                 formData.tags.push(
                     listTag.filter(
@@ -125,7 +124,7 @@ export default function renderForm(props) {
                         <Box style={{ fontSize: 30, margin: 5 }}>Thông tin cài đặt giá</Box>
                         <Box style={{ margin: 10 }}>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6} md={8}>
+                                <Grid item xs={12} sm={6} md={3}>
                                     <Typography gutterBottom>
                                         Sản phẩm: <b>{props.product?.name}</b>
                                     </Typography>
@@ -169,6 +168,7 @@ export default function renderForm(props) {
                                     }
 
                                 </Grid>
+                    
                                 <Grid item xs={12} sm={12} md={6}>
                                     <Controller
                                         render={({ onChange, ...props }) => (
@@ -176,7 +176,7 @@ export default function renderForm(props) {
                                                 id="tagsName"
                                                 multiple
                                                 size="small"
-                                                options={listTag.map(tag=>tag.name)}
+                                                options={listTag?.map(tag=>tag.name)}
                                                 // options={listSearchCategory.map(
                                                 // 	(category) => category.label
                                                 // )}
@@ -207,9 +207,10 @@ export default function renderForm(props) {
                                         //         return typeof d != "undefined";
                                         //     },
                                         // }}
-                                    />
+                                        />
 
-                                </Grid>
+                                    </Grid>
+                                {/* </Grid> */}
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography gutterBottom variant={'h6'}>
                                         Cài đặt giá bán lẻ:
