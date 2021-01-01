@@ -9,22 +9,22 @@ import {
     TableHead,
     TableRow
 } from "@material-ui/core";
-import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import Head from "next/head";
-import Link from "next/link";
-import Router, {useRouter} from "next/router";
-import AppCRM from "pages/_layout";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
-import React, {useState} from "react";
-import styles from "./customer.module.css";
 import Grid from "@material-ui/core/Grid";
-import InputBase from "@material-ui/core/InputBase";
-import SearchIcon from '@material-ui/icons/Search';
 import IconButton from "@material-ui/core/IconButton";
-import {useForm} from "react-hook-form";
-import {getCustomerClient} from "../../../client/customer";
+import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from '@material-ui/icons/Edit';
+import SearchIcon from '@material-ui/icons/Search';
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import { getCustomerClient } from "client/customer";
+import Head from "next/head";
+import Link from "next/link";
+import Router, { useRouter } from "next/router";
+import AppCRM from "pages/_layout";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import styles from "./customer.module.css";
 // import {levels, statuses} from "./form"
 
 const levels = [
@@ -95,10 +95,6 @@ export async function loadCustomerData(ctx) {
 
 export default function CustomerPage(props) {
     return renderWithLoggedInUser(props, render)
-}
-
-export function formatNumber(num) {
-    return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
 function render(props) {

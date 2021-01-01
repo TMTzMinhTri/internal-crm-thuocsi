@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const SellPrices = [
     {
         label: "Đảm bảo doanh thu của người bán hàng",
@@ -51,6 +53,12 @@ export const ProductTypes = [
     }
 ]
 
+export function formatDateTime(datetime) {
+    if (datetime) {
+        return moment(datetime).utcOffset('+0700').format("DD-MM-YYYY HH:mm:ss")
+    }
+    return ''
+}
 
 export function filterObjectName(obj) {
     let tags = []
@@ -63,6 +71,21 @@ export function filterObjectName(obj) {
         }
     }
     return tags
+}
+
+export function formatNumber(num) {
+    return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+}
+
+
+export function formatEllipsisText(text) {
+    if(text) {
+        if(text.length > 100) {
+            return text.substring(0, 100) + "..."
+        }
+        return text
+    }
+    return '-'
 }
 
 export function filterListObjectName(obj) {
