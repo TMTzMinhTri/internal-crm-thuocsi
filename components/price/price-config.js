@@ -1,8 +1,8 @@
-import {FormControl, Grid, InputAdornment, MenuItem, Select, TextField, Typography} from "@material-ui/core";
-import styles from "./pricing.module.css";
-import {Controller} from "react-hook-form";
-import {SellPrices} from "../../../components/global";
+import { FormControl, Grid, InputAdornment, MenuItem, Select, TextField, Typography } from "@material-ui/core";
+import { SellPrices } from "components/global";
 import React from "react";
+import { Controller } from "react-hook-form";
+import styles from "./pricing.module.css";
 
 export default function RenderPriceConfig({name, control, register, setValue, hidden, errors, index}){
     let arrName = name + `[${index}]`
@@ -24,13 +24,13 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                     rules={{required: true}}
                                     control={control}
                                     size="small"
-                                    defaultValue={SellPrices[0].value}
+                                    defaultValue={SellPrices[0]?.value}
                                     name={`${name}.type`}
                                     variant="outlined"
                                     // error={!!errors.categoryID}
                                     as={
                                         <Select disabled={hidden}>
-                                            {SellPrices.map((row) => (
+                                            {SellPrices?.map((row) => (
                                                 <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
                                             ))}
                                         </Select>
@@ -123,13 +123,13 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                     rules={{required: true}}
                                     control={control}
                                     size="small"
-                                    defaultValue={SellPrices[0].value}
+                                    defaultValue={SellPrices[0]?.value}
                                     name={`${arrName}.type`}
                                     variant="outlined"
                                     // error={!!errors.categoryID}
                                     as={
                                         <Select disabled={hidden}>
-                                            {SellPrices.map((row) => (
+                                            {SellPrices?.map((row) => (
                                                 <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
                                             ))}
                                         </Select>

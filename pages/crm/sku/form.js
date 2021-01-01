@@ -1,10 +1,3 @@
-import { Controller, useForm } from "react-hook-form";
-import React, { useState } from "react";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { getPriceClient } from "../../../client/price";
-import AppCRM from "../../_layout";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import Head from "next/head";
 import {
     Accordion, AccordionActions,
     AccordionDetails,
@@ -16,18 +9,24 @@ import {
     Tooltip,
     Typography
 } from "@material-ui/core";
-import styles from "./pricing.module.css";
-import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
-import RenderPriceConfig from "./price-config";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
+import DeleteIcon from "@material-ui/icons/Delete";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import RenderPriceConfig from "components/price/price-config";
+import Head from "next/head";
 import Link from "next/link";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { getPriceClient } from "../../../client/price";
+import AppCRM from "../../_layout";
+import styles from "./pricing.module.css";
 
-export default function renderForm(props) {
+export default function renderForm(props, toast) {
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
-    const { error, warn, info, success } = useToast();
+    const { error, warn, info, success } = toast;
     let defaultIds = []
     for (let i = 0; i < props.price?.wholesalePrice?.length; i++) {
         defaultIds.push(i + 1)
@@ -176,7 +175,7 @@ export default function renderForm(props) {
                                                 id="tagsName"
                                                 multiple
                                                 size="small"
-                                                options={listTag.map(tag=>tag.name)}
+                                                options={listTag?.map(tag=>tag.name)}
                                                 // options={listSearchCategory.map(
                                                 // 	(category) => category.label
                                                 // )}

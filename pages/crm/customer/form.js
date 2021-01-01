@@ -16,7 +16,6 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import Card from "@material-ui/core/Card";
 import {getMasterDataClient} from "../../../client/master-data";
 import {getCustomerClient} from "../../../client/customer";
-import {useToast} from '@thuocsi/nextjs-components/toast/useToast';
 import Link from "next/link";
 
 const levels = [
