@@ -24,13 +24,13 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                     rules={{required: true}}
                                     control={control}
                                     size="small"
-                                    defaultValue={SellPrices[0].value}
+                                    defaultValue={SellPrices[0]?.value}
                                     name={`${name}.type`}
                                     variant="outlined"
                                     // error={!!errors.categoryID}
                                     as={
                                         <Select disabled={hidden}>
-                                            {SellPrices.map((row) => (
+                                            {SellPrices?.map((row) => (
                                                 <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
                                             ))}
                                         </Select>
@@ -123,13 +123,13 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                     rules={{required: true}}
                                     control={control}
                                     size="small"
-                                    defaultValue={SellPrices[0].value}
+                                    defaultValue={SellPrices[0]?.value}
                                     name={`${arrName}.type`}
                                     variant="outlined"
                                     // error={!!errors.categoryID}
                                     as={
                                         <Select disabled={hidden}>
-                                            {SellPrices.map((row) => (
+                                            {SellPrices?.map((row) => (
                                                 <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
                                             ))}
                                         </Select>

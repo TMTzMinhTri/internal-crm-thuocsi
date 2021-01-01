@@ -1,6 +1,5 @@
 import { Controller, useForm } from "react-hook-form";
 import React, { useState } from "react";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getPriceClient } from "../../../client/price";
 import AppCRM from "../../_layout";
 import Autocomplete from "@material-ui/lab/Autocomplete";
@@ -24,10 +23,10 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import AddIcon from "@material-ui/icons/Add";
 import Link from "next/link";
 
-export default function renderForm(props) {
+export default function renderForm(props, toast) {
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
-    const { error, warn, info, success } = useToast();
+    const { error, warn, info, success } = toast;
     let defaultIds = []
     for (let i = 0; i < props.price?.wholesalePrice?.length; i++) {
         defaultIds.push(i + 1)
