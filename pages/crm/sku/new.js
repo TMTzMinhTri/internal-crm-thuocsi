@@ -3,6 +3,7 @@ import {getProductClient} from "client/product";
 import { getTagClient } from "client/tag";
 import React from 'react';
 import renderForm from "./form";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -30,5 +31,9 @@ export async function loadListProduct(ctx) {
 }
 
 export default function NewFromPage(props) {
-    return renderWithLoggedInUser(props, renderForm)
+    return renderWithLoggedInUser(props, render)
+}
+
+export function render(props) {
+    return renderForm(props, useToast())
 }

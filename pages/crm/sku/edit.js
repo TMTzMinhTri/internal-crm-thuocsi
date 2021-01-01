@@ -6,6 +6,7 @@ import { getProductClient } from "client/product";
 import renderForm from "./form";
 import { getPriceClient } from "../../../client/price";
 import { getTagClient } from "client/tag";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -46,5 +47,9 @@ return data;
 }
 
 export default function EditPage(props) {
-    return renderWithLoggedInUser(props, renderForm);
+    return renderWithLoggedInUser(props, render)
+}
+
+export function render(props) {
+    return renderForm(props, useToast())
 }
