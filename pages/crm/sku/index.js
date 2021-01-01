@@ -99,7 +99,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/sku">
             <Head>
                 <title>Danh sách cài đặt</title>
             </Head>
@@ -138,7 +138,7 @@ function render(props) {
                     </Grid>
 
                     <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/pricing/new">
+                        <Link href="/crm/sku/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
                                          className={styles.rightGroup}>
                                 <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài
@@ -196,7 +196,7 @@ function render(props) {
                                         </TableCell>
                                         <TableCell align="left">{ProductStatus[row.status]}</TableCell>
                                         <TableCell align="center">
-                                            <Link href={`/crm/pricing/edit?sellPriceCode=${row.sellPriceCode}`}>
+                                            <Link href={`/crm/sku/edit?sellPriceCode=${row.sellPriceCode}`}>
                                                 <Tooltip title="Cập nhật thông tin">
                                                     <IconButton>
                                                         <EditIcon fontSize="small"/>
@@ -223,7 +223,7 @@ function render(props) {
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
                             let qq = q ? '&' + q : '';
-                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}${qq}`)
+                            Router.push(`/crm/sku?page=${page}&limit=${rowsPerPage}${qq}`)
                         }}
                     />
                 </Table>

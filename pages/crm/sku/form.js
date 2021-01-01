@@ -115,7 +115,7 @@ export default function renderForm(props) {
     let lstOptions = props?.products
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/sku">
             <Head>
                 <title>{typeof props.product === "undefined" ? 'Thêm cài đặt giá' : 'Cập nhật cài đặt giá'}</title>
             </Head>
@@ -286,7 +286,7 @@ export default function renderForm(props) {
                                 typeof props.product === "undefined" ? (
                                     <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
                                 ) : (
-                                        <Link href="/crm/pricing">
+                                        <Link href="/crm/sku">
                                             <ButtonGroup>
                                                 <Button variant="contained">Quay lại</Button>
                                             </ButtonGroup>
