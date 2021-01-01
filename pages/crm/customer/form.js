@@ -472,8 +472,8 @@ export default function renderForm(props, toast) {
                                     </Grid>
                                     <Grid spacing={3} container>
                                         <Grid item xs={12} sm={6} md={6}>
-                                            <Grid container spacing={1} alignItems="center" justify="space-between">
-                                                <Grid item xs={10} sm={10} md={10}>
+                                            <Grid container spacing={1} alignItems="center">
+                                                <Grid item xs={8} sm={8} md={10}>
                                                     <TextField
                                                         id="licenses"
                                                         name="licenses"

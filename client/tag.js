@@ -11,7 +11,7 @@ class TagClient extends APIClient {
     getListTag(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
-            `${prefix}/tag/list`, {
+            `${prefix}/tags/list`, {
             q: q,
             offset: offset,
             limit: limit,
@@ -22,7 +22,7 @@ class TagClient extends APIClient {
     getTagByTagCode(tagCode) {
         return this.callFromNextJS(
             "GET",
-            `${prefix}/tag`,
+            `${prefix}/tags`,
             {
                 tagCode: tagCode,
             }
@@ -32,7 +32,7 @@ class TagClient extends APIClient {
     createTag(body) {
         return this.callFromClient(
             "POST",
-            `${prefix}/tag`,
+            `${prefix}/tags`,
             body
         )
     }
@@ -40,7 +40,7 @@ class TagClient extends APIClient {
     updateTag(data) {
         return this.callFromClient(
             "PUT",
-            `${prefix}/tag`,
+            `${prefix}/tags`,
             data
         )
     }

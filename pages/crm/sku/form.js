@@ -34,7 +34,7 @@ export default function renderForm(props, toast) {
     const [ids, setIds] = useState(defaultIds);
     const [idDeleteds, setIdDeleteds] = useState([]);
     const [expanded, setExpanded] = React.useState(false);
-    const [listTag,setListTag] = useState(props.listTag);
+    const [listTag, setListTag] = useState(props.listTag);
     let sellerCode = "MedX"
 
     // func onSubmit used because useForm not working with some fields
@@ -43,7 +43,7 @@ export default function renderForm(props, toast) {
         setLoading(true);
         let _client = getPriceClient()
         formData.tags = [];
-        if(formData.tagsName) {
+        if (formData.tagsName) {
             for (let i = 0; i < formData.tagsName.length; i++) {
                 formData.tags.push(
                     listTag.filter(
@@ -66,7 +66,7 @@ export default function renderForm(props, toast) {
         formData.sellerCode = props.price?.sellerCode
         formData.productCode = props.product?.code
         formData.tags = [];
-		if(formData.tagsName) {
+        if (formData.tagsName) {
             for (let i = 0; i < formData.tagsName.length; i++) {
                 formData.tags.push(
                     listTag.filter(
@@ -124,7 +124,7 @@ export default function renderForm(props, toast) {
                         <Box style={{ fontSize: 30, margin: 5 }}>Thông tin cài đặt giá</Box>
                         <Box style={{ margin: 10 }}>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6} md={8}>
+                                <Grid item xs={12} sm={6} md={3}>
                                     <Typography gutterBottom>
                                         Sản phẩm: <b>{props.product?.name}</b>
                                     </Typography>
@@ -168,6 +168,7 @@ export default function renderForm(props, toast) {
                                     }
 
                                 </Grid>
+                    
                                 <Grid item xs={12} sm={12} md={6}>
                                     <Controller
                                         render={({ onChange, ...props }) => (
@@ -206,9 +207,10 @@ export default function renderForm(props, toast) {
                                         //         return typeof d != "undefined";
                                         //     },
                                         // }}
-                                    />
+                                        />
 
-                                </Grid>
+                                    </Grid>
+                                {/* </Grid> */}
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography gutterBottom variant={'h6'}>
                                         Cài đặt giá bán lẻ:
