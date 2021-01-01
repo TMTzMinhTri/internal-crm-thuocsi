@@ -1,8 +1,8 @@
-import {FormControl, Grid, InputAdornment, MenuItem, Select, TextField, Typography} from "@material-ui/core";
-import styles from "./pricing.module.css";
-import {Controller} from "react-hook-form";
-import {SellPrices} from "../../../components/global";
+import { FormControl, Grid, InputAdornment, MenuItem, Select, TextField, Typography } from "@material-ui/core";
+import { SellPrices } from "components/global";
 import React from "react";
+import { Controller } from "react-hook-form";
+import styles from "./pricing.module.css";
 
 export default function RenderPriceConfig({name, control, register, setValue, hidden, errors, index}){
     let arrName = name + `[${index}]`
