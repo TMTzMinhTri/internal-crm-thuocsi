@@ -185,7 +185,7 @@ function render(props) {
                                                     <div>
                                                         <Chip variant="outlined" size="small"
                                                               label={'Giá bán: ' + formatNumber(price.price || 0) + 'đ' +
-                                                              ' - Giảm: ' + (price.percentageDiscount || 0) + '%' +
+                                                              ' - Giảm: ' + (price.percentageDiscount*100 || 0) + '%' +
                                                               (formatNumber(price.absoluteDiscount || 0) !== 0 ?
                                                                   (' - Giảm giá: ' + formatNumber(price.absoluteDiscount || 0)) : ('')) + 'đ' +
                                                               ' - Số lượng: ' + price.minNumber}/>

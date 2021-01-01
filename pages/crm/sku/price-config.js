@@ -7,7 +7,7 @@ import React from "react";
 export default function RenderPriceConfig({name, control, register, setValue, hidden, errors, index}){
     let arrName = name + `[${index}]`
     return (
-        <div>
+        <div style={{width:'100%'}}>
             {/* gia ban */}
             {
                 name === 'retailPrice' ? (
@@ -87,7 +87,7 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 disabled={hidden}
                                 // label=""
                                 placeholder=""
-                                defaultValue={1}
+                                defaultValue={10}
                                 helperText={errors[name]?.maxQuantity?.message}
                                 InputLabelProps={{
                                     shrink: true,
@@ -188,7 +188,7 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 disabled={hidden}
                                 // label=""
                                 placeholder=""
-                                defaultValue={1}
+                                defaultValue={5}
                                 error={errors[name] ? !!errors[name][index]?.minNumber : false}
                                 helperText={errors[name] ? errors[name][index]?.minNumber?.message: ''}
                                 InputLabelProps={{
@@ -219,7 +219,7 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 disabled={hidden}
                                 // label=""
                                 placeholder=""
-                                defaultValue={1}
+                                defaultValue={10}
                                 error={errors[name] ? !!errors[name][index]?.maxQuantity : false}
                                 helperText={errors[name] ? errors[name][index]?.maxQuantity?.message: ''}
                                 InputLabelProps={{
@@ -240,7 +240,7 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                         <Grid item xs={12} sm={12} md={12}/>
                         <Grid item xs={12} sm={6} md={3}>
                             <Typography gutterBottom>
-                                Ti lệ phần trăm giảm giá:
+                                Tỉ lệ phần trăm giảm giá:
                             </Typography>
                             <TextField
                                 id={`${arrName}.percentageDiscount`}
@@ -253,7 +253,7 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 placeholder=""
                                 error={errors[name] ? !!errors[name][index]?.percentageDiscount : false}
                                 helperText={errors[name] ? errors[name][index]?.percentageDiscount?.message: ''}
-                                defaultValue={0}
+                                defaultValue={5}
                                 // helperText={errors.name?.message}
                                 InputLabelProps={{
                                     shrink: true,
@@ -287,8 +287,8 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 disabled={hidden}
                                 // label=""
                                 placeholder=""
-                                defaultValue={0}
-                                // helperText={errors.name?.message}
+                                defaultValue={5000}
+                                helperText={errors.name?.message}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -298,7 +298,8 @@ export default function RenderPriceConfig({name, control, register, setValue, hi
                                 }}
                                 // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                 style={{width: '100%'}}
-                                // error={errors.name ? true : false}
+                                error={errors[name] ? !!errors[name][index]?.absoluteDiscount : false}
+                                helperText={errors[name] ? errors[name][index]?.absoluteDiscount?.message: ''}
                                 required
                                 inputRef={
                                     register({

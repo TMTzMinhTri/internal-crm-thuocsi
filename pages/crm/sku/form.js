@@ -35,7 +35,7 @@ export default function renderForm(props) {
     const [ids, setIds] = useState(defaultIds);
     const [idDeleteds, setIdDeleteds] = useState([]);
     const [expanded, setExpanded] = React.useState(false);
-    const [listTag,setListTag] = useState(props.listTag);
+    const [listTag, setListTag] = useState(props.listTag);
     let sellerCode = "MedX"
 
     // func onSubmit used because useForm not working with some fields
@@ -44,7 +44,7 @@ export default function renderForm(props) {
         setLoading(true);
         let _client = getPriceClient()
         formData.tags = [];
-        if(formData.tagsName) {
+        if (formData.tagsName) {
             for (let i = 0; i < formData.tagsName.length; i++) {
                 formData.tags.push(
                     listTag.filter(
@@ -67,7 +67,7 @@ export default function renderForm(props) {
         formData.sellerCode = props.price?.sellerCode
         formData.productCode = props.product?.code
         formData.tags = [];
-		if(formData.tagsName) {
+        if (formData.tagsName) {
             for (let i = 0; i < formData.tagsName.length; i++) {
                 formData.tags.push(
                     listTag.filter(
@@ -125,7 +125,7 @@ export default function renderForm(props) {
                         <Box style={{ fontSize: 30, margin: 5 }}>Thông tin cài đặt giá</Box>
                         <Box style={{ margin: 10 }}>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6} md={8}>
+                                <Grid item xs={12} sm={6} md={3}>
                                     <Typography gutterBottom>
                                         Sản phẩm: <b>{props.product?.name}</b>
                                     </Typography>
@@ -169,46 +169,48 @@ export default function renderForm(props) {
                                     }
 
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={6}>
-                                    <Controller
-                                        render={({ onChange, ...props }) => (
-                                            <Autocomplete
-                                                id="tagsName"
-                                                multiple
-                                                size="small"
-                                                options={listTag.map(tag=>tag.name)}
-                                                // options={listSearchCategory.map(
-                                                // 	(category) => category.label
-                                                // )}
-                                                InputLabelProps={{
-                                                    shrink: true
-                                                }}
-                                                filterSelectedOptions
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        label="Loại Tag"
-                                                        error={!!errors.tagsName}
-                                                        placeholder=""
-                                                        variant="outlined"
-                                                        size="small"
-                                                    // onChange={(e) => setSearchCategory(e.target.value)}
-                                                    />
-                                                )}
-                                                onChange={(e, data) => onChange(data)}
-                                                {...props}
-                                            />
-                                        )}
-                                        name="tagsName"
-                                        control={control}
+                                <Grid item container>
+                                    <Grid item xs={12} sm={12} md={6}>
+                                        <Controller
+                                            render={({ onChange, ...props }) => (
+                                                <Autocomplete
+                                                    id="tagsName"
+                                                    multiple
+                                                    size="small"
+                                                    options={listTag.map(tag => tag.name)}
+                                                    // options={listSearchCategory.map(
+                                                    // 	(category) => category.label
+                                                    // )}
+                                                    InputLabelProps={{
+                                                        shrink: true
+                                                    }}
+                                                    filterSelectedOptions
+                                                    renderInput={(params) => (
+                                                        <TextField
+                                                            {...params}
+                                                            label="Loại Tag"
+                                                            error={!!errors.tagsName}
+                                                            placeholder=""
+                                                            variant="outlined"
+                                                            size="small"
+                                                        // onChange={(e) => setSearchCategory(e.target.value)}
+                                                        />
+                                                    )}
+                                                    onChange={(e, data) => onChange(data)}
+                                                    {...props}
+                                                />
+                                            )}
+                                            name="tagsName"
+                                            control={control}
                                         // onChange={([, { id }]) => id}
                                         // rules={{
                                         //     validate: (d) => {
                                         //         return typeof d != "undefined";
                                         //     },
                                         // }}
-                                    />
+                                        />
 
+                                    </Grid>
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography gutterBottom variant={'h6'}>
