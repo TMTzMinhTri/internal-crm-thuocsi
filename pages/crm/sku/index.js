@@ -163,7 +163,7 @@ function render(props) {
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Loại</TableCell>
                             <TableCell align="left">Giá bán lẻ</TableCell>
-                            <TableCell align="left">Giá bán buôn</TableCell>
+                            {/* <TableCell align="left">Giá bán buôn</TableCell> */}
                             <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
@@ -179,7 +179,7 @@ function render(props) {
                                             showType(row.retailPrice.type)
                                         }</TableCell>
                                         <TableCell align="left">{formatNumber(row.retailPrice.price)}</TableCell>
-                                        <TableCell align="left">
+                                        {/* <TableCell align="left">
                                             {
                                                 row.wholesalePrice?.map((price) => (
                                                     <div>
@@ -193,7 +193,7 @@ function render(props) {
                                                     </div>
                                                 ))
                                             }
-                                        </TableCell>
+                                        </TableCell> */}
                                         <TableCell align="left">{ProductStatus[row.status]}</TableCell>
                                         <TableCell align="center">
                                             <Link href={`/crm/sku/edit?sellPriceCode=${row.sellPriceCode}`}>
