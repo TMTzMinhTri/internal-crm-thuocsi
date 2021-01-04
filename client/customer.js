@@ -29,6 +29,15 @@ class CustomerClient extends APIClient {
             })
     }
 
+    getCustomerByCustomerCode(customerCode) {
+        return this.callFromNextJS(
+            "GET",
+            `${URI}/account`,
+            {
+                customerCode: customerCode
+            })
+    }
+
     createNewCustomer(data) {
         return this.callFromClient(
             "POST",
