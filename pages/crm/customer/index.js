@@ -127,7 +127,7 @@ function render(props) {
 
     const RenderRow = (row, i) => (
         <TableRow key={i}>
-            <TableCell component="th" scope="row">{row.data.customerID}</TableCell>
+            <TableCell component="th" scope="row">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left">{row.data.email}</TableCell>
             <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label}</TableCell>
@@ -135,7 +135,7 @@ function render(props) {
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
             <TableCell align="center">
-                <Link href={`/crm/customer/edit?customerID=${row.data.customerID}`}>
+                <Link href={`/crm/customer/edit?customerCode=${row.data.code}`}>
                     <a>
                         <Tooltip title="Cập nhật thông tin">
                             <IconButton>
@@ -197,7 +197,7 @@ function render(props) {
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">ID</TableCell>
+                            <TableCell align="left">Mã khách hàng</TableCell>
                             <TableCell align="left">Tên khách hàng</TableCell>
                             <TableCell align="left">Email</TableCell>
                             <TableCell align="left">Cấp độ</TableCell>
