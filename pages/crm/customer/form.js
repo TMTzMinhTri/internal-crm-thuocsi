@@ -16,7 +16,6 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import Card from "@material-ui/core/Card";
 import {getMasterDataClient} from "../../../client/master-data";
 import {getCustomerClient} from "../../../client/customer";
-import {useToast} from '@thuocsi/nextjs-components/toast/useToast';
 import Link from "next/link";
 
 const levels = [
@@ -87,17 +86,18 @@ export async function loadData(ctx) {
     data.props.provinces = resp.data
 
     let query = ctx.query
-    let customerID = typeof(query.customerID) === "undefined" ? '' : query.customerID
+    let customerCode = typeof(query.customerCode) === "undefined" ? '' : query.customerCode
     data.props.isUpdate = false
-    if (customerID !== '') {
+    if (customerCode !== '') {
+        data.props.isUpdate = true
         let customerClient = getCustomerClient(ctx, data)
-        let customerResp = await customerClient.getCustomerByCustomerID(customerID)
-        if (resp.status !== 'OK') {
+        let customerResp = await customerClient.getCustomerByCustomerCode(customerCode)
+        if (customerResp.status !== 'OK') {
+            data.props.message = customerResp.message
             return data
         }
         let customer = customerResp.data[0]
         data.props.customer = customer
-        data.props.isUpdate = true
 
         let masterDataClient = getMasterDataClient(ctx, data)
         let provinceResp = await masterDataClient.getProvinceByProvinceCode(customer.provinceCode)
@@ -127,20 +127,26 @@ export default function renderForm(props, toast) {
     const [wards, setWards] = useState(props.wards);
     const [ward, setWard] = useState(props.ward);
     const {register, handleSubmit, errors, control} = useForm({
-        defaultValues: editObject
+        defaultValues: editObject,
+        mode: "onChange"
     });
 
+    console.log(props.customer)
     const onProvinceChange = async (event, val) => {
-        setProvince(val)
         setDistricts([])
         setDistrict({})
         setWard({})
         let masterDataClient = getMasterDataClient()
-        let res = await masterDataClient.getDistrictByProvinceCode(val.code)
-        if (res.status !== 'OK') {
-            error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        if (val) {
+            setProvince(val)
+            let res = await masterDataClient.getDistrictByProvinceCode(val?.code)
+            if (res.status !== 'OK') {
+                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            } else {
+                setDistricts(res.data)
+            }
         } else {
-            setDistricts(res.data)
+            setProvince()
         }
     }
 
@@ -149,25 +155,40 @@ export default function renderForm(props, toast) {
         setDistrict(val)
         setWard({})
         let masterDataClient = getMasterDataClient()
-        let res = await masterDataClient.getWardByDistrictCode(val.code)
-        if (res.status !== 'OK') {
-            error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        if (val) {
+            let res = await masterDataClient.getWardByDistrictCode(val.code)
+            if (res.status !== 'OK') {
+                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            } else {
+                setWards(res.data)
+            }
         } else {
-            setWards(res.data)
+            setDistrict({})
         }
     }
 
     const onWardChange = async (event, val) => {
-        setWard(val)
+        if (val) {
+            setWard(val)
+        } else {
+            setWard({})
+        }
     }
 
     const onSubmit = async (formData) => {
+        if (formData.passwordConfirm !== formData.password) {
+            error("Xác nhận mật khẩu không chính xác")
+            errors.passwordConfirm = {}
+            errors.passwordConfirm.message = "Mật khẩu xác nhận không chính xác"
+            return
+        }
         formData.provinceCode = province.code
         formData.districtCode = district.code
         formData.wardCode = ward.code
         if (props.isUpdate) {
             formData.customerID = props.customer.customerID
             formData.id = props.customer.id
+            formData.code = props.customer.code
             await updateCustomer(formData)
         } else {
             await createCustomer(formData)
@@ -199,7 +220,29 @@ export default function renderForm(props, toast) {
             <Head>
                 <title>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</title>
             </Head>
-            <Box component={Paper}>
+            {
+                props.isUpdate && typeof props.customer === 'undefined' ? (
+                    <div>
+                        <Box component={Paper} display="block">
+                            <FormGroup>
+                                <form>
+                                    <Grid container spacing={3} direction="row"
+                                        justify="space-between"
+                                        alignItems="flex-start" className={styles.contentPadding}>
+                                        <Grid item xs={12} md={12} sm={12}>
+                                            <Box style={{ fontSize: 24 }}>Cập nhật khách hàng</Box>
+                                        </Grid>
+                                        <Grid item xs={12} md={12} sm={12}>
+                                            <span>{props.message}</span>
+                                        </Grid>
+                                    </Grid>
+                                </form>
+                            </FormGroup>
+                        </Box>
+                    </div>
+                )
+             : (
+                <Box component={Paper} display="block">
                 <FormGroup>
                     <form>
                         <Box className={styles.contentPadding}>
@@ -372,16 +415,16 @@ export default function renderForm(props, toast) {
                                                         name="districtCode"
                                                         variant="outlined"
                                                         label="Quận/ Huyện"
-                                                        helperText={errors.districtCode?.message}
+                                                        // helperText={errors.districtCode?.message}
                                                         InputLabelProps={{
                                                             shrink: true,
                                                         }}
                                                         style={{width: '100%'}}
-                                                        error={!!errors.districtCode}
-                                                        required
+                                                        // error={!!errors.districtCode}
+                                                        // required
                                                         inputRef={
                                                             register({
-                                                                required: "Quận/huyện thể để trống",
+                                                                // required: "Quận/huyện thể để trống",
                                                             })
                                                         }
                                                         {...params} />}
@@ -401,16 +444,16 @@ export default function renderForm(props, toast) {
                                                         name="wardCode"
                                                         variant="outlined"
                                                         label="Phường/ Xã"
-                                                        helperText={errors.wardCode?.message}
+                                                        // helperText={errors.wardCode?.message}
                                                         InputLabelProps={{
                                                             shrink: true,
                                                         }}
                                                         style={{width: '100%'}}
-                                                        error={!!errors.wardCode}
-                                                        required
+                                                        // error={!!errors.wardCode}
+                                                        // required
                                                         inputRef={
                                                             register({
-                                                                required: "Phường xã không thể để trống",
+                                                                // required: "Phường xã không thể để trống",
                                                             })
                                                         }
                                                         {...params} />}
@@ -473,8 +516,8 @@ export default function renderForm(props, toast) {
                                     </Grid>
                                     <Grid spacing={3} container>
                                         <Grid item xs={12} sm={6} md={6}>
-                                            <Grid container spacing={1} alignItems="center" justify="space-between">
-                                                <Grid item xs={10} sm={10} md={10}>
+                                            {/* <Grid container spacing={1} alignItems="center">
+                                                <Grid item xs={8} sm={8} md={10}>
                                                     <TextField
                                                         id="licenses"
                                                         name="licenses"
@@ -511,7 +554,7 @@ export default function renderForm(props, toast) {
                                                         </Button>
                                                     </label>
                                                 </Grid>
-                                            </Grid>
+                                            </Grid> */}
                                         </Grid>
                                     </Grid>
                                 </CardContent>
@@ -702,6 +745,9 @@ export default function renderForm(props, toast) {
                     </form>
                 </FormGroup>
             </Box>
+            )
+             }
+            
         </AppCRM>
     )
 }

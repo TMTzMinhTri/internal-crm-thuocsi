@@ -9,22 +9,22 @@ import {
     TableHead,
     TableRow
 } from "@material-ui/core";
-import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import Head from "next/head";
-import Link from "next/link";
-import Router, {useRouter} from "next/router";
-import AppCRM from "pages/_layout";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
-import React, {useState} from "react";
-import styles from "./customer.module.css";
 import Grid from "@material-ui/core/Grid";
-import InputBase from "@material-ui/core/InputBase";
-import SearchIcon from '@material-ui/icons/Search';
 import IconButton from "@material-ui/core/IconButton";
-import {useForm} from "react-hook-form";
-import {getCustomerClient} from "../../../client/customer";
+import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from '@material-ui/icons/Edit';
+import SearchIcon from '@material-ui/icons/Search';
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import { getCustomerClient } from "client/customer";
+import Head from "next/head";
+import Link from "next/link";
+import Router, { useRouter } from "next/router";
+import AppCRM from "pages/_layout";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import styles from "./customer.module.css";
 // import {levels, statuses} from "./form"
 
 const levels = [
@@ -97,10 +97,6 @@ export default function CustomerPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
-export function formatNumber(num) {
-    return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
-}
-
 function render(props) {
     let router = useRouter()
     const {register, handleSubmit, errors} = useForm();
@@ -129,9 +125,9 @@ function render(props) {
         }
     }
 
-    const RenderRow = (row) => (
-        <TableRow>
-            <TableCell component="th" scope="row">{row.data.customerID}</TableCell>
+    const RenderRow = (row, i) => (
+        <TableRow key={i}>
+            <TableCell component="th" scope="row">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left">{row.data.email}</TableCell>
             <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label}</TableCell>
@@ -139,7 +135,7 @@ function render(props) {
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
             <TableCell align="center">
-                <Link href={`/crm/customer/edit?customerID=${row.data.customerID}`}>
+                <Link href={`/crm/customer/edit?customerCode=${row.data.code}`}>
                     <a>
                         <Tooltip title="Cập nhật thông tin">
                             <IconButton>
@@ -163,24 +159,22 @@ function render(props) {
                       alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <form>
-                            <Paper component="form" className={styles.search}>
-                                <InputBase
-                                    id="q"
-                                    name="q"
-                                    className={styles.input}
-                                    value={search}
-                                    onChange={handleChange}
-                                    inputRef={register}
-                                    placeholder="Tìm kiếm khách hàng"
-                                    inputProps={{'aria-label': 'Tìm kiếm khách hàng'}}
-                                />
-                                <IconButton className={styles.iconButton} aria-label="search"
-                                            onClick={handleSubmit(onSearch)}>
-                                    <SearchIcon/>
-                                </IconButton>
-                            </Paper>
-                        </form>
+                        <Paper component="form" className={styles.search}>
+                            <InputBase
+                                id="q"
+                                name="q"
+                                className={styles.input}
+                                value={search}
+                                onChange={handleChange}
+                                inputRef={register}
+                                placeholder="Tìm kiếm khách hàng"
+                                inputProps={{'aria-label': 'Tìm kiếm khách hàng'}}
+                            />
+                            <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={handleSubmit(onSearch)}>
+                                <SearchIcon/>
+                            </IconButton>
+                        </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/customer/new">
@@ -203,7 +197,7 @@ function render(props) {
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">ID</TableCell>
+                            <TableCell align="left">Mã khách hàng</TableCell>
                             <TableCell align="left">Tên khách hàng</TableCell>
                             <TableCell align="left">Email</TableCell>
                             <TableCell align="left">Cấp độ</TableCell>
@@ -215,8 +209,8 @@ function render(props) {
                     </TableHead>
                     {props.data.length > 0 ? (
                         <TableBody>
-                            {props.data.map(row => (
-                                <RenderRow data={row}/>
+                            {props.data.map((row, i) => (
+                                <RenderRow data={row} key={i}/>
                             ))}
                         </TableBody>
                     ) : (

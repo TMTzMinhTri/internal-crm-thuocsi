@@ -1,9 +1,8 @@
 import {
     Button,
     ButtonGroup,
-    Divider,
     Grid,
-    IconButton, InputBase,
+    IconButton,
     Paper,
     Table,
     TableBody,
@@ -13,20 +12,19 @@ import {
     TableRow,
     Tooltip
 } from "@material-ui/core";
-import FilterListIcon from '@material-ui/icons/FilterList';
-import SearchIcon from '@material-ui/icons/Search';
-import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import Head from "next/head";
 import Link from "next/link";
-import Router, { useRouter } from "next/router";
+import Router, {useRouter} from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import React, {useEffect, useState} from "react";
+import {useForm} from "react-hook-form";
 import styles from "./pricing.module.css";
-import { getPricingClient } from 'client/pricing';
+import {getPricingClient} from 'client/pricing';
 import EditIcon from "@material-ui/icons/Edit";
-import { SellPrices, ProductStatus } from "components/global";
+import {ProductStatus, SellPrices} from "components/global";
+import Chip from "@material-ui/core/Chip";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -44,27 +42,27 @@ export async function loadPricingData(ctx) {
 
     let _client = getPricingClient(ctx, {})
 
-    let result = { data: {}, count: 0 };
+    let result = {data: {}, count: 0};
     result = await _client.getListPricing(offset, limit, q);
     let mixData = {}
     if (result.status === 'OK') {
-        if(result.data.length > 0){
+        if (result.data.length > 0) {
             const productCodes = result.data.map((item) => item.productCode);
             const listProducts = await _client.getListProductByProductCode(productCodes);
-            if(listProducts.status === 'OK'){
+            if (listProducts.status === 'OK') {
                 mixData = result.data.map(t1 => ({...t1, ...listProducts.data.find(t2 => t2.code === t1.productCode)}))
-                return { props: { data: mixData, count: result.total } }
-            }  
+                return {props: {data: mixData, count: result.total}}
+            }
             return {
                 props: {
                     data: result.data,
                     count: result.total
                 }
-            }         
+            }
         }
     }
     // Pass data to the page via props
-    return { props: { data: [], count: 0 } }
+    return {props: {data: [], count: 0}}
 }
 
 export default function PricingPage(props) {
@@ -77,7 +75,7 @@ export function formatNumber(num) {
 
 function render(props) {
     let router = useRouter();
-    const { register, handleSubmit, errors, control } = useForm();
+    const {register, handleSubmit, errors, control} = useForm();
 
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
@@ -93,31 +91,7 @@ function render(props) {
         setCountSelling(props.count);
     }, [props]);
 
-    async function handleChange(event) {
-        const target = event.target;
-        const value = target.value;
-        setSearch(value)
-    }
-
-    function onSearch(formData) {
-        try {
-            Router.push(`/crm/pricing?${q}`)
-        } catch (error) {
-            console.log(error)
-        }
-    }
-
-    function onCollapse() {
-        // func set expand panel search
-        setOpen(!open);
-    }
-
-    function fnSearch(data) {
-        // TODO example
-        alert(data)
-    }
-
-    function showType(type){
+    function showType(type) {
         let a = SellPrices.filter((item) => {
             return item.value === type;
         });
@@ -125,17 +99,17 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/sku">
             <Head>
                 <title>Danh sách cài đặt</title>
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
-                    justify="space-evenly"
-                    alignItems="center"
+                      justify="space-evenly"
+                      alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <Paper component="form" className={styles.search}>
+                        {/*<Paper component="form" className={styles.search}>
                             <InputBase
                                 id="q"
                                 name="q"
@@ -160,14 +134,15 @@ function render(props) {
                                 onClick={onCollapse}>
                                 <FilterListIcon />
                             </IconButton>
-                        </Paper>
+                        </Paper>*/}
                     </Grid>
 
                     <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/pricing/new">
+                        <Link href="/crm/sku/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
-                                className={styles.rightGroup}>
-                                <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài đặt</Button>
+                                         className={styles.rightGroup}>
+                                <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài
+                                    đặt</Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
@@ -175,10 +150,10 @@ function render(props) {
             </div>
             {
                 q === '' ? (
-                    <span />
+                    <span/>
                 ) : (
-                        <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{search}'</i></div>
-                    )
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{search}'</i></div>
+                )
             }
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
@@ -188,8 +163,7 @@ function render(props) {
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Loại</TableCell>
                             <TableCell align="left">Giá bán lẻ</TableCell>
-                            <TableCell align="left">Giá bán buôn</TableCell>
-                            <TableCell align="left">Cập nhật</TableCell>
+                            {/* <TableCell align="left">Giá bán buôn</TableCell> */}
                             <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
@@ -200,21 +174,32 @@ function render(props) {
                                 sellingData.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell align="left">{row.sku}</TableCell>
-                                        <TableCell align="left">{row.productCode || '---'}</TableCell>
+                                        <TableCell align="left">{row.name || '-'}</TableCell>
                                         <TableCell align="left">{
                                             showType(row.retailPrice.type)
                                         }</TableCell>
                                         <TableCell align="left">{formatNumber(row.retailPrice.price)}</TableCell>
-                                        <TableCell align="left">
-                                            array whosalePrice
-                                        </TableCell>
-                                        <TableCell align="left">{row.lastUpdatedTime}</TableCell>
+                                        {/* <TableCell align="left">
+                                            {
+                                                row.wholesalePrice?.map((price) => (
+                                                    <div>
+                                                        <Chip variant="outlined" size="small"
+                                                              label={'Giá bán: ' + formatNumber(price.price || 0) + 'đ' +
+                                                              ' - Giảm: ' + (price.percentageDiscount*100 || 0) + '%' +
+                                                              (formatNumber(price.absoluteDiscount || 0) !== 0 ?
+                                                                  (' - Giảm giá: ' + formatNumber(price.absoluteDiscount || 0)) : ('')) + 'đ' +
+                                                              ' - Số lượng: ' + price.minNumber}/>
+                                                        <br/>
+                                                    </div>
+                                                ))
+                                            }
+                                        </TableCell> */}
                                         <TableCell align="left">{ProductStatus[row.status]}</TableCell>
                                         <TableCell align="center">
-                                            <Link href={`/cms/pricing/edit?pricingID=${row.sellPriceId}`}>
+                                            <Link href={`/crm/sku/edit?sellPriceCode=${row.sellPriceCode}`}>
                                                 <Tooltip title="Cập nhật thông tin">
                                                     <IconButton>
-                                                        <EditIcon fontSize="small" />
+                                                        <EditIcon fontSize="small"/>
                                                     </IconButton>
                                                 </Tooltip>
                                             </Link>
@@ -224,12 +209,12 @@ function render(props) {
                             }
                         </TableBody>
                     ) : (
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        )}
+                        <TableBody>
+                            <TableRow>
+                                <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    )}
 
                     <MyTablePagination
                         labelUnit="chỉ số"
@@ -237,8 +222,8 @@ function render(props) {
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            let qq = q ? '&'+q : '';
-                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}${qq}`)
+                            let qq = q ? '&' + q : '';
+                            Router.push(`/crm/sku?page=${page}&limit=${rowsPerPage}${qq}`)
                         }}
                     />
                 </Table>

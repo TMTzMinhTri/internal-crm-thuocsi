@@ -14,111 +14,108 @@ import {
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import Head from "next/head";
 import Link from "next/link";
-import Router, {useRouter} from "next/router";
+import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
-import React, {useState} from "react";
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import React, { useEffect, useState } from "react";
 import styles from "../pricing/pricing.module.css";
-import {useForm} from "react-hook-form";
-import {getProductClient} from "../../../client/product";
-import {ssrPipe} from "../../../components/global";
-import {getPriceClient} from "../../../client/price";
+import { useForm } from "react-hook-form";
+import { getProductClient } from "../../../client/product";
+import { ssrPipe } from "../../../components/global";
 import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import EditIcon from "@material-ui/icons/Edit";
-import SettingsIcon from '@material-ui/icons/Settings';
 import SearchIcon from "@material-ui/icons/Search";
-import FilterListIcon from "@material-ui/icons/FilterList";
 import PanelCollapse from "../../../components/panel/panel";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import { ProductTypes, ProductStatus } from "components/global";
+import Image from 'next/image';
+
 const LIMIT = 20
 
-export async function loadProduct(ctx) {
-
-    try {
-        let data = {props: {}}
-        let query = ctx.query
-        let q = typeof (query.q) === "undefined" ? '' : query.q
-        let filterProduct = typeof (query.filterProduct) === "undefined" ? '' : query.filterProduct
-        let page = query.page || 0
-        let limit = query.limit || LIMIT
-        let offset = page * limit
-
-        let productClient = getProductClient(ctx, data)
-        let res = {}
-        if (filterProduct === 'all') {
-            res = await productClient.getProductList(offset, limit, q)
-        } else if (filterProduct === 'noPrice') {
-            res = await productClient.getProductNoPrice(offset, limit, q)
-        } else (
-            res = await productClient.getProductHasPrice(offset, limit, q)
-        )
-
-        if (res.status === 'OK') {
-            return {
-                products: res.data,
-                count: res.total,
-                ctx: ctx
+export async function loadProduct(data) {
+    const productClient = getProductClient(data.ctx, data);
+    const productCodes = data.skuList.map(item =>
+        item.productCode
+    );
+    if (productCodes.length > 0) {
+        try {
+            const res = await productClient.postListProducstWithCodes(productCodes);
+            if (res.status === 'OK') {
+                return {
+                    products: res.data,
+                    skuList: data.skuList,
+                    count: data.count || 0,
+                    ctx: data.ctx
+                }
             }
-        } else {
-            return {
-                products: [],
-                count: 0,
-                ctx: ctx
-            }
+        } catch (err) {
+            console.log(err)
         }
-    } catch (err) {
-        console.log(err)
-        return {}
+    }
+    return {
+        products: [],
+        skuList: [],
+        count: 0,
+        ctx: data.ctx
     }
 
 }
 
-export async function loadPrice(data) {
+export async function loadSKUProduct(ctx) {
+    const productClient = getProductClient(ctx, {});
+    let data = {
+        skuList: {}
+    };
+    let query = ctx.query
+    let q = typeof (query.q) === "undefined" ? '' : query.q
+    let page = query.page || 0
+    let limit = query.limit || LIMIT
+    let offset = page * limit
     try {
-        let productIds = []
-        data?.products?.forEach(e => {
-            productIds.push(e.productID)
-        })
-        let priceClient = getPriceClient(data?.ctx, {})
-        let res = await priceClient.getListPriceByProductIds(productIds)
-        if (res.status === 'OK') {
-            data.prices = res.data
+        const res = await productClient.getListSKUProduct(offset, limit, q);
+        if (res.status === "OK") {
+            data.skuList = res.data;
+            return {
+                ...data,
+                ctx,
+                count: res.total || 0
+            };
         }
-        console.log(res)
-        return data
     } catch (error) {
         console.log(error)
-        return data
+    }
+    return {
+        skuList: {},
+        count: 0,
+        ctx
     }
 }
 
 export async function mixProductAndPrice(data) {
     try {
         delete data.ctx
-        let priceMap = {}
-        data.prices.map(price => {
-            priceMap[price.productId] = price
+        let dataMix = {}
+        dataMix = data.skuList.map((itm, i) => {
+            return {
+                ...data.products.find((item) => (item.code === itm.productCode) && item),
+                ...itm
+            }
         })
-        data.priceMap = priceMap
+        data.dataMix = dataMix
         return data
     } catch (e) {
-        data.priceMap = {}
+        data.dataMix = {}
         return data
     }
 }
 
-export function ssrPipePricing() {
-    return ssrPipe(loadProduct, loadPrice, mixProductAndPrice);
-}
-
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return ssrPipe(loadProduct, loadPrice, mixProductAndPrice)(ctx).then((resp) => {
+        return ssrPipe(loadSKUProduct, loadProduct, mixProductAndPrice)(ctx).then((resp) => {
             return resp
         });
     })
@@ -133,66 +130,62 @@ export function formatNumber(num) {
 }
 
 function render(props) {
-    let router = useRouter()
+    let router = useRouter();
     let [open, setOpen] = useState(false);
-    let [search, setSearch] = useState('');
-    let [state, setState] = useState({productName: ''})
-    const {register, handleSubmit, errors, control} = useForm();
+    const [dataTable, setDataTable] = useState(props.dataMix || []);
+    let [state, setState] = useState({ productName: '' })
+    const { register, handleSubmit, errors, control } = useForm();
 
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || LIMIT
     let filterProduct = router.query.filterProduct || ''
     let q = router.query.q || ''
 
-    function onCollapse() {
-        // func set expand panel search
-        setOpen(!open);
-    }
+    useEffect(() => {
+        setDataTable(props.dataMix);
+    }, [props]);
 
     const handleChange = async (event, val) => {
-        setState({...state, [event.target.name]: event.target.value})
+        setState({ ...state, [event.target.name]: event.target.value })
     }
 
     function onSearch(formData) {
-        router.push(`/crm/product?q=${state.search}`)
+        q = state.search.trim().replace(/\s+/g, ' ');
+        router.push(`?q=${q}`)
     }
 
     function fnSearch(data) {
-        router.push(`/crm/product?q=${state.productName}&filterProduct=${state.productType}`)
+        router.push(`/crm/product?q=${state.productName}`)
+    }
+
+    function getFirstImage(val) {
+        if (!val) {
+            return `/default.png`; // default link
+        }
+        return val.split(';')[0]
     }
 
     const RenderRow = (row) => (
         <TableRow>
-            <TableCell component="th" scope="row">{row.data.sku}</TableCell>
-            <TableCell align="left" style={{width: '20%'}}>{row.data.name}</TableCell>
-            <TableCell align="center">{ProductStatus[props.priceMap[row.data.productID]?.status] || '-'}</TableCell>
-            <TableCell align="left">{props.priceMap[row.data.productID]?.vat || '-'}</TableCell>
-            <TableCell align="left">{formatNumber(props.priceMap[row.data.productID]?.buyPrice || '-')}</TableCell>
-            <TableCell align="left">{formatNumber(props.priceMap[row.data.productID]?.sellPrice || '-')}</TableCell>
-            <TableCell align="left">{formatNumber(props.priceMap[row.data.productID]?.sellPriceVAT || '-')}</TableCell>
+            <TableCell scope="row">{row.data.code}</TableCell>
+            <TableCell scope="center">
+                <Image src={getFirstImage(row.data.imageUrls)} title="image" alt="image"
+                    width={100}
+                    height={100} />
+            </TableCell>
+            <TableCell align="left" style={{ width: '40%' }}>{row.data.name}</TableCell>
+            <TableCell align="center">{ProductStatus[row.data.status] || '-'}</TableCell>
             <TableCell align="center">
                 {
-                    typeof props.priceMap[row.data.productID] === 'undefined' ? (
-                        <Link href={`/crm/product/edit?productID=${row.data.productID}`}>
-                            <a>
-                                <Tooltip title="Cài đặt giá sản phẩm">
-                                    <IconButton>
-                                        <SettingsIcon fontSize="small"/>
-                                    </IconButton>
-                                </Tooltip>
-                            </a>
-                        </Link>
-                    ) : (
-                        <Link href={`/crm/product/edit?productID=${row.data.productID}`}>
-                            <a>
-                                <Tooltip title="Cập nhật giá sản phẩm">
-                                    <IconButton>
-                                        <EditIcon fontSize="small"/>
-                                    </IconButton>
-                                </Tooltip>
-                            </a>
-                        </Link>
-                    )
+                    // <Link href={`/crm/product/edit?productID=${row.data.productID}`}>
+                    //     <a>
+                    //         <Tooltip title="Cập nhật giá sản phẩm">
+                    //             <IconButton>
+                    //                 <EditIcon fontSize="small" />
+                    //             </IconButton>
+                    //         </Tooltip>
+                    //     </a>
+                    // </Link>
                 }
             </TableCell>
         </TableRow>
@@ -206,7 +199,7 @@ function render(props) {
             <div>
                 <Grid container alignItems="center">
                     <Grid item xs={6} sm={3} md={3} className={open === true ? styles.hidden : styles.unSetHidden}>
-                        <Paper className={styles.search} style={{marginBottom: '10px'}}>
+                        {/* <Paper className={styles.search} style={{ marginBottom: '10px' }}>
                             <InputBase
                                 id="search"
                                 name="search"
@@ -217,27 +210,23 @@ function render(props) {
                                         onSearch()
                                     }
                                 }}
-                                placeholder="Tìm kiếm sản phẩm theo tên hoặc sku"
-                                inputProps={{'aria-label': 'Tìm kiếm sản phẩm theo tên hoặc sku'}}
+                                placeholder="Tìm kiếm theo tên hoặc sku"
+                                inputProps={{ 'aria-label': 'Tìm kiếm theo tên hoặc sku' }}
                             />
                             <IconButton className={open === true ? styles.iconButtonHidden : styles.iconButton}
-                                        aria-label="search"
-                                        onClick={onSearch}
+                                aria-label="search"
+                                onClick={onSearch}
                             >
-                                <SearchIcon/>
+                                <SearchIcon />
                             </IconButton>
-                            <Divider className={styles.divider} orientation="vertical"/>
-                            <IconButton className={styles.iconButton} aria-label="filter-list"
-                                        onClick={onCollapse}>
-                                <FilterListIcon/>
-                            </IconButton>
-                        </Paper>
+                            <Divider className={styles.divider} orientation="vertical" />
+                        </Paper> */}
                     </Grid>
                 </Grid>
                 {
                     open === true ? (
                         <form>
-                            <Grid item xs={12} sm={12} md={12} style={{marginBottom: '10px'}}>
+                            <Grid item xs={12} sm={12} md={12} style={{ marginBottom: '10px' }}>
                                 <PanelCollapse expand={open} setOpen={setOpen} setExecute={fnSearch}>
                                     <Grid container spacing={5} direction="row" alignItems="center">
                                         <Grid item xs={4} md={4} sm={4}>
@@ -252,12 +241,12 @@ function render(props) {
                                                 InputLabelProps={{
                                                     shrink: true,
                                                 }}
-                                                style={{width: '100%'}}
+                                                style={{ width: '100%' }}
                                                 inputRef={register}
                                             />
                                         </Grid>
                                         <Grid item xs={4} md={4} sm={4}>
-                                            <FormControl style={{width: '100%'}} size="small" variant="outlined">
+                                            <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                                 <InputLabel id="department-select-label" sise="small">Sản phẩm</InputLabel>
                                                 <Select
                                                     id="productType"
@@ -266,7 +255,7 @@ function render(props) {
                                                     onChange={handleChange}
                                                     defaultValue={ProductTypes ? ProductTypes[1].value : {}}
                                                 >
-                                                    {ProductTypes.map(({value, label}) => (
+                                                    {ProductTypes.map(({ value, label }) => (
                                                         <MenuItem value={value} key={value}>{label}</MenuItem>
                                                     ))}
                                                 </Select>
@@ -277,8 +266,8 @@ function render(props) {
                             </Grid>
                         </form>
                     ) : (
-                        <div/>
-                    )
+                            <div />
+                        )
                 }
             </div>
             <TableContainer component={Paper}>
@@ -286,32 +275,29 @@ function render(props) {
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">SKU</TableCell>
+                            <TableCell align="center">Hình ảnh</TableCell>
                             <TableCell align="left">Tên sản phẩm</TableCell>
                             <TableCell align="center">Trạng thái</TableCell>
-                            <TableCell align="left">VAT(%)</TableCell>
-                            <TableCell align="left">Giá mua</TableCell>
-                            <TableCell align="left">Giá bán</TableCell>
-                            <TableCell align="left">Giá bán sau VAT</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {props?.products?.length > 0 ? (
+                    {dataTable.length > 0 ? (
                         <TableBody>
-                            {props.products.map(row => (
-                                <RenderRow data={row}/>
+                            {dataTable.map((row, i) => (
+                                <RenderRow key={i} data={row} />
                             ))}
                         </TableBody>
                     ) : (
-                        <TableBody>
-                            <TableRow>
-                                <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    )}
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        )}
 
                     <MyTablePagination
                         labelUnit="sản phẩm"
-                        count={props.count}
+                        count={props.count || dataTable.length}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
