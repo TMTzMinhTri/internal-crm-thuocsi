@@ -124,7 +124,7 @@ export default function renderForm(props, toast) {
                         <Box style={{ fontSize: 30, margin: 5 }}>Thông tin cài đặt giá</Box>
                         <Box style={{ margin: 10 }}>
                             <Grid container spacing={3}>
-                                <Grid item xs={12} sm={6} md={3}>
+                                <Grid item xs={12} sm={6} md={8}>
                                     <Typography gutterBottom>
                                         Sản phẩm: <b>{props.product?.name}</b>
                                     </Typography>
