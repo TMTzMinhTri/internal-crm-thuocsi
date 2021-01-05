@@ -349,7 +349,7 @@ export default function renderForm(props, toast) {
     const [expanded, setExpanded] = React.useState(false);
     const [listTag, setListTag] = useState(props.listTag);
     const [brand, setBrand] = useState(getValues('brand') || 'LOCAL');
-    const [categoryCode, setCategoryCode] = useState(props.price.categoryCodes);
+    const [categoryCode, setCategoryCode] = useState(props.price?.categoryCodes || []);
     let sellerCode = "MedX";
 
     // func onSubmit used because useForm not working with some fields
