@@ -336,7 +336,6 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
 }
 
 export default function renderForm(props, toast) {
-    console.log(props.price)
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
@@ -357,16 +356,16 @@ export default function renderForm(props, toast) {
         idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index, 1))
         setLoading(true);
         let _client = getPriceClient()
-        formData.tags = [];
-        if (formData.tagsName) {
-            for (let i = 0; i < formData.tagsName.length; i++) {
-                formData.tags.push(
-                    listTag.filter(
-                        (tag) => tag.name === formData.tagsName[i]
-                    )[0].code
-                );
-            }
-        }
+        formData.tags = [...formData.tagsName] || [];
+        // if (formData.tagsName) {
+        //     for (let i = 0; i < formData.tagsName.length; i++) {
+        //         formData.tags.push(
+        //             listTag.filter(
+        //                 (tag) => tag.name === formData.tagsName[i]
+        //             )[0].code
+        //         );
+        //     }
+        // }
         let result = await _client.createNewPricing(formData)
         setLoading(false);
         if (result.status === "OK") {
@@ -381,16 +380,16 @@ export default function renderForm(props, toast) {
         formData.sellerCode = props.price?.sellerCode
         formData.productCode = props.product?.code
         formData.categoryCodes = categoryCode;
-        formData.tags = [];
-        if (formData.tagsName) {
-            for (let i = 0; i < formData.tagsName.length; i++) {
-                formData.tags.push(
-                    listTag.filter(
-                        (tag) => tag.name === formData.tagsName[i]
-                    )[0].code
-                );
-            }
-        }
+        formData.tags = [...formData.tagsName] || [];
+        // if (formData.tagsName) {
+        //     for (let i = 0; i < formData.tagsName.length; i++) {
+        //         formData.tags.push(
+        //             listTag.filter(
+        //                 (tag) => tag.name === formData.tagsName[i]
+        //             )[0].code
+        //         );
+        //     }
+        // }
         idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index, 1))
         setLoading(true);
         let _client = getPriceClient()

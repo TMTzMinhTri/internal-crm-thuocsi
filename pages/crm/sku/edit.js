@@ -24,13 +24,7 @@ export async function loadProduct(ctx) {
     let listTag = await _client1.getListTag(0, 500, "");
     data.props.listTag = listTag.data || [];
     res.data[0].tagsName = [];
-    if (res.data[0].tags) {
-        for (let i = 0; i < res.data[0].tags.length; i++) {
-            res.data[0].tagsName.push(
-                listTag.data.filter((tag) => tag.code === res.data[0].tags[i])[0].name
-            );
-        }
-    }
+    res.data[0].tagsName = [...res.data[0].tags] || []
     if (res.status !== "OK") {
         data.props.price = {};
     } else {
