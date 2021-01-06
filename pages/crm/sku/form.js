@@ -567,7 +567,7 @@ export default function renderForm(props, toast) {
                                                         id="panel1bh-header"
                                                     >
                                                         <Typography color="textSecondary">
-                                                            Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
+                                                            Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
                                                         </Typography>
                                                     </AccordionSummary>
                                                     <AccordionDetails>
@@ -593,7 +593,7 @@ export default function renderForm(props, toast) {
                                                             id="panel1bh-header"
                                                         >
                                                             <Typography color="textSecondary">
-                                                                Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
+                                                                Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
                                                             </Typography>
                                                         </AccordionSummary>
                                                         <AccordionDetails>
