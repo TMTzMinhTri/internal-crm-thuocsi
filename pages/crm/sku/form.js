@@ -3,31 +3,29 @@ import {
     AccordionDetails,
     AccordionSummary,
     Box, Button, ButtonGroup, Divider,
-    Grid,
-    Paper,
-    TextField,
+    FormControl, Grid,
+    InputAdornment, MenuItem, Paper,
+    Select, TextField,
     Tooltip,
-    Typography,
-    FormControl, InputAdornment, MenuItem, Select,
+    Typography
 } from "@material-ui/core";
-import { SellPrices } from "components/global";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-// import RenderPriceConfig from "components/price/price-config";
+import { getPriceClient } from "client/price";
+import { SellPrices } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
+import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { getPriceClient } from "../../../client/price";
-import AppCRM from "../../_layout";
 import styles from "./pricing.module.css";
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormLabel from '@material-ui/core/FormLabel';
 
 const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index }) => {
     let arrName = name + `[${index}]`
@@ -484,7 +482,7 @@ export default function renderForm(props, toast) {
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
-                                                        label="Tag"
+                                                        label="Nhập tag"
                                                         error={!!errors.tagsName}
                                                         placeholder=""
 
@@ -524,12 +522,12 @@ export default function renderForm(props, toast) {
                                                 >
                                                     <FormControlLabel
                                                         value="LOCAL"
-                                                        control={<Radio />}
+                                                        control={<Radio color="primary"/>}
                                                         label="Trong nước"
                                                     />
                                                     <FormControlLabel
                                                         value="FOREIGN"
-                                                        control={<Radio />}
+                                                        control={<Radio color="primary"/>}
                                                         label="Ngoại nhập"
                                                     />
                                                 </RadioGroup>

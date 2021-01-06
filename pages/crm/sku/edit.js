@@ -1,12 +1,12 @@
 import {
     doWithLoggedInUser,
-    renderWithLoggedInUser,
+    renderWithLoggedInUser
 } from "@thuocsi/nextjs-components/lib/login";
-import { getProductClient } from "client/product";
-import renderForm from "./form";
-import { getPriceClient } from "../../../client/price";
-import { getTagClient } from "client/tag";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getPriceClient } from "client/price";
+import { getProductClient } from "client/product";
+import { getTagClient } from "client/tag";
+import renderForm from "./form";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -33,16 +33,16 @@ export async function loadProduct(ctx) {
         data.props.price.wholesalePrice = data.props.price.wholesalePrice.map(
             (price) => ({...price,percentageDiscount:price.percentageDiscount*100})
         );
-    let _client2 = getProductClient(ctx, {});
-    res = await _client2.getListProductByIdsOrCodes([], [productCode]);
-    if(res.data) {
-        data.props.product = res?.data[0];
-    } else {
-        data.props.product = []
+        let _client2 = getProductClient(ctx, {});
+        res = await _client2.getListProductByIdsOrCodes([], [productCode]);
+        if(res.data) {
+            data.props.product = res?.data[0];
+        } else {
+            data.props.product = []
+        }
     }
-}
-console.log(data.props.price.wholesalePrice)
-return data;
+    // console.log(data.props.price.wholesalePrice)
+    return data;
 }
 
 export default function EditPage(props) {
