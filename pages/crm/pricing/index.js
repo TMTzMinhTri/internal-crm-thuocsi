@@ -146,8 +146,8 @@ function render(props) {
                             <TableCell align="left">Loại khách hàng</TableCell>
                             <TableCell align="left">Danh mục</TableCell>
                             <TableCell align="left">Tỉnh/thành</TableCell>
-                            <TableCell align="left">Cấp số nhân</TableCell>
-                            <TableCell align="left">Cấp số cộng</TableCell>
+                            <TableCell align="left">Hẽ số nhân</TableCell>
+                            <TableCell align="left">Hẽ số cộng</TableCell>
                             <TableCell align="left">Brand</TableCell>
                             <TableCell align="left">Cập nhật</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
