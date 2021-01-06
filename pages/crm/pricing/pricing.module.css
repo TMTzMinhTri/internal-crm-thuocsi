@@ -125,3 +125,8 @@
 .padding {
     padding: 0 12 !important;
 }
+
+.displayRow {
+    display: flex;
+    flex-direction: row;
+}
