@@ -122,20 +122,23 @@ export default function renderForm(props, toast) {
     let editObject = props.isUpdate ? props.customer : {}
     const [loading, setLoading] = useState(false);
     const [province, setProvince] = useState(props.province);
-    const [districts, setDistricts] = useState(props.districts);
-    const [district, setDistrict] = useState(props.district);
-    const [wards, setWards] = useState(props.wards);
-    const [ward, setWard] = useState(props.ward);
-    const [isDisabledDistrict, setDisabledDistrict] = useState(district ? false : true);
-    const [isDisabledWard, setDisabledWard] = useState(ward ? false : true);
+    const [districts, setDistricts] = useState(props.districts || []);
+    const [district, setDistrict] = useState(props.district || {});
+    const [wards, setWards] = useState(props.wards || []);
+    const [ward, setWard] = useState(props.ward || {});
+    const isWard = ((props.ward === undefined) || (Object.keys(props.ward).length === 0 && props.ward.constructor === Object)) ? true : false;
+    const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
+    const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
+    const [isDisabledWard, setDisabledWard] = useState(isWard);
     const { register, handleSubmit, errors, control } = useForm({
         defaultValues: editObject,
         mode: "onChange"
     });
-
     const onProvinceChange = async (event, val) => {
+        setProvince()
         setDistricts([])
         setDistrict({})
+        setWards([])
         setWard({})
         let masterDataClient = getMasterDataClient()
         if (val) {
@@ -150,20 +153,19 @@ export default function renderForm(props, toast) {
                 setDisabledDistrict(false)
             }
         } else {
-            setProvince()
-            setDistrict({})
-            setWard({})
+
             setDisabledDistrict(true)
             setDisabledWard(true)
         }
     }
 
     const onDistrictChange = async (event, val) => {
+        setDistrict()
         setWards([])
-        setDistrict(val)
         setWard({})
         let masterDataClient = getMasterDataClient()
         if (val) {
+            setDistrict(val)
             let res = await masterDataClient.getWardByDistrictCode(val.code)
             if (res.status !== 'OK') {
                 error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
@@ -398,7 +400,7 @@ export default function renderForm(props, toast) {
                                                                     id="provinceCode"
                                                                     name="provinceCode"
                                                                     variant="outlined"
-                                                                    label="Tỉnh/ Thành phố"
+                                                                    label="Tỉnh/Thành phố"
                                                                     helperText={errors.provinceCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
@@ -413,7 +415,7 @@ export default function renderForm(props, toast) {
                                                                     }
                                                                     {...params} />}
                                                         />
-                                                        
+
                                                     </Grid>
                                                     <Grid item xs={12} sm={3} md={3}>
                                                         <Autocomplete
@@ -428,7 +430,7 @@ export default function renderForm(props, toast) {
                                                                     id="districtCode"
                                                                     name="districtCode"
                                                                     variant="outlined"
-                                                                    label="Quận/ Huyện"
+                                                                    label="Quận/Huyện"
                                                                     // helperText={errors.districtCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
@@ -458,7 +460,7 @@ export default function renderForm(props, toast) {
                                                                     id="wardCode"
                                                                     name="wardCode"
                                                                     variant="outlined"
-                                                                    label="Phường/ Xã"
+                                                                    label="Phường/Xã"
                                                                     // helperText={errors.wardCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
