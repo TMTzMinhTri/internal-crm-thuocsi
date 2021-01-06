@@ -17,26 +17,35 @@ export const condUserType = [
         value: "",
     },
     {
-        label: "Hạng cao nhất",
+        label: "Không giới hạn",
         value: "Infinity",
     },
     {
-        label: "Hạng Diamond",
+        label: "Kim cương",
         value: "Diamond",
     },
     {
-        label: "Hạng Platinum",
+        label: "Platinum",
         value: "Platinum",
     },
     {
-        label: "Hạng Gold",
+        label: "Vàng",
         value: "Gold",
     },
     {
-        label: "Hạng Sliver",
+        label: "Bạc",
         value: "Sliver",
     },
 ]
+
+export const Brand = {
+    'LOCAL':{
+        value: 'Trong nước'
+    },
+    'FOREIGN':{
+        value: 'Nhập khẩu'
+    }
+}
 
 export const ProductTypes = [
     {
