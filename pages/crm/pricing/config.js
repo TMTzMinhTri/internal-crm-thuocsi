@@ -1,280 +1,182 @@
-import {
-    Box, Button, FormControl, Grid, Paper,
-    TextField
-} from "@material-ui/core";
-import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { getPricingClient } from 'client/pricing';
-import { condUserType } from 'components/global';
-import { debounce } from "lodash";
 import Head from "next/head";
-import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
-import { Controller, useForm } from "react-hook-form";
-import ReactSelect from "react-select";
-import styles from "./pricing.module.css";
+import Router, { useRouter } from "next/router";
+import {
+    Button, ButtonGroup, Paper, Table, TableBody, TableCell, TableContainer,
+    TableHead, TableRow, Grid
+} from "@material-ui/core";
+import Chip from '@material-ui/core/Chip';
+import { makeStyles } from '@material-ui/core/styles';
 
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import AppCRM from "pages/_layout";
+import { getPricingClient } from 'client/pricing';
+import { condUserType, Brand } from 'components/global';
 
-const customStylesSelectOption = {
-    control: (provided, state) => ({
-        ...provided,
-        borderColor: state.isFocused ? '' : 'rgba(0, 0, 0, 0.23)',
-        border: state.isFocused ? '1px solid #00b46e !important' : '',
-        boxShadow: '0 0 0 #00b46e !important'
-    }),
-    menu: (provided, state) => ({
-        ...provided,
-        zIndex: 99999999,
-    }),
-    option: (provided, state) => ({
-        ...provided,
-        backgroundColor: "#fff",
-        color: state.isFocused ? "#00b46e" : '#777'
-    }),
-}
+const useStyles = makeStyles((theme) => ({
+    root: {
+        flexWrap: 'wrap',
+        '& > *': {
+            margin: theme.spacing(0.5),
+        },
+    },
+}));
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return loadPriceData(ctx)
+        return loadConfigPricingData(ctx)
     })
 }
 
-export async function loadPriceData(ctx) {
+export async function loadConfigPricingData(ctx) {
     let data = { props: {} }
-    const _client = getPricingClient(ctx, {})
-    const res = await _client.getListCategory('');
-    if (res.status !== "OK") {
-        return { props: { categoryCodeData: [] } }
+    let query = ctx.query
+    let q = typeof (query.q) === "undefined" ? '' : query.q
+    let page = query.page || 0
+    let limit = query.limit || 20
+    let offset = page * limit;
+
+    let categoryLists = {};
+    let provinceLists = {};
+    let configPriceLists = [];
+    let total = 0;
+
+    let configPriceClient = getPricingClient(ctx, {});
+    const res = await configPriceClient.getListConfigPrice({ q, limit, offset })
+
+    if (res.status === 'OK') {
+        if (res.data.length > 0) {
+            let categoryCodes = res.data.map((item) => item.categoryCode);
+            categoryCodes = new Set(categoryCodes.flat());
+
+            let [categoryList, provinceList] = await Promise.all([
+                configPriceClient.getCategoryWithArrayID([...categoryCodes]),
+                configPriceClient.getProvinceLists()
+            ]);
+            if (categoryList.status === "OK") {
+                if (categoryList.data.length > 0) {
+                    categoryList.data.map((item) => { categoryLists[item.code] = { ...item } });
+                }
+            }
+            provinceList.data.map((item) => { provinceLists[item.code] = { ...item } });
+            total = res.total;
+            configPriceLists = res.data;
+        }
     }
-    data.props.categoryCodeData = res.data;
-    return data;
+    return {
+        props: {
+            configPriceLists,
+            provinceLists,
+            categoryLists,
+            total,
+            message: res.message
+        }
+    };
 }
 
-export default function ConfigPricePage(props) {
+export default function ConfigPricingPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
 function render(props) {
-    const { error, success, warn, info } = useToast();
-    const [categoryCodeData, setCategoryCodeData] = useState([]);
 
-    let initData = {
-        customerType: { ...condUserType[0] }
-    }
+    const classes = useStyles();
+    let router = useRouter()
+    let q = router.query.q || ''
+    let page = parseInt(router.query.page) || 0
+    let limit = parseInt(router.query.limit) || 20
+
+    const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
+    const [provinceLists, setProvinceLists] = useState(props.provinceLists);
+    const [categoryLists, setCategoryLists] = useState(props.categoryLists);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        setCategoryCodeData(refactorCategoryCodeData(props.categoryCodeData));
-    }, [props])
+        setConfigPricingList(props.configPriceLists);
+        setProvinceLists(props.provinceLists);
+        setCategoryLists(props.categoryLists);
+        setTotal(props.total);
+    }, [props]);
 
-    const { register, handleSubmit, setValue, errors, control, reset } = useForm({ defaultValues: initData });
-
-    async function onSubmit(data) {
-        const _client = getPricingClient();
-
-        const categoryCodes = data.categoryCodes.map((item) => item.value);
-        const customerType = data.customerType.value;
-        data.categoryCodes = categoryCodes;
-        data.customerType = customerType;
-        data.addition = parseFloat(data.addition);
-        data.multiply = parseFloat(data.multiply);
-        const res = await _client.configPrice(data);
-        console.log(data);
-        if (res.status === "OK") {
-            success('Thành công.');
-        } else {
-            error(res.message)
-        }
-    }
-
-    function refactorCategoryCodeData(a) {
-        return a.map((item) => {
-            return {
-                value: item.code,
-                label: item.name
-            }
-        })
-    }
-
-    function onInputChangeCategory(e) {
-        e = e || '';
-        const _client = getPricingClient();
-        const debouncedSearchCategory = debounce(async () => {
-            const res = await _client.getListCategoryFromClient(e);
-            if (res.status === "OK") {
-                if (res.data.length > 0) {
-                    setCategoryCodeData(refactorCategoryCodeData(res.data));
+    function typeCategorys(catagory) {
+        if (catagory.length > 0) {
+            const chips = catagory.map(item => {
+                if (categoryLists[item]?.shortName) {
+                    return <Chip size="small" label={categoryLists[item]?.shortName} variant="outlined" />;
                 }
-            }
-        }, 100);
-        debouncedSearchCategory();
+            });
+            return chips;
+        }
+        return '---';
+    }
+
+    function provices(provi) {
+        if(provi === 'All'){
+            return <Chip size="small" label="All" variant="outlined" />;
+        }
+        if (provi.length > 0) {
+            const chips = provi.map(item => {
+                if (provinceLists[item]?.name) {
+                    return <Chip size="small" label={provinceLists[item]?.name} variant="outlined" />;
+                }
+            });
+            return chips;
+        }
+        return '---';
     }
 
     return (
         <AppCRM select="/crm/pricing">
             <Head>
-                <title>Danh sách cài đặt</title>
+                <title>Danh sách cấu hình giá</title>
             </Head>
-            <Box component={Paper} className={`${styles.gridPadding}`}>
-                <form onSubmit={handleSubmit(onSubmit)}>
-                    <Grid container spacing={3} direction="row" alignItems="center">
-                        <Grid item xs={12} sm={12} md={12}>
-                            <Box style={{ fontSize: 24 }}>Cấu hình giá sản phẩm</Box>
-                        </Grid>
+            <TableContainer component={Paper}>
+                <Table size="small" aria-label="a dense table">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="left">Code</TableCell>
+                            <TableCell align="left">Danh mục</TableCell>
+                            <TableCell align="left">Loại khách hàng</TableCell>
+                            <TableCell align="left">Cấp số nhân</TableCell>
+                            <TableCell align="left">Cấp số cộng</TableCell>
+                            <TableCell align="left">Tỉnh/thành</TableCell>
+                            <TableCell align="left">Brand</TableCell>
+                            {/* <TableCell align="center">Thao tác</TableCell> */}
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {
+                            total ? configPricingList.map((row, i) => (
+                                <TableRow key={i}>
+                                    <TableCell align="left">{row.code || '---'}</TableCell>
+                                    <TableCell align="left" className={classes.root}>{typeCategorys(row.categoryCode)}</TableCell>
+                                    <TableCell align="left">{condUserType.find(e => e.value === row.customerType)?.label}</TableCell>
+                                    <TableCell align="left">{row.numMultiply}</TableCell>
+                                    <TableCell align="left">{row.numAddition}</TableCell>
+                                    <TableCell align="left">{provices(row.locationCode)}</TableCell>
+                                    <TableCell align="left">{Brand[row.brand].value}</TableCell>
+                                </TableRow>
+                            )) : (
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                    </TableRow>
+                                )
+                        }
 
-                        <Grid item xs={12} sm={12} md={6}>
-                            <FormControl className={styles.formControl} size="small" variant="outlined"
-                                style={{ width: '100%' }}>
-                                <label className={styles.labelSelectOption} id="department-select-label">
-                                    Loại khách hàng*
-                                </label>
-                                <Controller
-                                    as={<ReactSelect />}
-                                    styles={customStylesSelectOption}
-                                    instanceId
-                                    value={condUserType[0]}
-                                    options={condUserType}
-                                    name="customerType"
-                                    control={control}
-                                    rules={{
-                                        required: true,
-                                        validate: (value) => {
-                                            if (value === "") {
-                                                return "Vui lòng chọn Loại khách hàng";
-                                            }
-                                        }
-                                    }}
-                                    onChange={([selected]) => {
-                                        return { value: selected };
-                                    }}
-                                />
-                                <div className={styles.alert}>
-                                    <span>{errors.customerType && "⚠ Vui lòng chọn Loại khách hàng."} &nbsp;</span>
-                                </div>
-                            </FormControl>
-                        </Grid>
-
-                        <Grid item xs={12} sm={12} md={12} className={styles.padding}></Grid>
-
-                        <Grid item xs={12} sm={12} md={6}>
-                            <FormControl className={styles.formControl} size="small" variant="outlined"
-                                style={{ width: '100%' }}>
-                                <label className={styles.labelSelectOption}>Loại sản phẩm*</label>
-                                <Controller
-                                    as={<ReactSelect onInputChange={event => onInputChangeCategory(event)} />}
-                                    styles={customStylesSelectOption}
-                                    instanceId
-                                    isMulti
-                                    defaultValue=""
-                                    value={categoryCodeData[0]}
-                                    options={categoryCodeData}
-                                    name="categoryCodes"
-                                    control={control}
-                                    onChange={([selected]) => {
-                                        return { value: selected };
-                                    }}
-                                    rules={{
-                                        required: true,
-                                        validate: (value) => {
-                                            if (value === "") {
-                                                return "Vui lòng chọn Loại sản phẩm";
-                                            }
-                                        }
-                                    }}
-                                />
-                                <div className={styles.alert}>
-                                    <span>{errors.categoryCodes && "⚠ Vui lòng chọn Loại sản phẩm."} &nbsp;</span>
-                                </div>
-                            </FormControl>
-                        </Grid>
-
-                        <Grid item xs={12} sm={12} md={12} className={styles.padding}></Grid>
-
-                        <Grid item xs={12} sm={6} md={3} className={styles.padding}>
-                            <TextField
-                                label="Cấp số nhân"
-                                id="outlined-size-small"
-                                variant="outlined"
-                                size="small"
-                                name="multiply"
-                                type="number"
-                                autoComplete="off"
-                                style={{ width: '100%' }}
-                                inputRef={register({
-                                    required: true
-                                })}
-                            />
-                            <div className={styles.alert}>
-                                <span>{errors.multiply && "⚠ Vui lòng nhập giá trị."} &nbsp;</span>
-                            </div>
-                        </Grid>
-
-                        <Grid item xs={12} sm={6} md={3} className={styles.padding}>
-                            <TextField
-                                label="Cấp số cộng"
-                                id="outlined-size-small"
-                                variant="outlined"
-                                size="small"
-                                name="addition"
-                                type="number"
-                                autoComplete="off"
-                                style={{ width: '100%' }}
-                                inputRef={register({
-                                    required: true
-                                })}
-                            />
-                            <div className={styles.alert}>
-                                <span>{errors.addition && "⚠ Vui lòng nhập giá trị."} &nbsp;</span>
-                            </div>
-                        </Grid>
-                        {/* <Grid item xs={12} sm={12} md={12} className={styles.padding}></Grid>
-                        <Grid item xs={12} sm={12} md={6} className={styles.padding}>
-                            <TextField
-                                label="Thương hiệu"
-                                id="outlined-size-small"
-                                variant="outlined"
-                                size="small"
-                                name="brand"
-                                autoComplete="off"
-                                style={{ width: '100%' }}
-                                inputRef={register}
-                            />
-                            <div className={styles.alert}>
-                                <span> &nbsp;</span>
-                            </div>
-                        </Grid> */}
-
-                        <Grid item xs={12} sm={12} md={12} className={styles.padding}></Grid>
-
-                    </Grid>
-                    <Grid container className={styles.padding}>
-                        <Grid item xs={12} sm={6} md={6} className={`${styles.padding} ${styles.conBtn}`}>
-                            <Button variant="contained" style={{ marginRight: 8 }}
-                                onClick={() => reset()}
-                            >
-                                Reset
-                            </Button>
-                            <Button style={{ marginRight: 8 }}
-                                variant="contained"
-                                color="primary"
-                                onClick={handleSubmit(onSubmit)}
-                            >
-                                Lưu
-                            </Button>
-                            {/* <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={() => router.back()}
-                            >
-                                Quay lại
-                            </Button> */}
-                        </Grid>
-
-                    </Grid>
-                </form>
-
-
-
-            </Box>
+                    </TableBody>
+                    <MyTablePagination
+                        labelUnit="Config"
+                        count={total}
+                        rowsPerPage={limit}
+                        page={page}
+                        onChangePage={(event, page, rowsPerPage) => {
+                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}`)
+                        }}
+                    />
+                </Table>
+            </TableContainer>
         </AppCRM>
     )
 }
