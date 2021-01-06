@@ -71,7 +71,7 @@ function render(props) {
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
 
     const onSubmit =  async (formData) => {
-        formData.catagoryCode = formData.categoryCodes.map(category => category.code)
+        formData.categoryCode = formData.categoryCodes.map(category => category.code)
         formData.locationCode = formData.locationCode.map(location => location.code)
         formData.customerType = formData.customerType.value
         let client = getPricingClient();
@@ -130,6 +130,7 @@ function render(props) {
                                     name="customerType"
                                     control={control}
                                     // onChange={([, { id }]) => id}
+
                                     rules={{
                                         validate: (d) => {
                                             return typeof d != "undefined";
