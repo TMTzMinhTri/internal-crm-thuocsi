@@ -203,7 +203,7 @@ function render(props) {
 
                             <Grid item xs={12} sm={9} md={12}></Grid>
 
-                            <Grid item xs={12} sm={5} md={3}>
+                            <Grid item xs={12} sm={4} md={2}>
                                 <TextField
                                     inputProps={{
                                         readOnly: true,
@@ -220,7 +220,25 @@ function render(props) {
                                 />
                             </Grid>
 
-                            <Grid item xs={12} sm={5} md={3}>
+                            <Grid item xs={12} sm={4} md={2}>
+                                <TextField
+                                    inputProps={{
+                                        readOnly: true,
+                                        disabled: true,
+                                    }}
+                                    label="Thời gian tạo"
+                                    size="small"
+                                    value={moment(configPricing.createdTime).utcOffset('+0700').format("DD-MM-YYYY HH:mm:ss")}
+                                    margin="normal"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    style={{ margin: 12 }}
+                                />
+                            </Grid>
+
+                            
+                            <Grid item xs={12} sm={4} md={2}>
                                 <TextField
                                     inputProps={{
                                         readOnly: true,
