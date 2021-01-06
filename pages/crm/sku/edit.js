@@ -35,8 +35,13 @@ export async function loadProduct(ctx) {
         );
     let _client2 = getProductClient(ctx, {});
     res = await _client2.getListProductByIdsOrCodes([], [productCode]);
-    data.props.product = res?.data[0];
+    if(res.data) {
+        data.props.product = res?.data[0];
+    } else {
+        data.props.product = []
+    }
 }
+console.log(data.props.price.wholesalePrice)
 return data;
 }
 
