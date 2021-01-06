@@ -1,4 +1,4 @@
-import { faDollarSign, faMoneyCheckAlt, faUsers } from '@fortawesome/free-solid-svg-icons'
+import { faDollarSign, faMoneyCheckAlt, faUsers } from '@fortawesome/free-solid-svg-icons' // https://fontawesome.com/icons?d=gallery&s=solid&m=free
 import App from "@thuocsi/nextjs-components/app/app"
 import React, { Component } from "react"
 
@@ -31,6 +31,12 @@ export default class AppCRM extends Component {
                     name: "Sản phẩm",
                     link: "/crm/sku",
                     icon: faDollarSign
+                },
+                {
+                    key: "CONFIGPRICING",
+                    name: "Cài đặt giá",
+                    link: "/crm/pricing",
+                    icon: faMoneyCheckAlt
                 },
                 // {
                 //     key: "DISCOUNT",
