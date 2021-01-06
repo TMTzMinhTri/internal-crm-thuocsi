@@ -339,10 +339,7 @@ export default function renderForm(props, toast) {
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
-    let defaultIds = []
-    for (let i = 0; i < props.price?.wholesalePrice?.length; i++) {
-        defaultIds.push(i + 1)
-    }
+    const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind + 1) || [])
     const [ids, setIds] = useState(defaultIds);
     const [idDeleteds, setIdDeleteds] = useState([]);
     const [expanded, setExpanded] = React.useState(false);
@@ -350,22 +347,13 @@ export default function renderForm(props, toast) {
     const [brand, setBrand] = useState(getValues('brand') || 'LOCAL');
     const [categoryCode, setCategoryCode] = useState(props.price?.categoryCodes || []);
     let sellerCode = "MedX";
-
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
-        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index, 1))
+        idDeleteds.sort(function (a, b) { return b-a });
+        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
         let _client = getPriceClient()
         formData.tags = [...formData.tagsName] || [];
-        // if (formData.tagsName) {
-        //     for (let i = 0; i < formData.tagsName.length; i++) {
-        //         formData.tags.push(
-        //             listTag.filter(
-        //                 (tag) => tag.name === formData.tagsName[i]
-        //             )[0].code
-        //         );
-        //     }
-        // }
         let result = await _client.createNewPricing(formData)
         setLoading(false);
         if (result.status === "OK") {
@@ -381,16 +369,8 @@ export default function renderForm(props, toast) {
         formData.productCode = props.product?.code
         formData.categoryCodes = categoryCode;
         formData.tags = [...formData.tagsName] || [];
-        // if (formData.tagsName) {
-        //     for (let i = 0; i < formData.tagsName.length; i++) {
-        //         formData.tags.push(
-        //             listTag.filter(
-        //                 (tag) => tag.name === formData.tagsName[i]
-        //             )[0].code
-        //         );
-        //     }
-        // }
-        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index, 1))
+        idDeleteds.sort(function (a, b) { return b - a });
+        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
         let _client = getPriceClient()
         let result = await _client.updatePrice(formData)
@@ -465,7 +445,7 @@ export default function renderForm(props, toast) {
                                                             />
                                                         )}
                                                         onChange={(e, data) => {
-                                                            onChange(data.code); 
+                                                            onChange(data.code);
                                                             setCategoryCode(data.categoryCodes)
                                                         }}
                                                         {...props}
@@ -504,7 +484,7 @@ export default function renderForm(props, toast) {
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
-                                                        label="Loại Tag"
+                                                        label="Tag"
                                                         error={!!errors.tagsName}
                                                         placeholder=""
 
@@ -577,43 +557,84 @@ export default function renderForm(props, toast) {
                                         </Tooltip>
                                     </Typography>
                                     {
-                                        ids.map((num, idx) => (
-                                            <Accordion expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
-                                                <AccordionSummary
-                                                    expandIcon={<ExpandMoreIcon />}
-                                                    aria-controls="panel1bh-content"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    id="panel1bh-header"
-                                                >
-                                                    <Typography color="textSecondary">
-                                                        Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
-                                                    </Typography>
-                                                </AccordionSummary>
-                                                <AccordionDetails>
-                                                    <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                        register={register} errors={errors} index={idx} />
-                                                </AccordionDetails>
-                                                <AccordionActions>
-                                                    <Button size="small" color="secondary" variant="contained"
-                                                        startIcon={<DeleteIcon />}
-                                                        // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
-                                                        onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
-                                                </AccordionActions>
-                                            </Accordion>
-                                        ))
+                                        defaultIds.length > 0 ? defaultIds.map((num, idx) => (
+                                            <>
+                                                <Accordion expanded={true} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                                    <AccordionSummary
+                                                        expandIcon={<ExpandMoreIcon />}
+                                                        aria-controls="panel1bh-content"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        id="panel1bh-header"
+                                                    >
+                                                        <Typography color="textSecondary">
+                                                            Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
+                                                        </Typography>
+                                                    </AccordionSummary>
+                                                    <AccordionDetails>
+                                                        <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                                            register={register} errors={errors} index={idx} />
+                                                    </AccordionDetails>
+                                                    <AccordionActions>
+                                                        <Button size="small" color="secondary" variant="contained"
+                                                            startIcon={<DeleteIcon />}
+                                                            // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                                            onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                                    </AccordionActions>
+                                                </Accordion>
+                                            </>
+                                        )) :
+                                            ids.map((num, idx) => (
+                                                <>
+                                                    <Accordion expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                                        <AccordionSummary
+                                                            expandIcon={<ExpandMoreIcon />}
+                                                            aria-controls="panel1bh-content"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            id="panel1bh-header"
+                                                        >
+                                                            <Typography color="textSecondary">
+                                                                Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
+                                                            </Typography>
+                                                        </AccordionSummary>
+                                                        <AccordionDetails>
+                                                            <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                                                register={register} errors={errors} index={idx} />
+                                                        </AccordionDetails>
+                                                        <AccordionActions>
+                                                            <Button size="small" color="secondary" variant="contained"
+                                                                startIcon={<DeleteIcon />}
+                                                                // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                                                onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                                        </AccordionActions>
+                                                    </Accordion>
+                                                </>
+                                            ))
                                     }
-                                    <Button
+                                    {defaultIds.length > 0 ? <Button
                                         color="primary"
-                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (ids.length - idDeleteds.length === 5)}
+                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length - idDeleteds.length === 5)}
                                         style={{ marginTop: '10px' }}
                                         onClick={() => {
-                                            setIds([...ids, ids.length + 1])
-                                            setExpanded(`panel${ids.length}`)
+                                            setDefaultIds([...defaultIds, defaultIds.length + 1])
+                                            setExpanded(`panel${defaultIds.length}`)
                                         }}
                                         startIcon={<AddIcon />}
                                     >
                                         Thêm giá bán buôn
-                                </Button>
+                                    </Button> :
+                                        <Button
+                                            color="primary"
+                                            disabled={(typeof props.product === "undefined" && !getValues().productCode) || (ids.length - idDeleteds.length === 5)}
+                                            style={{ marginTop: '10px' }}
+                                            onClick={() => {
+                                                setIds([...ids, ids.length + 1])
+                                                setExpanded(`panel${ids.length}`)
+                                            }}
+                                            startIcon={<AddIcon />}
+                                        >
+                                            Thêm giá bán buôn
+                                    </Button>}
+
                                 </Grid>
                             </Grid>
                         </Box>
