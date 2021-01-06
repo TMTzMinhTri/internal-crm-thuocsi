@@ -86,6 +86,14 @@ class PricingClient extends APIClient {
         });
     }
 
+    getConfigPriceByID(priceCode) {
+        return this.callFromNextJS(
+            "GET",
+            `${prefix}/product/config`, {
+                priceCode
+            });
+    }
+
 }
 
 export function getPricingClient(ctx, data) {

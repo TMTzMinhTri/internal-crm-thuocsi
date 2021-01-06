@@ -107,30 +107,30 @@ function render(props) {
     }, [props]);
 
     function typeCategorys(catagory) {
-        if (catagory.length > 0) {
-            const chips = catagory.map(item => {
+        if (catagory?.length > 0) {
+            const chips = catagory.map((item, i) => {
                 if (categoryLists[item]?.shortName) {
-                    return <Chip size="small" label={categoryLists[item]?.shortName} variant="outlined" />;
+                    return <Chip key={i} size="small" label={categoryLists[item]?.shortName} variant="outlined" />;
                 }
             });
             return chips;
         }
-        return '---';
+        return 'Không có danh mục.';
     }
 
     function provices(provi) {
-        if (provi === 'All') {
-            return <Chip size="small" label="All" variant="outlined" />;
-        }
-        if (provi.length > 0) {
-            const chips = provi.map(item => {
+        if (provi?.length > 0) {
+            if (provi[0] === 'ALL') {
+                return <Chip label="All" variant="outlined" />;
+            }
+            const chips = provi.map((item, i) => {
                 if (provinceLists[item]?.name) {
-                    return <Chip size="small" label={provinceLists[item]?.name} variant="outlined" />;
+                    return <Chip key={i} size="small" label={provinceLists[item]?.name} variant="outlined" />;
                 }
             });
             return chips;
         }
-        return '---';
+        return 'Không có tỉnh thành.';
     }
 
     return (
@@ -146,8 +146,8 @@ function render(props) {
                             <TableCell align="left">Loại khách hàng</TableCell>
                             <TableCell align="left">Danh mục</TableCell>
                             <TableCell align="left">Tỉnh/thành</TableCell>
-                            <TableCell align="left">Hẽ số nhân</TableCell>
-                            <TableCell align="left">Hẽ số cộng</TableCell>
+                            <TableCell align="right">Hệ số nhân</TableCell>
+                            <TableCell align="right">Hệ số cộng</TableCell>
                             <TableCell align="left">Brand</TableCell>
                             <TableCell align="left">Cập nhật</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -166,7 +166,7 @@ function render(props) {
                                     <TableCell align="left">{Brand[row.brand].value}</TableCell>
                                     <TableCell align="left">{moment(row.lastUpdatedTime).utcOffset('+0700').format("DD-MM-YYYY HH:mm:ss")}</TableCell>
                                     <TableCell align="center">
-                                        <Link href={`/crm/pricing/`}>
+                                        <Link href={`/crm/pricing/detail-config?priceCode=${row.code}`}>
                                             <Tooltip title="Cập nhật thông tin">
                                                 <IconButton>
                                                     <EditIcon fontSize="small" />
