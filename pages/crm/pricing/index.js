@@ -8,12 +8,17 @@ import {
 } from "@material-ui/core";
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
+import Link from "next/link";
+import Tooltip from "@material-ui/core/Tooltip";
+import IconButton from "@material-ui/core/IconButton";
+import EditIcon from "@material-ui/icons/Edit";
+import moment from "moment";
 
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import AppCRM from "pages/_layout";
 import { getPricingClient } from 'client/pricing';
-import { condUserType, Brand } from 'components/global';
+import { condUserType, Brand, formatNumber } from 'components/global';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -114,7 +119,7 @@ function render(props) {
     }
 
     function provices(provi) {
-        if(provi === 'All'){
+        if (provi === 'All') {
             return <Chip size="small" label="All" variant="outlined" />;
         }
         if (provi.length > 0) {
@@ -138,13 +143,14 @@ function render(props) {
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">Code</TableCell>
-                            <TableCell align="left">Danh mục</TableCell>
                             <TableCell align="left">Loại khách hàng</TableCell>
+                            <TableCell align="left">Danh mục</TableCell>
+                            <TableCell align="left">Tỉnh/thành</TableCell>
                             <TableCell align="left">Cấp số nhân</TableCell>
                             <TableCell align="left">Cấp số cộng</TableCell>
-                            <TableCell align="left">Tỉnh/thành</TableCell>
                             <TableCell align="left">Brand</TableCell>
-                            {/* <TableCell align="center">Thao tác</TableCell> */}
+                            <TableCell align="left">Cập nhật</TableCell>
+                            <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -152,12 +158,22 @@ function render(props) {
                             total ? configPricingList.map((row, i) => (
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.code || '---'}</TableCell>
-                                    <TableCell align="left" className={classes.root}>{typeCategorys(row.categoryCode)}</TableCell>
                                     <TableCell align="left">{condUserType.find(e => e.value === row.customerType)?.label}</TableCell>
-                                    <TableCell align="left">{row.numMultiply}</TableCell>
-                                    <TableCell align="left">{row.numAddition}</TableCell>
+                                    <TableCell align="left" className={classes.root}>{typeCategorys(row.categoryCode)}</TableCell>
                                     <TableCell align="left">{provices(row.locationCode)}</TableCell>
+                                    <TableCell align="right">{row.numMultiply}</TableCell>
+                                    <TableCell align="right">{formatNumber(row.numAddition)}</TableCell>
                                     <TableCell align="left">{Brand[row.brand].value}</TableCell>
+                                    <TableCell align="left">{moment(row.lastUpdatedTime).utcOffset('+0700').format("DD-MM-YYYY HH:mm:ss")}</TableCell>
+                                    <TableCell align="center">
+                                        <Link href={`/crm/pricing/`}>
+                                            <Tooltip title="Cập nhật thông tin">
+                                                <IconButton>
+                                                    <EditIcon fontSize="small" />
+                                                </IconButton>
+                                            </Tooltip>
+                                        </Link>
+                                    </TableCell>
                                 </TableRow>
                             )) : (
                                     <TableRow>
@@ -165,7 +181,6 @@ function render(props) {
                                     </TableRow>
                                 )
                         }
-
                     </TableBody>
                     <MyTablePagination
                         labelUnit="Config"

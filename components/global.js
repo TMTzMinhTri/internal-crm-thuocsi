@@ -40,10 +40,10 @@ export const condUserType = [
 
 export const Brand = {
     'LOCAL':{
-        value: 'Trong nước'
+        value: 'Nội địa'
     },
     'FOREIGN':{
-        value: 'Nhập khẩu'
+        value: 'Quốc tế'
     }
 }
 
