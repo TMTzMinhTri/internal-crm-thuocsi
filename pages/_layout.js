@@ -34,7 +34,7 @@ export default class AppCRM extends Component {
                 },
                 {
                     key: "CONFIGPRICING",
-                    name: "Cài đặt giá",
+                    name: "Bảng giá",
                     link: "/crm/pricing",
                     icon: faMoneyCheckAlt
                 },
