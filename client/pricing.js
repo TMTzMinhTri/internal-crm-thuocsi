@@ -14,55 +14,62 @@ class PricingClient extends APIClient {
         return this.callFromNextJS(
             "GET",
             `${prefix}/selling/list`, {
-                q,
-                offset,
-                limit,
-                getTotal: true
-            })
+            q,
+            offset,
+            limit,
+            getTotal: true
+        })
     }
 
     getListProductByProductCode(productCodes) {
         return this.callFromNextJS(
             "POST",
             `${prefixProduct}/product/list`, {
-                productCodes
-            });
+            productCodes
+        });
     }
 
     getListCategory(q) {
         return this.callFromNextJS(
             "GET",
             `${prefixProduct}/category/list`, {
-                q: q,
-                offset: 0,
-                limit: 100,
-                getTotal: true
-            })
+            // q: q,
+            // offset: 0,
+            // limit: 100,
+            // getTotal: true
+        })
     }
 
     getListCategoryFromClient(q) {
         return this.callFromClient(
             "GET",
             `${prefixProduct}/category/list`, {
-                q,
-                getTotal: true
-            })
+            q,
+            getTotal: true
+        })
+    }
+
+    createNewPriceGenConfig(data) {
+        return this.callFromClient(
+            "POST",
+            `${prefix}/product/config`, data
+        )
     }
 
     configPrice(data) {
-        console.log({...data });
+        console.log({ ...data });
         return this.callFromClient(
             "POST",
-            `${prefix}/product/config`, {...data });
+            `${prefix}/product/config`, { ...data });
     }
 
     getListConfigPrice(data) {
         return this.callFromNextJS(
             "GET",
             `${prefix}/product/config/list`, {
-                ...data,
-                getTotal: true
-            })
+            ...data,
+            getTotal: true
+        })
     }
 
     getProvinceLists() {
@@ -75,8 +82,8 @@ class PricingClient extends APIClient {
         return this.callFromNextJS(
             "POST",
             `${prefixProduct}/category/list`, {
-                codes: data
-            });
+            codes: data
+        });
     }
 
     getConfigPriceByID(priceCode) {

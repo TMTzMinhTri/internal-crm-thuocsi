@@ -152,3 +152,9 @@
     align-items: center;
     justify-content: center;
 }
+
+.displayRow {
+    display: flex;
+    flex-direction: row;
+}
+
