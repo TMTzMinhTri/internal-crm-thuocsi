@@ -56,7 +56,6 @@
     display: unset !important;
 }
 
-
 .textSearch {
     color: green;
     padding: 10px;
@@ -78,6 +77,7 @@
 .btnAction {
     margin-left: 5px !important;
 }
+
 .divider {
     height: 28px;
     margin: 4px;
@@ -87,7 +87,15 @@
     margin-top: 10px !important;
 }
 
-.addMore0{
+.addMore0 {
     display: none;
 }
 
+.marginTopBottom {
+    margin: 25px 0 15px!important;
+}
+
+.displayFlex {
+    flex-direction: row !important;
+    margin-top: 10px;
+}
