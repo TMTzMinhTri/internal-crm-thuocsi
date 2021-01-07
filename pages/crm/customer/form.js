@@ -1,22 +1,23 @@
-import AppCRM from "../../_layout";
-import Head from "next/head";
 import { Box, Button, ButtonGroup, CardContent, FormGroup, Paper, TextField } from "@material-ui/core";
-import styles from "./customer.module.css";
-import Typography from "@material-ui/core/Typography";
-import Grid from "@material-ui/core/Grid";
+import Card from "@material-ui/core/Card";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
+import FormControl from "@material-ui/core/FormControl";
+import Grid from "@material-ui/core/Grid";
+import InputLabel from "@material-ui/core/InputLabel";
+import MenuItem from "@material-ui/core/MenuItem";
+import Select from "@material-ui/core/Select";
+import Typography from "@material-ui/core/Typography";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+import { getCustomerClient } from "client/customer";
+import { getMasterDataClient } from "client/master-data";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import CircularProgress from "@material-ui/core/CircularProgress";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import Select from "@material-ui/core/Select";
-import InputLabel from "@material-ui/core/InputLabel";
-import Autocomplete from '@material-ui/lab/Autocomplete';
-import Card from "@material-ui/core/Card";
-import { getMasterDataClient } from "../../../client/master-data";
-import { getCustomerClient } from "../../../client/customer";
-import Link from "next/link";
+import styles from "./customer.module.css";
 
 const levels = [
     {
@@ -131,6 +132,7 @@ export default function renderForm(props, toast) {
     const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
     const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
     const [isDisabledWard, setDisabledWard] = useState(isWard);
+    const router = useRouter();
     const { register, handleSubmit, errors, control } = useForm({
         defaultValues: editObject,
         mode: "onChange"
@@ -211,7 +213,8 @@ export default function renderForm(props, toast) {
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success(resp.message || 'Thêm khách hàng thành công')
+            success('Thêm khách hàng thành công')
+            router.push(`/crm/customer`)
         }
     }
 
@@ -221,7 +224,7 @@ export default function renderForm(props, toast) {
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success(resp.message || 'Cập nhật khách hàng thành công')
+            success('Cập nhật khách hàng thành công')
         }
     }
 
