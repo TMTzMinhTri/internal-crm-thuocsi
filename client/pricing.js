@@ -1,6 +1,9 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-const prefix = `/marketplace/pricing/v1`
+import { constURL } from "./constant";
 
+const prefixMaster = constURL.PREFIX_MASTER
+const prefix = constURL.PREFIX_PRICING
+const prefixProduct = `${constURL.PREFIX_PRODUCT}`
 class PricingClient extends APIClient {
 
     constructor(ctx, data) {
@@ -21,7 +24,7 @@ class PricingClient extends APIClient {
     getListProductByProductCode(productCodes) {
         return this.callFromNextJS(
             "POST",
-            `/marketplace/product/v1/product/list`, {
+            `${prefixProduct}/product/list`, {
             productCodes
         });
     }
@@ -29,28 +32,80 @@ class PricingClient extends APIClient {
     getListCategory(q) {
         return this.callFromNextJS(
             "GET",
-            `/marketplace/product/v1/category/list`, {
-            q: q,
-            offset: 0,
-            limit: 100,
-            getTotal: true
+            `${prefixProduct}/category/list`, {
+            // q: q,
+            // offset: 0,
+            // limit: 100,
+            // getTotal: true
         })
     }
 
     getListCategoryFromClient(q) {
         return this.callFromClient(
             "GET",
-            `/marketplace/product/v1/category/list`, {
+            `${prefixProduct}/category/list`, {
             q,
             getTotal: true
         })
     }
 
-    configPrice(data) {
-        console.log({...data});
+    updatePriceGenConfig(data){
+        return this.callFromClient(
+            "PUT",
+            `${prefix}/product/config`,
+            data
+        )
+    }
+
+    createNewPriceGenConfig(data) {
         return this.callFromClient(
             "POST",
-            `${prefix}/product/config`, {...data});
+            `${prefix}/product/config`, data
+        )
+    }
+
+    configPrice(data) {
+        console.log({ ...data });
+        return this.callFromClient(
+            "POST",
+            `${prefix}/product/config`, { ...data });
+    }
+
+    getListConfigPrice(data) {
+        return this.callFromNextJS(
+            "GET",
+            `${prefix}/product/config/list`, {
+            ...data,
+            getTotal: true
+        })
+    }
+
+    getConfigPriceByCode(code) {
+        return this.callFromNextJS(
+            "GET",
+            `${prefix}/product/config?priceCode=${code}`)
+    }
+
+    getProvinceLists() {
+        return this.callFromNextJS(
+            "GET",
+            `${prefixMaster}/province/list`, '');
+    }
+
+    getCategoryWithArrayID(data) {
+        return this.callFromNextJS(
+            "POST",
+            `${prefixProduct}/category/list`, {
+            codes: data
+        });
+    }
+
+    getConfigPriceByID(priceCode) {
+        return this.callFromNextJS(
+            "GET",
+            `${prefix}/product/config`, {
+            priceCode
+        });
     }
 
 }

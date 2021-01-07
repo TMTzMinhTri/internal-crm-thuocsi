@@ -1,12 +1,12 @@
 import AppCRM from "../../_layout";
 import Head from "next/head";
-import {Box, Button, ButtonGroup, CardContent, FormGroup, Paper, TextField} from "@material-ui/core";
+import { Box, Button, ButtonGroup, CardContent, FormGroup, Paper, TextField } from "@material-ui/core";
 import styles from "./customer.module.css";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Divider from "@material-ui/core/Divider";
-import React, {useState} from "react";
-import {Controller, useForm} from "react-hook-form";
+import React, { useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
@@ -14,8 +14,8 @@ import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import Card from "@material-ui/core/Card";
-import {getMasterDataClient} from "../../../client/master-data";
-import {getCustomerClient} from "../../../client/customer";
+import { getMasterDataClient } from "../../../client/master-data";
+import { getCustomerClient } from "../../../client/customer";
 import Link from "next/link";
 
 const levels = [
@@ -76,7 +76,7 @@ const scopes = [
 ]
 
 export async function loadData(ctx) {
-    let data = {props: {}}
+    let data = { props: {} }
 
     let masterDataClient = getMasterDataClient(ctx, data)
     let resp = await masterDataClient.getProvince(0, 100, '')
@@ -86,7 +86,7 @@ export async function loadData(ctx) {
     data.props.provinces = resp.data
 
     let query = ctx.query
-    let customerCode = typeof(query.customerCode) === "undefined" ? '' : query.customerCode
+    let customerCode = typeof (query.customerCode) === "undefined" ? '' : query.customerCode
     data.props.isUpdate = false
     if (customerCode !== '') {
         data.props.isUpdate = true
@@ -118,56 +118,65 @@ export async function loadData(ctx) {
 }
 
 export default function renderForm(props, toast) {
-    let {error, success} = toast;
+    let { error, success } = toast;
     let editObject = props.isUpdate ? props.customer : {}
+    const checkWardData = props.isUpdate ? (props.customer.wardCode === '' ? {} : props.ward) : {};
     const [loading, setLoading] = useState(false);
     const [province, setProvince] = useState(props.province);
-    const [districts, setDistricts] = useState(props.districts);
-    const [district, setDistrict] = useState(props.district);
-    const [wards, setWards] = useState(props.wards);
-    const [ward, setWard] = useState(props.ward);
-    const {register, handleSubmit, errors, control} = useForm({
+    const [districts, setDistricts] = useState(props.districts || []);
+    const [district, setDistrict] = useState(props.district || {});
+    const [wards, setWards] = useState(props.wards || []);
+    const [ward, setWard] = useState(checkWardData);
+    const isWard = ((props.ward === undefined) || (Object.keys(checkWardData).length === 0 && checkWardData.constructor === Object)) ? true : false;
+    const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
+    const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
+    const [isDisabledWard, setDisabledWard] = useState(isWard);
+    const { register, handleSubmit, errors, control } = useForm({
         defaultValues: editObject,
         mode: "onChange"
     });
 
-    console.log(props.customer)
     const onProvinceChange = async (event, val) => {
+        setProvince()
         setDistricts([])
         setDistrict({})
+        setWards([])
         setWard({})
+        setDisabledDistrict(true)
+        setDisabledWard(true)
         let masterDataClient = getMasterDataClient()
         if (val) {
             setProvince(val)
             let res = await masterDataClient.getDistrictByProvinceCode(val?.code)
             if (res.status !== 'OK') {
-                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
+                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau');
             } else {
                 setDistricts(res.data)
+                setDisabledDistrict(false)
             }
-        } else {
-            setProvince()
         }
     }
 
     const onDistrictChange = async (event, val) => {
+        setDistrict('')
         setWards([])
-        setDistrict(val)
-        setWard({})
+        setWard('')
+        setDisabledWard(true)
         let masterDataClient = getMasterDataClient()
         if (val) {
+            setDistrict(val)
             let res = await masterDataClient.getWardByDistrictCode(val.code)
             if (res.status !== 'OK') {
                 error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
             } else {
                 setWards(res.data)
+                setDisabledWard(false)
             }
-        } else {
-            setDistrict({})
         }
     }
 
     const onWardChange = async (event, val) => {
+        setWard()
         if (val) {
             setWard(val)
         } else {
@@ -182,9 +191,10 @@ export default function renderForm(props, toast) {
             errors.passwordConfirm.message = "Mật khẩu xác nhận không chính xác"
             return
         }
-        formData.provinceCode = province.code
-        formData.districtCode = district.code
-        formData.wardCode = ward.code
+        formData.provinceCode = province.code || ''
+        formData.districtCode = district.code || ''
+        formData.wardCode = ward.code || ''
+
         if (props.isUpdate) {
             formData.customerID = props.customer.customerID
             formData.id = props.customer.id
@@ -241,282 +251,285 @@ export default function renderForm(props, toast) {
                         </Box>
                     </div>
                 )
-             : (
-                <Box component={Paper} display="block">
-                <FormGroup>
-                    <form>
-                        <Box className={styles.contentPadding}>
-                            <Box style={{fontSize: 24, marginBottom: '10px'}}>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</Box>
-                            <Card variant="outlined">
-                                <CardContent>
-                                    <Typography variant="h6" component="h6"
-                                                style={{marginBottom: '10px', fontSize: 18}}>
-                                        Thông tin cơ bản
+                    : (
+                        <Box component={Paper} display="block">
+                            <FormGroup>
+                                <form>
+                                    <Box className={styles.contentPadding}>
+                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</Box>
+                                        <Card variant="outlined">
+                                            <CardContent>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 18 }}>
+                                                    Thông tin cơ bản
+                                                </Typography>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={4} md={4}>
+                                                        <TextField
+                                                            id="name"
+                                                            name="name"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            label="Tên khách hàng"
+                                                            placeholder=""
+                                                            helperText={errors.name?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.name}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Tên khách hàng không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 250,
+                                                                        message: "Tên khách hàng có độ dài tối đa 250 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 6,
+                                                                        message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /[A-Za-z]/,
+                                                                        message: "Tên khách hàng phải có kí tự chữ"
+                                                                    }
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={4} md={4}>
+                                                        <TextField
+                                                            id="email"
+                                                            name="email"
+                                                            label="Email"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            placeholder=""
+                                                            type="email"
+                                                            helperText={errors.email?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.email}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Email khách hàng không thể để trống",
+                                                                    pattern: {
+                                                                        value: /.+@.+[.].+/,
+                                                                        message: "Email không hợp lệ"
+                                                                    }
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <TextField
+                                                            id="phone"
+                                                            name="phone"
+                                                            label="Số điện thoại"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            placeholder=""
+                                                            type="number"
+                                                            helperText={errors.phone?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.phone}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Số điện thoại không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 12,
+                                                                        message: "Số điện thoại không hợp lệ"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /[0-9]{9,12}/,
+                                                                        message: "Số điện thoại không hợp lệ"
+                                                                    },
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={6} md={6}>
+                                                        <TextField
+                                                            id="address"
+                                                            name="address"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            label="Địa chỉ"
+                                                            placeholder=""
+                                                            helperText={errors.address?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.address}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Địa chỉ không thể để trống",
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <Autocomplete
+                                                            options={props.provinces}
+                                                            size="small"
+                                                            value={province}
+                                                            onChange={onProvinceChange}
+                                                            getOptionLabel={(option) => option.name}
+                                                            renderInput={(params) =>
+                                                                <TextField
+                                                                    id="provinceCode"
+                                                                    name="provinceCode"
+                                                                    variant="outlined"
+                                                                    label="Tỉnh/Thành phố"
+                                                                    helperText={errors.provinceCode?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{ width: '100%' }}
+                                                                    error={!!errors.provinceCode}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Tỉnh/ Thành phố không thể để trống",
+                                                                        })
+                                                                    }
+                                                                    {...params} />}
+                                                        />
+
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <Autocomplete
+                                                            options={districts}
+                                                            size="small"
+                                                            getOptionLabel={(option) => option.name}
+                                                            value={district}
+                                                            onChange={onDistrictChange}
+                                                            disabled={isDisabledDistrict}
+                                                            renderInput={(params) =>
+                                                                <TextField
+                                                                    id="districtCode"
+                                                                    name="districtCode"
+                                                                    variant="outlined"
+                                                                    label="Quận/Huyện"
+                                                                    // helperText={errors.districtCode?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{ width: '100%' }}
+                                                                    // error={!!errors.districtCode}
+                                                                    // required
+                                                                    inputRef={
+                                                                        register({
+                                                                            // required: "Quận/huyện thể để trống",
+                                                                        })
+                                                                    }
+                                                                    {...params} />}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <Autocomplete
+                                                            size="small"
+                                                            options={wards}
+                                                            name={"ward"}
+                                                            value={ward}
+                                                            disabled={isDisabledWard}
+                                                            onChange={onWardChange}
+                                                            getOptionLabel={(option) => option.name}
+                                                            renderInput={(params) =>
+                                                                <TextField
+                                                                    id="wardCode"
+                                                                    name="wardCode"
+                                                                    variant="outlined"
+                                                                    label="Phường/Xã"
+                                                                    // helperText={errors.wardCode?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{ width: '100%' }}
+                                                                    // error={!!errors.wardCode}
+                                                                    // required
+                                                                    inputRef={
+                                                                        register({
+                                                                            // required: "Phường xã không thể để trống",
+                                                                        })
+                                                                    }
+                                                                    {...params} />}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Card>
+                                        <Card variant="outlined" style={{ marginTop: '10px' }}>
+                                            <CardContent>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 18 }}>
+                                                    Thông tin pháp lý
                                     </Typography>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <TextField
-                                                id="name"
-                                                name="name"
-                                                variant="outlined"
-                                                size="small"
-                                                label="Tên khách hàng"
-                                                placeholder=""
-                                                helperText={errors.name?.message}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                style={{width: '100%'}}
-                                                error={!!errors.name}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        required: "Tên khách hàng không thể để trống",
-                                                        maxLength: {
-                                                            value: 250,
-                                                            message: "Tên khách hàng có độ dài tối đa 250 kí tự"
-                                                        },
-                                                        minLength: {
-                                                            value: 6,
-                                                            message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
-                                                        },
-                                                        pattern: {
-                                                            value: /[A-Za-z]/,
-                                                            message: "Tên khách hàng phải có kí tự chữ"
-                                                        }
-                                                    })
-                                                }
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <TextField
-                                                id="email"
-                                                name="email"
-                                                label="Email"
-                                                variant="outlined"
-                                                size="small"
-                                                placeholder=""
-                                                type="email"
-                                                helperText={errors.email?.message}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                style={{width: '100%'}}
-                                                error={!!errors.email}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        required: "Email khách hàng không thể để trống",
-                                                        pattern: {
-                                                            value: /.+@.+[.].+/,
-                                                            message: "Email không hợp lệ"
-                                                        }
-                                                    })
-                                                }
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <TextField
-                                                id="phone"
-                                                name="phone"
-                                                label="Số điện thoại"
-                                                variant="outlined"
-                                                size="small"
-                                                placeholder=""
-                                                type="number"
-                                                helperText={errors.phone?.message}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                style={{width: '100%'}}
-                                                error={!!errors.phone}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        required: "Số điện thoại không thể để trống",
-                                                        maxLength: {
-                                                            value: 12,
-                                                            message: "Số điện thoại không hợp lệ"
-                                                        },
-                                                        pattern: {
-                                                            value: /[0-9]{9,12}/,
-                                                            message: "Số điện thoại không hợp lệ"
-                                                        },
-                                                    })
-                                                }
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={6} md={6}>
-                                            <TextField
-                                                id="address"
-                                                name="address"
-                                                variant="outlined"
-                                                size="small"
-                                                label="Địa chỉ"
-                                                placeholder=""
-                                                helperText={errors.address?.message}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                style={{width: '100%'}}
-                                                error={!!errors.address}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        required: "Địa chỉ không thể để trống",
-                                                    })
-                                                }
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <Autocomplete
-                                                options={props.provinces}
-                                                size="small"
-                                                value={province}
-                                                onChange={onProvinceChange}
-                                                getOptionLabel={(option) => option.name}
-                                                renderInput={(params) =>
-                                                    <TextField
-                                                        id="provinceCode"
-                                                        name="provinceCode"
-                                                        variant="outlined"
-                                                        label="Tỉnh/ Thành phố"
-                                                        helperText={errors.provinceCode?.message}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        style={{width: '100%'}}
-                                                        error={!!errors.provinceCode}
-                                                        required
-                                                        inputRef={
-                                                            register({
-                                                                required: "Tỉnh/ Thành phố không thể để trống",
-                                                            })
-                                                        }
-                                                        {...params} />}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <Autocomplete
-                                                options={districts}
-                                                size="small"
-                                                getOptionLabel={(option) => option.name}
-                                                value={district}
-                                                onChange={onDistrictChange}
-                                                renderInput={(params) =>
-                                                    <TextField
-                                                        id="districtCode"
-                                                        name="districtCode"
-                                                        variant="outlined"
-                                                        label="Quận/ Huyện"
-                                                        // helperText={errors.districtCode?.message}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        style={{width: '100%'}}
-                                                        // error={!!errors.districtCode}
-                                                        // required
-                                                        inputRef={
-                                                            register({
-                                                                // required: "Quận/huyện thể để trống",
-                                                            })
-                                                        }
-                                                        {...params} />}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <Autocomplete
-                                                size="small"
-                                                options={wards}
-                                                name={"ward"}
-                                                value={ward}
-                                                onChange={onWardChange}
-                                                getOptionLabel={(option) => option.name}
-                                                renderInput={(params) =>
-                                                    <TextField
-                                                        id="wardCode"
-                                                        name="wardCode"
-                                                        variant="outlined"
-                                                        label="Phường/ Xã"
-                                                        // helperText={errors.wardCode?.message}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        style={{width: '100%'}}
-                                                        // error={!!errors.wardCode}
-                                                        // required
-                                                        inputRef={
-                                                            register({
-                                                                // required: "Phường xã không thể để trống",
-                                                            })
-                                                        }
-                                                        {...params} />}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Card>
-                            <Card variant="outlined" style={{marginTop: '10px'}}>
-                                <CardContent>
-                                    <Typography variant="h6" component="h6"
-                                                style={{marginBottom: '10px', fontSize: 18}}>
-                                        Thông tin pháp lý
-                                    </Typography>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <TextField
-                                                id="legalRepresentative"
-                                                name="legalRepresentative"
-                                                label="Người đại diện"
-                                                variant="outlined"
-                                                size="small"
-                                                placeholder=""
-                                                helperText={errors.legalRepresentative?.message}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                style={{width: '100%'}}
-                                                error={!!errors.legalRepresentative}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        required: "Người đại diện không thể để trống",
-                                                    })
-                                                }
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <TextField
-                                                id="mst"
-                                                name="mst"
-                                                label="Mã số thuế"
-                                                variant="outlined"
-                                                size="small"
-                                                placeholder=""
-                                                helperText={errors.mst?.message}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                style={{width: '100%'}}
-                                                error={!!errors.mst}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        required: "Mã số thuế không thể để trống",
-                                                    })
-                                                }
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={6} md={6}>
-                                            {/* <Grid container spacing={1} alignItems="center">
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={4} md={4}>
+                                                        <TextField
+                                                            id="legalRepresentative"
+                                                            name="legalRepresentative"
+                                                            label="Người đại diện"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            placeholder=""
+                                                            helperText={errors.legalRepresentative?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.legalRepresentative}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Người đại diện không thể để trống",
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <TextField
+                                                            id="mst"
+                                                            name="mst"
+                                                            label="Mã số thuế"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            placeholder=""
+                                                            helperText={errors.mst?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.mst}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Mã số thuế không thể để trống",
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={6} md={6}>
+                                                        {/* <Grid container spacing={1} alignItems="center">
                                                 <Grid item xs={8} sm={8} md={10}>
                                                     <TextField
                                                         id="licenses"
@@ -555,199 +568,199 @@ export default function renderForm(props, toast) {
                                                     </label>
                                                 </Grid>
                                             </Grid> */}
-                                        </Grid>
-                                    </Grid>
-                                </CardContent>
-                            </Card>
-                            <Card variant="outlined" style={{marginTop: '10px'}}>
-                                <CardContent>
-                                    <Typography variant="h6" component="h6"
-                                                style={{marginBottom: '10px', fontSize: 18}}>
-                                        Thông tin tài khoản
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Card>
+                                        <Card variant="outlined" style={{ marginTop: '10px' }}>
+                                            <CardContent>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 18 }}>
+                                                    Thông tin tài khoản
                                     </Typography>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <FormControl style={{width: '100%'}} size="small" variant="outlined">
-                                                <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
-                                                <Controller
-                                                    name="scope"
-                                                    control={control}
-                                                    lable="Vai trò"
-                                                    defaultValue={scopes ? scopes[0].value : ''}
-                                                    rules={{required: true}}
-                                                    error={!!errors.scope}
-                                                    as={
-                                                        <Select label="Vai trò">
-                                                            {scopes.map(({value, label}) => (
-                                                                <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                    }
-                                                />
-                                            </FormControl>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
+                                                            <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
+                                                            <Controller
+                                                                name="scope"
+                                                                control={control}
+                                                                lable="Vai trò"
+                                                                defaultValue={scopes ? scopes[0].value : ''}
+                                                                rules={{ required: true }}
+                                                                error={!!errors.scope}
+                                                                as={
+                                                                    <Select label="Vai trò">
+                                                                        {scopes.map(({ value, label }) => (
+                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                }
+                                                            />
+                                                        </FormControl>
 
-                                        </Grid>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <FormControl style={{width: '100%'}} size="small" variant="outlined">
-                                                <InputLabel id="department-select-label" sise="small">Cấp độ</InputLabel>
-                                                <Controller
-                                                    name="level"
-                                                    control={control}
-                                                    lable="Cấp độ"
-                                                    defaultValue={levels ? levels[0].value : ''}
-                                                    rules={{required: true}}
-                                                    error={!!errors.level}
-                                                    as={
-                                                        <Select label="Cấp độ">
-                                                            {levels.map(({value, label}) => (
-                                                                <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                    }
-                                                />
-                                            </FormControl>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
+                                                            <InputLabel id="department-select-label" sise="small">Cấp độ</InputLabel>
+                                                            <Controller
+                                                                name="level"
+                                                                control={control}
+                                                                lable="Cấp độ"
+                                                                defaultValue={levels ? levels[0].value : ''}
+                                                                rules={{ required: true }}
+                                                                error={!!errors.level}
+                                                                as={
+                                                                    <Select label="Cấp độ">
+                                                                        {levels.map(({ value, label }) => (
+                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                }
+                                                            />
+                                                        </FormControl>
 
-                                        </Grid>
-                                        <Grid item xs={12} sm={3} md={3}>
-                                            <FormControl style={{width: '100%'}} size="small" variant="outlined">
-                                                <InputLabel id="department-select-label">Trạng thái</InputLabel>
-                                                <Controller
-                                                    name="status"
-                                                    control={control}
-                                                    defaultValue={statuses ? statuses[0].value : ''}
-                                                    rules={{required: true}}
-                                                    error={!!errors.status}
-                                                    as={
-                                                        <Select label="Trạng thái">
-                                                            {statuses.map(({value, label}) => (
-                                                                <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                    }
-                                                />
-                                            </FormControl>
-                                        </Grid>
-                                    </Grid>
-                                    {
-                                        props.isUpdate ? (
-                                            <div/>
-                                        ) : (
-                                            <Grid spacing={3} container>
-                                                <Grid item xs={12} sm={3} md={3}>
-                                                    <TextField
-                                                        id="password"
-                                                        name="password"
-                                                        label="Mật khẩu đăng nhập"
-                                                        variant="outlined"
-                                                        size="small"
-                                                        placeholder=""
-                                                        type="password"
-                                                        helperText={errors.password?.message}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        style={{width: '100%'}}
-                                                        error={!!errors.password}
-                                                        required
-                                                        inputRef={
-                                                            register({
-                                                                required: "Mật khẩu không thể để trống",
-                                                                maxLength: {
-                                                                    value: 12,
-                                                                    message: "Mật khẩu có độ dài tối đa 12 kí tự"
-                                                                },
-                                                                minLength: {
-                                                                    value: 6,
-                                                                    message: "Mật khẩu có độ dài tối thiểu 6 kí tự"
-                                                                },
-                                                                pattern: {
-                                                                    value: /[A-Za-z]/,
-                                                                    message: "Mật khẩu phải có kí tự chữ"
-                                                                },
-                                                            })
-                                                        }
-                                                    />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
+                                                            <InputLabel id="department-select-label">Trạng thái</InputLabel>
+                                                            <Controller
+                                                                name="status"
+                                                                control={control}
+                                                                defaultValue={statuses ? statuses[0].value : ''}
+                                                                rules={{ required: true }}
+                                                                error={!!errors.status}
+                                                                as={
+                                                                    <Select label="Trạng thái">
+                                                                        {statuses.map(({ value, label }) => (
+                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                }
+                                                            />
+                                                        </FormControl>
+                                                    </Grid>
                                                 </Grid>
-                                                <Grid item xs={12} sm={3} md={3}>
-                                                    <TextField
-                                                        id="passwordConfirm"
-                                                        name="passwordConfirm"
-                                                        label="Xác nhận mật khẩu"
-                                                        variant="outlined"
-                                                        size="small"
-                                                        type="password"
-                                                        placeholder=""
-                                                        helperText={errors.passwordConfirm?.message}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        style={{width: '100%'}}
-                                                        error={!!errors.passwordConfirm}
-                                                        required
-                                                        inputRef={
-                                                            register({
-                                                                required: "Mật khẩu không thể để trống",
-                                                                maxLength: {
-                                                                    value: 12,
-                                                                    message: "Mật khẩu có độ dài tối đa 12 kí tự"
-                                                                },
-                                                                minLength: {
-                                                                    value: 6,
-                                                                    message: "Mật khẩu có độ dài tối thiểu 6 kí tự"
-                                                                },
-                                                                pattern: {
-                                                                    value: /[A-Za-z]/,
-                                                                    message: "Mật khẩu phải có kí tự chữ"
-                                                                },
-                                                            })
-                                                        }
-                                                    />
-                                                </Grid>
-                                            </Grid>
-                                        )
-                                    }
+                                                {
+                                                    props.isUpdate ? (
+                                                        <div />
+                                                    ) : (
+                                                            <Grid spacing={3} container>
+                                                                <Grid item xs={12} sm={3} md={3}>
+                                                                    <TextField
+                                                                        id="password"
+                                                                        name="password"
+                                                                        label="Mật khẩu đăng nhập"
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        placeholder=""
+                                                                        type="password"
+                                                                        helperText={errors.password?.message}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                        }}
+                                                                        style={{ width: '100%' }}
+                                                                        error={!!errors.password}
+                                                                        required
+                                                                        inputRef={
+                                                                            register({
+                                                                                required: "Mật khẩu không thể để trống",
+                                                                                maxLength: {
+                                                                                    value: 12,
+                                                                                    message: "Mật khẩu có độ dài tối đa 12 kí tự"
+                                                                                },
+                                                                                minLength: {
+                                                                                    value: 6,
+                                                                                    message: "Mật khẩu có độ dài tối thiểu 6 kí tự"
+                                                                                },
+                                                                                pattern: {
+                                                                                    value: /[A-Za-z]/,
+                                                                                    message: "Mật khẩu phải có kí tự chữ"
+                                                                                },
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={3} md={3}>
+                                                                    <TextField
+                                                                        id="passwordConfirm"
+                                                                        name="passwordConfirm"
+                                                                        label="Xác nhận mật khẩu"
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        type="password"
+                                                                        placeholder=""
+                                                                        helperText={errors.passwordConfirm?.message}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                        }}
+                                                                        style={{ width: '100%' }}
+                                                                        error={!!errors.passwordConfirm}
+                                                                        required
+                                                                        inputRef={
+                                                                            register({
+                                                                                required: "Mật khẩu không thể để trống",
+                                                                                maxLength: {
+                                                                                    value: 12,
+                                                                                    message: "Mật khẩu có độ dài tối đa 12 kí tự"
+                                                                                },
+                                                                                minLength: {
+                                                                                    value: 6,
+                                                                                    message: "Mật khẩu có độ dài tối thiểu 6 kí tự"
+                                                                                },
+                                                                                pattern: {
+                                                                                    value: /[A-Za-z]/,
+                                                                                    message: "Mật khẩu phải có kí tự chữ"
+                                                                                },
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                            </Grid>
+                                                        )
+                                                }
 
-                                </CardContent>
-                            </Card>
-                            <Divider/>
-                            <Box>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleSubmit(onSubmit)}
-                                    disabled={loading}
-                                    style={{margin: 8}}>
-                                    {loading && <CircularProgress size={20}/>}
+                                            </CardContent>
+                                        </Card>
+                                        <Divider />
+                                        <Box>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleSubmit(onSubmit)}
+                                                disabled={loading}
+                                                style={{ margin: 8 }}>
+                                                {loading && <CircularProgress size={20} />}
                                     Lưu
                                 </Button>
-                                {
-                                    props.isUpdate ? (
-                                        <Link href={`/crm/customer`}>
-                                            <ButtonGroup color="primary" aria-label="contained primary button group">
-                                                <Button variant="contained" color="default">Quay lại</Button>
-                                            </ButtonGroup>
-                                        </Link>
-                                    ) : (
-                                        <Button
-                                            variant="contained"
-                                            type="reset"
-                                            style={{margin: 8}}
-                                            disabled={loading}>
-                                            {loading && <CircularProgress size={20}/>}
+                                            {
+                                                props.isUpdate ? (
+                                                    <Link href={`/crm/customer`}>
+                                                        <ButtonGroup color="primary" aria-label="contained primary button group">
+                                                            <Button variant="contained" color="default">Quay lại</Button>
+                                                        </ButtonGroup>
+                                                    </Link>
+                                                ) : (
+                                                        <Button
+                                                            variant="contained"
+                                                            type="reset"
+                                                            style={{ margin: 8 }}
+                                                            disabled={loading}>
+                                                            {loading && <CircularProgress size={20} />}
                                             Làm mới
-                                        </Button>
-                                    )
-                                }
+                                                        </Button>
+                                                    )
+                                            }
 
-                            </Box>
+                                        </Box>
 
+                                    </Box>
+                                </form>
+                            </FormGroup>
                         </Box>
-                    </form>
-                </FormGroup>
-            </Box>
-            )
-             }
-            
+                    )
+            }
+
         </AppCRM>
     )
 }

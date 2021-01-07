@@ -3,55 +3,355 @@ import {
     AccordionDetails,
     AccordionSummary,
     Box, Button, ButtonGroup, Divider,
-    Grid,
-    Paper,
-    TextField,
+    FormControl, Grid,
+    InputAdornment, MenuItem, Paper,
+    Select, TextField,
     Tooltip,
     Typography
 } from "@material-ui/core";
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormLabel from '@material-ui/core/FormLabel';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
 import Autocomplete from "@material-ui/lab/Autocomplete";
-import RenderPriceConfig from "components/price/price-config";
+import { getPriceClient } from "client/price";
+import { SellPrices } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
+import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { getPriceClient } from "../../../client/price";
-import AppCRM from "../../_layout";
 import styles from "./pricing.module.css";
+
+const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index }) => {
+    let arrName = name + `[${index}]`
+    return (
+        <div style={{ width: '100%' }}>
+            {/* gia ban */}
+            {
+                name === 'retailPrice' ? (
+                    <Grid container spacing={2}>
+                        <Grid item xs={12} sm={6} md={4}>
+                            <Typography gutterBottom>
+                                Loại cài đặt:
+                            </Typography>
+                            <FormControl className={styles.formControl} size="small"
+                                style={{ width: '100%' }}>
+                                <Controller
+                                    disa
+                                    rules={{ required: true }}
+                                    control={control}
+                                    size="small"
+                                    defaultValue={SellPrices[0]?.value}
+                                    name={`${name}.type`}
+                                    as={
+                                        <Select disabled={hidden}>
+                                            {SellPrices?.map((row) => (
+                                                <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
+                                            ))}
+                                        </Select>
+                                    }
+                                />
+                            </FormControl>
+
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={12} />
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Giá bán:
+                            </Typography>
+                            <TextField
+                                id={`${name}.price`}
+                                name={`${name}.price`}
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                placeholder=""
+                                defaultValue={1000}
+                                helperText={errors[name]?.price?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    endAdornment: <InputAdornment
+                                        position="end">đ</InputAdornment>,
+                                }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{ width: '100%' }}
+                                error={!!errors[name]?.price}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập giá bán",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={3}>
+                            <Typography gutterBottom>
+                                Số lượng tối đa áp dụng:
+                            </Typography>
+                            <TextField
+                                id={`${name}.maxQuantity`}
+                                name={`${name}.maxQuantity`}
+
+                                size="small"
+                                type="number"
+                                disabled={hidden}
+                                // label=""
+                                placeholder=""
+                                defaultValue={10}
+                                helperText={errors[name]?.maxQuantity?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                // InputProps={{
+                                //     endAdornment: <InputAdornment
+                                //         position="end">đ</InputAdornment>,
+                                // }}
+                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                style={{ width: '100%' }}
+                                error={!!errors[name]?.price}
+                                required
+                                inputRef={
+                                    register({
+                                        required: "Vui lòng nhập giá bán",
+                                        valueAsNumber: true, // important
+                                    })
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                ) : (
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6} md={4}>
+                                <Typography gutterBottom>
+                                    Loại cài đặt:
+                            </Typography>
+                                <FormControl className={styles.formControl} size="small"
+                                    style={{ width: '100%' }}>
+                                    {/* <InputLabel id="department-select-label">Loại sản phẩm</InputLabel> */}
+                                    <Controller
+                                        disa
+                                        rules={{ required: true }}
+                                        control={control}
+                                        size="small"
+                                        defaultValue={SellPrices[0]?.value}
+                                        name={`${arrName}.type`}
+
+                                        // error={!!errors.categoryID}
+                                        as={
+                                            <Select disabled={hidden}>
+                                                {SellPrices?.map((row) => (
+                                                    <MenuItem value={row.value} key={row.value}>{row.label}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        }
+                                    />
+                                </FormControl>
+
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12} />
+                            <Grid item xs={12} sm={6} md={3}>
+                                <Typography gutterBottom>
+                                    Giá bán:
+                            </Typography>
+                                <TextField
+                                    id={`${arrName}.price`}
+                                    name={`${arrName}.price`}
+
+                                    size="small"
+                                    type="number"
+                                    disabled={hidden}
+                                    // label=""
+                                    placeholder=""
+                                    defaultValue={1000}
+                                    error={errors[name] ? !!errors[name][index]?.price : false}
+                                    helperText={errors[name] ? errors[name][index]?.price?.message : ''}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment
+                                            position="end">đ</InputAdornment>,
+                                    }}
+                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                    style={{ width: '100%' }}
+                                    // error={errors.name ? true : false}
+                                    required
+                                    inputRef={
+                                        register({
+                                            required: "Vui lòng nhập giá bán",
+                                            valueAsNumber: true, // important
+                                        })
+                                    }
+                                />
+                            </Grid>
+                            {/* so luong ap dung */}
+                            <Grid item xs={12} sm={6} md={3}>
+                                <Typography gutterBottom>
+                                    Số lượng tối thiểu áp dụng:
+                            </Typography>
+                                <TextField
+                                    id={`${arrName}.minNumber`}
+                                    name={`${arrName}.minNumber`}
+
+                                    size="small"
+                                    type="number"
+                                    disabled={hidden}
+                                    // label=""
+                                    placeholder=""
+                                    defaultValue={5}
+                                    error={errors[name] ? !!errors[name][index]?.minNumber : false}
+                                    helperText={errors[name] ? errors[name][index]?.minNumber?.message : ''}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                    style={{ width: '100%' }}
+                                    // error={errors.name ? true : false}
+                                    required
+                                    inputRef={
+                                        register({
+                                            required: "Vui lòng nhập",
+                                            valueAsNumber: true, // important
+                                        })
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                                <Typography gutterBottom>
+                                    Số lượng tối đa áp dụng:
+                            </Typography>
+                                <TextField
+                                    id={`${arrName}.maxQuantity`}
+                                    name={`${arrName}.maxQuantity`}
+
+                                    size="small"
+                                    type="number"
+                                    disabled={hidden}
+                                    // label=""
+                                    placeholder=""
+                                    defaultValue={10}
+                                    error={errors[name] ? !!errors[name][index]?.maxQuantity : false}
+                                    helperText={errors[name] ? errors[name][index]?.maxQuantity?.message : ''}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                    style={{ width: '100%' }}
+                                    // error={errors.name ? true : false}
+                                    required
+                                    inputRef={
+                                        register({
+                                            required: "Vui lòng nhập",
+                                            valueAsNumber: true, // important
+                                        })
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12} />
+                            <Grid item xs={12} sm={6} md={3}>
+                                <Typography gutterBottom>
+                                    Tỉ lệ phần trăm giảm giá:
+                            </Typography>
+                                <TextField
+                                    id={`${arrName}.percentageDiscount`}
+                                    name={`${arrName}.percentageDiscount`}
+
+                                    size="small"
+                                    type="number"
+                                    disabled={hidden}
+                                    // label=""
+                                    placeholder=""
+                                    error={errors[name] ? !!errors[name][index]?.percentageDiscount : false}
+                                    helperText={errors[name] ? errors[name][index]?.percentageDiscount?.message : ''}
+                                    defaultValue={5}
+                                    // helperText={errors.name?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment
+                                            position="end">%</InputAdornment>,
+                                    }}
+                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                    style={{ width: '100%' }}
+                                    // error={errors.name ? true : false}
+                                    required
+                                    inputRef={
+                                        register({
+                                            required: "Vui lòng nhập",
+                                            valueAsNumber: true, // important
+                                        })
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={3}>
+                                <Typography gutterBottom>
+                                    Giảm giá tuyệt đối:
+                            </Typography>
+                                <TextField
+                                    id={`${arrName}.absoluteDiscount`}
+                                    name={`${arrName}.absoluteDiscount`}
+                                    size="small"
+                                    type="number"
+                                    disabled={hidden}
+                                    // label=""
+                                    placeholder=""
+                                    defaultValue={5000}
+                                    helperText={errors.name?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    InputProps={{
+                                        endAdornment: <InputAdornment
+                                            position="end">đ</InputAdornment>,
+                                    }}
+                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
+                                    style={{ width: '100%' }}
+                                    error={errors[name] ? !!errors[name][index]?.absoluteDiscount : false}
+                                    helperText={errors[name] ? errors[name][index]?.absoluteDiscount?.message : ''}
+                                    required
+                                    inputRef={
+                                        register({
+                                            required: "Vui lòng nhập",
+                                            valueAsNumber: true, // important
+                                        })
+                                    }
+                                />
+                            </Grid>
+                        </Grid>
+                    )
+            }
+        </div>
+    )
+}
 
 export default function renderForm(props, toast) {
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
-    let defaultIds = []
-    for (let i = 0; i < props.price?.wholesalePrice?.length; i++) {
-        defaultIds.push(i + 1)
-    }
+    const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind + 1) || [])
     const [ids, setIds] = useState(defaultIds);
     const [idDeleteds, setIdDeleteds] = useState([]);
     const [expanded, setExpanded] = React.useState(false);
     const [listTag, setListTag] = useState(props.listTag);
-    let sellerCode = "MedX"
-
+    const [brand, setBrand] = useState(getValues('brand') || 'LOCAL');
+    const [categoryCode, setCategoryCode] = useState(props.price?.categoryCodes || []);
+    let sellerCode = "MedX";
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
-        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index, 1))
+        idDeleteds.sort(function (a, b) { return b-a });
+        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
         let _client = getPriceClient()
-        formData.tags = [];
-        if (formData.tagsName) {
-            for (let i = 0; i < formData.tagsName.length; i++) {
-                formData.tags.push(
-                    listTag.filter(
-                        (tag) => tag.name === formData.tagsName[i]
-                    )[0].code
-                );
-            }
-        }
+        formData.tags = [...formData.tagsName] || [];
         let result = await _client.createNewPricing(formData)
         setLoading(false);
         if (result.status === "OK") {
@@ -65,17 +365,10 @@ export default function renderForm(props, toast) {
         formData.sellPriceId = props.price?.sellPriceId
         formData.sellerCode = props.price?.sellerCode
         formData.productCode = props.product?.code
-        formData.tags = [];
-        if (formData.tagsName) {
-            for (let i = 0; i < formData.tagsName.length; i++) {
-                formData.tags.push(
-                    listTag.filter(
-                        (tag) => tag.name === formData.tagsName[i]
-                    )[0].code
-                );
-            }
-        }
-        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(index, 1))
+        formData.categoryCodes = categoryCode;
+        formData.tags = [...formData.tagsName] || [];
+        idDeleteds.sort(function (a, b) { return b - a });
+        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
         let _client = getPriceClient()
         let result = await _client.updatePrice(formData)
@@ -90,7 +383,8 @@ export default function renderForm(props, toast) {
     // func submit data
     async function onSubmit(formData) {
         try {
-            formData.sellerCode = sellerCode
+            formData.categoryCodes = categoryCode;
+            formData.sellerCode = sellerCode;
             if (typeof props.product === "undefined") {
                 await createNewPricing(formData)
             } else {
@@ -143,16 +437,18 @@ export default function renderForm(props, toast) {
                                                                 error={!!errors.code}
                                                                 helperText={errors.code ? "Vui lòng chọn sản phẩm" : ""}
                                                                 placeholder="Chọn sản phẩm"
-                                                                variant="outlined"
+
                                                                 size="small"
                                                             // onChange={e => setSearchTerm(e.target.value)}
                                                             />
                                                         )}
-                                                        onChange={(e, data) => onChange(data.code)}
+                                                        onChange={(e, data) => {
+                                                            onChange(data.code);
+                                                            setCategoryCode(data.categoryCodes)
+                                                        }}
                                                         {...props}
                                                     />
                                                 )}
-
                                                 name="productCode"
                                                 control={control}
                                                 onChange={([, { id }]) => id}
@@ -166,9 +462,8 @@ export default function renderForm(props, toast) {
                                                 <div />
                                             )
                                     }
-
                                 </Grid>
-                                <Grid item xs={12} md={12} sm={12}/>
+                                <Grid item xs={12} md={12} sm={12} />
                                 <Grid item xs={12} sm={12} md={6}>
                                     <Controller
                                         render={({ onChange, ...props }) => (
@@ -176,7 +471,7 @@ export default function renderForm(props, toast) {
                                                 id="tagsName"
                                                 multiple
                                                 size="small"
-                                                options={listTag?.map(tag=>tag.name)}
+                                                options={listTag?.map(tag => tag.name)}
                                                 // options={listSearchCategory.map(
                                                 // 	(category) => category.label
                                                 // )}
@@ -187,10 +482,10 @@ export default function renderForm(props, toast) {
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
-                                                        label="Loại Tag"
+                                                        label="Nhập tag"
                                                         error={!!errors.tagsName}
                                                         placeholder=""
-                                                        variant="outlined"
+
                                                         size="small"
                                                     // onChange={(e) => setSearchCategory(e.target.value)}
                                                     />
@@ -201,16 +496,45 @@ export default function renderForm(props, toast) {
                                         )}
                                         name="tagsName"
                                         control={control}
-                                        // onChange={([, { id }]) => id}
-                                        // rules={{
-                                        //     validate: (d) => {
-                                        //         return typeof d != "undefined";
-                                        //     },
-                                        // }}
-                                        />
+                                    // onChange={([, { id }]) => id}
+                                    // rules={{
+                                    //     validate: (d) => {
+                                    //         return typeof d != "undefined";
+                                    //     },
+                                    // }}
+                                    />
+                                    <Grid item xs={12} md={12} sm={12} /></Grid>
 
-                                    </Grid>
-                                {/* </Grid> */}
+                                <Grid item xs={12} sm={12} md={12}>
+                                    <FormControl component="fieldset" className={styles.marginTopBottom}>
+                                        <FormLabel component="legend">Nơi bán</FormLabel>
+                                        <Controller
+                                            rules={{ required: true }}
+                                            control={control}
+                                            defaultValue={brand}
+                                            name="brand"
+                                            as={
+                                                <RadioGroup
+                                                    aria-label="brand"
+                                                    value={brand}
+                                                    onChange={(e) => setBrand(e.target.value)}
+                                                    className={styles.displayFlex}
+                                                >
+                                                    <FormControlLabel
+                                                        value="LOCAL"
+                                                        control={<Radio color="primary"/>}
+                                                        label="Trong nước"
+                                                    />
+                                                    <FormControlLabel
+                                                        value="FOREIGN"
+                                                        control={<Radio color="primary"/>}
+                                                        label="Ngoại nhập"
+                                                    />
+                                                </RadioGroup>
+                                            }
+                                        />
+                                    </FormControl>
+                                </Grid>
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography gutterBottom variant={'h6'}>
                                         Cài đặt giá bán lẻ:
@@ -222,7 +546,6 @@ export default function renderForm(props, toast) {
                                     {/* <pre>z{JSON.stringify(getValues().productCode?true:false )}</pre> */}
                                     <RenderPriceConfig name={'retailPrice'} control={control} register={register}
                                         hidden={typeof props.product === "undefined" && !getValues().productCode} errors={errors} index={0} />
-
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography gutterBottom>
@@ -232,44 +555,84 @@ export default function renderForm(props, toast) {
                                         </Tooltip>
                                     </Typography>
                                     {
-                                        ids.map((num, idx) => (
-                                            <Accordion expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
-                                                <AccordionSummary
-                                                    expandIcon={<ExpandMoreIcon />}
-                                                    aria-controls="panel1bh-content"
-                                                    onClick={(e) => e.stopPropagation()}
-                                                    id="panel1bh-header"
-                                                >
-                                                    <Typography color="textSecondary">
-                                                        Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
-                                                    </Typography>
-                                                </AccordionSummary>
-                                                <AccordionDetails>
-                                                    <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                        register={register} errors={errors} index={idx} />
-                                                </AccordionDetails>
-                                                <AccordionActions>
-                                                    <Button size="small" color="secondary" variant="contained"
-                                                        startIcon={<DeleteIcon />}
-                                                        // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
-                                                        onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
-                                                </AccordionActions>
-                                            </Accordion>
-                                        ))
+                                        defaultIds.length > 0 ? defaultIds.map((num, idx) => (
+                                            <>
+                                                <Accordion expanded={true} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                                    <AccordionSummary
+                                                        expandIcon={<ExpandMoreIcon />}
+                                                        aria-controls="panel1bh-content"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        id="panel1bh-header"
+                                                    >
+                                                        <Typography color="textSecondary">
+                                                            Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
+                                                        </Typography>
+                                                    </AccordionSummary>
+                                                    <AccordionDetails>
+                                                        <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                                            register={register} errors={errors} index={idx} />
+                                                    </AccordionDetails>
+                                                    <AccordionActions>
+                                                        <Button size="small" color="secondary" variant="contained"
+                                                            startIcon={<DeleteIcon />}
+                                                            // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                                            onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                                    </AccordionActions>
+                                                </Accordion>
+                                            </>
+                                        )) :
+                                            ids.map((num, idx) => (
+                                                <>
+                                                    <Accordion expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                                        <AccordionSummary
+                                                            expandIcon={<ExpandMoreIcon />}
+                                                            aria-controls="panel1bh-content"
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            id="panel1bh-header"
+                                                        >
+                                                            <Typography color="textSecondary">
+                                                                Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
+                                                            </Typography>
+                                                        </AccordionSummary>
+                                                        <AccordionDetails>
+                                                            <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                                                register={register} errors={errors} index={idx} />
+                                                        </AccordionDetails>
+                                                        <AccordionActions>
+                                                            <Button size="small" color="secondary" variant="contained"
+                                                                startIcon={<DeleteIcon />}
+                                                                // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                                                onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                                        </AccordionActions>
+                                                    </Accordion>
+                                                </>
+                                            ))
                                     }
-                                    <Button
-                                        variant="outlined"
+                                    {defaultIds.length > 0 ? <Button
                                         color="primary"
-                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (ids.length - idDeleteds.length === 5)}
+                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length - idDeleteds.length === 5)}
                                         style={{ marginTop: '10px' }}
                                         onClick={() => {
-                                            setIds([...ids, ids.length + 1])
-                                            setExpanded(`panel${ids.length}`)
+                                            setDefaultIds([...defaultIds, defaultIds.length + 1])
+                                            setExpanded(`panel${defaultIds.length}`)
                                         }}
                                         startIcon={<AddIcon />}
                                     >
                                         Thêm giá bán buôn
-                                </Button>
+                                    </Button> :
+                                        <Button
+                                            color="primary"
+                                            disabled={(typeof props.product === "undefined" && !getValues().productCode) || (ids.length - idDeleteds.length === 5)}
+                                            style={{ marginTop: '10px' }}
+                                            onClick={() => {
+                                                setIds([...ids, ids.length + 1])
+                                                setExpanded(`panel${ids.length}`)
+                                            }}
+                                            startIcon={<AddIcon />}
+                                        >
+                                            Thêm giá bán buôn
+                                    </Button>}
+
                                 </Grid>
                             </Grid>
                         </Box>
