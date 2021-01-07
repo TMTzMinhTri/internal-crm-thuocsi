@@ -47,10 +47,18 @@ export async function loadConfigPricingData(ctx) {
     let categoryResult = await client.getListCategory();
     let provinceResult = await client.getProvinceLists();
     provinceResult.data.unshift({ name: "ALL", code: "ALL" })
+    let priceData = await client.getConfigPriceByCode(query.priceCode);
+    priceData.data[0].customerType = { value: priceData.data[0].customerType, label: condUserType.filter(type => type.value === priceData.data[0].customerType)[0].label }
+    priceData.data[0].locationCode = priceData.data[0].locationCode.map(_code => ({ name: provinceResult.data.filter(province => province.code === _code)[0].name, code: _code }))
+    let listCateProduct = await client.getCategoryWithArrayID(priceData.data[0].categoryCode)
+    priceData.data[0].categoryCodes = [...listCateProduct.data]
+    priceData.data[0].multiply = priceData.data[0].numMultiply
+    priceData.data[0].addition = priceData.data[0].numAddition
     return {
         props: {
             provinceLists: provinceResult.data || [],
             categoryLists: categoryResult.data || [],
+            data: priceData.data[0] || []
             // total,
         }
     };
@@ -70,7 +78,7 @@ function render(props) {
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.data });
     const [searchCategory, setSearchCategory] = useState("");
     const debouncedSearchCategory = useDebounce(searchCategory, 500);
 
@@ -78,10 +86,11 @@ function render(props) {
         formData.categoryCode = formData.categoryCodes.map(category => category.code)
         formData.locationCode = formData.locationCode.map(location => location.code)
         formData.customerType = formData.customerType.value
+        formData.code = props.data.code
         let client = getPricingClient();
-        let result = await client.createNewPriceGenConfig(formData)
+        let result = await client.updatePriceGenConfig(formData)
         if (result.status === "OK") {
-            router.push(`/crm/pricing/edit?priceCode=${result.data[0].code}`)
+            success(result.message ? 'Chỉnh sửa thành công' : 'Thông báo không xác định')
         } else {
             error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
         }
@@ -110,12 +119,12 @@ function render(props) {
     return (
         <AppCRM select="/crm/pricing">
             <Head>
-                <title>Cài đặt giá mới</title>
+                <title>Cập nhật giá mới</title>
             </Head>
             <Box component={Paper} display="block">
                 <form noValidate>
                     <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 30, margin: 5 }}>Cài đặt giá mới</Box>
+                        <Box style={{ fontSize: 30, margin: 5 }}>Cập nhật giá mới</Box>
                         <Grid container spacing={2} style={{ padding: '10px' }}>
                             <Grid item xs={12} md={12} sm={12} />
                             <Grid item xs={12} sm={12} md={2}>
