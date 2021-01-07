@@ -103,58 +103,6 @@ function render(props) {
             <Head>
                 <title>Danh sách cài đặt</title>
             </Head>
-            <div className={styles.grid}>
-                <Grid container spacing={3} direction="row"
-                      justify="space-evenly"
-                      alignItems="center"
-                >
-                    <Grid item xs={12} sm={6} md={6}>
-                        {/*<Paper component="form" className={styles.search}>
-                            <InputBase
-                                id="q"
-                                name="q"
-                                className={styles.input}
-                                value={search}
-                                onChange={handleChange}
-                                inputRef={register}
-                                onKeyPress={event => {
-                                    if (event.key === 'Enter') {
-                                        onSearch()
-                                    }
-                                }}
-                                placeholder="Tìm kiếm theo tên sản phẩm"
-                                inputProps={{ 'aria-label': 'Tìm kiếm theo tên sản phẩm' }}
-                            />
-                            <IconButton className={open === true ? styles.iconButtonHidden : styles.iconButton} aria-label="search"
-                                onClick={handleSubmit(onSearch)}>
-                                <SearchIcon />
-                            </IconButton>
-                            <Divider className={styles.divider} orientation="vertical" />
-                            <IconButton className={styles.iconButton} aria-label="filter-list"
-                                onClick={onCollapse}>
-                                <FilterListIcon />
-                            </IconButton>
-                        </Paper>*/}
-                    </Grid>
-
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/sku/new">
-                            <ButtonGroup color="primary" aria-label="contained primary button group"
-                                         className={styles.rightGroup}>
-                                <Button variant="contained" color="primary" className={styles.btnAction}>Thêm cài
-                                    đặt</Button>
-                            </ButtonGroup>
-                        </Link>
-                    </Grid>
-                </Grid>
-            </div>
-            {
-                q === '' ? (
-                    <span/>
-                ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{search}'</i></div>
-                )
-            }
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
