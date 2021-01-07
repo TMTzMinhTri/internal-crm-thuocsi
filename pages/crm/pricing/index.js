@@ -4,7 +4,7 @@ import Router, { useRouter } from "next/router";
 
 import {
     Button, ButtonGroup, Paper, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Grid
+    TableHead, TableRow, Grid,InputBase
 } from "@material-ui/core";
 import Chip from '@material-ui/core/Chip';
 import { makeStyles } from '@material-ui/core/styles';
@@ -13,7 +13,9 @@ import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
 import EditIcon from "@material-ui/icons/Edit";
 import moment from "moment";
-
+import styles from "./pricing.module.css"
+import {useForm} from "react-hook-form"
+import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import AppCRM from "pages/_layout";
@@ -89,6 +91,7 @@ function render(props) {
 
     const classes = useStyles();
     let router = useRouter()
+    let [search, setSearch] = useState('')
     let q = router.query.q || ''
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
@@ -98,6 +101,27 @@ function render(props) {
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
+    const {register, handleSubmit, errors} = useForm();
+
+    function searchPrice(formData) {
+        let q = formData.q
+        Router.push(`/crm/price?q=${q}`)
+    }
+
+    async function handleChange(event) {
+        const target = event.target;
+        const value = target.value;
+        setSearch(value)
+    }
+
+    function onSearch(formData) {
+        try {
+            searchPrice(formData)
+            setSearch('')
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     useEffect(() => {
         setConfigPricingList(props.configPriceLists);
@@ -138,6 +162,46 @@ function render(props) {
             <Head>
                 <title>Danh sách cấu hình giá</title>
             </Head>
+            <div className={styles.grid}>
+                <Grid container spacing={3} direction="row"
+                      justify="space-evenly"
+                      alignItems="center"
+                >
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Paper component="form" className={styles.search}>
+                            <InputBase
+                                id="q"
+                                name="q"
+                                className={styles.input}
+                                value={search}
+                                onChange={handleChange}
+                                inputRef={register}
+                                placeholder="Tìm kiếm giá"
+                                inputProps={{'aria-label': 'Tìm kiếm giá'}}
+                            />
+                            <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={handleSubmit(onSearch)}>
+                                <SearchIcon/>
+                            </IconButton>
+                        </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Link href="/crm/pricing/new">
+                            <ButtonGroup color="primary" aria-label="contained primary button group"
+                                         className={styles.rightGroup}>
+                                <Button variant="contained" color="primary">Thêm giá mới</Button>
+                            </ButtonGroup>
+                        </Link>
+                    </Grid>
+                </Grid>
+            </div>
+            {
+                q === '' ? (
+                    <span/>
+                ) : (
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
+                )
+            }
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
@@ -166,7 +230,7 @@ function render(props) {
                                     <TableCell align="left">{Brand[row.brand].value}</TableCell>
                                     <TableCell align="left">{moment(row.lastUpdatedTime).utcOffset('+0700').format("DD-MM-YYYY HH:mm:ss")}</TableCell>
                                     <TableCell align="center">
-                                        <Link href={`/crm/pricing/detail-config?priceCode=${row.code}`}>
+                                        <Link href={`/crm/pricing/edit?priceCode=${row.code}`}>
                                             <Tooltip title="Cập nhật thông tin">
                                                 <IconButton>
                                                     <EditIcon fontSize="small" />

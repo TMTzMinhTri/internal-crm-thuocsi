@@ -49,6 +49,14 @@ class PricingClient extends APIClient {
         })
     }
 
+    updatePriceGenConfig(data){
+        return this.callFromClient(
+            "PUT",
+            `${prefix}/product/config`,
+            data
+        )
+    }
+
     createNewPriceGenConfig(data) {
         return this.callFromClient(
             "POST",
@@ -72,6 +80,12 @@ class PricingClient extends APIClient {
         })
     }
 
+    getConfigPriceByCode(code) {
+        return this.callFromNextJS(
+            "GET",
+            `${prefix}/product/config?priceCode=${code}`)
+    }
+
     getProvinceLists() {
         return this.callFromNextJS(
             "GET",
@@ -90,8 +104,8 @@ class PricingClient extends APIClient {
         return this.callFromNextJS(
             "GET",
             `${prefix}/product/config`, {
-                priceCode
-            });
+            priceCode
+        });
     }
 
 }
