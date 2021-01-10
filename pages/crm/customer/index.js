@@ -195,6 +195,16 @@ function render(props) {
             }
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
+                    <colgroup>
+                        <col width="10%"/>
+                        <col width="20%"/>
+                        <col width="20%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                    </colgroup>
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">Mã khách hàng</TableCell>
