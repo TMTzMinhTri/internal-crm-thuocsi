@@ -129,8 +129,8 @@ function render(props) {
         <TableRow key={i}>
             <TableCell component="th" scope="row">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.email}</TableCell>
-            <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label}</TableCell>
+            <TableCell align="left">{row.data.email || '-'}</TableCell>
+            <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
             <TableCell align="left">{row.data.point}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
@@ -167,8 +167,8 @@ function render(props) {
                                 value={search}
                                 onChange={handleChange}
                                 inputRef={register}
-                                placeholder="Tìm kiếm khách hàng"
-                                inputProps={{'aria-label': 'Tìm kiếm khách hàng'}}
+                                placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
+                                inputProps={{'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại'}}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
                                         onClick={handleSubmit(onSearch)}>
@@ -195,6 +195,16 @@ function render(props) {
             }
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
+                    <colgroup>
+                        <col width="10%"/>
+                        <col width="20%"/>
+                        <col width="20%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                    </colgroup>
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">Mã khách hàng</TableCell>
