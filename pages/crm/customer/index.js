@@ -167,8 +167,8 @@ function render(props) {
                                 value={search}
                                 onChange={handleChange}
                                 inputRef={register}
-                                placeholder="Tìm kiếm khách hàng"
-                                inputProps={{'aria-label': 'Tìm kiếm khách hàng'}}
+                                placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
+                                inputProps={{'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại'}}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
                                         onClick={handleSubmit(onSearch)}>
