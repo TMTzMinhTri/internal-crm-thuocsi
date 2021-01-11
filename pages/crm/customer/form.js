@@ -629,25 +629,30 @@ export default function renderForm(props, toast) {
                                                         </FormControl>
 
                                                     </Grid>
-                                                    <Grid item xs={12} sm={3} md={3}>
-                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
-                                                            <InputLabel id="department-select-label">Trạng thái</InputLabel>
-                                                            <Controller
-                                                                name="status"
-                                                                control={control}
-                                                                defaultValue={statuses ? statuses[0].value : ''}
-                                                                rules={{ required: true }}
-                                                                error={!!errors.status}
-                                                                as={
-                                                                    <Select label="Trạng thái">
-                                                                        {statuses.map(({ value, label }) => (
-                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                }
-                                                            />
-                                                        </FormControl>
-                                                    </Grid>
+                                                    {
+                                                        props.isUpdate ? (
+                                                            <Grid item xs={12} sm={3} md={3}>
+                                                                <FormControl style={{ width: '100%' }} size="small" variant="outlined">
+                                                                    <InputLabel id="department-select-label">Trạng thái</InputLabel>
+                                                                    <Controller
+                                                                        name="status"
+                                                                        control={control}
+                                                                        defaultValue={statuses ? statuses[0].value : ''}
+                                                                        rules={{ required: true }}
+                                                                        error={!!errors.status}
+                                                                        as={
+                                                                            <Select label="Trạng thái">
+                                                                                {statuses.map(({ value, label }) => (
+                                                                                    <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                                                ))}
+                                                                            </Select>
+                                                                        }
+                                                                    />
+                                                                </FormControl>
+                                                            </Grid>
+                                                        ): ''
+                                                    }
+
                                                 </Grid>
                                                 {
                                                     props.isUpdate ? (
