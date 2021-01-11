@@ -664,6 +664,9 @@ export default function renderForm(props, toast) {
                                                                         placeholder=""
                                                                         type="password"
                                                                         helperText={errors.password?.message}
+                                                                        inputProps={{
+                                                                            autoComplete: 'new-password'
+                                                                         }}
                                                                         InputLabelProps={{
                                                                             shrink: true,
                                                                         }}
@@ -699,6 +702,9 @@ export default function renderForm(props, toast) {
                                                                         type="password"
                                                                         placeholder=""
                                                                         helperText={errors.passwordConfirm?.message}
+                                                                        InputProps={{
+                                                                            autocomplete: 'off'
+                                                                        }}
                                                                         InputLabelProps={{
                                                                             shrink: true,
                                                                         }}
