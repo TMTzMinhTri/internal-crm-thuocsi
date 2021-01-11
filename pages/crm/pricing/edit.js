@@ -1,33 +1,32 @@
-import Head from "next/head";
-import React, { useEffect, useState } from 'react';
-import Router, { useRouter } from "next/router";
-
 import {
-    Button, ButtonGroup,
-    Box, Divider,
-    Paper,
-    TextField, InputAdornment,
-    Typography,
-    Grid, FormControl
+    Box, Button, ButtonGroup,
+    Divider,
+
+
+
+    FormControl, Grid, InputAdornment, Paper,
+    TextField,
+    Typography
 } from "@material-ui/core";
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
-import styles from "./pricing.module.css"
-import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import Autocomplete from "@material-ui/lab/Autocomplete";
-
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
-import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import AppCRM from "pages/_layout";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getCategoryClient } from "client/category";
 import { getPricingClient } from 'client/pricing';
 import { condUserType } from 'components/global';
+import useDebounce from "components/useDebounce";
+import Head from "next/head";
+import { useRouter } from "next/router";
+import AppCRM from "pages/_layout";
+import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import useDebounce from "components/useDebounce"
-import { getCategoryClient } from "client/category";
+import styles from "./pricing.module.css";
+
+
 
 
 export async function getServerSideProps(ctx) {
@@ -264,12 +263,12 @@ function render(props) {
                                             >
                                                 <FormControlLabel
                                                     value="LOCAL"
-                                                    control={<Radio />}
+                                                    control={<Radio color="primary"/>}
                                                     label="Trong nước"
                                                 />
                                                 <FormControlLabel
                                                     value="FOREIGN"
-                                                    control={<Radio />}
+                                                    control={<Radio color="primary"/>}
                                                     label="Ngoại nhập"
                                                 />
                                             </RadioGroup>
