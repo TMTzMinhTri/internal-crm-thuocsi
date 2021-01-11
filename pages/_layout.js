@@ -40,7 +40,7 @@ export default class AppCRM extends Component {
                 },
                 {
                     key:"SELLER",
-                    name:"Bán hàng",
+                    name:"Nhà Bán hàng",
                     link:"/crm/seller",
                     icon:faUsers,
                 }
