@@ -87,6 +87,9 @@ export async function loadCustomerData(ctx) {
     let customerClient = getCustomerClient(ctx, data)
     let resp = await customerClient.getCustomer(offset, limit, q)
     if (resp.status !== 'OK') {
+        if (resp.status === 'NOT_FOUND') {
+            return {props: {data: [], count: 0, message: 'Không tìm thấy khách hàng'}}
+        }
         return {props: {data: [], count: 0, message: resp.message}}
     }
     // Pass data to the page via props
@@ -105,24 +108,15 @@ function render(props) {
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
 
-    function searchCustomer(formData) {
-        let q = formData.q
-        Router.push(`/crm/customer?q=${q}`)
-    }
-
     async function handleChange(event) {
         const target = event.target;
         const value = target.value;
         setSearch(value)
     }
 
-    function onSearch(formData) {
-        try {
-            searchCustomer(formData)
-            setSearch('')
-        } catch (error) {
-            console.log(error)
-        }
+    async function onSearch() {
+        q = search.trim().replace(/\s+/g, ' ').replace(/[&]/, '%26');
+        router.push(`?q=${q}`)
     }
 
     const RenderRow = (row, i) => (
@@ -155,11 +149,11 @@ function render(props) {
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
-                      justify="space-evenly"
+                      justify="space-between"
                       alignItems="center"
                 >
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Paper component="form" className={styles.search}>
+                    <Grid item xs={12} sm={4} md={4}>
+                        <Paper className={styles.search}>
                             <InputBase
                                 id="q"
                                 name="q"
@@ -167,6 +161,11 @@ function render(props) {
                                 value={search}
                                 onChange={handleChange}
                                 inputRef={register}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter') {
+                                        onSearch()
+                                    }
+                                }}
                                 placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
                                 inputProps={{'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại'}}
                             />
@@ -186,13 +185,7 @@ function render(props) {
                     </Grid>
                 </Grid>
             </div>
-            {
-                q === '' ? (
-                    <span/>
-                ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
-                )
-            }
+           
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
@@ -237,7 +230,7 @@ function render(props) {
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`)
                         }}
                     />
                 </Table>
