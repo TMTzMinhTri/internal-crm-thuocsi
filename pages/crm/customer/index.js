@@ -115,7 +115,10 @@ function render(props) {
     }
 
     async function onSearch() {
-        q = search.trim().replace(/\s+/g, ' ').replace(/[&]/, '%26');
+        q = search.trim().replace(/\s+/g, ' ')
+        .replace(/[&]/, '%26')
+        .replace(/[+]/, '%2B')
+        .replace(/[#]/, '%23');
         router.push(`?q=${q}`)
     }
 
