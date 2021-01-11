@@ -9,7 +9,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { getCustomerClient } from "client/customer";
+import { getSellerClient } from "client/seller";
 import { getMasterDataClient } from "client/master-data";
 import Head from "next/head";
 import Link from "next/link";
@@ -17,7 +17,7 @@ import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import styles from "./customer.module.css";
+import styles from "./seller.module.css";
 
 const levels = [
     {
@@ -87,29 +87,29 @@ export async function loadData(ctx) {
     data.props.provinces = resp.data
 
     let query = ctx.query
-    let customerCode = typeof (query.customerCode) === "undefined" ? '' : query.customerCode
+    let sellerCode = typeof (query.sellerCode) === "undefined" ? '' : query.sellerCode
     data.props.isUpdate = false
-    if (customerCode !== '') {
+    if (sellerCode !== '') {
         data.props.isUpdate = true
-        let customerClient = getCustomerClient(ctx, data)
-        let customerResp = await customerClient.getCustomerByCustomerCode(customerCode)
-        if (customerResp.status !== 'OK') {
-            data.props.message = customerResp.message
+        let sellerClient = getSellerClient(ctx, data)
+        let sellerResp = await sellerClient.getSellerBySellerCode(sellerCode)
+        if (sellerResp.status !== 'OK') {
+            data.props.message = sellerResp.message
             return data
         }
-        let customer = customerResp.data[0]
-        data.props.customer = customer
+        let seller = sellerResp.data[0]
+        data.props.seller = seller
         let masterDataClient = getMasterDataClient(ctx, data)
-        let provinceResp = await masterDataClient.getProvinceByProvinceCode(customer.provinceCode)
-        let districtResp = await masterDataClient.getDistrictByDistrictCode(customer.districtCode)
-        let wardResp = await masterDataClient.getWardByWardCode(customer.wardCode)
+        let provinceResp = await masterDataClient.getProvinceByProvinceCode(seller.provinceCode)
+        let districtResp = await masterDataClient.getDistrictByDistrictCode(seller.districtCode)
+        let wardResp = await masterDataClient.getWardByWardCode(seller.wardCode)
 
         data.props.province = provinceResp.status === 'OK' ? provinceResp.data[0] : {}
         data.props.district = districtResp.status === 'OK' ? districtResp.data[0] : {}
         data.props.ward = wardResp.status === 'OK' ? wardResp.data[0] : {}
 
-        let districtsResp = await masterDataClient.getDistrictByProvinceCodeFromNextJs(customer.provinceCode)
-        let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(customer.districtCode)
+        let districtsResp = await masterDataClient.getDistrictByProvinceCodeFromNextJs(seller.provinceCode)
+        let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(seller.districtCode)
 
         data.props.districts = districtsResp.status === 'OK' ? districtsResp.data : []
         data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []
@@ -119,8 +119,8 @@ export async function loadData(ctx) {
 
 export default function renderForm(props, toast) {
     let { error, success } = toast;
-    let editObject = props.isUpdate ? props.customer : {}
-    const checkWardData = props.isUpdate ? (props.customer.wardCode === '' ? {} : props.ward) : {};
+    let editObject = props.isUpdate ? props.seller : {}
+    const checkWardData = props.isUpdate ? (props.seller.wardCode === '' ? {} : props.ward) : {};
     const [loading, setLoading] = useState(false);
     const [province, setProvince] = useState(props.province);
     const [districts, setDistricts] = useState(props.districts || []);
@@ -197,29 +197,29 @@ export default function renderForm(props, toast) {
         formData.wardCode = ward.code || ''
 
         if (props.isUpdate) {
-            formData.customerID = props.customer.customerID
-            formData.id = props.customer.id
-            formData.code = props.customer.code
-            await updateCustomer(formData)
+            formData.sellerID = props.seller.sellerID
+            formData.id = props.seller.id
+            formData.code = props.seller.code
+            await updateSeller(formData)
         } else {
-            await createCustomer(formData)
+            await createSeller(formData)
         }
     }
 
-    async function createCustomer(formData) {
-        let customerClient = getCustomerClient()
-        let resp = await customerClient.createNewCustomer(formData)
+    async function createSeller(formData) {
+        let sellerClient = getSellerClient()
+        let resp = await sellerClient.createNewSeller(formData)
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
             success('Thêm khách hàng thành công')
-            router.push(`/crm/customer`)
+            router.push(`/crm/seller`)
         }
     }
 
-    async function updateCustomer(formData) {
-        let customerClient = getCustomerClient()
-        let resp = await customerClient.updateCustomer(formData)
+    async function updateSeller(formData) {
+        let sellerClient = getSellerClient()
+        let resp = await sellerClient.updateSeller(formData)
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
@@ -228,12 +228,12 @@ export default function renderForm(props, toast) {
     }
 
     return (
-        <AppCRM select="/crm/customer">
+        <AppCRM select="/crm/seller">
             <Head>
-                <title>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</title>
+                <title>{props.isUpdate ? 'Cập nhật bán hàng' : 'Thêm khách hàng'}</title>
             </Head>
             {
-                props.isUpdate && typeof props.customer === 'undefined' ? (
+                props.isUpdate && typeof props.seller === 'undefined' ? (
                     <div>
                         <Box component={Paper} display="block">
                             <FormGroup>
@@ -272,6 +272,10 @@ export default function renderForm(props, toast) {
                                                             name="name"
                                                             variant="outlined"
                                                             size="small"
+                                                            inputProps={{
+                                                                readOnly: true,
+                                                                disabled: true,
+                                                            }}
                                                             label="Tên khách hàng"
                                                             placeholder=""
                                                             helperText={errors.name?.message}
@@ -281,7 +285,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.name}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Tên khách hàng không thể để trống",
@@ -308,6 +311,10 @@ export default function renderForm(props, toast) {
                                                             label="Email"
                                                             variant="outlined"
                                                             size="small"
+                                                            inputProps={{
+                                                                readOnly: true,
+                                                                disabled: true,
+                                                            }}
                                                             placeholder=""
                                                             type="email"
                                                             helperText={errors.email?.message}
@@ -317,7 +324,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.email}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
@@ -338,6 +344,10 @@ export default function renderForm(props, toast) {
                                                             label="Số điện thoại"
                                                             variant="outlined"
                                                             size="small"
+                                                            inputProps={{
+                                                                readOnly: true,
+                                                                disabled: true,
+                                                            }}
                                                             placeholder=""
                                                             type="number"
                                                             helperText={errors.phone?.message}
@@ -347,7 +357,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.phone}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
@@ -372,8 +381,11 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             label="Địa chỉ"
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             placeholder=""
+                                                            inputProps={{
+                                                                readOnly: true,
+                                                                disabled: true,
+                                                            }}
                                                             helperText={errors.address?.message}
                                                             InputLabelProps={{
                                                                 shrink: true,
@@ -397,6 +409,7 @@ export default function renderForm(props, toast) {
                                                             value={province}
                                                             onChange={onProvinceChange}
                                                             getOptionLabel={(option) => option.name}
+                                                            disabled
                                                             renderInput={(params) =>
                                                                 <TextField
                                                                     id="provinceCode"
@@ -407,17 +420,15 @@ export default function renderForm(props, toast) {
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
-                                                                    style={{ width: '100%' }}
-                                                                    error={!!errors.provinceCode}
-                                                                    required
                                                                     inputRef={
                                                                         register({
-                                                                            required: "Tỉnh/ Thành phố không thể để trống",
+                                                                            // required: "Phường xã không thể để trống",
                                                                         })
                                                                     }
+                                                                    style={{ width: '100%' }}
+                                                                    error={!!errors.provinceCode}
                                                                     {...params} />}
                                                         />
-
                                                     </Grid>
                                                     <Grid item xs={12} sm={3} md={3}>
                                                         <Autocomplete
@@ -426,12 +437,16 @@ export default function renderForm(props, toast) {
                                                             getOptionLabel={(option) => option.name}
                                                             value={district}
                                                             onChange={onDistrictChange}
-                                                            disabled={isDisabledDistrict}
+                                                            disabled
                                                             renderInput={(params) =>
                                                                 <TextField
                                                                     id="districtCode"
                                                                     name="districtCode"
                                                                     variant="outlined"
+                                                                    inputProps={{
+                                                                        readOnly: true,
+                                                                        disabled: true,
+                                                                    }}
                                                                     label="Quận/Huyện"
                                                                     // helperText={errors.districtCode?.message}
                                                                     InputLabelProps={{
@@ -463,6 +478,10 @@ export default function renderForm(props, toast) {
                                                                     name="wardCode"
                                                                     variant="outlined"
                                                                     label="Phường/Xã"
+                                                                    inputProps={{
+                                                                        readOnly: true,
+                                                                        disabled: true,
+                                                                    }}
                                                                     // helperText={errors.wardCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
@@ -485,150 +504,9 @@ export default function renderForm(props, toast) {
                                             <CardContent>
                                                 <Typography variant="h6" component="h6"
                                                     style={{ marginBottom: '10px', fontSize: 18 }}>
-                                                    Thông tin pháp lý
-                                    </Typography>
-                                                <Grid spacing={3} container>
-                                                    <Grid item xs={12} sm={4} md={4}>
-                                                        <TextField
-                                                            id="legalRepresentative"
-                                                            name="legalRepresentative"
-                                                            label="Người đại diện"
-                                                            variant="outlined"
-                                                            size="small"
-                                                            placeholder=""
-                                                            helperText={errors.legalRepresentative?.message}
-                                                            InputLabelProps={{
-                                                                shrink: true,
-                                                            }}
-                                                            style={{ width: '100%' }}
-                                                            error={!!errors.legalRepresentative}
-                                                            required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-                                                            inputRef={
-                                                                register({
-                                                                    required: "Người đại diện không thể để trống",
-                                                                })
-                                                            }
-                                                        />
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={3} md={3}>
-                                                        <TextField
-                                                            id="mst"
-                                                            name="mst"
-                                                            label="Mã số thuế"
-                                                            variant="outlined"
-                                                            size="small"
-                                                            placeholder=""
-                                                            helperText={errors.mst?.message}
-                                                            InputLabelProps={{
-                                                                shrink: true,
-                                                            }}
-                                                            style={{ width: '100%' }}
-                                                            error={!!errors.mst}
-                                                            required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-                                                            inputRef={
-                                                                register({
-                                                                    required: "Mã số thuế không thể để trống",
-                                                                })
-                                                            }
-                                                        />
-                                                    </Grid>
-                                                </Grid>
-                                                <Grid spacing={3} container>
-                                                    <Grid item xs={12} sm={6} md={6}>
-                                                        {/* <Grid container spacing={1} alignItems="center">
-                                                <Grid item xs={8} sm={8} md={10}>
-                                                    <TextField
-                                                        id="licenses"
-                                                        name="licenses"
-                                                        variant="outlined"
-                                                        size="small"
-                                                        label="Tài liệu giấy phép"
-                                                        defaultValue="abc.doc"
-                                                        disabled
-                                                        placeholder=""
-                                                        helperText={errors.licenses?.message}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        style={{width: '100%'}}
-                                                        error={!!errors.licenses}
-                                                        required
-                                                        inputRef={
-                                                            register({
-                                                                required: "Mã số thuế không thể để trống",
-                                                            })
-                                                        }
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={2} sm={2} md={2}>
-                                                    <label htmlFor="upload-photo" style={{marginBottom: 5}}>
-                                                        <input style={{display: 'none'}}
-                                                               id="upload-photo"
-                                                            // onChange={handleFile}
-                                                               name="upload-photo"
-                                                               type="file"/>
-                                                        <Button color="secondary" variant="contained"
-                                                                component="span">
-                                                            <span>Chọn</span>
-                                                        </Button>
-                                                    </label>
-                                                </Grid>
-                                            </Grid> */}
-                                                    </Grid>
-                                                </Grid>
-                                            </CardContent>
-                                        </Card>
-                                        <Card variant="outlined" style={{ marginTop: '10px' }}>
-                                            <CardContent>
-                                                <Typography variant="h6" component="h6"
-                                                    style={{ marginBottom: '10px', fontSize: 18 }}>
                                                     Thông tin tài khoản
                                     </Typography>
                                                 <Grid spacing={3} container>
-                                                    <Grid item xs={12} sm={3} md={3}>
-                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
-                                                            <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
-                                                            <Controller
-                                                                name="scope"
-                                                                control={control}
-                                                                lable="Vai trò"
-                                                                defaultValue={scopes ? scopes[0].value : ''}
-                                                                rules={{ required: true }}
-                                                                error={!!errors.scope}
-                                                                as={
-                                                                    <Select label="Vai trò">
-                                                                        {scopes.map(({ value, label }) => (
-                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                }
-                                                            />
-                                                        </FormControl>
-
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={3} md={3}>
-                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
-                                                            <InputLabel id="department-select-label" sise="small">Cấp độ</InputLabel>
-                                                            <Controller
-                                                                name="level"
-                                                                control={control}
-                                                                lable="Cấp độ"
-                                                                defaultValue={levels ? levels[0].value : ''}
-                                                                rules={{ required: true }}
-                                                                error={!!errors.level}
-                                                                as={
-                                                                    <Select label="Cấp độ">
-                                                                        {levels.map(({ value, label }) => (
-                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                }
-                                                            />
-                                                        </FormControl>
-
-                                                    </Grid>
                                                     <Grid item xs={12} sm={3} md={3}>
                                                         <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                                             <InputLabel id="department-select-label">Trạng thái</InputLabel>
@@ -639,7 +517,7 @@ export default function renderForm(props, toast) {
                                                                 rules={{ required: true }}
                                                                 error={!!errors.status}
                                                                 as={
-                                                                    <Select label="Trạng thái">
+                                                                    <Select label="Trạng thái" disabled>
                                                                         {statuses.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
@@ -731,37 +609,6 @@ export default function renderForm(props, toast) {
                                             </CardContent>
                                         </Card>
                                         <Divider />
-                                        <Box>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={handleSubmit(onSubmit)}
-                                                disabled={loading}
-                                                style={{ margin: 8 }}>
-                                                {loading && <CircularProgress size={20} />}
-                                    Lưu
-                                </Button>
-                                            {
-                                                props.isUpdate ? (
-                                                    <Link href={`/crm/customer`}>
-                                                        <ButtonGroup color="primary" aria-label="contained primary button group">
-                                                            <Button variant="contained" color="default">Quay lại</Button>
-                                                        </ButtonGroup>
-                                                    </Link>
-                                                ) : (
-                                                        <Button
-                                                            variant="contained"
-                                                            type="reset"
-                                                            style={{ margin: 8 }}
-                                                            disabled={loading}>
-                                                            {loading && <CircularProgress size={20} />}
-                                            Làm mới
-                                                        </Button>
-                                                    )
-                                            }
-
-                                        </Box>
-
                                     </Box>
                                 </form>
                             </FormGroup>
