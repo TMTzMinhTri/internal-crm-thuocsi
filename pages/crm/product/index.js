@@ -159,10 +159,10 @@ function render(props) {
     }
 
     function getFirstImage(val) {
-        if (!val) {
+        if (!val[0]) {
             return `/default.png`; // default link
         }
-        return val.split(';')[0]
+        return val[0].split(';')[0]
     }
 
     const RenderRow = (row) => (
