@@ -64,7 +64,7 @@ export async function loadSellerData(ctx) {
     let sellerClient = getSellerClient(ctx, data)
     let resp = await sellerClient.getSeller(offset, limit, q)
     if (resp.status !== 'OK') {
-        return {props: {data: [], count: 0, message: resp.message}}
+        return {props: {data: [], count: 0, message: 'Không tìm thấy nhà bán hàng nào'}}
     }
     // Pass data to the page via props
     return {props: {data: resp.data, count: resp.total}}
@@ -142,8 +142,8 @@ function render(props) {
                                 value={search}
                                 onChange={handleChange}
                                 inputRef={register}
-                                placeholder="Tìm kiếm người bán hàng"
-                                inputProps={{'aria-label': 'Tìm kiếm người bán hàng'}}
+                                placeholder="Tìm kiếm nhà bán hàng"
+                                inputProps={{'aria-label': 'Tìm kiếm nhà bán hàng'}}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
                                         onClick={handleSubmit(onSearch)}>
@@ -153,13 +153,13 @@ function render(props) {
                     </Grid>
                 </Grid>
             </div>
-            {
+            {/* {
                 q === '' ? (
                     <span/>
                 ) : (
                     <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
                 )
-            }
+            } */}
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
