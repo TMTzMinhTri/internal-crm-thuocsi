@@ -12,7 +12,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { Brand, condUserType, formatNumber } from 'components/global';
+import { Brand, condUserType, formatNumber, ErrorCode, formatUrlSearch } from 'components/global';
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
@@ -92,8 +92,9 @@ function render(props) {
 
     const classes = useStyles();
     let router = useRouter()
-    let [search, setSearch] = useState('')
+
     let q = router.query.q || ''
+    let [search, setSearch] = useState(q)
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
 
@@ -102,12 +103,7 @@ function render(props) {
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
-    const {register, handleSubmit, errors} = useForm();
-
-    function searchPrice(formData) {
-        let q = formData.q
-        Router.push(`/crm/price?q=${q}`)
-    }
+    const { register, handleSubmit, errors } = useForm();
 
     async function handleChange(event) {
         const target = event.target;
@@ -115,13 +111,9 @@ function render(props) {
         setSearch(value)
     }
 
-    function onSearch(formData) {
-        try {
-            searchPrice(formData)
-            setSearch('')
-        } catch (error) {
-            console.log(error)
-        }
+    function onSearch() {
+        q = formatUrlSearch(search)
+        router.push(`?q=${q}`)
     }
 
     useEffect(() => {
@@ -165,44 +157,43 @@ function render(props) {
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
-                      justify="space-evenly"
-                      alignItems="center"
+                    justify="space-evenly"
+                    alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <Paper component="form" className={styles.search}>
+                        <Paper className={styles.search}>
                             <InputBase
                                 id="q"
                                 name="q"
                                 className={styles.input}
                                 value={search}
                                 onChange={handleChange}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter' || event.keyCode === 13) {
+                                        onSearch()
+                                    }
+                                }}
                                 inputRef={register}
                                 placeholder="Tìm kiếm giá"
-                                inputProps={{'aria-label': 'Tìm kiếm giá'}}
+                                inputProps={{ 'aria-label': 'Tìm kiếm giá' }}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
-                                        onClick={handleSubmit(onSearch)}>
-                                <SearchIcon/>
+                                onClick={handleSubmit(onSearch)}>
+                                <SearchIcon />
                             </IconButton>
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/pricing/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
-                                         className={styles.rightGroup}>
+                                className={styles.rightGroup}>
                                 <Button variant="contained" color="primary">Thêm giá mới</Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
                 </Grid>
             </div>
-            {
-                q === '' ? (
-                    <span/>
-                ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
-                )
-            }
+
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
@@ -242,18 +233,18 @@ function render(props) {
                                 </TableRow>
                             )) : (
                                     <TableRow>
-                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                        <TableCell colSpan={3} align="left">{ErrorCode['NOT_FOUND_TABLE']}</TableCell>
                                     </TableRow>
                                 )
                         }
                     </TableBody>
                     <MyTablePagination
-                        labelUnit="Config"
+                        labelUnit="Cấu hình giá"
                         count={total}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}&q=${q}`)
                         }}
                     />
                 </Table>
