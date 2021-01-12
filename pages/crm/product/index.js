@@ -62,7 +62,6 @@ export async function loadProduct(data) {
         count: 0,
         ctx: data.ctx
     }
-
 }
 
 export async function loadSKUProduct(ctx) {

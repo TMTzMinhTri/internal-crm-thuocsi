@@ -13,14 +13,15 @@ import EditIcon from "@material-ui/icons/Edit";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { ProductStatus, SellPrices } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-
+import React, {useEffect, useState} from "react";
+import {useForm} from "react-hook-form";
+import styles from "./pricing.module.css";
+import {ProductStatus, SellPrices, formatNumber, ErrorCode} from "components/global";
+import Chip from "@material-ui/core/Chip";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -65,10 +66,6 @@ export default function PricingPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
-export function formatNumber(num) {
-    return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
-}
-
 function render(props) {
     console.log(props)
     let router = useRouter();
@@ -107,7 +104,7 @@ function render(props) {
                             <TableCell align="left">SKU</TableCell>
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Giá bán lẻ</TableCell>
+                            <TableCell align="right">Giá bán lẻ</TableCell>
                             {/* <TableCell align="left">Giá bán buôn</TableCell> */}
                             <TableCell align="left">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
@@ -123,7 +120,7 @@ function render(props) {
                                         <TableCell align="left">{
                                             showType(row.retailPrice.type)
                                         }</TableCell>
-                                        <TableCell align="left">{formatNumber(row.retailPrice.price)}</TableCell>
+                                        <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
                                         {/* <TableCell align="left">
                                             {
                                                 row.wholesalePrice?.map((price) => (
@@ -156,7 +153,7 @@ function render(props) {
                     ) : (
                         <TableBody>
                             <TableRow>
-                                <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                <TableCell colSpan={3} align="left">{ErrorCode['NOT_FOUND_TABLE']}</TableCell>
                             </TableRow>
                         </TableBody>
                     )}

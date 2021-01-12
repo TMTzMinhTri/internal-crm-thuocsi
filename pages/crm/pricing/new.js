@@ -153,7 +153,7 @@ function render(props) {
                                     )}
                                     name="customerType"
                                     control={control}
-                                    // onChange={([, { id }]) => id}
+                                    onChange={([, { id }]) => id}
 
                                     rules={{
                                         validate: (d) => {
@@ -183,6 +183,12 @@ function render(props) {
                                                     label="Loại sản phẩm"
                                                     error={!!errors.categoryCodes}
                                                     placeholder=""
+                                                    inputRef={
+                                                        register({
+                                                            required: "Loại sản phẩm không thể để trống",
+                                                        })
+                                                    }
+                                                    required 
                                                     size="small"
                                                 onChange={(e) => setSearchCategory(e.target.value)}
                                                 />
@@ -221,8 +227,15 @@ function render(props) {
                                                     {...params}
                                                     label="Tỉnh thành"
                                                     error={!!errors.locationCode}
+                                                    helperText={errors.provinceCode?.message}
                                                     placeholder=""
                                                     size="small"
+                                                    inputRef={
+                                                        register({
+                                                            required: "Tỉnh/ Thành phố không thể để trống",
+                                                        })
+                                                    }
+                                                    required
                                                 // onChange={(e) => setSearchCategory(e.target.value)}
                                                 />
                                             )}
