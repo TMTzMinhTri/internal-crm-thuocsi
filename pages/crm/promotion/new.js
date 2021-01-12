@@ -39,6 +39,8 @@ import DialogContent from "@material-ui/core/DialogContent";
 import Checkbox from "@material-ui/core/Checkbox";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
+import {getPromoClient} from "../../../client/promo";
+import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -48,14 +50,35 @@ export async function getServerSideProps(ctx) {
 
 const defaultState = {
     promotionOption: "option1",
-    type: "type1",
+    type: "discountOrderValue",
+    promotionScope: "global",
+}
+
+const defaultPercentInfo = {
+    orderValue: {
+        label: "",
+        value: 0,
+    },
+    percentValue: {
+        label: "",
+        value: 0,
+    },
+    discountMaxValue: {
+        label: "So",
+        value: 0,
+    }
 }
 
 export default function NewPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
+async function createPromontion() {
+    return getPromoClient().createPromotion()
+}
+
 function render(props) {
+    const toast = useToast()
     const [promotionCodeDefaults, setPromotionCodeDefaults] = useState([
         {
             id: 1,
@@ -67,7 +90,7 @@ function render(props) {
         },
     ])
     const [state, setState] = useState(defaultState);
-    const {promotionOption, type} = state
+    const {promotionOption, type, promotionScope} = state
     const {register, handleSubmit, errors} = useForm();
 
     const [open, setOpen] = useState(false);
@@ -84,8 +107,13 @@ function render(props) {
         setState({...state, [event.target.name]: event.target.value})
     }
 
-    async function createNewProduct(item) {
-
+    async function createNewPromontion(item) {
+        try {
+            await createPromontion()
+            toast.success('tạo khuyến mãi thành công')
+        }catch (e) {
+            toast.error('tạo khuyến mãi thất bại')
+        }
     }
 
     function handleRemoveCodeDefault(id) {
@@ -109,7 +137,7 @@ function render(props) {
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
         try {
-            await createNewProduct(state)
+            await createNewPromontion(state)
         } catch (error) {
             console.log(error)
         }
@@ -144,7 +172,7 @@ function render(props) {
                                         required
                                         inputRef={
                                             register({
-                                                required: "Name Required",
+                                                required: "Tên khuyến mãi không được để trống",
                                                 maxLength: {
                                                     value: 250,
                                                     message: "Name must be less than 250 characters"
@@ -176,7 +204,7 @@ function render(props) {
                                         required
                                         inputRef={
                                             register({
-                                                required: "Name Required",
+                                                required: "Mã khuyến mãi không được để trống",
                                                 maxLength: {
                                                     value: 250,
                                                     message: "Name must be less than 250 characters"
@@ -291,7 +319,7 @@ function render(props) {
                                         required
                                         inputRef={
                                             register({
-                                                required: "Mã khuyến mãi không thể để trống",
+                                                required: "Vui lòng chọn ngày bắt đầu",
                                                 maxLength: {
                                                     value: 50,
                                                     message: "Mã khuyến mãi có chiều dài tối đa là 50 kí tự"
@@ -322,10 +350,10 @@ function render(props) {
                                             shrink: true,
                                         }}
                                         style={{width: '100%'}}
-                                        error={!!errors.sku}
+                                        error={errors.showTime ? true : false}
                                         inputRef={
                                             register({
-                                                required: "Mã khuyến mãi không thể để trống",
+                                                required: "Vui lòng chọn ngày kêt thúc",
                                                 maxLength: {
                                                     value: 50,
                                                     message: "Mã khuyến mãi có chiều dài tối đa là 50 kí tự"
@@ -371,32 +399,22 @@ function render(props) {
                                                 onChange={handleChange}>
                                         <Grid spacing={1} container justify="space-around" alignItems="center">
                                             <Grid item xs={12} sm={6} md={4}>
-                                                <FormControlLabel value="type1"
+                                                <FormControlLabel value="discountOrderValue"
                                                                   control={<Radio style={{color: 'blue'}}/>}
                                                                   label="Giảm tiền"/>
                                             </Grid>
                                             <Grid item xs={12} sm={6} md={4}>
-                                                <FormControlLabel value="type2"
+                                                <FormControlLabel value="discountPercent"
                                                                   control={<Radio style={{color: 'blue'}}/>}
                                                                   label="Giảm % giá sản phẩm"/>
                                             </Grid>
                                             <Grid item xs={12} sm={6} md={4}>
-                                                <FormControlLabel value="type3"
+                                                <FormControlLabel value="gift"
                                                                   control={<Radio style={{color: 'blue'}}/>}
                                                                   label="Quà"/>
                                             </Grid>
                                             <Grid item xs={12} sm={6} md={4}>
-                                                <FormControlLabel value="type4"
-                                                                  control={<Radio style={{color: 'blue'}}/>}
-                                                                  label="Giảm tiền + quà"/>
-                                            </Grid>
-                                            <Grid item xs={12} sm={6} md={4}>
-                                                <FormControlLabel value="type5"
-                                                                  control={<Radio style={{color: 'blue'}}/>}
-                                                                  label="Giảm % giá + quà"/>
-                                            </Grid>
-                                            <Grid item xs={12} sm={6} md={4}>
-                                                <FormControlLabel value="type6"
+                                                <FormControlLabel value="giftProduct"
                                                                   control={<Radio style={{color: 'blue'}}/>}
                                                                   label="Tặng sản phẩm"/>
                                             </Grid>
@@ -404,1247 +422,300 @@ function render(props) {
                                     </RadioGroup>
                                 </CardContent>
                             </Card>
-
                             {
-                                promotionOption === "option1" ? (
-                                    type === "type1" ? (
-                                        <Card variant="outlined" style={{marginTop: '10px'}}>
-                                            <List component="nav" aria-label="mailbox folders">
-                                                {
-                                                    promotionCodePercents.map((code, index) => (
-                                                        <ListItem key={"type1_" + code.id} button>
-                                                            <Grid spacing={1} container alignItems="center">
-                                                                <Grid item xs={5} sm={5} md={5}>
-                                                                    <TextField
-                                                                        id="priceMinValue"
-                                                                        name="priceMinValue"
-                                                                        label="Số lượng sản phẩm"
-                                                                        placeholder=""
-                                                                        type="number"
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        helperText={errors.priceMinValue?.message}
-                                                                        InputLabelProps={{
-                                                                            shrink: true,
-                                                                        }}
-                                                                        style={{width: '100%'}}
-                                                                        error={!!errors.priceMinValue}
-                                                                        required
-                                                                        inputRef={
-                                                                            register({
-                                                                                required: "Name Required",
-                                                                                maxLength: {
-                                                                                    value: 250,
-                                                                                    message: "Name must be less than 250 characters"
-                                                                                },
-                                                                                minLength: {
-                                                                                    value: 6,
-                                                                                    message: "Name must be greater than 6 characters"
-                                                                                },
-                                                                                pattern: {
-                                                                                    value: /[A-Za-z]/,
-                                                                                    message: "Name must be characters"
-                                                                                }
-                                                                            })
-                                                                        }
-                                                                    />
-                                                                </Grid>
-                                                                <Grid item xs={5} sm={5} md={5}>
-                                                                    <TextField
-                                                                        id="code"
-                                                                        name="code"
-                                                                        type="number"
-                                                                        label="Số tiền giảm"
-                                                                        placeholder=""
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        helperText={errors.code?.message}
-                                                                        InputLabelProps={{
-                                                                            shrink: true,
-                                                                        }}
-                                                                        InputProps={{
-                                                                            endAdornment: <InputAdornment
-                                                                                position="end">đ</InputAdornment>,
-                                                                        }}
-                                                                        style={{width: '100%'}}
-                                                                        error={errors.code ? true : false}
-                                                                        required
-                                                                        inputRef={
-                                                                            register({
-                                                                                required: "Name Required",
-                                                                                maxLength: {
-                                                                                    value: 250,
-                                                                                    message: "Name must be less than 250 characters"
-                                                                                },
-                                                                                minLength: {
-                                                                                    value: 6,
-                                                                                    message: "Name must be greater than 6 characters"
-                                                                                },
-                                                                                pattern: {
-                                                                                    value: /[A-Za-z]/,
-                                                                                    message: "Name must be characters"
-                                                                                }
-                                                                            })
-                                                                        }
-                                                                    />
-                                                                </Grid>
-                                                                <Grid item xs={2} sm={2} md={2}>
-                                                                    <Grid spacing={1} container alignItems="center">
-                                                                        <Grid item xs={6} sm={4} md={2}>
-                                                                            {
-                                                                                promotionCodePercents.length !== 1 ? (
-                                                                                    <IconButton color="secondary"
-                                                                                                component="span"
-                                                                                                onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                                        <HighlightOffOutlinedIcon/>
-                                                                                    </IconButton>
-                                                                                ) : (
-                                                                                    <div/>
-                                                                                )
+                                type === "discountOrderValue" ? (
+                                    <Card variant="outlined" style={{marginTop: '10px'}}
+                                    >
+                                        <List component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionCodePercents.map((code, index) => (
+                                                    <ListItem key={"type1_" + code.id} button>
+                                                        <Grid spacing={1} container alignItems="center">
+                                                            <Grid item xs={5} sm={5} md={5}>
+                                                                <TextField
+                                                                    id="priceMinValue"
+                                                                    name="priceMinValue"
+                                                                    label="Giá trị đơn hàng"
+                                                                    placeholder=""
+                                                                    type="number"
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors.priceMinValue?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={!!errors.priceMinValue}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Name Required",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Name must be less than 250 characters"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 6,
+                                                                                message: "Name must be greater than 6 characters"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[A-Za-z]/,
+                                                                                message: "Name must be characters"
                                                                             }
-                                                                        </Grid>
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={5} sm={5} md={5}>
+                                                                <TextField
+                                                                    id="code"
+                                                                    name="code"
+                                                                    type="number"
+                                                                    label="Số tiền giảm"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors.code?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">đ</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors.code ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Name Required",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Name must be less than 250 characters"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 6,
+                                                                                message: "Name must be greater than 6 characters"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[A-Za-z]/,
+                                                                                message: "Name must be characters"
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <Grid spacing={1} container alignItems="center">
+                                                                    <Grid item xs={6} sm={4} md={2}>
                                                                         {
-                                                                            index + 1 === promotionCodePercents.length ?
-                                                                                (
-                                                                                    <Grid item xs={6} sm={4} md={2}>
-                                                                                        <IconButton color="primary"
-                                                                                                    onClick={() => handleAddCodePercent(code.id)}
-                                                                                                    aria-label="upload picture"
-                                                                                                    component="span">
-                                                                                            <AddCircleOutlineOutlinedIcon/>
-                                                                                        </IconButton>
-                                                                                    </Grid>
-                                                                                ) : (
-                                                                                    <div/>
-                                                                                )
+                                                                            promotionCodePercents.length !== 1 ? (
+                                                                                <IconButton color="secondary"
+                                                                                            component="span"
+                                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                                    <HighlightOffOutlinedIcon/>
+                                                                                </IconButton>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
                                                                         }
                                                                     </Grid>
+                                                                    {
+                                                                        index + 1 === promotionCodePercents.length ?
+                                                                            (
+                                                                                <Grid item xs={6} sm={4} md={2}>
+                                                                                    <IconButton color="primary"
+                                                                                                onClick={() => handleAddCodePercent(code.id)}
+                                                                                                aria-label="upload picture"
+                                                                                                component="span">
+                                                                                        <AddCircleOutlineOutlinedIcon/>
+                                                                                    </IconButton>
+                                                                                </Grid>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                    }
                                                                 </Grid>
                                                             </Grid>
-                                                        </ListItem>
-                                                    ))
-                                                }
-                                            </List>
-                                        </Card>
-                                    ) : type === "type2" ? (
-                                        <Card variant="outlined" style={{marginTop: '10px'}}>
-                                            <List component="nav" aria-label="mailbox folders">
-                                                {
-                                                    promotionCodePercents.map((code, index) => (
-                                                        <ListItem key={"type2_" + code.id} button>
-                                                            <Grid spacing={1} container alignItems="center">
-                                                                <Grid item xs={4} sm={4} md={4}>
-                                                                    <TextField
-                                                                        id="priceMinValue"
-                                                                        name="priceMinValue"
-                                                                        label="Số lượng sản phẩm"
-                                                                        placeholder=""
-                                                                        type="number"
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        helperText={errors.priceMinValue?.message}
-                                                                        InputLabelProps={{
-                                                                            shrink: true,
-                                                                        }}
-                                                                        style={{width: '100%'}}
-                                                                        error={!!errors.priceMinValue}
-                                                                        required
-                                                                        inputRef={
-                                                                            register({
-                                                                                required: "Name Required",
-                                                                                maxLength: {
-                                                                                    value: 250,
-                                                                                    message: "Name must be less than 250 characters"
-                                                                                },
-                                                                                minLength: {
-                                                                                    value: 6,
-                                                                                    message: "Name must be greater than 6 characters"
-                                                                                },
-                                                                                pattern: {
-                                                                                    value: /[A-Za-z]/,
-                                                                                    message: "Name must be characters"
-                                                                                }
-                                                                            })
-                                                                        }
-                                                                    />
-                                                                </Grid>
-                                                                <Grid item xs={2} sm={2} md={2}>
-                                                                    <TextField
-                                                                        id="code"
-                                                                        name="code"
-                                                                        type="number"
-                                                                        label="Số % giảm"
-                                                                        placeholder=""
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        helperText={errors.code?.message}
-                                                                        InputLabelProps={{
-                                                                            shrink: true,
-                                                                        }}
-                                                                        InputProps={{
-                                                                            endAdornment: <InputAdornment
-                                                                                position="end">đ</InputAdornment>,
-                                                                        }}
-                                                                        style={{width: '100%'}}
-                                                                        error={errors.code ? true : false}
-                                                                        required
-                                                                        inputRef={
-                                                                            register({
-                                                                                required: "Name Required",
-                                                                                maxLength: {
-                                                                                    value: 250,
-                                                                                    message: "Name must be less than 250 characters"
-                                                                                },
-                                                                                minLength: {
-                                                                                    value: 6,
-                                                                                    message: "Name must be greater than 6 characters"
-                                                                                },
-                                                                                pattern: {
-                                                                                    value: /[A-Za-z]/,
-                                                                                    message: "Name must be characters"
-                                                                                }
-                                                                            })
-                                                                        }
-                                                                    />
-                                                                </Grid>
-                                                                <Grid item xs={4} sm={4} md={4}>
-                                                                    <TextField
-                                                                        id="code"
-                                                                        name="code"
-                                                                        type="number"
-                                                                        label="Số tiền giảm tối đa"
-                                                                        placeholder=""
-                                                                        variant="outlined"
-                                                                        size="small"
-                                                                        helperText={errors.code?.message}
-                                                                        InputLabelProps={{
-                                                                            shrink: true,
-                                                                        }}
-                                                                        InputProps={{
-                                                                            endAdornment: <InputAdornment
-                                                                                position="end">đ</InputAdornment>,
-                                                                        }}
-                                                                        style={{width: '100%'}}
-                                                                        error={errors.code ? true : false}
-                                                                        required
-                                                                        inputRef={
-                                                                            register({
-                                                                                required: "Name Required",
-                                                                                maxLength: {
-                                                                                    value: 250,
-                                                                                    message: "Name must be less than 250 characters"
-                                                                                },
-                                                                                minLength: {
-                                                                                    value: 6,
-                                                                                    message: "Name must be greater than 6 characters"
-                                                                                },
-                                                                                pattern: {
-                                                                                    value: /[A-Za-z]/,
-                                                                                    message: "Name must be characters"
-                                                                                }
-                                                                            })
-                                                                        }
-                                                                    />
-                                                                </Grid>
-                                                                <Grid item xs={2} sm={2} md={2}>
-                                                                    <Grid spacing={1} container alignItems="center">
-                                                                        <Grid item xs={6} sm={4} md={2}>
-                                                                            {
-                                                                                promotionCodePercents.length !== 1 ? (
-                                                                                    <IconButton color="secondary"
-                                                                                                component="span"
-                                                                                                onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                                        <HighlightOffOutlinedIcon/>
-                                                                                    </IconButton>
-                                                                                ) : (
-                                                                                    <div/>
-                                                                                )
+                                                        </Grid>
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </Card>
+                                ) : type === "discountPercent" ? (
+                                    <Card variant="outlined" style={{marginTop: '10px'}}>
+                                        <List component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionCodePercents.map((code, index) => (
+                                                    <ListItem key={"type2_" + code.id} button>
+                                                        <Grid spacing={1} container alignItems="center">
+                                                            <Grid item xs={4} sm={4} md={4}>
+                                                                <TextField
+                                                                    id="priceMinValue"
+                                                                    name="priceMinValue"
+                                                                    label="Giá trị đơn hàng"
+                                                                    placeholder=""
+                                                                    type="number"
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors.priceMinValue?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={!!errors.priceMinValue}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Name Required",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Name must be less than 250 characters"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 6,
+                                                                                message: "Name must be greater than 6 characters"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[A-Za-z]/,
+                                                                                message: "Name must be characters"
                                                                             }
-                                                                        </Grid>
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <TextField
+                                                                    id="code"
+                                                                    name="code"
+                                                                    type="number"
+                                                                    label="Số % giảm"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors.code?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">đ</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors.code ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Name Required",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Name must be less than 250 characters"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 6,
+                                                                                message: "Name must be greater than 6 characters"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[A-Za-z]/,
+                                                                                message: "Name must be characters"
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={4} sm={4} md={4}>
+                                                                <TextField
+                                                                    id="code"
+                                                                    name="code"
+                                                                    type="number"
+                                                                    label="Số tiền giảm tối đa"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors.code?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">đ</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors.code ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Name Required",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Name must be less than 250 characters"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 6,
+                                                                                message: "Name must be greater than 6 characters"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[A-Za-z]/,
+                                                                                message: "Name must be characters"
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <Grid spacing={1} container alignItems="center">
+                                                                    <Grid item xs={6} sm={4} md={2}>
                                                                         {
-                                                                            index + 1 === promotionCodePercents.length ?
-                                                                                (
-                                                                                    <Grid item xs={6} sm={4} md={2}>
-                                                                                        <IconButton color="primary"
-                                                                                                    onClick={() => handleAddCodePercent(code.id)}
-                                                                                                    aria-label="upload picture"
-                                                                                                    component="span">
-                                                                                            <AddCircleOutlineOutlinedIcon/>
-                                                                                        </IconButton>
-                                                                                    </Grid>
-                                                                                ) : (
-                                                                                    <div/>
-                                                                                )
+                                                                            promotionCodePercents.length !== 1 ? (
+                                                                                <IconButton color="secondary"
+                                                                                            component="span"
+                                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                                    <HighlightOffOutlinedIcon/>
+                                                                                </IconButton>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
                                                                         }
                                                                     </Grid>
+                                                                    {
+                                                                        index + 1 === promotionCodePercents.length ?
+                                                                            (
+                                                                                <Grid item xs={6} sm={4} md={2}>
+                                                                                    <IconButton color="primary"
+                                                                                                onClick={() => handleAddCodePercent(code.id)}
+                                                                                                aria-label="upload picture"
+                                                                                                component="span">
+                                                                                        <AddCircleOutlineOutlinedIcon/>
+                                                                                    </IconButton>
+                                                                                </Grid>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                    }
                                                                 </Grid>
                                                             </Grid>
-                                                        </ListItem>
-                                                    ))
-                                                }
-                                            </List>
-                                        </Card>
-                                    ) : type === "type3" ? (
-                                        <Card variant="outlined" style={{marginTop: '10px'}}>
-                                            <div>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" color="primary">Thêm quà</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên quà</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm quà"
-                                                                inputProps={{'aria-label': 'Tìm kiếm quà'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton} aria-label="search">
-                                                                <SearchIcon/>
-                                                            </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên quà</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </div>
-                                        </Card>
-                                    ) : type === "type4" ? (
-                                        <div>
-                                            <Card variant="outlined" style={{marginTop: '10px'}}>
-                                                <List component="nav" aria-label="mailbox folders">
-                                                    {
-                                                        promotionCodeDefaults.map((code, index) => (
-                                                            <ListItem key={code.id} button>
-                                                                <Grid spacing={1} container alignItems="center">
-                                                                    <Grid item xs={5} sm={5} md={5}>
-                                                                        <TextField
-                                                                            id="priceMinValue"
-                                                                            name="priceMinValue"
-                                                                            label="Số lượng sản phẩm"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            helperText={errors.priceMinValue?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.priceMinValue ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={5} sm={5} md={5}>
-                                                                        <TextField
-                                                                            id="code"
-                                                                            name="code"
-                                                                            label="Số tiền giảm"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.code?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.code ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={2} sm={2} md={2}>
-                                                                        <Grid spacing={1} container alignItems="center">
-                                                                            <Grid item xs={6} sm={4} md={2}>
-                                                                                {
-                                                                                    promotionCodeDefaults.length !== 1 ? (
-                                                                                        <IconButton color="secondary"
-                                                                                                    component="span"
-                                                                                                    onClick={() => handleRemoveCodeDefault(code.id)}>
-                                                                                            <HighlightOffOutlinedIcon/>
-                                                                                        </IconButton>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                                }
-                                                                            </Grid>
-                                                                            {
-                                                                                index + 1 === promotionCodeDefaults.length ?
-                                                                                    (
-                                                                                        <Grid item xs={6} sm={4} md={2}>
-                                                                                            <IconButton color="primary"
-                                                                                                        onClick={() => handleAddCodeDefault(code.id)}
-                                                                                                        aria-label="upload picture"
-                                                                                                        component="span">
-                                                                                                <AddCircleOutlineOutlinedIcon/>
-                                                                                            </IconButton>
-                                                                                        </Grid>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                            }
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </ListItem>
-                                                        ))
-                                                    }
-                                                </List>
-                                            </Card>
-                                            <Card variant="outlined" style={{marginTop: '4px'}}>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" color="primary">Thêm quà</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên quà</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm quà"
-                                                                inputProps={{'aria-label': 'Tìm kiếm quà'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton}
-                                                                        aria-label="search">
-                                                                <SearchIcon/>
-                                                            </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên quà</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </Card>
-                                        </div>
-                                    ) : type === "type5" ? (
-                                        <div>
-                                            <Card variant="outlined" style={{marginTop: '10px'}}>
-                                                <List component="nav" aria-label="mailbox folders">
-                                                    {
-                                                        promotionCodePercents.map((code, index) => (
-                                                            <ListItem key={"type2_" + code.id} button>
-                                                                <Grid spacing={1} container alignItems="center">
-                                                                    <Grid item xs={4} sm={4} md={4}>
-                                                                        <TextField
-                                                                            id="priceMinValue"
-                                                                            name="priceMinValue"
-                                                                            label="Số lượng sản phẩm"
-                                                                            placeholder=""
-                                                                            type="number"
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.priceMinValue?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={!!errors.priceMinValue}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={2} sm={2} md={2}>
-                                                                        <TextField
-                                                                            id="code"
-                                                                            name="code"
-                                                                            type="number"
-                                                                            label="Số % giảm"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.code?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.code ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={4} sm={4} md={4}>
-                                                                        <TextField
-                                                                            id="code"
-                                                                            name="code"
-                                                                            type="number"
-                                                                            label="Số tiền giảm tối đa"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.code?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.code ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={2} sm={2} md={2}>
-                                                                        <Grid spacing={1} container alignItems="center">
-                                                                            <Grid item xs={6} sm={4} md={2}>
-                                                                                {
-                                                                                    promotionCodePercents.length !== 1 ? (
-                                                                                        <IconButton color="secondary"
-                                                                                                    component="span"
-                                                                                                    onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                                            <HighlightOffOutlinedIcon/>
-                                                                                        </IconButton>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                                }
-                                                                            </Grid>
-                                                                            {
-                                                                                index + 1 === promotionCodePercents.length ?
-                                                                                    (
-                                                                                        <Grid item xs={6} sm={4} md={2}>
-                                                                                            <IconButton color="primary"
-                                                                                                        onClick={() => handleAddCodePercent(code.id)}
-                                                                                                        aria-label="upload picture"
-                                                                                                        component="span">
-                                                                                                <AddCircleOutlineOutlinedIcon/>
-                                                                                            </IconButton>
-                                                                                        </Grid>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                            }
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </ListItem>
-                                                        ))
-                                                    }
-                                                </List>
-                                            </Card>
-                                            <Card variant="outlined" style={{marginTop: '4px'}}>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" color="primary">Thêm quà</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên quà</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm quà"
-                                                                inputProps={{'aria-label': 'Tìm kiếm quà'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton}
-                                                                        aria-label="search">
-                                                                <SearchIcon/>
-                                                            </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên quà</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </Card>
-                                        </div>
-                                    ) : type === "type6" ? (
-                                        <Card variant="outlined" style={{marginTop: '10px'}}>
-                                            <div>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" size="small"  color="primary">Thêm sản phẩm</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên sản phẩm</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="left">Đơn vị</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableRow>
-                                                            <TableCell align="left">png</TableCell>
-                                                            <TableCell align="left">Khẩu trang</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="left">Hộp</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">png</TableCell>
-                                                            <TableCell align="left">Khẩu trang</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="left">Hộp</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">png</TableCell>
-                                                            <TableCell align="left">Khẩu trang</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="left">Hộp</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn sản phẩm"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm sản phẩm"
-                                                                inputProps={{'aria-label': 'Tìm kiếm sản phẩm'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton} aria-label="search">
-                                                                <SearchIcon/>
-                                                            </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên sản phẩm</TableCell>
-                                                                        <TableCell align="left">Đơn vị</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableRow>
-                                                                    <TableCell align="left">png</TableCell>
-                                                                    <TableCell align="left">Khẩu trang</TableCell>
-                                                                    <TableCell align="left">Hộp</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">png</TableCell>
-                                                                    <TableCell align="left">Khẩu trang</TableCell>
-                                                                    <TableCell align="left">Hộp</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">png</TableCell>
-                                                                    <TableCell align="left">Khẩu trang</TableCell>
-                                                                    <TableCell align="left">Hộp</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </div>
-                                        </Card>
-                                    ): (
-                                        <div/>
-                                    )
-                                ) : (
-                                    type === "type1" ? (
+                                                        </Grid>
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </Card>
+                                ) : type === "gift" ? (
+                                    <RenderTableGift
+                                        handleClickOpen={handleClickOpen}
+                                        handleClose={handleClose}
+                                        open={open}
+                                        register={register}
+                                        handleRemoveCodePercent={handleRemoveCodePercent}
+                                        handleChange={handleChange}/>
+                                ) : type === "type4" ? (
+                                    <div>
                                         <Card variant="outlined" style={{marginTop: '10px'}}>
                                             <List component="nav" aria-label="mailbox folders">
                                                 {
-                                                    promotionCodePercents.map((code, index) => (
-                                                        <ListItem key={"type1_" + code.id} button>
+                                                    promotionCodeDefaults.map((code, index) => (
+                                                        <ListItem key={code.id} button>
                                                             <Grid spacing={1} container alignItems="center">
                                                                 <Grid item xs={5} sm={5} md={5}>
                                                                     <TextField
@@ -1652,15 +723,18 @@ function render(props) {
                                                                         name="priceMinValue"
                                                                         label="Giá trị đơn hàng"
                                                                         placeholder=""
-                                                                        type="number"
                                                                         variant="outlined"
                                                                         size="small"
+                                                                        InputProps={{
+                                                                            endAdornment: <InputAdornment
+                                                                                position="end">đ</InputAdornment>,
+                                                                        }}
                                                                         helperText={errors.priceMinValue?.message}
                                                                         InputLabelProps={{
                                                                             shrink: true,
                                                                         }}
                                                                         style={{width: '100%'}}
-                                                                        error={!!errors.priceMinValue}
+                                                                        error={errors.priceMinValue ? true : false}
                                                                         required
                                                                         inputRef={
                                                                             register({
@@ -1685,7 +759,6 @@ function render(props) {
                                                                     <TextField
                                                                         id="code"
                                                                         name="code"
-                                                                        type="number"
                                                                         label="Số tiền giảm"
                                                                         placeholder=""
                                                                         variant="outlined"
@@ -1724,10 +797,10 @@ function render(props) {
                                                                     <Grid spacing={1} container alignItems="center">
                                                                         <Grid item xs={6} sm={4} md={2}>
                                                                             {
-                                                                                promotionCodePercents.length !== 1 ? (
+                                                                                promotionCodeDefaults.length !== 1 ? (
                                                                                     <IconButton color="secondary"
                                                                                                 component="span"
-                                                                                                onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                                                onClick={() => handleRemoveCodeDefault(code.id)}>
                                                                                         <HighlightOffOutlinedIcon/>
                                                                                     </IconButton>
                                                                                 ) : (
@@ -1736,11 +809,11 @@ function render(props) {
                                                                             }
                                                                         </Grid>
                                                                         {
-                                                                            index + 1 === promotionCodePercents.length ?
+                                                                            index + 1 === promotionCodeDefaults.length ?
                                                                                 (
                                                                                     <Grid item xs={6} sm={4} md={2}>
                                                                                         <IconButton color="primary"
-                                                                                                    onClick={() => handleAddCodePercent(code.id)}
+                                                                                                    onClick={() => handleAddCodeDefault(code.id)}
                                                                                                     aria-label="upload picture"
                                                                                                     component="span">
                                                                                             <AddCircleOutlineOutlinedIcon/>
@@ -1758,7 +831,16 @@ function render(props) {
                                                 }
                                             </List>
                                         </Card>
-                                    ) : type === "type2" ? (
+                                        <RenderTableGift
+                                            handleClickOpen={handleClickOpen}
+                                            handleClose={handleClose}
+                                            open={open}
+                                            register={register}
+                                            handleRemoveCodePercent={handleRemoveCodePercent}
+                                            handleChange={handleChange}/>
+                                    </div>
+                                ) : type === "type5" ? (
+                                    <div>
                                         <Card variant="outlined" style={{marginTop: '10px'}}>
                                             <List component="nav" aria-label="mailbox folders">
                                                 {
@@ -1916,1072 +998,146 @@ function render(props) {
                                                 }
                                             </List>
                                         </Card>
-                                    ) : type === "type3" ? (
-                                        <Card variant="outlined" style={{marginTop: '10px'}}>
-                                            <div>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" color="primary">Thêm quà</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên quà</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm quà"
-                                                                inputProps={{'aria-label': 'Tìm kiếm quà'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton} aria-label="search">
-                                                                <SearchIcon/>
-                                                            </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên quà</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </div>
-                                        </Card>
-                                    ) : type === "type4" ? (
+                                        <RenderTableGift
+                                            handleClickOpen={handleClickOpen}
+                                            handleClose={handleClose}
+                                            open={open}
+                                            register={register}
+                                            handleRemoveCodePercent={handleRemoveCodePercent}
+                                            handleChange={handleChange}/>
+                                    </div>
+                                ) : type === "giftProduct" ? (
+                                    <Card variant="outlined" style={{marginTop: '10px'}}>
                                         <div>
-                                            <Card variant="outlined" style={{marginTop: '10px'}}>
-                                                <List component="nav" aria-label="mailbox folders">
-                                                    {
-                                                        promotionCodeDefaults.map((code, index) => (
-                                                            <ListItem key={code.id} button>
-                                                                <Grid spacing={1} container alignItems="center">
-                                                                    <Grid item xs={5} sm={5} md={5}>
-                                                                        <TextField
-                                                                            id="priceMinValue"
-                                                                            name="priceMinValue"
-                                                                            label="Giá trị đơn hàng"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            helperText={errors.priceMinValue?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.priceMinValue ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={5} sm={5} md={5}>
-                                                                        <TextField
-                                                                            id="code"
-                                                                            name="code"
-                                                                            label="Số tiền giảm"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.code?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.code ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={2} sm={2} md={2}>
-                                                                        <Grid spacing={1} container alignItems="center">
-                                                                            <Grid item xs={6} sm={4} md={2}>
-                                                                                {
-                                                                                    promotionCodeDefaults.length !== 1 ? (
-                                                                                        <IconButton color="secondary"
-                                                                                                    component="span"
-                                                                                                    onClick={() => handleRemoveCodeDefault(code.id)}>
-                                                                                            <HighlightOffOutlinedIcon/>
-                                                                                        </IconButton>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                                }
-                                                                            </Grid>
-                                                                            {
-                                                                                index + 1 === promotionCodeDefaults.length ?
-                                                                                    (
-                                                                                        <Grid item xs={6} sm={4} md={2}>
-                                                                                            <IconButton color="primary"
-                                                                                                        onClick={() => handleAddCodeDefault(code.id)}
-                                                                                                        aria-label="upload picture"
-                                                                                                        component="span">
-                                                                                                <AddCircleOutlineOutlinedIcon/>
-                                                                                            </IconButton>
-                                                                                        </Grid>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                            }
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </ListItem>
-                                                        ))
-                                                    }
-                                                </List>
-                                            </Card>
-                                            <Card variant="outlined" style={{marginTop: '4px'}}>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" color="primary">Thêm quà</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên quà</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
+                                            <ButtonGroup color="primary" size="small"
+                                                         aria-label="contained primary button group"
+                                                         className={styles.btnDialog}
+                                                         onClick={handleClickOpen}
+                                            >
+                                                <Button variant="contained" size="small"  color="primary">Thêm sản phẩm</Button>
+                                            </ButtonGroup>
+                                            <TableContainer component={Paper}>
+                                                <Table size="small">
+                                                    <TableHead>
                                                         <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
+                                                            <TableCell align="left">Hình ảnh</TableCell>
+                                                            <TableCell align="left">Tên sản phẩm</TableCell>
+                                                            <TableCell align="left">Số lượng</TableCell>
+                                                            <TableCell align="left">Đơn vị</TableCell>
+                                                            <TableCell align="center">Thao tác</TableCell>
                                                         </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm quà"
-                                                                inputProps={{'aria-label': 'Tìm kiếm quà'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton}
-                                                                        aria-label="search">
-                                                                <SearchIcon/>
+                                                    </TableHead>
+                                                    <TableRow>
+                                                        <TableCell align="left">png</TableCell>
+                                                        <TableCell align="left">Khẩu trang</TableCell>
+                                                        <TableCell align="left">12</TableCell>
+                                                        <TableCell align="left">Hộp</TableCell>
+                                                        <TableCell align="center">
+                                                            <IconButton color="secondary"
+                                                                        component="span"
+                                                                        onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                <HighlightOffOutlinedIcon/>
                                                             </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên quà</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                </Table>
+                                            </TableContainer>
+                                            <Dialog
+                                                open={open}
+                                                onClose={handleClose}
+                                                aria-labelledby="alert-dialog-title"
+                                                aria-describedby="alert-dialog-description"
+                                            >
+                                                <DialogTitle id="alert-dialog-title">{"Chọn sản phẩm"}</DialogTitle>
+                                                <DialogContent>
+                                                    <Paper component="form" className={styles.search}
+                                                           style={{marginBottom: '10px'}}>
+                                                        <InputBase
+                                                            id="q"
+                                                            name="q"
+                                                            className={styles.input}
+                                                            onChange={handleChange}
+                                                            inputRef={register}
+                                                            placeholder="Tìm kiếm sản phẩm"
+                                                            inputProps={{'aria-label': 'Tìm kiếm sản phẩm'}}
+                                                        />
+                                                        <IconButton className={styles.iconButton} aria-label="search">
+                                                            <SearchIcon/>
+                                                        </IconButton>
+                                                    </Paper>
+                                                    <TableContainer component={Paper}>
+                                                        <Table size="small">
+                                                            <TableHead>
                                                                 <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
+                                                                    <TableCell align="left">Hình ảnh</TableCell>
+                                                                    <TableCell align="left">Tên sản phẩm</TableCell>
+                                                                    <TableCell align="left">Đơn vị</TableCell>
+                                                                    <TableCell align="left" style={{width: '25%'}}>Số
+                                                                        lượng</TableCell>
+                                                                    <TableCell align="center">Thao tác</TableCell>
                                                                 </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </Card>
+                                                            </TableHead>
+                                                            <TableRow>
+                                                                <TableCell align="left">png</TableCell>
+                                                                <TableCell align="left">Khẩu trang</TableCell>
+                                                                <TableCell align="left">Hộp</TableCell>
+                                                                <TableCell align="left">
+                                                                    <TextField
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        style={{
+                                                                            height: '40%'
+                                                                        }}
+                                                                        type="number"
+                                                                        id="outlined-adornment-weight"
+                                                                        aria-describedby="outlined-weight-helper-text"
+                                                                        labelWidth={0}
+                                                                    />
+                                                                </TableCell>
+                                                                <TableCell align="center">
+                                                                    <Checkbox style={{color: 'green'}}/>
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        </Table>
+                                                    </TableContainer>
+                                                </DialogContent>
+                                                <DialogActions>
+                                                    <Button onClick={handleClose} color="secondary">
+                                                        Hủy
+                                                    </Button>
+                                                    <Button onClick={handleClose} color="primary" autoFocus>
+                                                        Thêm
+                                                    </Button>
+                                                </DialogActions>
+                                            </Dialog>
                                         </div>
-                                    ) : type === "type5" ? (
-                                        <div>
-                                            <Card variant="outlined" style={{marginTop: '10px'}}>
-                                                <List component="nav" aria-label="mailbox folders">
-                                                    {
-                                                        promotionCodePercents.map((code, index) => (
-                                                            <ListItem key={"type2_" + code.id} button>
-                                                                <Grid spacing={1} container alignItems="center">
-                                                                    <Grid item xs={4} sm={4} md={4}>
-                                                                        <TextField
-                                                                            id="priceMinValue"
-                                                                            name="priceMinValue"
-                                                                            label="Giá trị đơn hàng"
-                                                                            placeholder=""
-                                                                            type="number"
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.priceMinValue?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={!!errors.priceMinValue}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={2} sm={2} md={2}>
-                                                                        <TextField
-                                                                            id="code"
-                                                                            name="code"
-                                                                            type="number"
-                                                                            label="Số % giảm"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.code?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.code ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={4} sm={4} md={4}>
-                                                                        <TextField
-                                                                            id="code"
-                                                                            name="code"
-                                                                            type="number"
-                                                                            label="Số tiền giảm tối đa"
-                                                                            placeholder=""
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            helperText={errors.code?.message}
-                                                                            InputLabelProps={{
-                                                                                shrink: true,
-                                                                            }}
-                                                                            InputProps={{
-                                                                                endAdornment: <InputAdornment
-                                                                                    position="end">đ</InputAdornment>,
-                                                                            }}
-                                                                            style={{width: '100%'}}
-                                                                            error={errors.code ? true : false}
-                                                                            required
-                                                                            inputRef={
-                                                                                register({
-                                                                                    required: "Name Required",
-                                                                                    maxLength: {
-                                                                                        value: 250,
-                                                                                        message: "Name must be less than 250 characters"
-                                                                                    },
-                                                                                    minLength: {
-                                                                                        value: 6,
-                                                                                        message: "Name must be greater than 6 characters"
-                                                                                    },
-                                                                                    pattern: {
-                                                                                        value: /[A-Za-z]/,
-                                                                                        message: "Name must be characters"
-                                                                                    }
-                                                                                })
-                                                                            }
-                                                                        />
-                                                                    </Grid>
-                                                                    <Grid item xs={2} sm={2} md={2}>
-                                                                        <Grid spacing={1} container alignItems="center">
-                                                                            <Grid item xs={6} sm={4} md={2}>
-                                                                                {
-                                                                                    promotionCodePercents.length !== 1 ? (
-                                                                                        <IconButton color="secondary"
-                                                                                                    component="span"
-                                                                                                    onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                                            <HighlightOffOutlinedIcon/>
-                                                                                        </IconButton>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                                }
-                                                                            </Grid>
-                                                                            {
-                                                                                index + 1 === promotionCodePercents.length ?
-                                                                                    (
-                                                                                        <Grid item xs={6} sm={4} md={2}>
-                                                                                            <IconButton color="primary"
-                                                                                                        onClick={() => handleAddCodePercent(code.id)}
-                                                                                                        aria-label="upload picture"
-                                                                                                        component="span">
-                                                                                                <AddCircleOutlineOutlinedIcon/>
-                                                                                            </IconButton>
-                                                                                        </Grid>
-                                                                                    ) : (
-                                                                                        <div/>
-                                                                                    )
-                                                                            }
-                                                                        </Grid>
-                                                                    </Grid>
-                                                                </Grid>
-                                                            </ListItem>
-                                                        ))
-                                                    }
-                                                </List>
-                                            </Card>
-                                            <Card variant="outlined" style={{marginTop: '4px'}}>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" color="primary">Thêm quà</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên quà</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">Balo</TableCell>
-                                                            <TableCell align="left">Ảnh</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm quà"
-                                                                inputProps={{'aria-label': 'Tìm kiếm quà'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton}
-                                                                        aria-label="search">
-                                                                <SearchIcon/>
-                                                            </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên quà</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">Balo</TableCell>
-                                                                    <TableCell align="left">Ảnh</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </Card>
-                                        </div>
-                                    ) : type === "type6" ? (
-                                        <Card variant="outlined" style={{marginTop: '10px'}}>
-                                            <div>
-                                                <ButtonGroup color="primary" size="small"
-                                                             aria-label="contained primary button group"
-                                                             className={styles.btnDialog}
-                                                             onClick={handleClickOpen}
-                                                >
-                                                    <Button variant="contained" size="small"  color="primary">Thêm sản phẩm</Button>
-                                                </ButtonGroup>
-                                                <TableContainer component={Paper}>
-                                                    <Table size="small">
-                                                        <TableHead>
-                                                            <TableRow>
-                                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                                <TableCell align="left">Tên sản phẩm</TableCell>
-                                                                <TableCell align="left">Số lượng</TableCell>
-                                                                <TableCell align="left">Đơn vị</TableCell>
-                                                                <TableCell align="center">Thao tác</TableCell>
-                                                            </TableRow>
-                                                        </TableHead>
-                                                        <TableRow>
-                                                            <TableCell align="left">png</TableCell>
-                                                            <TableCell align="left">Khẩu trang</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="left">Hộp</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">png</TableCell>
-                                                            <TableCell align="left">Khẩu trang</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="left">Hộp</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                        <TableRow>
-                                                            <TableCell align="left">png</TableCell>
-                                                            <TableCell align="left">Khẩu trang</TableCell>
-                                                            <TableCell align="left">12</TableCell>
-                                                            <TableCell align="left">Hộp</TableCell>
-                                                            <TableCell align="center">
-                                                                <IconButton color="secondary"
-                                                                            component="span"
-                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
-                                                                    <HighlightOffOutlinedIcon/>
-                                                                </IconButton>
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    </Table>
-                                                </TableContainer>
-                                                <Dialog
-                                                    open={open}
-                                                    onClose={handleClose}
-                                                    aria-labelledby="alert-dialog-title"
-                                                    aria-describedby="alert-dialog-description"
-                                                >
-                                                    <DialogTitle id="alert-dialog-title">{"Chọn sản phẩm"}</DialogTitle>
-                                                    <DialogContent>
-                                                        <Paper component="form" className={styles.search}
-                                                               style={{marginBottom: '10px'}}>
-                                                            <InputBase
-                                                                id="q"
-                                                                name="q"
-                                                                className={styles.input}
-                                                                onChange={handleChange}
-                                                                inputRef={register}
-                                                                placeholder="Tìm kiếm sản phẩm"
-                                                                inputProps={{'aria-label': 'Tìm kiếm sản phẩm'}}
-                                                            />
-                                                            <IconButton className={styles.iconButton} aria-label="search">
-                                                                <SearchIcon/>
-                                                            </IconButton>
-                                                        </Paper>
-                                                        <TableContainer component={Paper}>
-                                                            <Table size="small">
-                                                                <TableHead>
-                                                                    <TableRow>
-                                                                        <TableCell align="left">Hình ảnh</TableCell>
-                                                                        <TableCell align="left">Tên sản phẩm</TableCell>
-                                                                        <TableCell align="left">Đơn vị</TableCell>
-                                                                        <TableCell align="left" style={{width: '25%'}}>Số
-                                                                            lượng</TableCell>
-                                                                        <TableCell align="center">Thao tác</TableCell>
-                                                                    </TableRow>
-                                                                </TableHead>
-                                                                <TableRow>
-                                                                    <TableCell align="left">png</TableCell>
-                                                                    <TableCell align="left">Khẩu trang</TableCell>
-                                                                    <TableCell align="left">Hộp</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">png</TableCell>
-                                                                    <TableCell align="left">Khẩu trang</TableCell>
-                                                                    <TableCell align="left">Hộp</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                                <TableRow>
-                                                                    <TableCell align="left">png</TableCell>
-                                                                    <TableCell align="left">Khẩu trang</TableCell>
-                                                                    <TableCell align="left">Hộp</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <TextField
-                                                                            variant="outlined"
-                                                                            size="small"
-                                                                            style={{
-                                                                                height: '40%'
-                                                                            }}
-                                                                            type="number"
-                                                                            id="outlined-adornment-weight"
-                                                                            aria-describedby="outlined-weight-helper-text"
-                                                                            labelWidth={0}
-                                                                        />
-                                                                    </TableCell>
-                                                                    <TableCell align="center">
-                                                                        <Checkbox style={{color: 'green'}}/>
-                                                                    </TableCell>
-                                                                </TableRow>
-                                                            </Table>
-                                                        </TableContainer>
-                                                    </DialogContent>
-                                                    <DialogActions>
-                                                        <Button onClick={handleClose} color="secondary">
-                                                            Hủy
-                                                        </Button>
-                                                        <Button onClick={handleClose} color="primary" autoFocus>
-                                                            Thêm
-                                                        </Button>
-                                                    </DialogActions>
-                                                </Dialog>
-                                            </div>
-                                        </Card>
-                                    ): (
-                                        <div/>
-                                    )
+                                    </Card>
+                                ): (
+                                    <div/>
                                 )
-
                             }
                         </CardContent>
                         <Divider/>
                         <CardHeader
-                            subheader="Áp dụng"
+                            subheader="Áp dụng cho"
                         />
-                        {/*  <CardContent>
+                          <CardContent>
                                 <Grid spacing={3} container justify="space-around">
-                                    <Grid item xs={12} sm={6} md={6}>
-                                        <TextField
-                                            id="name"
-                                            name="name"
-                                            label="Tên khuyến mãi"
-                                            placeholder=""
-                                            helperText={errors.name?.message}
-                                            value={name}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            style={{width: '100%'}}
-                                            error={ errors.name ? true : false }
-                                            required
-                                            inputRef={register}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6} md={6}>
-                                        <TextField
-                                            id="code"
-                                            name="code"
-                                            label="Mã"
-                                            placeholder=""
-                                            helperText={errors.name?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            style={{ width: '100%' }}
-                                            error={ errors.sku ? true : false }
-                                            required
-                                            inputRef={register}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6} md={6}>
-                                        <TextField
-                                            id="startTime"
-                                            name="startTime"
-                                            label="Thời gian bắt đầu"
-                                            placeholder=""
-                                            helperText={errors.startTime?.message}
-                                            type="datetime-local"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            style={{ width: '100%' }}
-                                            error={ errors.startTime ? true : false }
-                                            required
-                                            inputRef={
-                                                register({
-                                                    required: "Name Required",
-                                                    maxLength: {
-                                                        value: 250,
-                                                        message: "Name must be less than 250 characters"
-                                                    },
-                                                    minLength: {
-                                                        value: 6,
-                                                        message: "Name must be greater than 6 characters"
-                                                    },
-                                                    pattern: {
-                                                        value: /[A-Za-z]/,
-                                                        message: "Name must be characters"
-                                                    }
-                                                })
-                                            }
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} sm={6} md={6}>
-                                        <TextField
-                                            id="endTime"
-                                            name="endTime"
-                                            label="Thời gian kết thúc"
-                                            placeholder=""
-                                            type="datetime-local"
-                                            helperText={errors.name?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            style={{ width: '100%'}}
-                                            onChange={handleChange}
-                                            error={ errors.sku ? true : false }
-                                            required
-                                            inputRef={
-                                                register({
-                                                    required: "Mã khuyến mãi không thể để trống",
-                                                    maxLength: {
-                                                        value: 50,
-                                                        message: "Mã khuyến mãi có chiều dài tối đa là 50 kí tự"
-                                                    },
-                                                    minLength: {
-                                                        value: 6,
-                                                        message: "Mã khuyến mãi có chiều dài  là 6 kí tự"
-                                                    },
-                                                    pattern: {
-                                                        value: /[A-Za-z]/,
-                                                        message: "Mã khuyến mãi phải có kí tự là chữ"
-                                                    }
-                                                })
-                                            }
-                                        />
-                                    </Grid>
+                                    <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
+                                                onChange={handleChange}>
+                                        <Grid spacing={3} container justify="space-around" alignItems="center">
+                                            <Grid item xs={12} sm={6} md={6}>
+                                                <FormControlLabel value="global" control={<Radio color="primary"/>}
+                                                                  label="Toàn sàn"/>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={6}>
+                                                <FormControlLabel value="product" control={<Radio color="primary"/>}
+                                                                  label="Sản phẩm được chọn"/>
+                                            </Grid>
+                                        </Grid>
+                                    </RadioGroup>
                                 </Grid>
-                            </CardContent>*/}
+                            </CardContent>
                         <Box>
                             <Button
                                 variant="contained"
@@ -2992,10 +1148,114 @@ function render(props) {
                             </Button>
                             <Button variant="contained" style={{margin: 8}}>Làm mới</Button>
                         </Box>
-
                     </Box>
                 </FormGroup>
             </Box>
         </AppCRM>
+    )
+}
+
+export function RenderTableGift(props) {
+    return (
+        <Card variant="outlined" style={{marginTop: '4px'}}>
+            <ButtonGroup color="primary" size="small"
+                         aria-label="contained primary button group"
+                         className={styles.btnDialog}
+                         onClick={props.handleClickOpen}
+            >
+                <Button variant="contained" color="primary">Thêm quà</Button>
+            </ButtonGroup>
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="left">Hình ảnh</TableCell>
+                            <TableCell align="left">Tên quà</TableCell>
+                            <TableCell align="left">Số lượng</TableCell>
+                            <TableCell align="center">Thao tác</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableRow>
+                        <TableCell align="left">Balo</TableCell>
+                        <TableCell align="left">Ảnh</TableCell>
+                        <TableCell align="left">12</TableCell>
+                        <TableCell align="center">
+                            <IconButton color="secondary"
+                                        component="span"
+                                        onClick={() => props.handleRemoveCodePercent()}
+                                >
+                                <HighlightOffOutlinedIcon/>
+                            </IconButton>
+                        </TableCell>
+                    </TableRow>
+                </Table>
+            </TableContainer>
+            <Dialog
+                open={props.open}
+                onClose={props.handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
+                <DialogContent>
+                    <Paper component="form" className={styles.search}
+                           style={{marginBottom: '10px'}}>
+                        <InputBase
+                            name="q"
+                            className={styles.input}
+                            onChange={props.handleChange}
+                            inputRef={props.register}
+                            placeholder="Tìm kiếm quà"
+                            inputProps={{'aria-label': 'Tìm kiếm quà'}}
+                        />
+                        <IconButton className={styles.iconButton}
+                                    aria-label="search">
+                            <SearchIcon/>
+                        </IconButton>
+                    </Paper>
+                    <TableContainer component={Paper}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell align="left">Hình ảnh</TableCell>
+                                    <TableCell align="left">Tên quà</TableCell>
+                                    <TableCell align="left" style={{width: '25%'}}>Số
+                                        lượng</TableCell>
+                                    <TableCell align="center">Thao tác</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            <TableRow>
+                                <TableCell align="left">Balo</TableCell>
+                                <TableCell align="left">Ảnh</TableCell>
+                                <TableCell align="left">
+                                    <TextField
+                                        variant="outlined"
+                                        size="small"
+                                        style={{
+                                            height: '40%'
+                                        }}
+                                        type="number"
+                                        id="outlined-adornment-weight"
+                                        aria-describedby="outlined-weight-helper-text"
+                                        labelWidth={0}
+                                    />
+                                </TableCell>
+                                <TableCell align="center">
+                                    <Checkbox style={{color: 'green'}}/>
+                                </TableCell>
+                            </TableRow>
+                        </Table>
+                    </TableContainer>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={props.handleClose} color="secondary">
+                        Hủy
+                    </Button>
+                    <Button onClick={props.handleClose} color="primary" autoFocus>
+                        Thêm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Card>
     )
 }
