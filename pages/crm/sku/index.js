@@ -1,7 +1,4 @@
 import {
-    Button,
-    ButtonGroup,
-    Grid,
     IconButton,
     Paper,
     Table,
@@ -12,19 +9,18 @@ import {
     TableRow,
     Tooltip
 } from "@material-ui/core";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
+import EditIcon from "@material-ui/icons/Edit";
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import { getPricingClient } from 'client/pricing';
+import { ProductStatus, SellPrices } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
-import Router, {useRouter} from "next/router";
+import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, {useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
-import styles from "./pricing.module.css";
-import {getPricingClient} from 'client/pricing';
-import EditIcon from "@material-ui/icons/Edit";
-import {ProductStatus, SellPrices} from "components/global";
-import Chip from "@material-ui/core/Chip";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -62,7 +58,7 @@ export async function loadPricingData(ctx) {
         }
     }
     // Pass data to the page via props
-    return {props: {data: [], count: 0}}
+    return {props: {data: [], count: 0, message: "Không tìm thấy kết quả phù hợp"}}
 }
 
 export default function PricingPage(props) {
@@ -74,6 +70,7 @@ export function formatNumber(num) {
 }
 
 function render(props) {
+    console.log(props)
     let router = useRouter();
     const {register, handleSubmit, errors, control} = useForm();
 

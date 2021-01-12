@@ -79,7 +79,8 @@ export async function loadConfigPricingData(ctx) {
             provinceLists,
             categoryLists,
             total,
-            message: res.message
+            // message: res.message,
+            message: "Không tìm thấy kết quả phù hợp"
         }
     };
 }
