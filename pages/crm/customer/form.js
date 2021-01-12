@@ -286,8 +286,8 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Tên khách hàng không thể để trống",
                                                                     maxLength: {
-                                                                        value: 250,
-                                                                        message: "Tên khách hàng có độ dài tối đa 250 kí tự"
+                                                                        value: 50,
+                                                                        message: "Tên khách hàng có độ dài tối đa 50 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 6,
