@@ -53,6 +53,14 @@ class CustomerClient extends APIClient {
             data
         )
     }
+
+    updateStatus(data) {
+        return this.callFromClient(
+            "PUT",
+            `${URI}/account`,
+            data
+        )
+    }
 }
 
 export function getCustomerClient(ctx, data) {
