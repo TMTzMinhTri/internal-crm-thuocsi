@@ -234,7 +234,7 @@ function render(props) {
                                 </TableRow>
                             )) : (
                                     <TableRow>
-                                        <TableCell colSpan={3} align="left">{ErrorCode['NOT_FOUND_TABLE']}</TableCell>
+                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
                                     </TableRow>
                                 )
                         }

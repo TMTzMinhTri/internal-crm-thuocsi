@@ -151,13 +151,7 @@ function render(props) {
                     </Grid>
                 </Grid>
             </div>
-            {/* {
-                q === '' ? (
-                    <span/>
-                ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
-                )
-            } */}
+
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
@@ -179,7 +173,7 @@ function render(props) {
                     ) : (
                             <TableBody>
                                 <TableRow>
-                                    <TableCell colSpan={3} align="left">{ErrorCode['NOT_FOUND_TABLE']}</TableCell>
+                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
                                 </TableRow>
                             </TableBody>
                         )}
