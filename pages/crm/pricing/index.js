@@ -1,26 +1,27 @@
-import Head from "next/head";
-import React, { useEffect, useState } from 'react';
-import Router, { useRouter } from "next/router";
-
 import {
-    Button, ButtonGroup, Paper, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Grid,InputBase
+    Button, ButtonGroup,
+    Grid, InputBase, Paper, Table, TableBody, TableCell, TableContainer,
+    TableHead, TableRow
 } from "@material-ui/core";
 import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
-import Link from "next/link";
-import Tooltip from "@material-ui/core/Tooltip";
 import IconButton from "@material-ui/core/IconButton";
+import { makeStyles } from '@material-ui/core/styles';
+import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import moment from "moment";
-import styles from "./pricing.module.css"
-import {useForm} from "react-hook-form"
 import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import AppCRM from "pages/_layout";
 import { getPricingClient } from 'client/pricing';
-import { condUserType, Brand, formatNumber } from 'components/global';
+import { Brand, condUserType, formatNumber } from 'components/global';
+import moment from "moment";
+import Head from "next/head";
+import Link from "next/link";
+import Router, { useRouter } from "next/router";
+import AppCRM from "pages/_layout";
+import React, { useEffect, useState } from 'react';
+import { useForm } from "react-hook-form";
+import styles from "./pricing.module.css";
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -145,7 +146,7 @@ function render(props) {
     function provices(provi) {
         if (provi?.length > 0) {
             if (provi[0] === 'ALL') {
-                return <Chip label="All" variant="outlined" />;
+                return <Chip label="Tất cả" variant="outlined" />;
             }
             const chips = provi.map((item, i) => {
                 if (provinceLists[item]?.name) {
