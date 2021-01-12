@@ -106,7 +106,7 @@ function render(props) {
         <TableRow key={i}>
             <TableCell component="th" scope="row">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.email}</TableCell>
+            <TableCell align="left" style={{overflowWrap:'anywhere'}}>{row.data.email}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
             <TableCell align="center">
