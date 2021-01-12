@@ -11,6 +11,18 @@ export const SellPrices = [
     }
 ];
 
+export const ErrorCode = {
+    "NOT_FOUND": "không tồn tại",
+    "NOT_FOUND_TABLE": "Tìm kiếm không có kết quả phù hợp"
+}
+
+export function formatUrlSearch(str) {
+    return str.trim().replace(/\s+/g, ' ')
+        .replace(/[&]/, '%26')
+        .replace(/[+]/, '%2B')
+        .replace(/[#]/, '%23');
+}
+
 export const condUserType = [
     {
         label: "Mặc định",
@@ -39,10 +51,10 @@ export const condUserType = [
 ]
 
 export const Brand = {
-    'LOCAL':{
+    'LOCAL': {
         value: 'Nội địa'
     },
-    'FOREIGN':{
+    'FOREIGN': {
         value: 'Quốc tế'
     }
 }
@@ -71,10 +83,10 @@ export function formatDateTime(datetime) {
 
 export function filterObjectName(obj) {
     let tags = []
-    if(typeof(obj) == 'undefined') {
+    if (typeof (obj) == 'undefined') {
         return tags
     }
-    for(let k in obj) {
+    for (let k in obj) {
         if (k.startsWith("cond") && obj.hasOwnProperty(k)) {
             tags.push(k)
         }
@@ -88,8 +100,8 @@ export function formatNumber(num) {
 
 
 export function formatEllipsisText(text) {
-    if(text) {
-        if(text.length > 100) {
+    if (text) {
+        if (text.length > 100) {
             return text.substring(0, 100) + "..."
         }
         return text
@@ -99,11 +111,11 @@ export function formatEllipsisText(text) {
 
 export function filterListObjectName(obj) {
     let tags = []
-    if(typeof(obj) == 'undefined') {
+    if (typeof (obj) == 'undefined') {
         return tags
     }
-    for(let k in obj) {
-        if (k.startsWith("cond")  && obj.hasOwnProperty(k) && typeof(obj[k]?.name) != 'undefined') {
+    for (let k in obj) {
+        if (k.startsWith("cond") && obj.hasOwnProperty(k) && typeof (obj[k]?.name) != 'undefined') {
             tags.push({
                 label: obj[k].name,
                 value: k,
@@ -115,7 +127,7 @@ export function filterListObjectName(obj) {
 }
 
 export function loadTag(tag) {
-    switch(tag) {
+    switch (tag) {
         case "condUserType": {
             return {
                 default: condUserType[0].value,
@@ -135,11 +147,11 @@ export function loadTag(tag) {
 
 function mSort(property) {
     var sortOrder = 1;
-    if(property[0] === "-") {
+    if (property[0] === "-") {
         sortOrder = -1;
         property = property.substr(1);
     }
-    return function (a,b) {
+    return function (a, b) {
         var result = (a[property] < b[property]) ? -1 : (a[property] > b[property]) ? 1 : 0;
         return result * sortOrder;
     }
@@ -152,5 +164,5 @@ export const ssrPipe = (...functions) => async (input) => {
 }
 
 export const ProductStatus = {
-    "NEW" : "Mới",
+    "NEW": "Mới",
 }
