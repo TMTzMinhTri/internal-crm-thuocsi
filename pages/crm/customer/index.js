@@ -2,21 +2,30 @@ import {
     Button,
     ButtonGroup,
     Paper,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
 } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
-import EditIcon from '@material-ui/icons/Edit';
-import SearchIcon from '@material-ui/icons/Search';
-import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import EditIcon from "@material-ui/icons/Edit";
+import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';import SearchIcon from "@material-ui/icons/Search";
+import {
+    doWithLoggedInUser,
+    renderWithLoggedInUser,
+} from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCustomerClient } from "client/customer";
 import Head from "next/head";
 import Link from "next/link";
@@ -31,7 +40,7 @@ import { ErrorCode, formatUrlSearch } from 'components/global';
 const levels = [
     {
         value: "Infinity",
-        label: "Không giới hạn"
+        label: "Không giới hạn",
     },
     {
         value: "Diamond",
@@ -68,13 +77,16 @@ const statuses = [
         value: "GUEST",
         label: "Khách",
     },
-]
-
+    {
+        value:"APPROVED",
+        label:"Đã kích hoạt"
+    }
+];
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return loadCustomerData(ctx)
-    })
+        return loadCustomerData(ctx);
+    });
 }
 
 export async function loadCustomerData(ctx) {
@@ -98,38 +110,66 @@ export async function loadCustomerData(ctx) {
 }
 
 export default function CustomerPage(props) {
-    return renderWithLoggedInUser(props, render)
+    return renderWithLoggedInUser(props, render);
 }
 
 function render(props) {
-    let router = useRouter()
+    let router = useRouter();
     const { register, handleSubmit, errors } = useForm();
-    let q = router.query.q || ''
-    let [search, setSearch] = useState(q)
-    let page = parseInt(router.query.page) || 0
-    let limit = parseInt(router.query.limit) || 20
+    const [openApproveDialog, setOpenApproveDialog] = useState(false);
+    const [approvedCustomerCode, setApprovedCustomerCode] = useState();
+    let [search, setSearch] = useState("");
+    let q = router.query.q || "";
+    let page = parseInt(router.query.page) || 0;
+    let limit = parseInt(router.query.limit) || 20;
+    const { error, success } = useToast()
 
     async function handleChange(event) {
         const target = event.target;
         const value = target.value;
-        setSearch(value)
+        setSearch(value);
     }
 
     async function onSearch() {
+        q = search
+            .trim()
+            .replace(/\s+/g, " ")
+            .replace(/[&]/, "%26")
+            .replace(/[+]/, "%2B")
+            .replace(/[#]/, "%23");
+        router.push(`?q=${q}`);
+    }
+
+    async function approveAccount() {
+        const _client = getCustomerClient()
+        setOpenApproveDialog(false)
+        const resp = await _client.updateStatus({ code:approvedCustomerCode.code, status: "APPROVED" })
+        if (resp.status !== "OK") {
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        } else {
+            props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "APPROVED" 
+            setApprovedCustomerCode(null)
+            success("Kích hoạt tài khoản thành công")
+            // window.location.reload()
+        }
         q = formatUrlSearch(search);
         router.push(`?q=${q}`)
     }
 
     const RenderRow = (row, i) => (
         <TableRow key={i}>
-            <TableCell component="th" scope="row">{row.data.code}</TableCell>
+            <TableCell component="th" scope="row">
+                {row.data.code}
+            </TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email || '-'}</TableCell>
             <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
             <TableCell align="left">{row.data.point}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
-            <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
-            <TableCell align="center">
+            <TableCell align="left">
+                {statuses.find((e) => e.value === row.data.status)?.label}
+            </TableCell>
+            <TableCell align="left">
                 <Link href={`/crm/customer/edit?customerCode=${row.data.code}`}>
                     <a>
                         <Tooltip title="Cập nhật thông tin">
@@ -139,15 +179,49 @@ function render(props) {
                         </Tooltip>
                     </a>
                 </Link>
+                {row.data.status !== 'DRAFT' ? <Tooltip title="Cập nhật thông tin">
+                    <IconButton onClick={() => {setOpenApproveDialog(true); setApprovedCustomerCode(row.data)}}>
+                        <IndeterminateCheckBoxIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip> : null}
             </TableCell>
         </TableRow>
-    )
+    );
+
+    const ApproveDialog = () => (
+        <div>
+            <Dialog
+                open={true}
+                onClose={() => setOpenApproveDialog(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Kích Hoạt Tài Khoản"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Bạn có muốn kích hoạt tài khoản này chứ ?
+          </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenApproveDialog(false)} color="primary">
+                        Hủy bỏ
+                    </Button>
+                    <Button onClick={approveAccount} color="primary" autoFocus>
+                        Đồng ý
+                     </Button>
+                </DialogActions>
+            </Dialog>
+        </div>
+    );
 
     return (
         <AppCRM select="/crm/customer">
             <Head>
                 <title>Danh sách khách hàng</title>
             </Head>
+            {openApproveDialog ? <ApproveDialog /> : null}
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
                     justify="space-between"
@@ -208,7 +282,7 @@ function render(props) {
                             <TableCell align="left">Điểm</TableCell>
                             <TableCell align="left">Số điện thoại</TableCell>
                             <TableCell align="left">Trạng thái</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
+                            <TableCell align="left">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
                     {props.data.length > 0 ? (
@@ -231,11 +305,13 @@ function render(props) {
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`)
+                            Router.push(
+                                `/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`
+                            );
                         }}
                     />
                 </Table>
             </TableContainer>
         </AppCRM>
-    )
+    );
 }
