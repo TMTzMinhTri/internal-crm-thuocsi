@@ -126,7 +126,7 @@ function render(props) {
         <TableRow key={i}>
             <TableCell component="th" scope="row">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.email || '-'}</TableCell>
+            <TableCell align="left" style={{overflowWrap:'anywhere'}}>{row.data.email || '-'}</TableCell>
             <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
             <TableCell align="left">{row.data.point}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
