@@ -34,6 +34,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./customer.module.css";
+import { ErrorCode, formatUrlSearch } from 'components/global';
 // import {levels, statuses} from "./form"
 
 const levels = [
@@ -89,25 +90,23 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadCustomerData(ctx) {
-    let data = { props: {} };
-    let query = ctx.query;
-    let q = typeof query.q === "undefined" ? "" : query.q;
-    let page = query.page || 0;
-    let limit = query.limit || 20;
-    let offset = page * limit;
+    let data = { props: {} }
+    let query = ctx.query
+    let q = typeof (query.q) === "undefined" ? '' : query.q
+    let page = query.page || 0
+    let limit = query.limit || 20
+    let offset = page * limit
 
-    let customerClient = getCustomerClient(ctx, data);
-    let resp = await customerClient.getCustomer(offset, limit, q);
-    if (resp.status !== "OK") {
-        if (resp.status === "NOT_FOUND") {
-            return {
-                props: { data: [], count: 0, message: "Không tìm thấy khách hàng" },
-            };
+    let customerClient = getCustomerClient(ctx, data)
+    let resp = await customerClient.getCustomer(offset, limit, q)
+    if (resp.status !== 'OK') {
+        if (resp.status === 'NOT_FOUND') {
+            return { props: { data: [], count: 0, message: 'Không tìm thấy khách hàng' } }
         }
-        return { props: { data: [], count: 0, message: resp.message } };
+        return { props: { data: [], count: 0, message: resp.message } }
     }
     // Pass data to the page via props
-    return { props: { data: resp.data, count: resp.total } };
+    return { props: { data: resp.data, count: resp.total } }
 }
 
 export default function CustomerPage(props) {
@@ -153,6 +152,8 @@ function render(props) {
             success("Kích hoạt tài khoản thành công")
             // window.location.reload()
         }
+        q = formatUrlSearch(search);
+        router.push(`?q=${q}`)
     }
 
     const RenderRow = (row, i) => (
@@ -161,10 +162,8 @@ function render(props) {
                 {row.data.code}
             </TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.email || "-"}</TableCell>
-            <TableCell align="left">
-                {levels.find((e) => e.value === row.data.level)?.label || "-"}
-            </TableCell>
+            <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email || '-'}</TableCell>
+            <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
             <TableCell align="left">{row.data.point}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">
@@ -224,10 +223,7 @@ function render(props) {
             </Head>
             {openApproveDialog ? <ApproveDialog /> : null}
             <div className={styles.grid}>
-                <Grid
-                    container
-                    spacing={3}
-                    direction="row"
+                <Grid container spacing={3} direction="row"
                     justify="space-between"
                     alignItems="center"
                 >
@@ -240,35 +236,25 @@ function render(props) {
                                 value={search}
                                 onChange={handleChange}
                                 inputRef={register}
-                                onKeyPress={(event) => {
-                                    if (event.key === "Enter") {
-                                        onSearch();
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter' || event.keyCode === 13) {
+                                        onSearch()
                                     }
                                 }}
                                 placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
-                                inputProps={{
-                                    "aria-label": "Nhập Tên khách hàng, Email, Số điện thoại",
-                                }}
+                                inputProps={{ 'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại' }}
                             />
-                            <IconButton
-                                className={styles.iconButton}
-                                aria-label="search"
-                                onClick={handleSubmit(onSearch)}
-                            >
+                            <IconButton className={styles.iconButton} aria-label="search"
+                                onClick={handleSubmit(onSearch)}>
                                 <SearchIcon />
                             </IconButton>
                         </Paper>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/customer/new">
-                            <ButtonGroup
-                                color="primary"
-                                aria-label="contained primary button group"
-                                className={styles.rightGroup}
-                            >
-                                <Button variant="contained" color="primary">
-                                    Thêm khách hàng
-                </Button>
+                            <ButtonGroup color="primary" aria-label="contained primary button group"
+                                className={styles.rightGroup}>
+                                <Button variant="contained" color="primary">Thêm khách hàng</Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
@@ -308,9 +294,7 @@ function render(props) {
                     ) : (
                             <TableBody>
                                 <TableRow>
-                                    <TableCell colSpan={3} align="left">
-                                        {props.message}
-                                    </TableCell>
+                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
                                 </TableRow>
                             </TableBody>
                         )}
