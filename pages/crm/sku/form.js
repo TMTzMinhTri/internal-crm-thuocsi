@@ -109,7 +109,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 placeholder=""
                                 defaultValue={10}
                                 helperText={errors[name]?.maxQuantity.type === 'required' ? "Vui lòng nhập" : errors[name]?.maxQuantity.type === 'max' ?
-                            "Vui lòng số lượng tối đa thấp hơn giá bán buôn" : null}
+                                    "Vui lòng số lượng tối đa thấp hơn giá bán buôn" : null}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -123,9 +123,9 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 required
                                 inputRef={
                                     register({
-                                        required:true,
+                                        required: true,
                                         valueAsNumber: true, // important,
-                                        max:getValues().wholesalePrice ? getValues().wholesalePrice[0]?.maxQuantity-1  : null
+                                        max: getValues().wholesalePrice ? getValues().wholesalePrice[0]?.maxQuantity - 1 : null
                                     })
                                 }
                             />
@@ -245,8 +245,8 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     error={errors[name] ? !!errors[name][index]?.maxQuantity : false}
                                     helperText={errors[name] && errors[name][index]?.maxQuantity.type === 'required' ? "Vui lòng nhập" :
                                         errors[name] && errors[name][index]?.maxQuantity.type === 'min' && index == 0 ? "Vui lòng nhập tối đa lớn hơn bán lẻ" :
-                                            errors[name] && errors[name][index]?.maxQuantity.type === 'min' ? "Vui lòng nhập số lượng tối đa lớn hơn số lượng tối đa của bán buôn trước":
-                                            errors[name] && errors[name][index]?.maxQuantity.type === 'max' ? "Vui lòng nhập số lượng tối đa bé hơn số lượng tối đa của bán buôn sau" : null}
+                                            errors[name] && errors[name][index]?.maxQuantity.type === 'min' ? "Vui lòng nhập số lượng tối đa lớn hơn số lượng tối đa của bán buôn trước" :
+                                                errors[name] && errors[name][index]?.maxQuantity.type === 'max' ? "Vui lòng nhập số lượng tối đa bé hơn số lượng tối đa của bán buôn sau" : null}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
@@ -258,9 +258,9 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                         register({
                                             required: true,
                                             valueAsNumber: true, // important
-                                            min: index === 0 ? getValues().retailPrice?.maxQuantity + 1 : getValues().wholesalePrice?getValues().wholesalePrice[index-1]?.maxQuantity + 1 : 0,
-                                            max: (index===ids.length - idDeleteds.length -1 || index===defaultIds.length - idDeleteds.length -1 ) ?  null : 
-                                            getValues().wholesalePrice?getValues().wholesalePrice[index+1]?.maxQuantity - 1 : null
+                                            min: index === 0 ? getValues().retailPrice?.maxQuantity + 1 : getValues().wholesalePrice ? getValues().wholesalePrice[index - 1]?.maxQuantity + 1 : 0,
+                                            max: (index === ids.length - idDeleteds.length - 1 || index === defaultIds.length - idDeleteds.length - 1) ? null :
+                                                getValues().wholesalePrice ? getValues().wholesalePrice[index + 1]?.maxQuantity - 1 : null
                                         })
                                     }
                                 />
@@ -346,7 +346,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
 export default function renderForm(props, toast) {
     if (props.status && props.status !== "OK") {
         return (
-            <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm"/>
+            <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
         )
     }
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
@@ -355,6 +355,7 @@ export default function renderForm(props, toast) {
     const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind + 1) || [])
     const [ids, setIds] = useState(defaultIds);
     const [idDeleteds, setIdDeleteds] = useState([]);
+    const [expandeds, setExpandeds] = useState(props.price?.wholesalePrice?.map((value, ind) => true) || []);
     const [expanded, setExpanded] = React.useState(false);
     const [listTag, setListTag] = useState(props.listTag);
     const [brand, setBrand] = useState(getValues('brand') || 'LOCAL');
@@ -419,7 +420,6 @@ export default function renderForm(props, toast) {
     const handleChange = (panel) => (event, isExpanded) => {
         setExpanded(isExpanded ? panel : false);
     };
-
 
     let lstOptions = props?.products
 
@@ -575,7 +575,13 @@ export default function renderForm(props, toast) {
                                     {
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
                                             <>
-                                                <Accordion expanded={true} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                                <Accordion expanded={expandeds ? expandeds[idx] : false} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={() => {
+                                                    {
+                                                        let tmpExpandeds = [...expandeds]
+                                                        tmpExpandeds[idx] = !tmpExpandeds[idx]
+                                                        setExpandeds(tmpExpandeds)
+                                                    };
+                                                }}>
                                                     <AccordionSummary
                                                         expandIcon={<ExpandMoreIcon />}
                                                         aria-controls="panel1bh-content"
@@ -631,8 +637,8 @@ export default function renderForm(props, toast) {
                                         disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length - idDeleteds.length === 5)}
                                         style={{ marginTop: '10px' }}
                                         onClick={() => {
-                                            setDefaultIds([...defaultIds, defaultIds.length + 1])
-                                            setExpanded(`panel${defaultIds.length}`)
+                                            setDefaultIds([...defaultIds, defaultIds.length + 1]);
+                                            setExpandeds(prevState=>[...prevState,true])
                                         }}
                                         startIcon={<AddIcon />}
                                     >
