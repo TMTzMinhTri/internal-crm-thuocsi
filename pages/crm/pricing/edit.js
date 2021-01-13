@@ -17,7 +17,7 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCategoryClient } from "client/category";
 import { getPricingClient } from 'client/pricing';
-import { condUserType } from 'components/global';
+import { condUserType, noOptionsText, Brand } from 'components/global';
 import { NotFound } from 'components/components-global';
 import useDebounce from "components/useDebounce";
 import Head from "next/head";
@@ -154,6 +154,7 @@ function render(props) {
                                                 InputLabelProps={{
                                                     shrink: true
                                                 }}
+                                                noOptionsText={noOptionsText}
                                                 filterSelectedOptions
                                                 renderInput={(params) => (
                                                     <TextField
@@ -200,6 +201,7 @@ function render(props) {
                                                 InputLabelProps={{
                                                     shrink: true
                                                 }}
+                                                noOptionsText={noOptionsText}
                                                 filterSelectedOptions
                                                 renderInput={(params) => (
                                                     <TextField
@@ -240,6 +242,7 @@ function render(props) {
                                                     shrink: true
                                                 }}
                                                 filterSelectedOptions
+                                                noOptionsText={noOptionsText}
                                                 renderInput={(params) => (
                                                     <TextField
                                                         {...params}
@@ -280,12 +283,12 @@ function render(props) {
                                                     <FormControlLabel
                                                         value="LOCAL"
                                                         control={<Radio color="primary" />}
-                                                        label="Trong nước"
+                                                        label={Brand.LOCAL.value}
                                                     />
                                                     <FormControlLabel
                                                         value="FOREIGN"
                                                         control={<Radio color="primary" />}
-                                                        label="Ngoại nhập"
+                                                        label={Brand.FOREIGN.value}
                                                     />
                                                 </RadioGroup>
                                             }

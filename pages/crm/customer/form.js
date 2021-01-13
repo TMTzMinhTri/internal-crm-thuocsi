@@ -137,6 +137,8 @@ export default function renderForm(props, toast) {
         mode: "onChange"
     });
 
+    const noOptionsText = "Không có tùy chọn!";
+
     const onProvinceChange = async (event, val) => {
         setProvince()
         setDistricts([])
@@ -396,7 +398,9 @@ export default function renderForm(props, toast) {
                                                             size="small"
                                                             value={province}
                                                             onChange={onProvinceChange}
+                                                            noOptionsText={noOptionsText}
                                                             getOptionLabel={(option) => option.name}
+
                                                             renderInput={(params) =>
                                                                 <TextField
                                                                     id="provinceCode"
@@ -426,6 +430,7 @@ export default function renderForm(props, toast) {
                                                             getOptionLabel={(option) => option.name}
                                                             value={district}
                                                             onChange={onDistrictChange}
+                                                            noOptionsText={noOptionsText}
                                                             disabled={isDisabledDistrict}
                                                             renderInput={(params) =>
                                                                 <TextField
@@ -456,6 +461,7 @@ export default function renderForm(props, toast) {
                                                             value={ward}
                                                             disabled={isDisabledWard}
                                                             onChange={onWardChange}
+                                                            noOptionsText={noOptionsText}
                                                             getOptionLabel={(option) => option.name}
                                                             renderInput={(params) =>
                                                                 <TextField
