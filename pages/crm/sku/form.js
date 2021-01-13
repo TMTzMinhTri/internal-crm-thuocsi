@@ -28,7 +28,7 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
 
-const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index }) => {
+const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index, getValues, limitQty, ids, defaultIds, idDeleteds }) => {
 
     let arrName = name + `[${index}]`
     return (
@@ -108,7 +108,8 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 // label=""
                                 placeholder=""
                                 defaultValue={10}
-                                helperText={errors[name]?.maxQuantity?.message}
+                                helperText={errors[name]?.maxQuantity.type === 'required' ? "Vui lòng nhập" : errors[name]?.maxQuantity.type === 'max' ?
+                            "Vui lòng số lượng tối đa thấp hơn giá bán buôn" : null}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -118,12 +119,13 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 // }}
                                 // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                 style={{ width: '100%' }}
-                                error={!!errors[name]?.price}
+                                error={!!errors[name]?.maxQuantity}
                                 required
                                 inputRef={
                                     register({
-                                        required: "Vui lòng nhập giá bán",
-                                        valueAsNumber: true, // important
+                                        required:true,
+                                        valueAsNumber: true, // important,
+                                        max:getValues().wholesalePrice ? getValues().wholesalePrice[0]?.maxQuantity-1  : null
                                     })
                                 }
                             />
@@ -241,7 +243,10 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     placeholder=""
                                     defaultValue={10}
                                     error={errors[name] ? !!errors[name][index]?.maxQuantity : false}
-                                    helperText={errors[name] ? errors[name][index]?.maxQuantity?.message : ''}
+                                    helperText={errors[name] && errors[name][index]?.maxQuantity.type === 'required' ? "Vui lòng nhập" :
+                                        errors[name] && errors[name][index]?.maxQuantity.type === 'min' && index == 0 ? "Vui lòng nhập tối đa lớn hơn bán lẻ" :
+                                            errors[name] && errors[name][index]?.maxQuantity.type === 'min' ? "Vui lòng nhập số lượng tối đa lớn hơn số lượng tối đa của bán buôn trước":
+                                            errors[name] && errors[name][index]?.maxQuantity.type === 'max' ? "Vui lòng nhập số lượng tối đa bé hơn số lượng tối đa của bán buôn sau" : null}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
@@ -251,8 +256,11 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     required
                                     inputRef={
                                         register({
-                                            required: "Vui lòng nhập",
+                                            required: true,
                                             valueAsNumber: true, // important
+                                            min: index === 0 ? getValues().retailPrice?.maxQuantity + 1 : getValues().wholesalePrice?getValues().wholesalePrice[index-1]?.maxQuantity + 1 : 0,
+                                            max: (index===ids.length - idDeleteds.length -1 || index===defaultIds.length - idDeleteds.length -1 ) ?  null : 
+                                            getValues().wholesalePrice?getValues().wholesalePrice[index+1]?.maxQuantity - 1 : null
                                         })
                                     }
                                 />
@@ -351,6 +359,7 @@ export default function renderForm(props, toast) {
     const [listTag, setListTag] = useState(props.listTag);
     const [brand, setBrand] = useState(getValues('brand') || 'LOCAL');
     const [categoryCode, setCategoryCode] = useState(props.price?.categoryCodes || []);
+    const [limitQty, setLimitQty] = useState(2)
     let sellerCode = "MedX";
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
@@ -516,7 +525,7 @@ export default function renderForm(props, toast) {
 
                                 <Grid item xs={12} sm={12} md={12}>
                                     <FormControl component="fieldset" className={styles.marginTopBottom}>
-                                        <FormLabel component="legend">Nơi bán</FormLabel>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>Nơi bán</FormLabel>
                                         <Controller
                                             rules={{ required: true }}
                                             control={control}
@@ -554,10 +563,10 @@ export default function renderForm(props, toast) {
                                     {/* Setup gia ban le */}
                                     {/* <pre>z{JSON.stringify(getValues().productCode?true:false )}</pre> */}
                                     <RenderPriceConfig name={'retailPrice'} control={control} register={register}
-                                        hidden={typeof props.product === "undefined" && !getValues().productCode} errors={errors} index={0} />
+                                        hidden={typeof props.product === "undefined" && !getValues().productCode} errors={errors} index={0} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <Typography gutterBottom>
+                                <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
+                                    <Typography gutterBottom style={{ fontSize: '1.25rem' }}>
                                         Cài đặt giá bán buôn:
                                     <Tooltip title="Danh sách cài đặt bán buôn (bán sỉ)" placement="right-start">
                                             <HelpOutlinedIcon fontSize="small" />
@@ -579,7 +588,7 @@ export default function renderForm(props, toast) {
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                            register={register} errors={errors} index={idx} />
+                                                            register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                                     </AccordionDetails>
                                                     <AccordionActions>
                                                         <Button size="small" color="secondary" variant="contained"
@@ -605,7 +614,7 @@ export default function renderForm(props, toast) {
                                                         </AccordionSummary>
                                                         <AccordionDetails>
                                                             <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                                register={register} errors={errors} index={idx} />
+                                                                register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                                         </AccordionDetails>
                                                         <AccordionActions>
                                                             <Button size="small" color="secondary" variant="contained"
