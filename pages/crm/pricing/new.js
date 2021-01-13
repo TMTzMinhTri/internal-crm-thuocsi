@@ -22,8 +22,8 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import AppCRM from "pages/_layout";
+import { condUserType, noOptionsText, Brand } from 'components/global';
 import { getPricingClient } from 'client/pricing';
-import { condUserType } from 'components/global';
 import { Controller, useForm } from "react-hook-form";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import useDebounce from "components/useDebounce"
@@ -72,7 +72,7 @@ function render(props) {
     const [loading, setLoading] = useState(true);
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
     const [searchCategory, setSearchCategory] = useState("");
-    const debouncedSearchCategory = useDebounce(searchCategory, 500);
+    const debouncedSearchCategory = useDebounce(searchCategory, 200);
 
     const onSubmit = async (formData) => {
         formData.categoryCode = formData.categoryCodes.map(category => category.code)
@@ -89,7 +89,7 @@ function render(props) {
 
     const searchCatogery = async (search) => {
         let categoryClient = getCategoryClient();
-        let res = await categoryClient.getListCategoryFromClient(0, 20, search);
+        let res = await categoryClient.getListCategoryFromClient(0, 100, search);
         if (res.status === "OK") {
             return res.data;
         }
@@ -100,7 +100,7 @@ function render(props) {
         if (debouncedSearchCategory) {
             searchCatogery(debouncedSearchCategory).then((results) => {
                 const parseCategory = results.map((category) => {
-                    return { value: category.code, name: category.name , code:category.code };
+                    return { value: category.code, name: category.name, code: category.code };
                 });
                 setCategoryLists(parseCategory);
             });
@@ -130,6 +130,7 @@ function render(props) {
                                             InputLabelProps={{
                                                 shrink: true
                                             }}
+                                            noOptionsText={noOptionsText}
                                             filterSelectedOptions
                                             renderInput={(params) => (
                                                 <TextField
@@ -176,6 +177,7 @@ function render(props) {
                                             InputLabelProps={{
                                                 shrink: true
                                             }}
+                                            noOptionsText={noOptionsText}
                                             filterSelectedOptions
                                             renderInput={(params) => (
                                                 <TextField
@@ -188,9 +190,9 @@ function render(props) {
                                                             required: "Loại sản phẩm không thể để trống",
                                                         })
                                                     }
-                                                    required 
+                                                    required
                                                     size="small"
-                                                onChange={(e) => setSearchCategory(e.target.value)}
+                                                    onChange={(e) => setSearchCategory(e.target.value)}
                                                 />
                                             )}
                                             onChange={(e, data) => onChange(data)}
@@ -221,6 +223,7 @@ function render(props) {
                                             InputLabelProps={{
                                                 shrink: true
                                             }}
+                                            noOptionsText={noOptionsText}
                                             filterSelectedOptions
                                             renderInput={(params) => (
                                                 <TextField
@@ -268,13 +271,13 @@ function render(props) {
                                             >
                                                 <FormControlLabel
                                                     value="LOCAL"
-                                                    control={<Radio />}
-                                                    label="Trong nước"
+                                                    control={<Radio color="primary" />}
+                                                    label={Brand.LOCAL.value}
                                                 />
                                                 <FormControlLabel
                                                     value="FOREIGN"
-                                                    control={<Radio />}
-                                                    label="Ngoại nhập"
+                                                    control={<Radio color="primary" />}
+                                                    label={Brand.FOREIGN.value}
                                                 />
                                             </RadioGroup>
                                         }

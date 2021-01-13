@@ -19,7 +19,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { getPriceClient } from "client/price";
-import { SellPrices } from "components/global";
+import { SellPrices, noOptionsText, Brand } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import AppCRM from "pages/_layout";
@@ -28,6 +28,7 @@ import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
 
 const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index }) => {
+    
     let arrName = name + `[${index}]`
     return (
         <div style={{ width: '100%' }}>
@@ -449,6 +450,7 @@ export default function renderForm(props, toast) {
                                                         {...props}
                                                     />
                                                 )}
+                                                noOptionsText={noOptionsText}
                                                 name="productCode"
                                                 control={control}
                                                 onChange={([, { id }]) => id}
@@ -475,6 +477,7 @@ export default function renderForm(props, toast) {
                                                 // options={listSearchCategory.map(
                                                 // 	(category) => category.label
                                                 // )}
+                                                noOptionsText={noOptionsText}
                                                 InputLabelProps={{
                                                     shrink: true
                                                 }}
@@ -523,12 +526,12 @@ export default function renderForm(props, toast) {
                                                     <FormControlLabel
                                                         value="LOCAL"
                                                         control={<Radio color="primary"/>}
-                                                        label="Trong nước"
+                                                        label={Brand.LOCAL.value}
                                                     />
                                                     <FormControlLabel
                                                         value="FOREIGN"
                                                         control={<Radio color="primary"/>}
-                                                        label="Ngoại nhập"
+                                                        label={Brand.FOREIGN.value}
                                                     />
                                                 </RadioGroup>
                                             }
