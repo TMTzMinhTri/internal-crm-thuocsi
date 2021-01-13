@@ -20,6 +20,7 @@ import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { getPriceClient } from "client/price";
 import { SellPrices, noOptionsText, Brand } from "components/global";
+import { NotFound } from "components/components-global";
 import Head from "next/head";
 import Link from "next/link";
 import AppCRM from "pages/_layout";
@@ -343,6 +344,11 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
 }
 
 export default function renderForm(props, toast) {
+    if (props.status && props.status !== "OK") {
+        return (
+            <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm"/>
+        )
+    }
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;

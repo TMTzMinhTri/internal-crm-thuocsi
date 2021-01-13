@@ -18,17 +18,12 @@ export const ErrorCode = {
 
 export const noOptionsText = "Không có tùy chọn!";
 
-export function formatUrlSearch(str) {
-    return str.trim().replace(/\s+/g, ' ')
-        .replace(/[&]/, '%26')
-        .replace(/[+]/, '%2B')
-        .replace(/[#]/, '%23');
-}
+
 
 export const condUserType = [
     {
         label: "Mặc định",
-        value: "",
+        value: "all",
     },
     {
         label: "Không giới hạn",
@@ -75,6 +70,56 @@ export const ProductTypes = [
         label: "Chưa được cài giá"
     }
 ]
+
+export const scopes = [
+    {
+        value: "PHARMACY",
+        label: "Tiệm thuốc"
+    },
+    {
+        value: "CLINIC",
+        label: "Phòng khám"
+    },
+    {
+        value: "DRUGSTORE",
+        label: "Nhà thuốc"
+    },
+]
+
+export const statuses = [
+    {
+        value: "ACTIVE",
+        label: "Đang hoạt động",
+    },
+    {
+        value: "DRAFT",
+        label: "Nháp",
+    },
+    {
+        value: "NEW",
+        label: "Mới",
+    },
+    {
+        value: "GUEST",
+        label: "Khách",
+    },
+    {
+        value:"APPROVED",
+        label:"Đã kích hoạt"
+    }
+]
+
+
+export const ProductStatus = {
+    "NEW": "Mới",
+}
+
+export function formatUrlSearch(str) {
+    return str.trim().replace(/\s+/g, ' ')
+        .replace(/[&]/, '%26')
+        .replace(/[+]/, '%2B')
+        .replace(/[#]/, '%23');
+}
 
 export function formatDateTime(datetime) {
     if (datetime) {
@@ -163,8 +208,4 @@ export const ssrPipe = (...functions) => async (input) => {
     return {
         props: await functions.reduce((chain, func) => chain.then(func), Promise.resolve(input)),
     }
-}
-
-export const ProductStatus = {
-    "NEW": "Mới",
 }
