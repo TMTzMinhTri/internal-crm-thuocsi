@@ -16,6 +16,8 @@ export const ErrorCode = {
     "NOT_FOUND_TABLE": "Tìm kiếm không có kết quả phù hợp"
 }
 
+export const noOptionsText = "Không có tùy chọn!";
+
 export function formatUrlSearch(str) {
     return str.trim().replace(/\s+/g, ' ')
         .replace(/[&]/, '%26')
@@ -52,10 +54,10 @@ export const condUserType = [
 
 export const Brand = {
     'LOCAL': {
-        value: 'Nội địa'
+        value: 'Trong nước'
     },
     'FOREIGN': {
-        value: 'Quốc tế'
+        value: 'Ngoại nhập'
     }
 }
 
