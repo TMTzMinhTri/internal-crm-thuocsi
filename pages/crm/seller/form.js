@@ -18,66 +18,15 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-
-const levels = [
-    {
-        value: "Infinity",
-        label: "Không giới hạn"
-    },
-    {
-        value: "Diamond",
-        label: "Kim cương",
-    },
-    {
-        value: "Platinum",
-        label: "Bạch kim",
-    },
-    {
-        value: "Gold",
-        label: "Vàng",
-    },
-    {
-        value: "Sliver",
-        label: "Bạc",
-    },
-];
-
-const statuses = [
-    {
-        value: "ACTIVE",
-        label: "Đang hoạt động",
-    },
-    {
-        value: "DRAFT",
-        label: "Nháp",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-    },
-]
-
-const scopes = [
-    {
-        value: "PHARMACY",
-        label: "Tiệm thuốc"
-    },
-    {
-        value: "CLINIC",
-        label: "Phòng khám"
-    },
-    {
-        value: "DRUGSTORE",
-        label: "Nhà thuốc"
-    },
-]
+import { statuses, scopes } from "components/global"
+import { NotFound } from "components/components-global";
 
 export async function loadData(ctx) {
-    let data = { props: {} }
+    let data = {
+        props: {
+            status: "OK"
+        }
+    }
 
     let masterDataClient = getMasterDataClient(ctx, data)
     let resp = await masterDataClient.getProvince(0, 100, '')
@@ -95,6 +44,7 @@ export async function loadData(ctx) {
         let sellerResp = await sellerClient.getSellerBySellerCode(sellerCode)
         if (sellerResp.status !== 'OK') {
             data.props.message = sellerResp.message
+            data.props.status = sellerResp.status;
             return data
         }
         let seller = sellerResp.data[0]
@@ -118,6 +68,11 @@ export async function loadData(ctx) {
 }
 
 export default function renderForm(props, toast) {
+    if (props.status && props.status !== "OK") {
+        return (
+            <NotFound link='/crm/seller' titlePage="Cập nhật nhà bán hàng" labelLink="nhà bán hàng" />
+        )
+    }
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.seller : {}
     const checkWardData = props.isUpdate ? (props.seller.wardCode === '' ? {} : props.ward) : {};
@@ -230,7 +185,7 @@ export default function renderForm(props, toast) {
     return (
         <AppCRM select="/crm/seller">
             <Head>
-                <title>{props.isUpdate ? 'Cập nhật bán hàng' : 'Thêm khách hàng'}</title>
+                <title>{props.isUpdate ? 'Cập nhật nhà bán hàng' : 'Thêm khách hàng'}</title>
             </Head>
             {
                 props.isUpdate && typeof props.seller === 'undefined' ? (

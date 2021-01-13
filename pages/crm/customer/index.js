@@ -37,54 +37,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import { ErrorCode, formatUrlSearch } from 'components/global';
-// import {levels, statuses} from "./form"
-
-const levels = [
-    {
-        value: "Infinity",
-        label: "Không giới hạn",
-    },
-    {
-        value: "Diamond",
-        label: "Kim cương",
-    },
-    {
-        value: "Platinum",
-        label: "Bạch kim",
-    },
-    {
-        value: "Gold",
-        label: "Vàng",
-    },
-    {
-        value: "Sliver",
-        label: "Bạc",
-    },
-];
-
-const statuses = [
-    {
-        value: "ACTIVE",
-        label: "Đang hoạt động",
-    },
-    {
-        value: "DRAFT",
-        label: "Nháp",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-    },
-    {
-        value:"APPROVED",
-        label:"Đã kích hoạt"
-    }
-];
+import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -135,12 +88,7 @@ function render(props) {
     }
 
     async function onSearch() {
-        q = search
-            .trim()
-            .replace(/\s+/g, " ")
-            .replace(/[&]/, "%26")
-            .replace(/[+]/, "%2B")
-            .replace(/[#]/, "%23");
+        q = formatUrlSearch(search);
         router.push(`?q=${q}`);
     }
 
@@ -167,7 +115,7 @@ function render(props) {
             </TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email || '-'}</TableCell>
-            <TableCell align="left">{levels.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
+            <TableCell align="left">{condUserType.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
             <TableCell align="left">{row.data.point}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">
