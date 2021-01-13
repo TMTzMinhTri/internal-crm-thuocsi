@@ -188,7 +188,7 @@ function render(props) {
                     </IconButton>
                 </Tooltip> : row.data.status !== 'DRAFT' ? <Tooltip title="Kích hoạt tài khoản">
                     <IconButton onClick={() => {setOpenApproveDialog(true); setApprovedCustomerCode(row.data)}}>
-                        <LockIcon fontSize="small" />
+                        <LockIcon fontSize="small" style={{color:'red'}}/>
                     </IconButton>
                 </Tooltip> : null}
             </TableCell>
