@@ -1,393 +1,1032 @@
-import { Box, Button, FormControl, FormGroup, InputLabel, MenuItem, Paper, Select, TextField } from "@material-ui/core";
+import {
+    Box,
+    Button, ButtonGroup, CardContent,
+    CardHeader,
+    FormControl, FormControlLabel,
+    FormGroup,
+    InputLabel,
+    MenuItem,
+    Paper, Radio, RadioGroup,
+    Select, Table, TableCell, TableContainer, TableHead, TableRow,
+    TextField
+} from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import styles from "./promotion.module.css";
+import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
+import Grid from "@material-ui/core/Grid";
+import Divider from "@material-ui/core/Divider";
+import Typography from "@material-ui/core/Typography";
+import {
+    defaultNameRules, defaultPromotionScope, defaultPromotionType,
+    defaultRulePromotion,
+    defaultTypeConditionsRule,
+    setRulesPromotion
+} from "../../../client/constant";
+import Card from "@material-ui/core/Card";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import InputAdornment from "@material-ui/core/InputAdornment";
+import IconButton from "@material-ui/core/IconButton";
+import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
+import AddCircleOutlineOutlinedIcon from "@material-ui/icons/AddCircleOutlineOutlined";
+import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
+import Dialog from "@material-ui/core/Dialog";
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import Checkbox from "@material-ui/core/Checkbox";
+import DialogActions from "@material-ui/core/DialogActions";
+import InputBase from "@material-ui/core/InputBase";
+import SearchIcon from "@material-ui/icons/Search";
+import {loadPromoData} from "./index";
 
-export async function getServerSideProps({ query }) {
-    return await loadProductData(query)
-}
-
-export async function loadProductData(query) {
-    let sku = query.sku || ''
-    
-    const res = await fetch(`http://34.87.48.109/core/product/v1/product?sku=${sku}`, {
-        method: "GET",
-        headers: {
-            "Authorization": "Basic bmFtcGg6MTIzNDU2"
-        }
+export async function getServerSideProps(ctx ) {
+    return await doWithLoggedInUser(ctx, () => {
+        return loadPromotionData(ctx)
     })
-    const result = await res.json()
-    
-    if(result.status != "OK"){
-        return { props: Object.assign({data:[]}, result) }
-    }
+}
 
-    // console.log(result)
-    // Pass data to the page via props
-    return { props: result }
+const defaultState = {
+    promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
+    promotionTypeRule: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
+    promotionScope: "global",
+    listGiftPromotion: [{
+        gift: {},
+        quantity: 0,
+    }],
+}
+
+export async function loadPromotionData(ctx) {
+    let returnObject = {props: {}}
+    return returnObject
 }
 
 
-export default function EditPage(props) {
-    const [units] = useState([
+export default function NewPage(props) {
+    return renderWithLoggedInUser(props, render)
+}
+
+function render(props) {
+    const toast = useToast()
+    const [promotionRulesLine, setPromotionRulesLine] = useState([
         {
-            label: "Hộp",
-            value: "Hộp"
-        }
-    ]);
-    const product = props?.data[0]
-    const [categories, setCategories] = useState([])
-    const [state, setState] = useState(product);
-    const { register, handleSubmit, errors } = useForm();
-    
+            id: 1,
+        },
+    ])
+    const [state, setState] = useState(defaultState);
+    const {promotionOption, promotionTypeRule, promotionScope} = state
+    const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
+
+    const [open, setOpen] = useState(false);
+
+    const handleClickOpen = () => {
+        setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        console.log('12321')
+    };
+
     const handleChange = (event) => {
-        // change event.target.id to event.target.name because select box'event do not return id, ex: {value: "value", name: "category"}
         setState({...state, [event.target.name]: event.target.value})
     }
 
-    async function loadCategoryData(query) {
-        let page = query.page || 0
-        let limit = query.limit || 100
-        let offset = page * limit
-    
-        const res = await fetch(`http://34.87.48.109/core/product/v1/category/list?offset=${offset}&limit=${limit}`, {
-            method: "GET",
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
-            }
-        })
-        const result = await res.json()
-        setCategories(result.data.map(({ name }) => ({ label: name, value: name })))
-        if(result.data.length > 0) {
-            setState({...state, ["category"]: result.data[0].name})
-        }
+    const handleChangeState = (name,value) => {
+        setState({...state,name:value})
     }
 
-    async function updateProduct(item) {
-        const payload = Object.assign({imageUrls: "thuocsi.vn/default.png"},item)
-        const res = await fetch(`http://34.87.48.109/core/product/v1/product`, {
-            method: 'POST',
-            headers: {
-                "Authorization": "Basic bmFtcGg6MTIzNDU2"
-            },
-            body: JSON.stringify(payload)
-        })
-        const result = await res.json()
-        console.log(result)
+    const handleChangeStatus = (event) => {
+        setPromotionRulesLine([{
+            id: 1,
+        }])
+        setState({...state, [event.target.name]: event.target.value})
+        console.log('value',getValues())
+        reset()
+        console.log('error',errors)
+        console.log('value',getValues())
+    }
+
+    function handleRemoveCodePercent(id) {
+        const newCodes = promotionRulesLine.filter((item) => item.id !== id);
+        setPromotionRulesLine(newCodes);
+    }
+
+    function handleAddCodePercent(id) {
+        setPromotionRulesLine([...promotionRulesLine, {id: id + 1}]);
     }
 
     // func onSubmit used because useForm not working with some fields
-    async function onSubmit(){
-        try {
-            await updateProduct(state)
-        } catch (error) {
-            console.log(error)
+    async function onSubmit() {
+        let {promotionName,totalCode,startTime,endTime} = getValues()
+        let value = getValues()
+        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,promotionScope)
+        startTime  = startTime + ":00Z"
+        endTime  = endTime + ":00Z"
+
+        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,defaultPromotionScope.GLOBAL,rule)
+        if (promotionResponse.status === "OK") {
+            toast.success('Tạo khuyến mãi thành công')
+        }else {
+            toast.error(`${promotionResponse.message}`)
         }
     }
 
-    useEffect(() => {
-        loadCategoryData({})
-    },[]);
-
-    if(props.status !="OK") {
-        return (
-            <AppCRM select="/product">
-                <Head>
-                    <title>Thông tin sản phẩm</title>
-                </Head>
-                <Box component={Paper}>
-                    <FormGroup>
-                        <Box className={styles.contentPadding}>
-                            <Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>
-                            <Box>{props.message}</Box>
-                        </Box>
-                    </FormGroup>
-                </Box>
-            </AppCRM>
-        )
-    }
     return (
-        <AppCRM select="/product">
+        <AppCRM select="/crm/promotion">
             <Head>
-                <title>Thông tin sản phẩm</title>
+                <title>Thêm khuyến mãi</title>
             </Head>
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 24 }}>Thông tin sản phẩm</Box>
-                        <Box>
-                            <TextField
-                                id="name"
-                                name="name"
-                                value={state.name}
-                                label="Tên sản phẩm"
-                                placeholder=""
-                                helperText={errors.name?.message}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '25%' }}
-                                onChange={({target: {value,name}}) => {
-                                    setState({...state,[name]:value})
-                                }}
-                                error={ errors.name ? true : false }
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Name Required",
-                                        maxLength: {
-                                            value: 250,
-                                            message: "Name must be less than 250 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "Name must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "Name must be characters"
+                        <Box style={{fontSize: 24}}>Thêm khuyến mãi mới</Box>
+                        <CardHeader
+                            subheader="Thông tin khuyến mãi"
+                        />
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="promotionName"
+                                        name="promotionName"
+                                        label="Tên khuyến mãi"
+                                        placeholder=""
+                                        helperText={errors.promotionName?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.promotionName ? true : false}
+                                        required
+                                        inputRef={
+                                            register({
+                                                required: "Tên khuyến mãi không được để trống",
+                                                maxLength: {
+                                                    value: 250,
+                                                    message: "Tên khuyến mãi không được vượt quá 250 kí tự"
+                                                },
+                                                minLength: {
+                                                    value: 6,
+                                                    message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự"
+                                                },
+                                                pattern: {
+                                                    value: /[A-Za-z]/,
+                                                    message: "Tên khuyến mãi phải có kí tự là chứ số"
+                                                }
+                                            })
                                         }
-                                    })
-                                }
-                            />
-                            <TextField
-                                id="sku"
-                                name="sku"
-                                label="SKU"
-                                value={state.sku}
-                                placeholder=""
-                                helperText={errors.sku? errors.sku.message: "Mã sản phẩm"}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                onChange={handleChange}
-                                error={ errors.sku ? true : false }
-                                disabled
-                                required
-                                inputRef={
-                                    register({
-                                        required: "SKU Required",
-                                        maxLength: {
-                                            value: 50,
-                                            message: "SKU must be less than 50 characters"
-                                        },
-                                        minLength: {
-                                            value: 6,
-                                            message: "SKU must be greater than 6 characters"
-                                        },
-                                        pattern: {
-                                            value: /[A-Za-z]/,
-                                            message: "SKU must be characters"
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalCode"
+                                        name="totalCode"
+                                        label="Số lần áp dụng"
+                                        type="number"
+                                        helperText={errors.totalCode?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.totalCode ? true : false}
+                                        required
+                                        inputRef={register(
+                                            {
+                                                required: "Số lần áp dụng không được để trống",
+                                                pattern: {
+                                                    value: /[0-9]/,
+                                                    message: "Chỉ chấp nhận kí tự là số"
+                                                }
+                                            }
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="startTime"
+                                        name="startTime"
+                                        label="Thời gian bắt đầu"
+                                        placeholder=""
+                                        helperText={errors.startTime?.message}
+                                        type="datetime-local"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.startTime ? true : false}
+                                        required
+                                        inputRef={
+                                            register({
+                                                required: "Vui lòng chọn thời gian bắt đầu",
+                                            })
                                         }
-                                    })
-                                }
-                            />
-                            <TextField
-                                id="createdTime"
-                                name="createdTime"
-                                label="Created at"
-                                value={state.createdTime}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                disabled
-                            />
-                            <TextField
-                                id="lastUpdatedTime"
-                                name="lastUpdatedTime"
-                                label="Updated at"
-                                value={state.lastUpdatedTime}
-                                margin="normal"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '20%' }}
-                                disabled
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="description"
-                                name="description"
-                                value={state.description}
-                                label="Mô tả"
-                                placeholder=""
-                                helperText={errors.description?.message}
-                                margin="normal"
-                                multiline
-                                rowsMax={4}
-                                onChange={handleChange}
-                                error={ errors.description ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="origin"
-                                name="origin"
-                                value={state.origin}
-                                label="Xuất xứ"
-                                placeholder="Quốc gia sản xuất"
-                                helperText={errors.origin?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.origin ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Origin Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="madeBy"
-                                name="madeBy"
-                                value={state.madeBy}
-                                label="Nhà sản xuất"
-                                placeholder="Tên nhà sản xuất"
-                                helperText={errors.madeBy?.message}
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.madeBy ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "MakeBy Required",
-                                    })
-                                }
-                            />
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="storage"
-                                name="storage"
-                                value={state.storage}
-                                label="Bảo quản"
-                                placeholder="Cách bảo quản"
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '47%' }}
-                            />
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="unit-select-label">Đơn vị tính</InputLabel>
-                                <Select
-                                    labelId="unit-select-label"
-                                    id="unit-select"
-                                    name="unit"
-                                    value={state.unit}
-                                    onChange={handleChange}
-                                >
-                                    {units.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <TextField
-                                id="volume"
-                                name="volume"
-                                value={state.volume}
-                                label="Thể tích"
-                                placeholder=""
-                                helperText="Ví dụ: 4 chai x 300ml"
-                                margin="normal"
-                                onChange={handleChange}
-                                error={ errors.volume ? true : false }
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                                required
-                                inputRef={
-                                    register({
-                                        required: "Volume Required",
-                                    })
-                                }
-                            />
-                            
-                        </Box>
-                        <Box>
-                            <FormControl className={styles.formControl} style={{ margin: 12, width: 240 }}>
-                                <InputLabel id="category-select-label">Loại sản phẩm</InputLabel>
-                                <Select
-                                    labelId="category-select-label"
-                                    id="category"
-                                    name="category"
-                                    value={state.category}
-                                    onChange={handleChange}
-                                >
-                                    {categories.map(({label, value}) => (
-                                        <MenuItem value={value} key={value}>{label}</MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                        </Box>
-                        <Box>
-                            <TextField
-                                id="indication"
-                                name="indication"
-                                value={state.indication}
-                                label="Chỉ định"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '23%' }}
-                            />
-                            <TextField
-                                id="dosage"
-                                name="dosage"
-                                value={state.dosage}
-                                label="Liều lượng"
-                                placeholder=""
-                                margin="normal"
-                                onChange={handleChange}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{ margin: 12, width: '22%' }}
-                            />
-                        </Box>
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="endTime"
+                                        name="endTime"
+                                        label="Thời gian kết thúc"
+                                        placeholder=""
+                                        type="datetime-local"
+                                        helperText={errors.endTime?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        onChange={handleChange}
+                                        error={errors.endTime ? true : false}
+                                        required
+                                        inputRef={
+                                            register({
+                                                required: "Vui lòng chọn ngày kêt thúc",
+                                            })
+                                        }
+                                    />
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                        <Divider/>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Điều kiện
+                            </Typography>
+                            <RadioGroup aria-label="quiz" name="promotionOption" value={promotionOption}
+                                        onChange={handleChangeStatus}>
+                                <Grid spacing={3} container justify="space-around" alignItems="center">
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <FormControlLabel value={defaultRulePromotion.MIN_ORDER_VALUE} control={<Radio color="primary"/>}
+                                                          label="Giảm giá theo giá trị đơn hàng"/>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <FormControlLabel value={defaultRulePromotion.MIN_QUANTITY} control={<Radio color="primary"/>}
+                                                          label="Giảm giá theo lượng sản phẩm"/>
+                                    </Grid>
+                                </Grid>
+                            </RadioGroup>
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <Typography color="textSecondary" gutterBottom>
+                                        Loại
+                                    </Typography>
+                                    <RadioGroup aria-label="quiz" name="promotionTypeRule" value={promotionTypeRule}
+                                                onChange={handleChangeStatus}>
+                                        <Grid spacing={1} container justify="space-around" alignItems="center">
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Giảm tiền"/>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.DISCOUNT_PERCENT}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Giảm % giá sản phẩm"/>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.GIFT}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Quà"/>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.PRODUCT_GIFT}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Tặng sản phẩm"/>
+                                            </Grid>
+                                        </Grid>
+                                    </RadioGroup>
+                                </CardContent>
+                            </Card>
+                            {
+                                promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE ? (
+                                    <Card variant="outlined" style={{marginTop: '10px'}}
+                                    >
+                                        <List component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionRulesLine.map((code, index) => (
+                                                    <ListItem
+                                                        key={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id}
+                                                        button>
+                                                        <Grid
+                                                            spacing={1} container alignItems="center">
+                                                            <Grid item xs={5} sm={5} md={5}>
+                                                                <TextField
+                                                                    id={defaultNameRules.priceMinValueAndQuantity + index}
+                                                                    name={defaultNameRules.priceMinValueAndQuantity + index}
+                                                                    label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
+                                                                    placeholder=""
+                                                                    type="number"
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[defaultNameRules.priceMinValueAndQuantity + index]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={!!errors[defaultNameRules.priceMinValueAndQuantity + index]}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Giá trị đơn hàng không được bỏ trống",
+                                                                            maxLength: {
+                                                                                value: 10,
+                                                                                message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 6,
+                                                                                message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
+                                                                            },
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={5} sm={5} md={5}>
+                                                                <TextField
+                                                                    id={defaultNameRules.priceDiscountValue + index}
+                                                                    name={defaultNameRules.priceDiscountValue + index}
+                                                                    type="number"
+                                                                    label="Số tiền giảm"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[defaultNameRules.priceDiscountValue + index]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">đ</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors[defaultNameRules.priceDiscountValue + index] ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Số tiền giảm không được bỏ trống",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Số tiền giảm không được vượt quá 250 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 3,
+                                                                                message: "Giá trị sản phẩm phải lớn hơn 1000"
+                                                                            },
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <Grid spacing={1} container alignItems="center">
+                                                                    <Grid item xs={6} sm={4} md={2}>
+                                                                        {
+                                                                            promotionRulesLine.length !== 1 ? (
+                                                                                <IconButton color="secondary"
+                                                                                            component="span"
+                                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                                    <HighlightOffOutlinedIcon/>
+                                                                                </IconButton>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                    {
+                                                                        index + 1 === promotionRulesLine.length ?
+                                                                            (
+                                                                                <Grid item xs={6} sm={4} md={2}>
+                                                                                    <IconButton color="primary"
+                                                                                                onClick={() => handleAddCodePercent(code.id)}
+                                                                                                aria-label="upload picture"
+                                                                                                component="span">
+                                                                                        <AddCircleOutlineOutlinedIcon/>
+                                                                                    </IconButton>
+                                                                                </Grid>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </Card>
+                                ) : promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT ? (
+                                    <Card variant="outlined" style={{marginTop: '10px'}}>
+                                        <List component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionRulesLine.map((code, index) => (
+                                                    <ListItem key={defaultTypeConditionsRule.DISCOUNT_PERCENT+ "_" + code.id} button>
+                                                        <Grid spacing={1} container alignItems="center">
+                                                            <Grid item xs={4} sm={4} md={4}>
+                                                                <TextField
+                                                                    id={defaultNameRules.priceMinValuePercent + index}
+                                                                    name={defaultNameRules.priceMinValuePercent + index}
+                                                                    label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
+                                                                    placeholder=""
+                                                                    type="number"
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[defaultNameRules.priceMinValuePercent+index]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={!!errors[defaultNameRules.priceMinValuePercent+index]}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Giá trị đơn hàng không được bỏ trống",
+                                                                            maxLength: {
+                                                                                value: 10,
+                                                                                message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 6,
+                                                                                message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
+                                                                            },
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <TextField
+                                                                    id={defaultNameRules.percentValue + index}
+                                                                    name={defaultNameRules.percentValue + index}
+                                                                    type="number"
+                                                                    label="Số % giảm"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[defaultNameRules.percentValue + index]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">%</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors[defaultNameRules.percentValue + index] ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Số % giảm không được để trống",
+                                                                            maxLength: {
+                                                                                value: 3,
+                                                                                message: "Số % giảm không đượt vượt quá 3 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 1,
+                                                                                message: "Số % giảm có độ dài lớn hơn 1 kí tự"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[0-9]/,
+                                                                                message: "Chỉ chấp nhận kí tự là số"
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={4} sm={4} md={4}>
+                                                                <TextField
+                                                                    id={defaultNameRules.priceMaxDiscountValue + index}
+                                                                    name={defaultNameRules.priceMaxDiscountValue + index}
+                                                                    type="number"
+                                                                    label="Số tiền giảm tối đa"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[defaultNameRules.priceMaxDiscountValue + index]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">đ</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors[defaultNameRules.priceMaxDiscountValue + index] ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Số tiền giảm tối đa không được để trống",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Số tiền giảm tối đa không đượt vượt quá 250 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 4,
+                                                                                message: "Số tiền giảm tối đa phải có độ dài lớn hơn 4 kí tự"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[0-9]/,
+                                                                                message: "Chỉ chấp nhận kí tự là số"
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <Grid spacing={1} container alignItems="center">
+                                                                    <Grid item xs={6} sm={4} md={2}>
+                                                                        {
+                                                                            promotionRulesLine.length !== 1 ? (
+                                                                                <IconButton color="secondary"
+                                                                                            component="span"
+                                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                                    <HighlightOffOutlinedIcon/>
+                                                                                </IconButton>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                    {
+                                                                        index + 1 === promotionRulesLine.length ?
+                                                                            (
+                                                                                <Grid item xs={6} sm={4} md={2}>
+                                                                                    <IconButton color="primary"
+                                                                                                onClick={() => handleAddCodePercent(code.id)}
+                                                                                                aria-label="upload picture"
+                                                                                                component="span">
+                                                                                        <AddCircleOutlineOutlinedIcon/>
+                                                                                    </IconButton>
+                                                                                </Grid>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </Card>
+                                ) : promotionTypeRule === defaultTypeConditionsRule.GIFT ? (
+                                    <RenderTableGift
+                                        handleClickOpen={handleClickOpen}
+                                        handleClose={handleClose}
+                                        open={open}
+                                        register={register}
+                                        state={state}
+                                        handleRemoveCodePercent={handleRemoveCodePercent}
+                                        handleChange={handleChange}/>
+                                ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
+                                    <RenderTableProductGift
+                                        handleClickOpen={handleClickOpen}
+                                        handleClose={handleClose}
+                                        open={open}
+                                        register={register}
+                                        state={state}
+                                        handleRemoveCodePercent={handleRemoveCodePercent}
+                                        handleChange={handleChange}
+                                    />
+                                ): (
+                                    <div/>
+                                )
+                            }
+                        </CardContent>
+                        <Divider/>
+                        <CardHeader
+                            subheader="Áp dụng cho"
+                        />
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
+                                            onChange={handleChange}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center">
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value="global" control={<Radio color="primary"/>}
+                                                              label="Toàn sàn"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value="products" control={<Radio color="primary"/>}
+                                                              label="Sản phẩm được chọn"/>
+                                        </Grid>
+                                    </Grid>
+                                </RadioGroup>
+                            </Grid>
+                        </CardContent>
+                        {
+                            promotionScope === "products" ? (
+                                <Card variant="outlined" style={{marginTop: '10px'}}>
+
+                                </Card>
+                            ): (
+                                <div></div>
+                            )
+                        }
                         <Box>
                             <Button
-                                variant="contained" 
-                                color="primary" 
+                                variant="contained"
+                                color="primary"
                                 onClick={handleSubmit(onSubmit)}
-                                style={{ margin: 8 }}>
-                                    Lưu
+                                style={{margin: 8}}>
+                                Lưu
                             </Button>
-                            <Button variant="contained" style={{ margin: 8 }}>Làm mới</Button>
+                            <Button variant="contained" style={{margin: 8}}>Làm mới</Button>
                         </Box>
-                        
                     </Box>
                 </FormGroup>
             </Box>
         </AppCRM>
     )
 }
+
+export function RenderTableGift(props) {
+    const [stateGift, setStateGift] = useState({
+        listGiftSearch: [],
+        listGiftAction: [],
+        listGiftNew: [],
+    })
+
+    const [showAutoComplete, setShowAutoComplete]   = useState(false);
+
+    const handleSearchProductGift = async (productName) => {
+        let giftResponse = await searchGift(productName)
+        if (giftResponse.status === "OK") {
+            setStateGift({...stateGift, listGiftSearch: giftResponse.data})
+        }
+    }
+
+    const handleRemoveGift = (gift) => {
+        let {listGiftAction} = stateGift
+        listGiftAction.remove(giftAction => giftAction.gift.productId === gift.productId)
+        setStateGift({...stateGift,listGiftAction: listGiftAction})
+    }
+
+    const handleChangeQuantityGift = (gift,quantity) =>{
+        let {listGiftNew} = stateGift
+        listGiftNew.forEach(giftNew => {
+            if (giftNew.gift.productId === gift.productId) {
+                giftNew.quantity = quantity
+            }
+        })
+        setStateGift({...stateGift,listGiftNew: listGiftNew})
+    }
+
+    const handleActiveGift = (gift,active) => {
+        let {listGiftNew} = stateGift
+        listGiftNew.forEach(giftNew => {
+            if (giftNew.gift.productId === gift.productId) {
+                giftNew.active = active
+            }
+        })
+        setStateGift({...stateGift,listGiftNew: listGiftNew})
+    }
+
+    const handleAddGiftNew = (e,value) => {
+        let {listGiftNew} = stateGift
+        if (value) {
+            if (listGiftNew.find(giftnew => giftnew.productId === value.productId)) {
+                listGiftNew.forEach(giftNew => {
+                    if (giftNew.gift && giftNew.gift.productId === value.productId) {
+                        return giftNew.quantity++
+                    }
+                })
+            }else {
+                listGiftNew.push({
+                    gift: value,
+                    quantity: 0,
+                    active: true,
+                })
+            }
+        }
+        setStateGift({...stateGift,listGiftNew: listGiftNew,listGiftSearch: []})
+    }
+
+    const handleAddGiftAction = () => {
+        let {listGiftAction,listGiftNew} = stateGift
+        listGiftNew.forEach(giftNew => {
+            if (giftNew.active) {
+                listGiftAction.push(giftNew)
+            }
+        })
+        props.handleClose()
+    }
+
+    return (
+        <Card variant="outlined" style={{marginTop: '4px'}}>
+            <ButtonGroup color="primary" size="small"
+                         aria-label="contained primary button group"
+                         className={styles.btnDialog}
+                         onClick={props.handleClickOpen}
+            >
+                <Button variant="contained" color="primary">Thêm quà</Button>
+            </ButtonGroup>
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="left">Hình ảnh</TableCell>
+                            <TableCell align="left">Tên quà</TableCell>
+                            <TableCell align="left">Số lượng</TableCell>
+                            <TableCell align="center">Thao tác</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    {stateGift.listGiftAction.map(({gift,quantity,active}) => (
+                        <TableRow>
+                            <TableCell align="left">Balo</TableCell>
+                            <TableCell align="left">{gift.name}</TableCell>
+                            <TableCell align="left">quantity</TableCell>
+                            <TableCell align="center">
+                                <IconButton color="secondary"
+                                            component="span"
+                                            onClick={() => handleRemoveGift(gift)}
+                                >
+                                    <HighlightOffOutlinedIcon/>
+                                </IconButton>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </Table>
+            </TableContainer>
+            <Dialog
+                open={props.open}
+                onClose={props.handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
+                <DialogContent>
+                    <div style={{marginBottom: '1rem'}}>
+                        <Autocomplete
+                            options={stateGift.listGiftSearch}
+                            variant="outlined"
+                            name="searchProductGift"
+                            loading={showAutoComplete}
+                            fullWidth
+                            loadingText="Không tìm thấy quà tặng"
+                            onOpen={() => {
+                                setShowAutoComplete(true)
+                            }}
+                            onClose={() => {
+                                setShowAutoComplete(false)
+                            }}
+                            getOptionLabel={option => option.name}
+                            renderInput={params => (
+                                <TextField
+                                    {...params}
+                                    label="Tên quà tặng"
+                                    placeholder=""
+                                    variant="outlined"
+                                    onChange={e => handleSearchProductGift(e.target.value)}
+                                />
+                            )}
+                            onChange={(e,value) => handleAddGiftNew(e,value)}
+                        />
+                    </div>
+                    <TableContainer component={Paper}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell align="left">Hình ảnh</TableCell>
+                                    <TableCell align="left">Tên quà</TableCell>
+                                    <TableCell align="left" style={{width: '25%'}}>Số
+                                        lượng</TableCell>
+                                    <TableCell align="center">Thao tác</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            {stateGift.listGiftNew.map(({gift,active,quantity}) => (
+                                <TableRow>
+                                    <TableCell align="left">
+                                        {
+                                            gift.imageUrls? (
+                                                <image src={gift.imageUrls[0]}></image>
+                                            ):(
+                                                <div></div>
+                                            )
+                                        }
+                                    </TableCell>
+                                    <TableCell align="left">{gift.name}</TableCell>
+                                    <TableCell align="left">
+                                        <TextField
+                                            variant="outlined"
+                                            size="small"
+                                            style={{
+                                                height: '40%'
+                                            }}
+                                            type="number"
+                                            value={quantity}
+                                            onChange={(e,value) => handleChangeQuantityGift(gift,value)}
+                                            id="outlined-adornment-weight"
+                                            aria-describedby="outlined-weight-helper-text"
+                                            labelWidth={0}
+                                        />
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveGift(gift,value)} />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </Table>
+                    </TableContainer>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={props.handleClose} color="secondary">
+                        Hủy
+                    </Button>
+                    <Button onClick={handleAddGiftAction} color="primary" autoFocus>
+                        Thêm
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </Card>
+    )
+}
+
+export function RenderTableProductGift(props) {
+
+    const [stateProductGift, setStateProductGift] = useState({
+        listProductGiftSearch: [],
+        listProductGiftAction: [],
+        listProductGiftNew: [],
+    })
+
+    const [showAutoComplete, setShowAutoComplete]   = useState(false);
+
+    const handleSearchProductGift = async (productName) => {
+        let categoryGiftResponse = await getListGift()
+        if (categoryGiftResponse.status === "OK") {
+            let giftResponse = await searchGift(categoryGiftResponse.data[0].code)
+            if (giftResponse.status === "OK") {
+                setStateProductGift({...stateProductGift, listProductGiftSearch: giftResponse.data})
+            }
+        }
+    }
+
+    const handleRemoveProductGift = (gift) => {
+        let {listProductGiftAction} = stateProductGift
+        listGiftAction.remove(giftAction => giftAction.gift.productId === gift.productId)
+        setStateProductGift({...stateProductGift,listProductGiftAction: listGiftAction})
+    }
+
+    const handleChangeQuantityProductGift = (giftId,quantity) =>{
+        let {listProductGiftNew} = stateProductGift
+        listGiftNew.forEach(giftNew => {
+            if (giftNew.gift.productId === giftId) {
+                giftNew.quantity = quantity
+            }
+        })
+        setStateProductGift({...stateProductGift,listProductGiftNew: listGiftNew})
+    }
+
+    const handleActiveProductGift = (gift,active) => {
+        let {listProductGiftNew} = stateProductGift
+        listGiftNew.forEach(giftNew => {
+            if (giftNew.gift.productId === giftId) {
+                giftNew.active = active
+            }
+        })
+        setStateProductGift({...stateProductGift,listProductGiftNew: listGiftNew})
+    }
+
+    const handleAddProductGiftNew = (e,value) => {
+        let {listProductGiftNew} = stateProductGift
+        if (value) {
+            listGiftNew.push({
+                gift: value,
+                quantity: 0,
+            })
+        }
+        setStateProductGift({...stateProductGift,listProductGiftNew: listGiftNew})
+    }
+
+    return (
+        <Card variant="outlined" style={{marginTop: '10px'}}>
+            <div>
+                <ButtonGroup color="primary" size="small"
+                             aria-label="contained primary button group"
+                             className={styles.btnDialog}
+                             onClick={props.handleClickOpen}
+                >
+                    <Button variant="contained" size="small"  color="primary">Thêm sản phẩm</Button>
+                </ButtonGroup>
+                <TableContainer component={Paper}>
+                    <Table size="small">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="left">Hình ảnh</TableCell>
+                                <TableCell align="left">Tên sản phẩm</TableCell>
+                                <TableCell align="left">Số lượng</TableCell>
+                                <TableCell align="left">Đơn vị</TableCell>
+                                <TableCell align="center">Thao tác</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        {stateProductGift.listProductGiftAction.map(({gift,quantity,active}) => (
+                            <TableRow>
+                                <TableCell align="left">Balo</TableCell>
+                                <TableCell align="left">{gift.name}</TableCell>
+                                <TableCell align="left">quantity</TableCell>
+                                <TableCell align="left">quantity</TableCell>
+                                <TableCell align="center">
+                                    <IconButton color="secondary"
+                                                component="span"
+                                                onClick={() => handleRemoveGift(gift)}
+                                    >
+                                        <HighlightOffOutlinedIcon/>
+                                    </IconButton>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </Table>
+                </TableContainer>
+                <Dialog
+                    open={props.open}
+                    onClose={props.handleClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Chọn sản phẩm"}</DialogTitle>
+                    <DialogContent>
+                        <Paper component="form" className={styles.search}
+                               style={{marginBottom: '10px'}}>
+                            <InputBase
+                                id="q"
+                                name="q"
+                                className={styles.input}
+                                onChange={props.handleChange}
+                                inputRef={props.register}
+                                placeholder="Tìm kiếm sản phẩm"
+                                inputProps={{'aria-label': 'Tìm kiếm sản phẩm'}}
+                            />
+                            <IconButton className={styles.iconButton} aria-label="search">
+                                <SearchIcon/>
+                            </IconButton>
+                        </Paper>
+                        <TableContainer component={Paper}>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell align="left">Hình ảnh</TableCell>
+                                        <TableCell align="left">Tên sản phẩm</TableCell>
+                                        <TableCell align="left">Đơn vị</TableCell>
+                                        <TableCell align="left" style={{width: '25%'}}>Số
+                                            lượng</TableCell>
+                                        <TableCell align="center">Thao tác</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                {stateProductGift.listProductGiftNew.map(({gift,active}) => (
+                                    <TableRow>
+                                        <TableCell align="left">
+                                            Ảnh
+                                        </TableCell>
+                                        <TableCell align="left">{gift.name}</TableCell>
+                                        <TableCell align="left">
+                                            <TextField
+                                                variant="outlined"
+                                                size="small"
+                                                style={{
+                                                    height: '40%'
+                                                }}
+                                                type="number"
+                                                onChange={(e,value) => handleChangeQuantityProductGift(gift,value)}
+                                                id="outlined-adornment-weight"
+                                                aria-describedby="outlined-weight-helper-text"
+                                                labelWidth={0}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="left">
+                                            <TextField
+                                                variant="outlined"
+                                                size="small"
+                                                style={{
+                                                    height: '40%'
+                                                }}
+                                                type="number"
+                                                onChange={(e,value) => handleChangeQuantityProductGift(gift,value)}
+                                                id="outlined-adornment-weight"
+                                                aria-describedby="outlined-weight-helper-text"
+                                                labelWidth={0}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveProductGift(gift,value)} />
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </Table>
+                        </TableContainer>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={props.handleClose} color="secondary">
+                            Hủy
+                        </Button>
+                        <Button onClick={props.handleClose} color="primary" autoFocus>
+                            Thêm
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            </div>
+        </Card>
+    )
+}
+

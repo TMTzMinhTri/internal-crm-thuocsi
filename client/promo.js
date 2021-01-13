@@ -1,5 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-const URI = `/marketplace/promotion/v1`
+import {constURL} from "./constant";
 
 
 class PromoClient extends APIClient{
@@ -8,25 +8,30 @@ class PromoClient extends APIClient{
         super(ctx, data)
     }
 
-    createPromotion() {
+    createPromotion(data) {
+        console.log('data',data)
         return this.callFromClient(
             "POST",
-            `${URI}/promotion`,
+            `${constURL.PREFIX_PROMOTION}/promotion`,data
         )
     }
 
     getPromotionByID(promotionId) {
         return this.callFromNextJS(
             "GET",
-            `${URI}/promotion`,
+            `${constURL.PREFIX_PROMOTION}/promotion`,
             {promotionId}
         )
     }
 
-    getPromotion() {
+    getPromotion(status,limit,offset,getTotal) {
+        let q = JSON.stringify({status})
         return this.callFromNextJS(
             "GET",
-            `${URI}/promotion`
+            `${constURL.PREFIX_PROMOTION}/promotion`,
+            {
+                q,limit,getTotal,offset
+            }
         )
     }
 

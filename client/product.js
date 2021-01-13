@@ -1,4 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
+import {queryParamGetProductGift} from "./constant";
 const PREFIX = `/marketplace/product/v1`
 // const PREFIX = ``
 
@@ -46,6 +47,15 @@ class ProductClient extends APIClient {
             })
     }
 
+    getProductByCategoryCode(categoryCode) {
+        return this.callFromClient(
+            "GET",
+            `${PREFIX}/product/category/list`,
+            {categoryCode}
+            )
+    }
+
+
     getProductList(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
@@ -55,6 +65,15 @@ class ProductClient extends APIClient {
             limit: limit,
             getTotal: true
         })
+    }
+
+    searchProductListFromClient(q,gift) {
+        return this.callFromClient(
+            "GET",
+            `${PREFIX}/product/category/list`, {
+                q: q,
+                categoryCode: gift,
+            })
     }
 
     getProductHasPrice(offset, limit, q) {
