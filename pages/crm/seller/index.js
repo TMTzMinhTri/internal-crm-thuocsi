@@ -25,29 +25,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-import { ErrorCode, formatUrlSearch } from 'components/global';
-
-// import {levels, statuses} from "./form"
-
-const statuses = [
-    {
-        value: "ACTIVE",
-        label: "Đang hoạt động",
-    },
-    {
-        value: "DRAFT",
-        label: "Nháp",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-    },
-]
-
+import { ErrorCode, formatUrlSearch, statuses } from 'components/global';
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {

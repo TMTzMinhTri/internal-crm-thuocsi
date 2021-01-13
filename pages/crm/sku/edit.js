@@ -15,27 +15,33 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadProduct(ctx) {
-    let data = { props: {} };
+    let data = {
+        props: {
+            status: 'OK'
+        }
+    };
     let _client = getPriceClient(ctx, {});
     let query = ctx.query;
     let code = query.sellPriceCode;
     let res = await _client.getSellingPricingByCode(code);
-    let _client1 = getTagClient(ctx, {});
-    let listTag = await _client1.getListTag(0, 500, "");
-    data.props.listTag = listTag.data || [];
-    res.data[0].tagsName = [];
-    res.data[0].tagsName = [...res.data[0].tags] || []
+
     if (res.status !== "OK") {
+        data.props.status = res.status
         data.props.price = {};
     } else {
+        let _client1 = getTagClient(ctx, {});
+        let listTag = await _client1.getListTag(0, 100, "");
+        data.props.listTag = listTag.data || [];
+        res.data[0].tagsName = [];
+        res.data[0].tagsName = [...res.data[0].tags] || []
         data.props.price = res?.data[0];
         let productCode = data.props.price.productCode;
         data.props.price.wholesalePrice = data.props.price.wholesalePrice.map(
-            (price) => ({...price,percentageDiscount:price.percentageDiscount*100})
+            (price) => ({ ...price, percentageDiscount: price.percentageDiscount * 100 })
         );
         let _client2 = getProductClient(ctx, {});
         res = await _client2.getListProductByIdsOrCodes([], [productCode]);
-        if(res.data) {
+        if (res.data) {
             data.props.product = res?.data[0];
         } else {
             data.props.product = []
