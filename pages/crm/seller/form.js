@@ -252,8 +252,8 @@ export default function renderForm(props, toast) {
                                                                         message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
                                                                     },
                                                                     pattern: {
-                                                                        value: /[A-Za-z]/,
-                                                                        message: "Tên khách hàng phải có kí tự chữ"
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Tên không hợp lệ (không được dư khoảng trắng)."
                                                                     }
                                                                 })
                                                             }
