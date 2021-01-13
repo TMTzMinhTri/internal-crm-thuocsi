@@ -158,3 +158,11 @@
     flex-direction: row;
 }
 
+.chipCaterogy {
+    height: auto !important;
+    margin: 2px !important;
+}
+
+.chipCaterogy span {
+    white-space: normal !important;
+}

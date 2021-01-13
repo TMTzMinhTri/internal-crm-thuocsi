@@ -19,7 +19,10 @@ import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';import SearchIcon from "@material-ui/icons/Search";
+import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';
+import LockIcon from '@material-ui/icons/Lock';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
+import SearchIcon from "@material-ui/icons/Search";
 import {
     doWithLoggedInUser,
     renderWithLoggedInUser,
@@ -118,8 +121,9 @@ function render(props) {
     const { register, handleSubmit, errors } = useForm();
     const [openApproveDialog, setOpenApproveDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
-    let [search, setSearch] = useState("");
+    
     let q = router.query.q || "";
+    const [search, setSearch] = useState(q);
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
     const { error, success } = useToast()
@@ -179,9 +183,13 @@ function render(props) {
                         </Tooltip>
                     </a>
                 </Link>
-                {row.data.status !== 'DRAFT' ? <Tooltip title="Cập nhật thông tin">
+                {row.data.status === 'APPROVED' ? <Tooltip title="Kích hoạt tài khoản">
+                    <IconButton disabled>
+                        <LockOpenIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip> : row.data.status !== 'DRAFT' ? <Tooltip title="Kích hoạt tài khoản">
                     <IconButton onClick={() => {setOpenApproveDialog(true); setApprovedCustomerCode(row.data)}}>
-                        <IndeterminateCheckBoxIcon fontSize="small" />
+                        <LockIcon fontSize="small" style={{color:'red'}}/>
                     </IconButton>
                 </Tooltip> : null}
             </TableCell>
