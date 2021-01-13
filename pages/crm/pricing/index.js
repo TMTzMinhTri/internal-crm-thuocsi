@@ -58,12 +58,13 @@ export async function loadConfigPricingData(ctx) {
         if (res.data.length > 0) {
             let categoryCodes = res.data.map((item) => item.categoryCode);
             categoryCodes = new Set(categoryCodes.flat());
-
+            categoryCodes = [...categoryCodes].filter(item => item !== null)
             let [categoryList, provinceList] = await Promise.all([
                 configPriceClient.getCategoryWithArrayID([...categoryCodes]),
                 configPriceClient.getProvinceLists()
             ]);
             if (categoryList.status === "OK") {
+                
                 if (categoryList.data.length > 0) {
                     categoryList.data.map((item) => { categoryLists[item.code] = { ...item } });
                 }
@@ -127,8 +128,8 @@ function render(props) {
     function typeCategorys(catagory) {
         if (catagory?.length > 0) {
             const chips = catagory.map((item, i) => {
-                if (categoryLists[item]?.shortName) {
-                    return <Chip key={i} size="small" label={categoryLists[item]?.shortName} variant="outlined" />;
+                if (categoryLists[item]?.name) {
+                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={ categoryLists[item]?.name } variant="outlined" />;
                 }
             });
             return chips;
@@ -143,7 +144,7 @@ function render(props) {
             }
             const chips = provi.map((item, i) => {
                 if (provinceLists[item]?.name) {
-                    return <Chip key={i} size="small" label={provinceLists[item]?.name} variant="outlined" />;
+                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={provinceLists[item]?.name} variant="outlined" />;
                 }
             });
             return chips;

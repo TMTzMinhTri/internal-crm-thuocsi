@@ -118,8 +118,9 @@ function render(props) {
     const { register, handleSubmit, errors } = useForm();
     const [openApproveDialog, setOpenApproveDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
-    let [search, setSearch] = useState("");
+    
     let q = router.query.q || "";
+    const [search, setSearch] = useState(q);
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
     const { error, success } = useToast()
