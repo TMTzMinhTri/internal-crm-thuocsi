@@ -20,6 +20,7 @@ import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import { getPriceClient } from "client/price";
 import { SellPrices, noOptionsText, Brand } from "components/global";
+import { NotFound } from "components/components-global";
 import Head from "next/head";
 import Link from "next/link";
 import AppCRM from "pages/_layout";
@@ -28,7 +29,7 @@ import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
 
 const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index }) => {
-    
+
     let arrName = name + `[${index}]`
     return (
         <div style={{ width: '100%' }}>
@@ -335,6 +336,11 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
 }
 
 export default function renderForm(props, toast) {
+    if (props.status && props.status !== "OK") {
+        return (
+            <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm"/>
+        )
+    }
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
@@ -348,7 +354,7 @@ export default function renderForm(props, toast) {
     let sellerCode = "MedX";
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
-        idDeleteds.sort(function (a, b) { return b-a });
+        idDeleteds.sort(function (a, b) { return b - a });
         idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
         let _client = getPriceClient()
@@ -525,12 +531,12 @@ export default function renderForm(props, toast) {
                                                 >
                                                     <FormControlLabel
                                                         value="LOCAL"
-                                                        control={<Radio color="primary"/>}
+                                                        control={<Radio color="primary" />}
                                                         label={Brand.LOCAL.value}
                                                     />
                                                     <FormControlLabel
                                                         value="FOREIGN"
-                                                        control={<Radio color="primary"/>}
+                                                        control={<Radio color="primary" />}
                                                         label={Brand.FOREIGN.value}
                                                     />
                                                 </RadioGroup>
@@ -568,7 +574,7 @@ export default function renderForm(props, toast) {
                                                         id="panel1bh-header"
                                                     >
                                                         <Typography color="textSecondary">
-                                                            Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
+                                                            Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item < num).length}
                                                         </Typography>
                                                     </AccordionSummary>
                                                     <AccordionDetails>
@@ -594,7 +600,7 @@ export default function renderForm(props, toast) {
                                                             id="panel1bh-header"
                                                         >
                                                             <Typography color="textSecondary">
-                                                                Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
+                                                                Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item < num).length}
                                                             </Typography>
                                                         </AccordionSummary>
                                                         <AccordionDetails>
