@@ -49,17 +49,11 @@ export const SingleAuto = ({
     useEffect(() => {
         if (typeof (onFieldChange) === 'function') {
             onFieldChange(debouncedSearch).then((res) => {
-                if(res.status === "NOT_FOUND"){
-                    setQOptions([])
-                }
-                if(res.data){
-                    setQOptions([...res.data?.map((item) => {
-                        return { label: item.name, name: item.name, value: item.code };
-                    })])
-                }
+                res?.length > 0 ? setQOptions(res) : setQOptions([{value: '', label:''}])
             })
         }
     }, [debouncedSearch]);
+    
     return (
         <div>
             <Controller
@@ -137,14 +131,7 @@ export const MuiAuto = ({
     useEffect(() => {
         if (typeof (onFieldChange) === 'function') {
             onFieldChange(debouncedSearch).then((res) => {
-                if(res.status === "NOT_FOUND"){
-                    setQOptions([])
-                }
-                if(res.data){
-                    setQOptions([...res.data?.map((item) => {
-                        return { label: item.name, name: item.name, value: item.code };
-                    })])
-                }
+                res?.length > 0 ? setQOptions(res) : setQOptions([{value: '', label:''}])
             })
         }
     }, [debouncedSearch]);

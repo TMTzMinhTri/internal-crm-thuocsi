@@ -90,10 +90,12 @@ function render(props) {
     const searchCatogery = async (search) => {
         let categoryClient = getCategoryClient();
         let res = await categoryClient.getListCategoryFromClient(0, 100, search);
-        // if (res.status === "OK") {
-        //     return res.data;
-        // }
-        return res;
+        if (res.status === "OK") {
+            return res.data.map((category) => {
+                return { label: category.name, name: category.name, value: category.code };
+            });
+        }
+        return [{value: '', label:''}];
     };
 
     useEffect(() => {

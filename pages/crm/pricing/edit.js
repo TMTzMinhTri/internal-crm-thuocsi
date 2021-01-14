@@ -116,20 +116,21 @@ function render(props) {
 
         const searchCatogery = async (search) => {
             let categoryClient = getCategoryClient();
-            let res = await categoryClient.getListCategoryFromClient(0, 20, search);
+            let res = await categoryClient.getListCategoryFromClient(0, 100, search);
             if (res.status === "OK") {
-                return res.data;
+                return res.data.map((category) => {
+                    return { label: category.name, name: category.name, value: category.code };
+                });
             }
-            return [];
+            return [{value: '', label:''}];
         };
 
         useEffect(() => {
             if (debouncedSearchCategory) {
                 searchCatogery(debouncedSearchCategory).then((results) => {
-                    const parseCategory = results.map((category) => {
+                    return parseCategory = results.map((category) => {
                         return { label: category.code, name: category.name, value: category.code };
                     });
-                    setCategoryLists(parseCategory);
                 });
             }
         }, [debouncedSearchCategory]);
