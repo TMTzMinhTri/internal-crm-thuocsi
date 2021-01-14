@@ -60,3 +60,35 @@
 .rootCard {
     margin: 10px;
 }
+
+.blockSearch {
+    padding: 0 20px;
+}
+
+.search {
+    width: 100%!important;
+}
+
+.MuiInputBase-root {
+    width: 100%;
+}
+
+.modalBody {
+    background: #FFF;
+    width: 40%;
+    display: block;
+    padding: 24px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    overflow: auto;
+    outline: 0;
+    min-height: inherit;
+    max-height: inherit;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

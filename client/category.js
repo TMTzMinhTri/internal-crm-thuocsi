@@ -28,6 +28,14 @@ class CategoryClient extends APIClient {
                 getTotal: true
             })
     }
+
+    getListCategoryFromClient() {
+        return this.callFromClient(
+            "GET",
+            `${prefix}/category/list`, {
+                getTotal: true
+            })
+    }
 }
 
 export function getCategoryClient(ctx, data) {

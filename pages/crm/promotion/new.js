@@ -3,9 +3,9 @@ import {
     Button,
     ButtonGroup,
     CardContent,
-    CardHeader,
+    CardHeader, Container,
     FormControlLabel,
-    FormGroup,
+    FormGroup, Modal,
     Paper,
     Radio,
     RadioGroup,
@@ -49,6 +49,11 @@ import {
     defaultPromotionType, defaultRulePromotion, defaultTypeConditionsRule,
     queryParamGetProductGift, setRulesPromotion,defaultNameRules
 } from "../../../client/constant";
+import {Grade} from "@material-ui/icons";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -60,12 +65,14 @@ export async function getServerSideProps(ctx) {
 const defaultState = {
     promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
     promotionTypeRule: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
-    promotionScope: "global",
+    promotionScope: defaultPromotionScope.GLOBAL,
     listGiftPromotion: [{
         gift: {},
         quantity: 0,
     }],
-    listProductPromotion: []
+    listProductPromotion: [],
+    listProductDefault: [],
+    listCategoryPromotion: [],
 }
 
 export default function NewPage(props) {
@@ -76,12 +83,20 @@ async function createPromontion(totalCode,promotionName,promotionType,startTime,
     return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,scope,rule})
 }
 
-async function searchGift(giftName) {
-    return getProductClient().searchProductListFromClient(giftName,queryParamGetProductGift)
+async function getProduct(productName,categoryCode) {
+    return getProductClient().searchProductCategoryListFromClient(productName,categoryCode)
 }
 
-async function getListProductGift(giftName) {
-    return getProductClient().searchProductListFromClient(giftName,"")
+async function getListProductGift(productName) {
+    return await getProductClient().getProductListFromClient(productName)
+}
+
+async function searchProductList(q,categoryCode) {
+    return await getProductClient().searchProductListFromClient(q,categoryCode)
+}
+
+async function getListCategory() {
+    return await getCategoryClient().getListCategoryFromClient()
 }
 
 function render(props) {
@@ -92,23 +107,42 @@ function render(props) {
         },
     ])
     const [state, setState] = useState(defaultState);
-    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion} = state
+    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion,listCategoryPromotion} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
 
-    const [open, setOpen] = useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-        console.log('12321')
-    };
+    const [open, setOpen] = useState({
+        openModalGift : false,
+        openModalProductGift: false,
+        openModalProductScopePromotion: false,
+    });
 
     const handleChange = (event) => {
-        setOpen(true)
         setState({...state, [event.target.name]: event.target.value})
+    }
+
+    const handleChangeScope = async (event) => {
+        if (event.target.value === defaultPromotionScope.PRODUCT) {
+            event.persist();
+            let listCategoryResponse = await getListCategory()
+            if (listCategoryResponse && listCategoryResponse.status === "OK") {
+                setState({...state,listCategoryPromotion: listCategoryResponse.data,[event.target?.name]: event.target?.value})
+            }
+            let productDefaultResponse = await getProduct("","")
+            if (productDefaultResponse && productDefaultResponse.status === "OK") {
+                let listProductDefault = []
+                    productDefaultResponse.data.forEach((productResponse,index) => {
+                        if (index < 5) {
+                            listProductDefault.push({
+                                product: productResponse,
+                                active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID)
+                            })
+                        }
+                    })
+                setState({...state,[event.target?.name]: event.target?.value,listProductDefault: listProductDefault})
+                }
+        }else {
+            setState({...state,[event.target?.name]: event.target?.value})
+        }
     }
 
     const handleChangeStatus = (event) => {
@@ -116,14 +150,18 @@ function render(props) {
             id: 1,
         }])
         setState({...state, [event.target.name]: event.target.value})
-        console.log('value',getValues())
         reset()
-        console.log('error',errors)
-        console.log('value',getValues())
     }
 
     const handleAddProductPromotion = (productList) => {
-        setState({...state,listProductPromotion:productList})
+        setOpen({...open,openModalProductScopePromotion: false})
+        let listProductPromotion = []
+        productList.forEach(product => {
+            if (product.active) {
+                listProductPromotion.push(product.product)
+            }
+        })
+        setState({...state,listProductPromotion:listProductPromotion})
     }
 
     function handleRemoveCodePercent(id) {
@@ -135,16 +173,33 @@ function render(props) {
         setPromotionRulesLine([...promotionRulesLine, {id: id + 1}]);
     }
 
+
+    const handleRemoveProductPromotion = (product) => {
+        let {listProductPromotion,listProductDefault} = state
+        listProductPromotion.forEach((productPromotion,index) => {
+            if (productPromotion.productID === product.productID) {
+                return listProductPromotion.splice(index,1)
+            }
+        })
+        listProductDefault.forEach(productDefault => {
+            if (productDefault.product.productID === product.productID) {
+                product.active=false
+            }
+        })
+        setState({...state,listProductPromotion: listProductPromotion,listProductDefault: listProductDefault})
+    }
+
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
         let {promotionName,totalCode,startTime,endTime} = getValues()
         let value = getValues()
-
-        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,promotionScope)
+        let listProductIDs = []
+        listProductPromotion.forEach(product => listProductIDs.push(product.productID))
+        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,listProductIDs)
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
 
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,defaultPromotionScope.GLOBAL,rule)
+        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,promotionScope,rule)
         if (promotionResponse.status === "OK") {
             toast.success('Tạo khuyến mãi thành công')
         }else {
@@ -589,18 +644,18 @@ function render(props) {
                                     </Card>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.GIFT ? (
                                     <RenderTableGift
-                                        handleClickOpen={handleClickOpen}
-                                        handleClose={handleClose}
-                                        open={open}
+                                        handleClickOpen={() => setOpen({...open,openModalGift: true})}
+                                        handleClose={() => setOpen({...open,openModalGift: false})}
+                                        open={open.openModalGift}
                                         register={register}
                                         state={state}
                                         handleRemoveCodePercent={handleRemoveCodePercent}
                                         handleChange={handleChange}/>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
                                     <RenderTableProductGift
-                                        handleClickOpen={handleClickOpen}
-                                        handleClose={handleClose}
-                                        open={open}
+                                        handleClickOpen={() => setOpen({...open,openModalProductGift: true})}
+                                        handleClose={() => setOpen({...open,openModalProductGift: false})}
+                                        open={open.openModalProductGift}
                                         register={register}
                                         state={state}
                                         handleRemoveCodePercent={handleRemoveCodePercent}
@@ -618,14 +673,14 @@ function render(props) {
                           <CardContent>
                                 <Grid spacing={3} container>
                                     <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
-                                                onChange={handleChange}>
+                                                onChange={handleChangeScope}>
                                         <Grid spacing={3} container justify="space-around" alignItems="center">
                                             <Grid item xs={12} sm={6} md={6}>
-                                                <FormControlLabel value="global" control={<Radio color="primary"/>}
+                                                <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
                                                                   label="Toàn sàn"/>
                                             </Grid>
                                             <Grid item xs={12} sm={6} md={6}>
-                                                <FormControlLabel value="products" control={<Radio color="primary"/>}
+                                                <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
                                                                   label="Sản phẩm được chọn"/>
                                             </Grid>
                                         </Grid>
@@ -633,16 +688,16 @@ function render(props) {
                                 </Grid>
                             </CardContent>
                         {
-                            promotionScope === "products" ? (
+                            promotionScope === defaultPromotionScope.PRODUCT ? (
                                     <RenderTableListProduct
-                                        handleClickOpen={handleClickOpen}
-                                        handleClose={handleClose}
-                                        open={open}
+                                        handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
+                                        handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
+                                        open={open.openModalProductScopePromotion}
                                         register={register}
                                         state={state}
+                                        getValue={getValues()}
                                         handleAddProductPromotion={handleAddProductPromotion}
-                                        listProductPromotion={listProductPromotion}
-                                        handleRemoveCodePercent={handleRemoveCodePercent}
+                                        handleRemoveProductPromotion={handleRemoveProductPromotion}
                                         handleChange={handleChange}
                                     />
                             ): (
@@ -676,7 +731,7 @@ export function RenderTableGift(props) {
     const [showAutoComplete, setShowAutoComplete]   = useState(false);
 
     const handleSearchProductGift = async (productName) => {
-        let giftResponse = await searchGift(productName)
+        let giftResponse = await getProduct(productName,queryParamGetProductGift)
         if (giftResponse.status === "OK") {
             setStateGift({...stateGift, listGiftSearch: giftResponse.data})
         }
@@ -879,9 +934,8 @@ export function RenderTableProductGift(props) {
     const [showAutoComplete, setShowAutoComplete]   = useState(false);
 
     const handleSearchProductGift = async (productName) => {
-        let categoryGiftResponse = await getListGift()
         if (categoryGiftResponse.status === "OK") {
-            let giftResponse = await searchGift(categoryGiftResponse.data[0].code)
+            let giftResponse = await getProduct(categoryGiftResponse.data[0].code)
             if (giftResponse.status === "OK") {
                 setStateProductGift({...stateProductGift, listProductGiftSearch: giftResponse.data})
             }
@@ -1058,114 +1112,182 @@ export function RenderTableProductGift(props) {
 export function RenderTableListProduct(props) {
     const [stateProduct, setStateProduct] = useState({
         listProductSearch: [],
-        listProductAction: props.listProductPromotion,
+        listProductAction: props.state.listProductDefault,
+        listCategoryPromotion: props.state.listCategoryPromotion,
+        categorySearch: {},
+        productNameSearch: "",
     })
 
     const [showAutoComplete, setShowAutoComplete]   = useState(false);
 
-    const handleSearchProduct = async (productName) => {
-        let searProductResponse = await getListProductGift(productName)
-        if (searProductResponse.status === "OK") {
-            setStateProduct({...stateProduct, listProductSearch: searProductResponse.data})
-        }
+    const handleChangeProductSearch = (event) => {
+        setStateProduct({...stateProduct,productNameSearch: event.target.value})
+    }
+
+    const handleChangeCategory = (event) => {
+        setStateProduct({...stateProduct,categorySearch: event.target.value})
     }
 
     const handleActiveProduct = (product,active) => {
-        let {listProductAction} = stateGift
+        let {listProductAction} = stateProduct
         listProductAction.forEach(productAction => {
-            if (productAction.gift.productId === product.productId) {
+            if (productAction.product.productID === product.productID) {
                 productAction.active = active
             }
         })
-        setStateProduct({stateProductstateGift,listProductAction: listProductAction})
+        setStateProduct({...stateProduct,listProductAction: listProductAction})
     }
 
-    const handleAddProduct = (e,value) => {
-        let {listProductAction} = stateProduct
-        if (value) {
-            if (!listProductAction.find(productAction => productAction.productId === value.productId)) {
-                listProductAction.push({
-                    product: value,
-                    active: true,
-                })
-            }
+    const handleOnSearchProductCategory = async () => {
+        let seachProductResponse = await searchProductList(stateProduct.productNameSearch, stateProduct.categorySearch.code)
+        if (seachProductResponse && seachProductResponse.status === "OK") {
+            let listProductAction = []
+            seachProductResponse.data.forEach((searchProduct, index) => {
+                if (index < 5) {
+                    listProductAction.push({
+                        product: searchProduct,
+                        active: props.state.listProductPromotion.find(productPromotion => productPromotion.productID === searchProduct.productID)
+                    })
+                }
+            })
+            setStateProduct({...stateProduct, listProductAction: listProductAction})
         }
-        setStateProduct({...stateProduct,listGiftNew: listGiftNew,listGiftSearch: []})
     }
 
     return (
-        <Card variant="outlined" style={{marginTop: '4px'}}>
-            <Dialog
-                open={props.open}
-                onClose={props.handleClose}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
-                <DialogContent>
-                    <div style={{marginBottom: '1rem'}}>
-                        <Autocomplete
-                            options={stateProduct.listProductAction}
-                            variant="outlined"
-                            name="searchProductGift"
-                            loading={showAutoComplete}
-                            fullWidth
-                            loadingText="Không tìm thấy quà tặng"
-                            onOpen={() => {
-                                setShowAutoComplete(true)
-                            }}
-                            onClose={() => {
-                                setShowAutoComplete(false)
-                            }}
-                            getOptionLabel={option => option.name}
-                            renderInput={params => (
+        <div>
+            <Button variant="contained" style={{margin: "1rem 0"}} onClick={props.handleClickOpen}>Chọn sản phẩm</Button>
+            <Modal open={props.open} onClose={props.handleClose} className={styles.modal}>
+                <div className={styles.modalBody}>
+                    <h3>
+                        Chọn sản phẩm
+                    </h3>
+                    <div>
+                        <Grid spacing={3} container>
+                            <Grid item sx={12} sm={4} md={4}>
                                 <TextField
-                                    {...params}
-                                    label="Tên quà tặng"
-                                    placeholder=""
-                                    variant="outlined"
-                                    onChange={e => handleSearchProduct(e.target.value)}
+                                    placeholder="Tên sản phẩm"
+                                    label="Tên sản phẩm"
+                                    name="searchProduct"
+                                    onChange={handleChangeProductSearch}
+                                    style={{width: '100% !important'}}
+                                    inputRef={props.register}
                                 />
-                            )}
-                           onChange={(e,value) => handleAddProduct(e,value)}
-                        />
+                            </Grid>
+                            <Grid item sx={12} sm={4} md={4} className={styles.blockSearch}>
+                                <FormControl className={styles.search}>
+                                    <InputLabel id="category-select-outlined-label">Chọn danh mục</InputLabel>
+                                    <Select
+                                        autoWidth={false}
+                                        style={{width: '100% !important'}}
+                                        labelId="category-select-outlined-label"
+                                        id="category-select-outlined"
+                                        onChange={handleChangeCategory}
+                                        inputRef={props.register}
+                                        label="Chọn danh mục">
+                                        {stateProduct.listCategoryPromotion.map((category) => (
+                                            <MenuItem value={category} key={category.categoryID}>
+                                                {category.name}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                            </Grid>
+                            <Grid item sx={12} sm={4} md={4}>
+                                    <Button variant="contained">Tìm kiếm<IconButton onClick={handleOnSearchProductCategory}>
+                                        <SearchIcon/>
+                                    </IconButton>
+                                    </Button>
+                            </Grid>
+                        </Grid>
                     </div>
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell align="left">Thông tin sản phẩm</TableCell>
-                                    <TableCell align="left">Giá gốc</TableCell>
-                                    <TableCell align="left">Giá bán</TableCell>
-                                    <TableCell align="left">Trạng thái</TableCell>
-                                    <TableCell align="center">Thao tác</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            {stateProduct.listProductAction.map(({product,active,quantity}) => (
-                                <TableRow>
-                                    <TableCell align="left">
-                                        {product.name}
-                                    </TableCell>
-                                    <TableCell align="left">{product.name}</TableCell>
-                                    <TableCell align="left">{product.name}</TableCell>
-                                    <TableCell align="left">{product.name}</TableCell>
-                                    <TableCell align="center">
-                                        <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveGift(gift,value)} />
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </Table>
-                    </TableContainer>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={props.handleClose} color="secondary">
-                        Hủy
-                    </Button>
-                    <Button onClick={() => props.handleAddProductPromotion(stateProduct.listProductAction)} color="primary" autoFocus>
-                        Thêm
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Card>
+                    <DialogContent>
+                        <div style={{marginBottom: '1rem'}}>
+                        </div>
+                        <TableContainer component={Paper}>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell align="center">Thao tác</TableCell>
+                                        <TableCell align="left">Thông tin sản phẩm</TableCell>
+                                        <TableCell align="left">Ảnh</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                {stateProduct.listProductAction.map(({product,active}) => (
+                                    <TableRow key={product.productID}>
+                                        <TableCell align="center">
+                                            <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveProduct(product,value)} />
+                                        </TableCell>
+                                        <TableCell align="left">
+                                            {product.name}
+                                        </TableCell>
+                                        <TableCell align="left">
+                                            {
+                                                product.imageUrls? (
+                                                    <image src={product.imageUrls[0]}></image>
+                                                ):(
+                                                    <div></div>
+                                                )
+                                            }
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </Table>
+                        </TableContainer>
+                    </DialogContent>
+                    <DialogActions>
+                        <ButtonGroup>
+                            <Button onClick={props.handleClose} color="secondary">
+                                Hủy
+                            </Button>
+                            <Button onClick={() => props.handleAddProductPromotion(stateProduct.listProductAction)} color="primary" autoFocus>
+                                Thêm
+                            </Button>
+                        </ButtonGroup>
+                    </DialogActions>
+                </div>
+            </Modal>
+            {
+               props.state.promotionScope === defaultPromotionScope.PRODUCT ? (
+                    <Card>
+                        <TableContainer component={Paper}>
+                            <Table size="small">
+                                <TableHead>
+                                    <TableRow>
+                                        <TableCell align="left">Ảnh</TableCell>
+                                        <TableCell align="left">Thông tin sản phẩm</TableCell>
+                                        <TableCell align="left">Hành Động</TableCell>
+                                    </TableRow>
+                                </TableHead>
+                                {props.state.listProductPromotion.map((product) => (
+                                    <TableRow>
+                                        <TableCell align="left">
+                                            {
+                                                product.imageUrls? (
+                                                    <image src={product.imageUrls[0]}></image>
+                                                ):(
+                                                    <div></div>
+                                                )
+                                            }
+                                        </TableCell>
+                                        <TableCell align="left">{product.name}</TableCell>
+                                        <TableCell align="left">
+                                            <IconButton color="secondary"
+                                                        component="span"
+                                                        onClick={() => props.handleRemoveProductPromotion(product)}
+                                            >
+                                                <HighlightOffOutlinedIcon/>
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </Table>
+                        </TableContainer>
+                    </Card>
+                ): (
+                    <div></div>
+                )
+            }
+        </div>
     )
 }

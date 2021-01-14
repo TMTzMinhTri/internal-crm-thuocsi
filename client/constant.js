@@ -145,10 +145,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
 }
 
 export function displayRule(rule) {
-    console.log("rule",rule)
     let result = ""
     let {minQuantity,minOrderValue} = rule
-    console.log('rule',rule)
     if (minQuantity?.field) {
         let {conditions,field,type} = minQuantity
         conditions.forEach(condition => {
