@@ -38,6 +38,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./customer.module.css";
 import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
+import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -73,7 +74,9 @@ function render(props) {
     let router = useRouter();
     const { register, handleSubmit, errors } = useForm();
     const [openApproveDialog, setOpenApproveDialog] = useState(false);
+    const [openLockAccountDialog, setOpenLockAccountDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
+    const [lockedCustomerCode,setLockedCustomerCode]=useState();
     
     let q = router.query.q || "";
     const [search, setSearch] = useState(q);
@@ -104,8 +107,20 @@ function render(props) {
             success("Kích hoạt tài khoản thành công")
             // window.location.reload()
         }
-        q = formatUrlSearch(search);
-        router.push(`?q=${q}`)
+    }
+
+    async function lockAccount() {
+        const _client = getCustomerClient()
+        setOpenLockAccountDialog(false)
+        const resp = await _client.updateStatus({ code:lockedCustomerCode.code, status: "NEW" })
+        if (resp.status !== "OK") {
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        } else {
+            props.data.filter(row => row.code === lockedCustomerCode.code)[0].status = "NEW" 
+            setApprovedCustomerCode(null)
+            success("Khóa tài khoản thành công")
+            // window.location.reload()
+        }
     }
 
     const RenderRow = (row, i) => (
@@ -131,8 +146,8 @@ function render(props) {
                         </Tooltip>
                     </a>
                 </Link>
-                {row.data.status === 'APPROVED' ? <Tooltip title="Kích hoạt tài khoản">
-                    <IconButton disabled>
+                {row.data.status === 'APPROVED' ? <Tooltip title="Khóa tài khoản">
+                    <IconButton onClick={() => {setOpenLockAccountDialog(true); setLockedCustomerCode(row.data)}}>
                         <LockOpenIcon fontSize="small" />
                     </IconButton>
                 </Tooltip> : row.data.status !== 'DRAFT' ? <Tooltip title="Kích hoạt tài khoản">
@@ -171,6 +186,34 @@ function render(props) {
             </Dialog>
         </div>
     );
+    const LockAccountDialog = () => (
+        <div>
+            <Dialog
+                open={true}
+                onClose={() => setOpenLockAccountDialog(false)}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">
+                    {"Khoá Tài Khoản"}
+                </DialogTitle>
+                <DialogContent>
+                    <DialogContentText id="alert-dialog-description">
+                        Bạn có muốn khóa tài khoản này chứ ?
+          </DialogContentText>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenLockAccountDialog(false)} color="primary">
+                        Hủy bỏ
+                    </Button>
+                    <Button onClick={lockAccount} color="primary" autoFocus>
+                        Đồng ý
+                     </Button>
+                </DialogActions>
+            </Dialog>
+        </div>
+    );
+
 
     return (
         <AppCRM select="/crm/customer">
@@ -178,6 +221,7 @@ function render(props) {
                 <title>Danh sách khách hàng</title>
             </Head>
             {openApproveDialog ? <ApproveDialog /> : null}
+            {openLockAccountDialog ? <LockAccountDialog/> : null }
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
                     justify="space-between"
