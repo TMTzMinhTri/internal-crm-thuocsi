@@ -1,7 +1,7 @@
 import Head from "next/head";
 import React, { useEffect, useState } from 'react';
 import Router, { useRouter } from "next/router";
-
+import Link from "next/link";
 import {
     Button, ButtonGroup,
     Box, Divider,
@@ -15,12 +15,11 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import styles from "./pricing.module.css"
-import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
-import Autocomplete from "@material-ui/lab/Autocomplete";
+// import Chip from '@material-ui/core/Chip';
+// import { makeStyles } from '@material-ui/core/styles';
+// import Autocomplete from "@material-ui/lab/Autocomplete";
 
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
-import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import AppCRM from "pages/_layout";
 import { condUserType, noOptionsText, Brand } from 'components/global';
 import { getPricingClient } from 'client/pricing';
@@ -28,7 +27,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import useDebounce from "components/useDebounce"
 import { getCategoryClient } from "client/category";
-
+import { MuiAuto, SingleAuto } from "components/mul-single-autocomplete/mul-single-auto"
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -75,12 +74,13 @@ function render(props) {
     const debouncedSearchCategory = useDebounce(searchCategory, 200);
 
     const onSubmit = async (formData) => {
-        formData.categoryCode = formData.categoryCodes.map(category => category.code)
-        formData.locationCode = formData.locationCode.map(location => location.code)
+        formData.categoryCode = formData.categoryCodes.map(category => category.value)
+        formData.locationCode = formData.locationCode.map(location => location.value)
         formData.customerType = formData.customerType.value
         let client = getPricingClient();
         let result = await client.createNewPriceGenConfig(formData)
         if (result.status === "OK") {
+            success('Tạo mới thành công')
             router.push(`/crm/pricing/edit?priceCode=${result.data[0].code}`)
         } else {
             error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
@@ -93,7 +93,7 @@ function render(props) {
         if (res.status === "OK") {
             return res.data;
         }
-        return [];
+        return res;
     };
 
     useEffect(() => {
@@ -105,7 +105,7 @@ function render(props) {
                 setCategoryLists(parseCategory);
             });
         }
-    }, [debouncedSearchCategory]);
+    }, [debouncedSearchCategory, searchCategory]);
 
     return (
         <AppCRM select="/crm/pricing">
@@ -119,53 +119,31 @@ function render(props) {
                         <Grid container spacing={2} style={{ padding: '10px' }}>
                             <Grid item xs={12} md={12} sm={12} />
                             <Grid item xs={12} sm={12} md={2}>
-                                <Controller
-                                    render={({ onChange, ...props }) => (
-                                        <Autocomplete
-                                            id="customerType"
-                                            size="small"
-                                            options={condUserType}
-                                            getOptionLabel={option => option.label}
-                                            getOptionSelected={(option, value) => option.label === value.label}
-                                            InputLabelProps={{
-                                                shrink: true
-                                            }}
-                                            noOptionsText={noOptionsText}
-                                            filterSelectedOptions
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Loại khách hàng"
-                                                    error={!!errors.customerType}
-                                                    placeholder=""
-                                                    size="small"
-                                                    helperText={errors.customerType?.message}
-                                                    inputRef={
-                                                        register({
-                                                            required: "Vui lòng chọn loại khách hàng"
-                                                        })
-                                                    }
-                                                // onChange={(e) => setSearchCategory(e.target.value)}
-                                                />
-                                            )}
-                                            onChange={(e, data) => onChange(data)}
-                                            {...props}
-                                        />
-                                    )}
-                                    name="customerType"
+                                <SingleAuto
+                                    id="customerType"
+                                    options={condUserType}
+                                    label="Loại khách hàng"
                                     control={control}
-                                    onChange={([, { id }]) => id}
-
-                                    rules={{
-                                        validate: (d) => {
-                                            return typeof d != "undefined";
-                                        },
-                                    }}
+                                    errors={errors}
+                                    name="customerType"
+                                    width="250px"
                                 />
+
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} />
                             <Grid item xs={12} sm={12} md={6}>
-                                <Controller
+                                <MuiAuto
+                                    id="categoryCodes"
+                                    options={[...categoryLists.map(category => {
+                                        return { label: category.name, value: category.code }
+                                    })]}
+                                    label="Loại sản phẩm"
+                                    name="categoryCodes"
+                                    control={control}
+                                    errors={errors}
+                                    onFieldChange={searchCatogery}
+                                />
+                                {/* <Controller
                                     render={({ onChange, ...props }) => (
                                         <Autocomplete
                                             id="categoryCodes"
@@ -207,11 +185,22 @@ function render(props) {
                                             return typeof d != "undefined";
                                         },
                                     }}
-                                />
+                                /> */}
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} />
                             <Grid item xs={12} sm={12} md={6}>
-                                <Controller
+                                <MuiAuto
+                                    id="locationCode"
+                                    options={[...provinceLists.map(category => {
+                                        return { label: category.name, value: category.code }
+                                    })]}
+                                    label="Tỉnh/thành"
+                                    name="locationCode"
+                                    control={control}
+                                    errors={errors}
+                                // onFieldChange={setProvinceLists}
+                                />
+                                {/* <Controller
                                     render={({ onChange, ...props }) => (
                                         <Autocomplete
                                             id="locationCode"
@@ -254,7 +243,7 @@ function render(props) {
                                             return typeof d != "undefined";
                                         },
                                     }}
-                                />
+                                /> */}
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
                                 <FormControl component="fieldset" className={styles.marginTopBottom}>
@@ -362,8 +351,13 @@ function render(props) {
                                     onClick={handleSubmit(onSubmit)}
                                     style={{ margin: 8 }}>
                                     Lưu
-                            </Button>
-                                {
+                                </Button>
+                                <Link href="/crm/http://localhost:3000/crm/sku">
+                                    <ButtonGroup>
+                                        <Button variant="contained">Quay lại</Button>
+                                    </ButtonGroup>
+                                </Link>
+                                {/* {
                                     typeof props.product === "undefined" ? (
                                         <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
                                     ) : (
@@ -373,7 +367,7 @@ function render(props) {
                                                 </ButtonGroup>
                                             </Link>
                                         )
-                                }
+                                } */}
                             </Box>
                         </Grid>
                     </Box>
