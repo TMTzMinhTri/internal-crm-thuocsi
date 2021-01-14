@@ -86,6 +86,7 @@ const MuiSingleAuto = ({
                                 error={hasError}
                                 placeholder={placeholder}
                                 variant="outlined"
+                                style={{ width: "100%", minWidth: "250px" }}
                                 size="small"
                                 onBlur={() => {
                                     setQ('')
@@ -104,7 +105,7 @@ const MuiSingleAuto = ({
                     validate: (d) => {
                         if (required && required == true) {
                             console.log("debug with d: ", d)
-                            if (typeof d === "undefined" || d?.length == 0) {
+                            if (typeof d === "undefined" || d === null || d?.length == 0) {
                                 return "Vui lòng nhập"
                             }
                         }
