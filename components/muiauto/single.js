@@ -1,3 +1,5 @@
+
+import { withStyles } from "@material-ui/core/styles";
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import useDebounce from "components/useDebounce";
@@ -16,19 +18,31 @@ import { Controller } from "react-hook-form";
 	reset error - PENDING
  * @param {*} param0 
  */
-const MuiAuto = ({
-        name, // NAME INPUT
-        options,  // DATA OPTIONS label-value
-        label,  // LABEL
-        placeholder,
-        required, // boolean
-        message, // CUSTOM MESSAGE ERROR
-        onFieldChange, // HANDLE EVENT CHANGE
-        control,  // REACT HOOK FORM CONTROL
-        errors})=>{ // REACT HOOK FORM ERRORS 
-            
+
+const MuiSingleAutocomplete = withStyles({
+    tag: {
+        height: 'auto',
+        "& .MuiChip-label": {
+            paddingBottom: '3px',
+            paddingTop: '3px',
+            whiteSpace: 'normal'
+        }
+    }
+})(Autocomplete); // Fix CSS scroll page when pick long tag
+
+const MuiSingleAuto = ({
+    name, // NAME INPUT
+    options,  // DATA OPTIONS label-value
+    label,  // LABEL
+    placeholder,
+    required, // boolean
+    message, // CUSTOM MESSAGE ERROR
+    onFieldChange, // HANDLE EVENT CHANGE
+    control,  // REACT HOOK FORM CONTROL
+    errors})=>{ // REACT HOOK FORM ERRORS 
+        
     // TODO
-    
+
     const hasError =  typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
     const [qOptions, setQOptions] = useState(options);
@@ -45,15 +59,14 @@ const MuiAuto = ({
                 })
             }
         }
-    },[debouncedSearch]);
+    },[debouncedSearch,q]);
 
     return (
         <div>
             <Controller
                 render={({ onChange, ...props }) => (
-                    <Autocomplete
+                    <MuiSingleAutocomplete
                         id={name}
-                        multiple
                         options={qOptions}
                         filterSelectedOptions
                         getOptionLabel={(option) => option.label?.toString()}
@@ -74,6 +87,9 @@ const MuiAuto = ({
                                 placeholder={placeholder}
                                 variant="outlined"
                                 size="small"
+                                onBlur={() => {
+                                    setQ('')
+                                }}
                                 onChange={(e) => setQ(e.target.value)}
                             />
                         )}
@@ -99,4 +115,4 @@ const MuiAuto = ({
     )
 }
 
-export default MuiAuto;
+export default MuiSingleAuto;

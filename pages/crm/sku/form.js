@@ -13,7 +13,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -21,19 +20,13 @@ import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
 import { getPriceClient } from "client/price";
 import { NotFound } from "components/components-global";
 import { Brand, SellPrices } from "components/global";
-import MuiAuto from "components/muiauto";
+import MuiMultipleAuto from "components/muiauto/multiple";
 import Head from "next/head";
 import Link from "next/link";
 import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
-
-const useStyles = makeStyles({
-    root: {
-        backgroundColor:'#f8faf8'
-    },
-  });
 
 const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index, getValues, limitQty, ids, defaultIds, idDeleteds }) => {
 
@@ -357,7 +350,7 @@ export default function renderForm(props, toast) {
             <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
         )
     }
-    const classes = useStyles();
+    
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
@@ -465,7 +458,7 @@ export default function renderForm(props, toast) {
                                         ):(
                                             // Case 2: Select product
                                             <div>
-                                                <MuiAuto 
+                                                <MuiMultipleAuto 
                                                     name="productCode"
                                                     control={control}
                                                     errors={errors}
@@ -522,7 +515,7 @@ export default function renderForm(props, toast) {
                                 </Grid>
                                 <Grid item xs={12} md={12} sm={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <MuiAuto 
+                                    <MuiMultipleAuto 
                                         name="tagsName"
                                         control={control}
                                         errors={errors}
