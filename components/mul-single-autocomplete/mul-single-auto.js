@@ -37,7 +37,7 @@ export const SingleAuto = ({
     onFieldChange, // HANDLE EVENT CHANGE
     control,
     required,  // REACT HOOK FORM CONTROL
-    errors, width }) => { // REACT HOOK FORM ERRORS 
+    errors, width }, props) => { // REACT HOOK FORM ERRORS 
 
     // TODO
 
@@ -52,8 +52,8 @@ export const SingleAuto = ({
                 res?.length > 0 ? setQOptions(res) : setQOptions([{value: '', label:''}])
             })
         }
-    }, [debouncedSearch]);
-    
+    }, [debouncedSearch, props]);
+
     return (
         <div>
             <Controller
@@ -119,7 +119,7 @@ export const MuiAuto = ({
     control,
     required,  // REACT HOOK FORM CONTROL
     errors, 
-    width }) => { // REACT HOOK FORM ERRORS 
+    width }, props) => { // REACT HOOK FORM ERRORS 
 
     // TODO
 
@@ -134,7 +134,7 @@ export const MuiAuto = ({
                 res?.length > 0 ? setQOptions(res) : setQOptions([{value: '', label:''}])
             })
         }
-    }, [debouncedSearch]);
+    }, [debouncedSearch, props]);
     return (
         <div>
             <Controller

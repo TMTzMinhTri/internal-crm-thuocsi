@@ -122,7 +122,7 @@ function render(props) {
                     return { label: category.name, name: category.name, value: category.code };
                 });
             }
-            return [{value: '', label:''}];
+            return [{ value: '', label: '' }];
         };
 
         useEffect(() => {
@@ -134,7 +134,7 @@ function render(props) {
                 });
             }
         }, [debouncedSearchCategory]);
-
+        
         return (
             <AppCRM select="/crm/pricing">
                 <Head>
@@ -343,7 +343,7 @@ function render(props) {
                                             size="small"
                                             type="number"
                                             placeholder=""
-                                            defaultValue={2}
+                                            defaultValue={props.data?.numMultiply || 1}
                                             helperText={errors.name?.message}
                                             InputLabelProps={{
                                                 shrink: true,
@@ -376,7 +376,7 @@ function render(props) {
                                             // disabled={hidden}
                                             // label=""
                                             placeholder=""
-                                            defaultValue={5000}
+                                            defaultValue={props.data?.numAddition || 5000}
                                             helperText={errors.name?.message}
                                             InputLabelProps={{
                                                 shrink: true,
@@ -413,7 +413,21 @@ function render(props) {
                                 </Button>
                                     {
                                         typeof props.product === "undefined" ? (
-                                            <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
+                                            <Button variant="contained" type="reset" style={{ margin: 8 }}
+                                                onClick={() => {
+                                                    reset({
+                                                       ...props.data 
+                                                    }, {
+                                                        errors: false, // errors will not be reset 
+                                                        dirtyFields: false, // dirtyFields will not be reset
+                                                        isDirty: false, // dirty will not be reset
+                                                        isSubmitted: false,
+                                                        touched: false,
+                                                        isValid: false,
+                                                        submitCount: false,
+                                                    });
+                                                }}
+                                            >Làm mới</Button>
                                         ) : (
                                                 <Link href="/crm/sku">
                                                     <ButtonGroup>
