@@ -26,8 +26,7 @@ import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
-
-
+import { MuiAuto, SingleAuto } from "components/mul-single-autocomplete/mul-single-auto"
 
 
 export async function getServerSideProps(ctx) {
@@ -53,13 +52,17 @@ export async function loadConfigPricingData(ctx) {
     if (priceData.status === "OK") {
         priceData.data[0].customerType = { value: priceData.data[0].customerType, label: condUserType.filter(type => type.value === priceData.data[0].customerType)[0].label }
         if (priceData.data[0]?.locationCode !== null) {
-            priceData.data[0].locationCode = priceData.data[0].locationCode.map(_code => ({ name: provinceResult.data.filter(province => province.code === _code)[0].name, code: _code }))
+            priceData.data[0].locationCode = priceData.data[0].locationCode.map(_code => ({ label: provinceResult.data.filter(province => province.code === _code)[0].name, value: _code }))
         } else {
             priceData.data[0].locationCode = []
         }
         let listCateProduct = await client.getCategoryWithArrayID(priceData.data[0].categoryCode || [])
+        if (listCateProduct.status === 'OK') {
+            priceData.data[0].categoryCodes = listCateProduct.data.map(item => { return { label: item.name, value: item.code } })
+        } else {
+            priceData.data[0].categoryCodes = [{ label: '', value: '' }]
+        }
 
-        priceData.data[0].categoryCodes = listCateProduct.data || []
         priceData.data[0].multiply = priceData.data[0].numMultiply || []
         priceData.data[0].addition = priceData.data[0].numAddition || []
 
@@ -98,8 +101,8 @@ function render(props) {
         const debouncedSearchCategory = useDebounce(searchCategory, 500);
 
         const onSubmit = async (formData) => {
-            formData.categoryCode = formData.categoryCodes.map(category => category.code)
-            formData.locationCode = formData.locationCode.map(location => location.code)
+            formData.categoryCode = formData.categoryCodes.map(category => category.value)
+            formData.locationCode = formData.locationCode.map(location => location.value)
             formData.customerType = formData.customerType.value
             formData.code = props.data.code
             let client = getPricingClient();
@@ -124,13 +127,13 @@ function render(props) {
             if (debouncedSearchCategory) {
                 searchCatogery(debouncedSearchCategory).then((results) => {
                     const parseCategory = results.map((category) => {
-                        return { value: category.code, name: category.name, code: category.code };
+                        return { label: category.code, name: category.name, value: category.code };
                     });
                     setCategoryLists(parseCategory);
                 });
             }
         }, [debouncedSearchCategory]);
-
+        console.log(props)
         return (
             <AppCRM select="/crm/pricing">
                 <Head>
@@ -143,7 +146,16 @@ function render(props) {
                             <Grid container spacing={2} style={{ padding: '10px' }}>
                                 <Grid item xs={12} md={12} sm={12} />
                                 <Grid item xs={12} sm={12} md={2}>
-                                    <Controller
+                                    <SingleAuto
+                                        id="customerType"
+                                        options={condUserType}
+                                        label="Loại khách hàng"
+                                        control={control}
+                                        errors={errors}
+                                        name="customerType"
+                                        width="250px"
+                                    />
+                                    {/* <Controller
                                         render={({ onChange, ...props }) => (
                                             <Autocomplete
                                                 id="customerType"
@@ -179,17 +191,27 @@ function render(props) {
                                         name="customerType"
                                         control={control}
                                         // onChange={([, { id }]) => id}
-
                                         rules={{
                                             validate: (d) => {
                                                 return typeof d != "undefined";
                                             },
                                         }}
-                                    />
+                                    /> */}
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <Controller
+                                    <MuiAuto
+                                        id="categoryCodes"
+                                        options={[...categoryLists.map(category => {
+                                            return { label: category.name, value: category.code }
+                                        })]}
+                                        label="Loại sản phẩm"
+                                        name="categoryCodes"
+                                        control={control}
+                                        errors={errors}
+                                        onFieldChange={searchCatogery}
+                                    />
+                                    {/* <Controller
                                         render={({ onChange, ...props }) => (
                                             <Autocomplete
                                                 id="categoryCodes"
@@ -225,11 +247,22 @@ function render(props) {
                                                 return typeof d != "undefined";
                                             },
                                         }}
-                                    />
+                                    /> */}
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <Controller
+                                    <MuiAuto
+                                        id="locationCode"
+                                        options={[...provinceLists.map(category => {
+                                            return { label: category.name, value: category.code }
+                                        })]}
+                                        label="Tỉnh/thành"
+                                        name="locationCode"
+                                        control={control}
+                                        errors={errors}
+                                    // onFieldChange={setProvinceLists}
+                                    />
+                                    {/* <Controller
                                         render={({ onChange, ...props }) => (
                                             <Autocomplete
                                                 id="locationCode"
@@ -265,7 +298,7 @@ function render(props) {
                                                 return typeof d != "undefined";
                                             },
                                         }}
-                                    />
+                                    /> */}
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
                                     <FormControl component="fieldset" className={styles.marginTopBottom}>

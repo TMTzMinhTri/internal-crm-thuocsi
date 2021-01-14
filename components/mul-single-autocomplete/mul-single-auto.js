@@ -137,7 +137,7 @@ export const MuiAuto = ({
                         multiple
                         options={qOptions}
                         filterSelectedOptions
-                        getOptionLabel={(option) => option.label.toString()}
+                        getOptionLabel={(option) => option.label?.toString()}
                         getOptionSelected={(option, val) => option.value === val.value}
                         noOptionsText="Không có tùy chọn"
                         renderInput={(params) => (
