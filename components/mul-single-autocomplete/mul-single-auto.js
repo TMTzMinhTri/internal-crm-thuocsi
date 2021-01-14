@@ -35,13 +35,15 @@ export const SingleAuto = ({
     label,  // LABEL
     message, // CUSTOM MESSAGE ERROR
     onFieldChange, // HANDLE EVENT CHANGE
-    control,  // REACT HOOK FORM CONTROL
+    control,
+    required,  // REACT HOOK FORM CONTROL
     errors, width }) => { // REACT HOOK FORM ERRORS 
 
     // TODO
 
     const hasError = typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
+    const [qOptions, setQOptions] = useState(options);
     const debouncedSearch = useDebounce(q?.trim(), 200);
 
     useEffect(() => {
@@ -51,8 +53,8 @@ export const SingleAuto = ({
                     setQOptions([])
                 }
                 if(res.data){
-                    setQOptions([...res.data?.map((category) => {
-                        return { label: category.name, name: category.name, value: category.code };
+                    setQOptions([...res.data?.map((item) => {
+                        return { label: item.name, name: item.name, value: item.code };
                     })])
                 }
             })
@@ -102,11 +104,12 @@ export const SingleAuto = ({
                 onChange={([, { id }]) => id}
                 rules={{
                     validate: (d) => {
-                        if (typeof d === "undefined" || d?.length == 0) {
-                            return "Vui lòng nhập"
+                        if (required && required == true) {
+                            if (typeof d === "undefined" || d?.length == 0) {
+                                return "Vui lòng nhập"
+                            }
                         }
-                    },
-                    required: "Vui lòng nhập"
+                    }
                 }}
             />
         </div>
@@ -119,8 +122,10 @@ export const MuiAuto = ({
     label,  // LABEL
     message, // CUSTOM MESSAGE ERROR
     onFieldChange, // HANDLE EVENT CHANGE
-    control,  // REACT HOOK FORM CONTROL
-    errors, width }) => { // REACT HOOK FORM ERRORS 
+    control,
+    required,  // REACT HOOK FORM CONTROL
+    errors, 
+    width }) => { // REACT HOOK FORM ERRORS 
 
     // TODO
 
@@ -136,8 +141,8 @@ export const MuiAuto = ({
                     setQOptions([])
                 }
                 if(res.data){
-                    setQOptions([...res.data?.map((category) => {
-                        return { label: category.name, name: category.name, value: category.code };
+                    setQOptions([...res.data?.map((item) => {
+                        return { label: item.name, name: item.name, value: item.code };
                     })])
                 }
             })
@@ -188,11 +193,12 @@ export const MuiAuto = ({
                 onChange={([, { id }]) => id}
                 rules={{
                     validate: (d) => {
-                        if (typeof d === "undefined" || d?.length == 0) {
-                            return "Vui lòng nhập"
+                        if (required && required == true) {
+                            if (typeof d === "undefined" || d?.length == 0) {
+                                return "Vui lòng nhập"
+                            }
                         }
-                    },
-                    required: "Vui lòng nhập"
+                    }
                 }}
             />
         </div>

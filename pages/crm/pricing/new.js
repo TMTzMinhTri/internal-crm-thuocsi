@@ -127,6 +127,7 @@ function render(props) {
                                     errors={errors}
                                     name="customerType"
                                     width="250px"
+                                    required={true}
                                 />
 
                             </Grid>
@@ -142,6 +143,7 @@ function render(props) {
                                     control={control}
                                     errors={errors}
                                     onFieldChange={searchCatogery}
+                                    required={true}
                                 />
                                 {/* <Controller
                                     render={({ onChange, ...props }) => (
@@ -198,6 +200,7 @@ function render(props) {
                                     name="locationCode"
                                     control={control}
                                     errors={errors}
+                                    required={true}
                                 // onFieldChange={setProvinceLists}
                                 />
                                 {/* <Controller
