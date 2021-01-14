@@ -17,10 +17,10 @@ import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import { getPriceClient } from "client/price";
-import { SellPrices, noOptionsText, Brand } from "components/global";
 import { NotFound } from "components/components-global";
+import { Brand, SellPrices } from "components/global";
+import MuiAuto from "components/muiauto";
 import Head from "next/head";
 import Link from "next/link";
 import AppCRM from "pages/_layout";
@@ -349,7 +349,7 @@ export default function renderForm(props, toast) {
             <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
         )
     }
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
     const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind + 1) || [])
@@ -423,6 +423,9 @@ export default function renderForm(props, toast) {
 
     let lstOptions = props?.products
 
+    const onSubmit2 = (data, e) => console.log(data, e);
+    const onError2 = (errors, e) => console.log(errors, e);
+
     return (
         <AppCRM select="/crm/sku">
             <Head>
@@ -435,10 +438,30 @@ export default function renderForm(props, toast) {
                         <Box style={{ margin: 10 }}>
                             <Grid container spacing={1}>
                                 <Grid item xs={12} sm={6} md={6}>
-                                    <Typography gutterBottom>
-                                        Sản phẩm: <b>{props.product?.name}</b>
-                                    </Typography>
                                     {
+                                        props.isUpdate === true?(
+                                            // Case 1: Product can not change
+                                            <Typography gutterBottom>
+                                                Sản phẩm: <b>{props.product?.name}</b>
+                                            </Typography>
+                                        ):(
+                                            // Case 2: Select product
+                                            <div>
+                                                <MuiAuto 
+                                                    name="productCode"
+                                                    control={control}
+                                                    errors={errors}
+                                                    message="Vui lòng chọn sản phẩm"
+                                                    placeholder="Chọn sản phẩm"
+                                                    options={lstOptions}
+                                                    onFieldChange={searchCatogery}
+                                                />
+                                            </div>
+                                        )
+                                    }
+                                    
+                                    
+                                    {/* {
                                         typeof lstOptions !== "undefined" ? (
                                             <Controller
                                                 render={({ onChange, ...props }) => (
@@ -478,11 +501,20 @@ export default function renderForm(props, toast) {
                                         ) : (
                                                 <div />
                                             )
-                                    }
+                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={12} sm={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <Controller
+                                    <MuiAuto 
+                                        name="tagsName"
+                                        control={control}
+                                        errors={errors}
+                                        message="Vui lòng nhập"
+                                        placeholder="Tuỳ chọn"
+                                        label="Chọn tag"
+                                        options={listTag}
+                                    />
+                                    {/* <Controller
                                         render={({ onChange, ...props }) => (
                                             <Autocomplete
                                                 id="tagsName"
@@ -520,7 +552,7 @@ export default function renderForm(props, toast) {
                                     //         return typeof d != "undefined";
                                     //     },
                                     // }}
-                                    />
+                                    /> */}
                                     <Grid item xs={12} md={12} sm={12} /></Grid>
 
                                 <Grid item xs={12} sm={12} md={12}>
@@ -575,7 +607,7 @@ export default function renderForm(props, toast) {
                                     {
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
                                             <>
-                                                <Accordion expanded={expandeds ? expandeds[idx] : false} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={() => {
+                                                <Accordion key={idx} expanded={expandeds ? expandeds[idx] : false} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={() => {
                                                     {
                                                         let tmpExpandeds = [...expandeds]
                                                         tmpExpandeds[idx] = !tmpExpandeds[idx]
@@ -607,7 +639,7 @@ export default function renderForm(props, toast) {
                                         )) :
                                             ids.map((num, idx) => (
                                                 <>
-                                                    <Accordion expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                                    <Accordion key={`panel${idx}`} expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
                                                         <AccordionSummary
                                                             expandIcon={<ExpandMoreIcon />}
                                                             aria-controls="panel1bh-content"
@@ -666,7 +698,7 @@ export default function renderForm(props, toast) {
                                 variant="contained"
                                 color="primary"
                                 disabled={(typeof props.product === "undefined" && !getValues().productCode)}
-                                onClick={handleSubmit(onSubmit)}
+                                onClick={handleSubmit(onSubmit, onError2)}
                                 style={{ margin: 8 }}>
                                 Lưu
                             </Button>
