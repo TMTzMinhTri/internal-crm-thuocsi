@@ -63,13 +63,25 @@ function render(props) {
 
     let router = useRouter()
     const { error, success } = useToast()
-
-    const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
+    // const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
     const [provinceLists, setProvinceLists] = useState(props.provinceLists);
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
+    // const [total, setTotal] = useState(0);
+    // const [loading, setLoading] = useState(true);
+    const { register, handleSubmit, errors, reset, control } = useForm({
+        mode: 'onChange',
+        defaultValues: {
+            addition: 5000,
+            brand: "LOCAL",
+            categoryCode: [],
+            categoryCodes: [],
+            customerType: [],
+            locationCode: [],
+            multiply: 2,
+            numAddition: 5000,
+            numMultiply: 1,
+        }
+    });
     const [searchCategory, setSearchCategory] = useState("");
     const debouncedSearchCategory = useDebounce(searchCategory, 200);
 
@@ -95,7 +107,7 @@ function render(props) {
                 return { label: category.name, name: category.name, value: category.code };
             });
         }
-        return [{value: '', label:''}];
+        return [{ value: '', label: '' }];
     };
 
     useEffect(() => {
@@ -357,14 +369,13 @@ function render(props) {
                                     style={{ margin: 8 }}>
                                     Lưu
                                 </Button>
-                                <Link href="/crm/http://localhost:3000/crm/sku">
-                                    <ButtonGroup>
-                                        <Button variant="contained">Quay lại</Button>
-                                    </ButtonGroup>
-                                </Link>
-                                {/* {
+                                {
                                     typeof props.product === "undefined" ? (
-                                        <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
+                                        <Button variant="contained" type="reset" style={{ margin: 8 }}
+                                        onClick={() => {
+                                            reset();
+                                        }}
+                                        >Làm mới</Button>
                                     ) : (
                                             <Link href="/crm/sku">
                                                 <ButtonGroup>
@@ -372,7 +383,7 @@ function render(props) {
                                                 </ButtonGroup>
                                             </Link>
                                         )
-                                } */}
+                                }
                             </Box>
                         </Grid>
                     </Box>

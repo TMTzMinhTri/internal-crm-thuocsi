@@ -62,7 +62,7 @@ export const SingleAuto = ({
                         id={name}
                         options={qOptions}
                         filterSelectedOptions
-                        getOptionLabel={(option) => option.label.toString()}
+                        getOptionLabel={(option) => option.label?.toString()}
                         noOptionsText="Không có tùy chọn"
                         renderInput={(params) => (
                             <TextField
