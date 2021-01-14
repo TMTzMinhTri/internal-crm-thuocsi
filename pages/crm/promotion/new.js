@@ -46,8 +46,14 @@ import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
 import {
     defaultPromotionScope,
-    defaultPromotionType, defaultRulePromotion, defaultTypeConditionsRule,
-    queryParamGetProductGift, setRulesPromotion,defaultNameRules
+    defaultPromotionType,
+    defaultRulePromotion,
+    defaultTypeConditionsRule,
+    queryParamGetProductGift,
+    setRulesPromotion,
+    limitText,
+    defaultNameRulesValue,
+    defaultNameRulesQuantity, displayNameRule
 } from "../../../client/constant";
 import {Grade} from "@material-ui/icons";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -387,19 +393,19 @@ function render(props) {
                                                             spacing={1} container alignItems="center">
                                                             <Grid item xs={5} sm={5} md={5}>
                                                                 <TextField
-                                                                    id={defaultNameRules.priceMinValueAndQuantity + index}
-                                                                    name={defaultNameRules.priceMinValueAndQuantity + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)}
                                                                     label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
                                                                     placeholder=""
                                                                     type="number"
                                                                     variant="outlined"
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRules.priceMinValueAndQuantity + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={!!errors[defaultNameRules.priceMinValueAndQuantity + index]}
+                                                                    error={!!errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -418,14 +424,14 @@ function render(props) {
                                                             </Grid>
                                                             <Grid item xs={5} sm={5} md={5}>
                                                                 <TextField
-                                                                    id={defaultNameRules.priceDiscountValue + index}
-                                                                    name={defaultNameRules.priceDiscountValue + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)}
                                                                     type="number"
                                                                     label="Số tiền giảm"
                                                                     placeholder=""
                                                                     variant="outlined"
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRules.priceDiscountValue + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
@@ -434,7 +440,7 @@ function render(props) {
                                                                             position="end">đ</InputAdornment>,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={errors[defaultNameRules.priceDiscountValue + index] ? true : false}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)] ? true : false}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -498,19 +504,19 @@ function render(props) {
                                                         <Grid spacing={1} container alignItems="center">
                                                             <Grid item xs={4} sm={4} md={4}>
                                                                 <TextField
-                                                                    id={defaultNameRules.priceMinValuePercent + index}
-                                                                    name={defaultNameRules.priceMinValuePercent + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)}
                                                                     label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
                                                                     placeholder=""
                                                                     type="number"
                                                                     variant="outlined"
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRules.priceMinValuePercent+index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={!!errors[defaultNameRules.priceMinValuePercent+index]}
+                                                                    error={!!errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)]}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -529,14 +535,14 @@ function render(props) {
                                                             </Grid>
                                                             <Grid item xs={2} sm={2} md={2}>
                                                                 <TextField
-                                                                    id={defaultNameRules.percentValue + index}
-                                                                    name={defaultNameRules.percentValue + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)}
                                                                     type="number"
                                                                     label="Số % giảm"
                                                                     placeholder=""
                                                                     variant="outlined"
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRules.percentValue + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
@@ -545,7 +551,7 @@ function render(props) {
                                                                             position="end">%</InputAdornment>,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={errors[defaultNameRules.percentValue + index] ? true : false}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)] ? true : false}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -568,14 +574,14 @@ function render(props) {
                                                             </Grid>
                                                             <Grid item xs={4} sm={4} md={4}>
                                                                 <TextField
-                                                                    id={defaultNameRules.priceMaxDiscountValue + index}
-                                                                    name={defaultNameRules.priceMaxDiscountValue + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)}
                                                                     type="number"
                                                                     label="Số tiền giảm tối đa"
                                                                     placeholder=""
                                                                     variant="outlined"
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRules.priceMaxDiscountValue + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
@@ -584,7 +590,7 @@ function render(props) {
                                                                             position="end">đ</InputAdornment>,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={errors[defaultNameRules.priceMaxDiscountValue + index] ? true : false}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)] ? true : false}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -1189,9 +1195,9 @@ export function RenderTableListProduct(props) {
                                         inputRef={props.register}
                                         label="Chọn danh mục">
                                         {stateProduct.listCategoryPromotion.map((category) => (
-                                            <MenuItem value={category} key={category.categoryID}>
-                                                {category.name}
-                                            </MenuItem>
+                                                <MenuItem value={category} key={category.categoryID}>
+                                                    {limitText(category.name,20) || "...Không xác định"}
+                                                </MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
