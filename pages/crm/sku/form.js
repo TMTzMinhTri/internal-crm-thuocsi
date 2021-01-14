@@ -13,6 +13,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
+import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
@@ -27,6 +28,12 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
+
+const useStyles = makeStyles({
+    root: {
+        backgroundColor:'#f8faf8'
+    },
+  });
 
 const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index, getValues, limitQty, ids, defaultIds, idDeleteds }) => {
 
@@ -350,7 +357,8 @@ export default function renderForm(props, toast) {
             <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
         )
     }
-    const { register,unregister, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
+    const classes = useStyles();
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
     const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind) || [])
@@ -617,7 +625,7 @@ export default function renderForm(props, toast) {
                                         // case edit sku
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
                                             <>
-                                                <Accordion key={num} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
+                                                <Accordion classes={{root:classes.root}} key={num} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
                                                     {
                                                         let tmpExpandeds = [...expandeds]
                                                         tmpExpandeds[idx] = !tmpExpandeds[idx]
@@ -653,7 +661,7 @@ export default function renderForm(props, toast) {
                                         )) :
                                             // ids.map((num, idx) => (
                                             //     <>
-                                            //         <Accordion key={`panel${num}`} expanded={expanded === `panel${num}`} onChange={handleChange(`panel${num}`)}>
+                                            //         <Accordion classes={{root:classes.root}} key={`panel${num}`} expanded={expanded === `panel${num}`} onChange={handleChange(`panel${num}`)}>
                                             //             <AccordionSummary
                                             //                 expandIcon={<ExpandMoreIcon />}
                                             //                 aria-controls="panel1bh-content"
@@ -678,6 +686,7 @@ export default function renderForm(props, toast) {
                                             //     </>
                                             // ))
                                             <div/>
+
                                     }
                                     {/* edit */}
                                     {props.isUpdate ? <Button
