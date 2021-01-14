@@ -133,7 +133,7 @@ function render(props) {
                 });
             }
         }, [debouncedSearchCategory]);
-        console.log(props)
+
         return (
             <AppCRM select="/crm/pricing">
                 <Head>
