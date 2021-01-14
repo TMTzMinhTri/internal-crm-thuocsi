@@ -21,14 +21,11 @@ export const noOptionsText = "Không có tùy chọn!";
 
 
 export const condUserType = [
-    {
-        label: "Mặc định",
-        value: "all",
-    },
-    {
-        label: "Không giới hạn",
-        value: "Infinity",
-    },
+    // {
+    //     label: "Mặc định",
+    //     value: "all",
+    // },
+    
     {
         label: "Kim cương",
         value: "Diamond",
@@ -44,6 +41,10 @@ export const condUserType = [
     {
         label: "Bạc",
         value: "Sliver",
+    },
+    {
+        label: "Không giới hạn",
+        value: "Infinity",
     },
 ]
 
