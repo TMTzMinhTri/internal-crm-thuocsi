@@ -107,7 +107,7 @@ function render(props) {
         },
     ])
     const [state, setState] = useState(defaultState);
-    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion,listCategoryPromotion} = state
+    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion,listCategoryPromotion,listProductDefault} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
 
     const [open, setOpen] = useState({
@@ -121,13 +121,15 @@ function render(props) {
     }
 
     const handleChangeScope = async (event) => {
+        console.log('1234',event.target.value)
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
             let listCategoryResponse = await getListCategory()
             if (listCategoryResponse && listCategoryResponse.status === "OK") {
                 setState({...state,listCategoryPromotion: listCategoryResponse.data,[event.target?.name]: event.target?.value})
             }
-            let productDefaultResponse = await getProduct("","")
+            let productDefaultResponse = await getProduct()
+            console.log('product',productDefaultResponse)
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = []
                     productDefaultResponse.data.forEach((productResponse,index) => {
@@ -139,6 +141,7 @@ function render(props) {
                         }
                     })
                 setState({...state,[event.target?.name]: event.target?.value,listProductDefault: listProductDefault})
+                setOpen({...open,openModalProductScopePromotion: true})
                 }
         }else {
             setState({...state,[event.target?.name]: event.target?.value})
@@ -698,7 +701,6 @@ function render(props) {
                                         getValue={getValues()}
                                         handleAddProductPromotion={handleAddProductPromotion}
                                         handleRemoveProductPromotion={handleRemoveProductPromotion}
-                                        handleChange={handleChange}
                                     />
                             ): (
                                 <div></div>
@@ -1110,8 +1112,8 @@ export function RenderTableProductGift(props) {
 }
 
 export function RenderTableListProduct(props) {
+    console.log('props',props.state)
     const [stateProduct, setStateProduct] = useState({
-        listProductSearch: [],
         listProductAction: props.state.listProductDefault,
         listCategoryPromotion: props.state.listCategoryPromotion,
         categorySearch: {},
@@ -1194,7 +1196,7 @@ export function RenderTableListProduct(props) {
                                 </FormControl>
                             </Grid>
                             <Grid item sx={12} sm={4} md={4}>
-                                    <Button variant="contained">Tìm kiếm<IconButton onClick={handleOnSearchProductCategory}>
+                                    <Button variant="contained"  onClick={handleOnSearchProductCategory}>Tìm kiếm<IconButton>
                                         <SearchIcon/>
                                     </IconButton>
                                     </Button>

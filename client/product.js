@@ -67,13 +67,23 @@ class ProductClient extends APIClient {
         })
     }
 
-    searchProductCategoryListFromClient(q,categoryCode) {
+    searchProductCategoryListFromClient(productName,categoryCode) {
+        let data = {}
+        if (productName) {
+            data = {
+                ...data,
+                q: productName
+            }
+        }
+        if (categoryCode) {
+            data = {
+                ...data,
+                categoryCode: categoryCode,
+            }
+        }
         return this.callFromClient(
             "GET",
-            `${PREFIX}/product/category/list`, {
-                q: q,
-                categoryCode: categoryCode,
-            })
+            `${PREFIX}/product/category/list`, data)
     }
 
     searchProductListFromClient(productName,categoryCode) {
