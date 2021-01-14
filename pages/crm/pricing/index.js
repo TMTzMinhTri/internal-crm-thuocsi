@@ -12,7 +12,7 @@ import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { Brand, condUserType, formatNumber, ErrorCode, formatUrlSearch } from 'components/global';
+import { Brand, condUserType, formatNumber, ErrorCode, formatUrlSearch, formatEllipsisText } from 'components/global';
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
@@ -129,7 +129,7 @@ function render(props) {
         if (catagory?.length > 0) {
             const chips = catagory.map((item, i) => {
                 if (categoryLists[item]?.name) {
-                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={ categoryLists[item]?.name } variant="outlined" />;
+                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={ formatEllipsisText(categoryLists[item]?.name, 30) } variant="outlined" />;
                 }
             });
             return chips;
