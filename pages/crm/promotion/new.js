@@ -65,6 +65,7 @@ const defaultState = {
         gift: {},
         quantity: 0,
     }],
+    listProductPromotion: []
 }
 
 export default function NewPage(props) {
@@ -91,7 +92,7 @@ function render(props) {
         },
     ])
     const [state, setState] = useState(defaultState);
-    const {promotionOption, promotionTypeRule, promotionScope} = state
+    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
 
     const [open, setOpen] = useState(false);
@@ -106,11 +107,8 @@ function render(props) {
     };
 
     const handleChange = (event) => {
+        setOpen(true)
         setState({...state, [event.target.name]: event.target.value})
-    }
-
-    const handleChangeState = (name,value) => {
-        setState({...state,name:value})
     }
 
     const handleChangeStatus = (event) => {
@@ -122,6 +120,10 @@ function render(props) {
         reset()
         console.log('error',errors)
         console.log('value',getValues())
+    }
+
+    const handleAddProductPromotion = (productList) => {
+        setState({...state,listProductPromotion:productList})
     }
 
     function handleRemoveCodePercent(id) {
@@ -137,6 +139,7 @@ function render(props) {
     async function onSubmit() {
         let {promotionName,totalCode,startTime,endTime} = getValues()
         let value = getValues()
+
         let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,promotionScope)
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
@@ -631,9 +634,17 @@ function render(props) {
                             </CardContent>
                         {
                             promotionScope === "products" ? (
-                                <Card variant="outlined" style={{marginTop: '10px'}}>
-
-                                </Card>
+                                    <RenderTableListProduct
+                                        handleClickOpen={handleClickOpen}
+                                        handleClose={handleClose}
+                                        open={open}
+                                        register={register}
+                                        state={state}
+                                        handleAddProductPromotion={handleAddProductPromotion}
+                                        listProductPromotion={listProductPromotion}
+                                        handleRemoveCodePercent={handleRemoveCodePercent}
+                                        handleChange={handleChange}
+                                    />
                             ): (
                                 <div></div>
                             )
@@ -1040,6 +1051,121 @@ export function RenderTableProductGift(props) {
                     </DialogActions>
                 </Dialog>
             </div>
+        </Card>
+    )
+}
+
+export function RenderTableListProduct(props) {
+    const [stateProduct, setStateProduct] = useState({
+        listProductSearch: [],
+        listProductAction: props.listProductPromotion,
+    })
+
+    const [showAutoComplete, setShowAutoComplete]   = useState(false);
+
+    const handleSearchProduct = async (productName) => {
+        let searProductResponse = await getListProductGift(productName)
+        if (searProductResponse.status === "OK") {
+            setStateProduct({...stateProduct, listProductSearch: searProductResponse.data})
+        }
+    }
+
+    const handleActiveProduct = (product,active) => {
+        let {listProductAction} = stateGift
+        listProductAction.forEach(productAction => {
+            if (productAction.gift.productId === product.productId) {
+                productAction.active = active
+            }
+        })
+        setStateProduct({stateProductstateGift,listProductAction: listProductAction})
+    }
+
+    const handleAddProduct = (e,value) => {
+        let {listProductAction} = stateProduct
+        if (value) {
+            if (!listProductAction.find(productAction => productAction.productId === value.productId)) {
+                listProductAction.push({
+                    product: value,
+                    active: true,
+                })
+            }
+        }
+        setStateProduct({...stateProduct,listGiftNew: listGiftNew,listGiftSearch: []})
+    }
+
+    return (
+        <Card variant="outlined" style={{marginTop: '4px'}}>
+            <Dialog
+                open={props.open}
+                onClose={props.handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+            >
+                <DialogTitle id="alert-dialog-title">{"Chọn quà"}</DialogTitle>
+                <DialogContent>
+                    <div style={{marginBottom: '1rem'}}>
+                        <Autocomplete
+                            options={stateProduct.listProductAction}
+                            variant="outlined"
+                            name="searchProductGift"
+                            loading={showAutoComplete}
+                            fullWidth
+                            loadingText="Không tìm thấy quà tặng"
+                            onOpen={() => {
+                                setShowAutoComplete(true)
+                            }}
+                            onClose={() => {
+                                setShowAutoComplete(false)
+                            }}
+                            getOptionLabel={option => option.name}
+                            renderInput={params => (
+                                <TextField
+                                    {...params}
+                                    label="Tên quà tặng"
+                                    placeholder=""
+                                    variant="outlined"
+                                    onChange={e => handleSearchProduct(e.target.value)}
+                                />
+                            )}
+                           onChange={(e,value) => handleAddProduct(e,value)}
+                        />
+                    </div>
+                    <TableContainer component={Paper}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell align="left">Thông tin sản phẩm</TableCell>
+                                    <TableCell align="left">Giá gốc</TableCell>
+                                    <TableCell align="left">Giá bán</TableCell>
+                                    <TableCell align="left">Trạng thái</TableCell>
+                                    <TableCell align="center">Thao tác</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            {stateProduct.listProductAction.map(({product,active,quantity}) => (
+                                <TableRow>
+                                    <TableCell align="left">
+                                        {product.name}
+                                    </TableCell>
+                                    <TableCell align="left">{product.name}</TableCell>
+                                    <TableCell align="left">{product.name}</TableCell>
+                                    <TableCell align="left">{product.name}</TableCell>
+                                    <TableCell align="center">
+                                        <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveGift(gift,value)} />
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </Table>
+                    </TableContainer>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={props.handleClose} color="secondary">
+                        Hủy
+                    </Button>
+                    <Button onClick={() => props.handleAddProductPromotion(stateProduct.listProductAction)} color="primary" autoFocus>
+                        Thêm
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Card>
     )
 }

@@ -50,16 +50,8 @@ export const defaultConditionInfo = {
     products: "products"
 }
 
-export function setRulesPromotion(typePromotion,typeRule,value,index,scope,conditionsScope) {
-    let result = {
-        products: {
-            field: "products",
-            type: scope,
-            conditions: {
-                products: conditionsScope || [],
-            }
-        }
-    }
+export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct) {
+    let result = {}
     let conditions = []
     switch (typePromotion){
         case defaultRulePromotion.MIN_QUANTITY:
@@ -75,6 +67,7 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,scope,condi
                     conditions.push({
                         minQuantity: parseInt(value[defaultNameRules.priceMinValueAndQuantity + i]),
                         discountValue: parseInt(value[defaultNameRules.priceDiscountValue + i]),
+                        products: listProduct,
                     })
                 }
                 result = {
@@ -90,7 +83,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,scope,condi
                     conditions.push({
                         minQuantity: parseInt(value[defaultNameRules.priceMinValuePercent + i]),
                         maxDiscountValue: parseInt(value[defaultNameRules.priceMaxDiscountValue + i]),
-                        percent: parseInt(value[defaultNameRules.percentValue+i])
+                        percent: parseInt(value[defaultNameRules.percentValue+i]),
+                        products: listProduct,
                     })
                 }
                 result = {
@@ -116,6 +110,7 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,scope,condi
                     conditions.push({
                         minOrderValue: parseInt(value[defaultNameRules.priceMinValueAndQuantity + i]),
                         discountValue: parseInt(value[defaultNameRules.priceDiscountValue + i]),
+                        products: listProduct,
                     })
                 }
                 result = {
@@ -131,7 +126,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,scope,condi
                     conditions.push({
                         minOrderValue: parseInt(value[defaultNameRules.priceMinValuePercent + i]),
                         maxDiscountValue: parseInt(value[defaultNameRules.priceMaxDiscountValue + i]),
-                        percent: parseInt(value[defaultNameRules.percentValue+i])
+                        percent: parseInt(value[defaultNameRules.percentValue+i]),
+                        products: listProduct,
                     })
                 }
                 result = {
