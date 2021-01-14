@@ -42,8 +42,22 @@ export const SingleAuto = ({
 
     const hasError = typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
-    const [qOptions, setQOptions] = useState(options);
+    const debouncedSearch = useDebounce(q?.trim(), 200);
 
+    useEffect(() => {
+        if (typeof (onFieldChange) === 'function') {
+            onFieldChange(debouncedSearch).then((res) => {
+                if(res.status === "NOT_FOUND"){
+                    setQOptions([])
+                }
+                if(res.data){
+                    setQOptions([...res.data?.map((category) => {
+                        return { label: category.name, name: category.name, value: category.code };
+                    })])
+                }
+            })
+        }
+    }, [debouncedSearch]);
     return (
         <div>
             <Controller
@@ -72,7 +86,6 @@ export const SingleAuto = ({
                                 style={{ width: width || "100%" }}
                                 onChange={(e) => {
                                     if (typeof (onFieldChange) === 'function') {
-
                                         onFieldChange(e.target.value)
                                     }
                                     setQ(e.target.value)
@@ -122,12 +135,14 @@ export const MuiAuto = ({
                 if(res.status === "NOT_FOUND"){
                     setQOptions([])
                 }
-                setQOptions([...res.map((category) => {
-                    return { label: category.name, name: category.name, value: category.code };
-                })])
+                if(res.data){
+                    setQOptions([...res.data?.map((category) => {
+                        return { label: category.name, name: category.name, value: category.code };
+                    })])
+                }
             })
         }
-    }, [debouncedSearch, q]);
+    }, [debouncedSearch]);
     return (
         <div>
             <Controller
