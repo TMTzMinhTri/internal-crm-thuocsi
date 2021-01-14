@@ -259,8 +259,8 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                             required: true,
                                             valueAsNumber: true, // important
                                             min: index === 0 ? getValues().retailPrice?.maxQuantity + 1 : getValues().wholesalePrice ? getValues().wholesalePrice[index - 1]?.maxQuantity + 1 : 0,
-                                            max: (index === ids.length - idDeleteds.length - 1 || index === defaultIds.length - idDeleteds.length - 1) ? null :
-                                                getValues().wholesalePrice ? getValues().wholesalePrice[index + 1]?.maxQuantity - 1 : null
+                                            // max: (index === ids.length - idDeleteds.length - 1 || index === defaultIds.length - idDeleteds.length - 1) ? null :
+                                            //     getValues().wholesalePrice ? getValues().wholesalePrice[index + 1]?.maxQuantity - 1 : null
                                         })
                                     }
                                 />
@@ -344,16 +344,17 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
 }
 
 export default function renderForm(props, toast) {
+    console.log(props)
     if (props.status && props.status !== "OK") {
         return (
             <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
         )
     }
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
+    const { register,unregister, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
-    const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind + 1) || [])
-    const [ids, setIds] = useState(defaultIds);
+    const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind) || [])
+    const [ids, setIds] = useState([]);
     const [idDeleteds, setIdDeleteds] = useState([]);
     const [expandeds, setExpandeds] = useState(props.price?.wholesalePrice?.map((value, ind) => true) || []);
     const [expanded, setExpanded] = React.useState(false);
@@ -362,6 +363,9 @@ export default function renderForm(props, toast) {
     const [categoryCode, setCategoryCode] = useState(props.price?.categoryCodes || []);
     const [limitQty, setLimitQty] = useState(2)
     let sellerCode = "MedX";
+    // tamnt
+    const [incrId, setIncrId] = useState(0);
+    
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
         idDeleteds.sort(function (a, b) { return b - a });
@@ -387,8 +391,11 @@ export default function renderForm(props, toast) {
         formData.tagsName.forEach((tag) => {
             formData.tags.push(tag.value)
         })
-        idDeleteds.sort(function (a, b) { return b - a });
-        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
+
+        let wholesale = formData.wholesalePrice?.filter((item) => item && item.type !== "")
+        formData.wholesalePrice = wholesale
+    
+        console.log("after:", formData.wholesalePrice)
         setLoading(true);
         let _client = getPriceClient()
         let result = await _client.updatePrice(formData)
@@ -595,7 +602,6 @@ export default function renderForm(props, toast) {
                                         </Tooltip>
                                     </Typography>
                                     {/* Setup gia ban le */}
-                                    {/* <pre>z{JSON.stringify(getValues().productCode?true:false )}</pre> */}
                                     <RenderPriceConfig name={'retailPrice'} control={control} register={register}
                                         hidden={typeof props.product === "undefined" && !getValues().productCode} errors={errors} index={0} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                 </Grid>
@@ -606,10 +612,12 @@ export default function renderForm(props, toast) {
                                             <HelpOutlinedIcon fontSize="small" />
                                         </Tooltip>
                                     </Typography>
+                                    
                                     {
+                                        // case edit sku
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
                                             <>
-                                                <Accordion key={idx} expanded={expandeds ? expandeds[idx] : false} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={() => {
+                                                <Accordion key={num} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
                                                     {
                                                         let tmpExpandeds = [...expandeds]
                                                         tmpExpandeds[idx] = !tmpExpandeds[idx]
@@ -623,56 +631,65 @@ export default function renderForm(props, toast) {
                                                         id="panel1bh-header"
                                                     >
                                                         <Typography color="textSecondary">
-                                                            Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item < num).length}
+                                                            Cài đặt giá bán buôn (bán sỉ) thứ {idx+1}
+                                                            {/* <pre>{JSON.stringify(expandeds)}</pre> */}
                                                         </Typography>
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                            register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                                            register={register} errors={errors} index={num} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                                     </AccordionDetails>
                                                     <AccordionActions>
                                                         <Button size="small" color="secondary" variant="contained"
                                                             startIcon={<DeleteIcon />}
-                                                            // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
-                                                            onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                                            onClick={() => {
+                                                                setIncrId(incrId+1)
+                                                                setDefaultIds(defaultIds.filter((_id) => _id !== num))
+                                                                setExpandeds(expandeds.filter((val, index) => index !== idx))
+                                                            }}>Xóa</Button>
                                                     </AccordionActions>
                                                 </Accordion>
                                             </>
                                         )) :
-                                            ids.map((num, idx) => (
-                                                <>
-                                                    <Accordion key={`panel${idx}`} expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
-                                                        <AccordionSummary
-                                                            expandIcon={<ExpandMoreIcon />}
-                                                            aria-controls="panel1bh-content"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            id="panel1bh-header"
-                                                        >
-                                                            <Typography color="textSecondary">
-                                                                Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item < num).length}
-                                                            </Typography>
-                                                        </AccordionSummary>
-                                                        <AccordionDetails>
-                                                            <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                                register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
-                                                        </AccordionDetails>
-                                                        <AccordionActions>
-                                                            <Button size="small" color="secondary" variant="contained"
-                                                                startIcon={<DeleteIcon />}
-                                                                // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
-                                                                onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
-                                                        </AccordionActions>
-                                                    </Accordion>
-                                                </>
-                                            ))
+                                            // ids.map((num, idx) => (
+                                            //     <>
+                                            //         <Accordion key={`panel${num}`} expanded={expanded === `panel${num}`} onChange={handleChange(`panel${num}`)}>
+                                            //             <AccordionSummary
+                                            //                 expandIcon={<ExpandMoreIcon />}
+                                            //                 aria-controls="panel1bh-content"
+                                            //                 onClick={(e) => e.stopPropagation()}
+                                            //                 id="panel1bh-header"
+                                            //             >
+                                            //                 <Typography color="textSecondary">
+                                            //                     Cài đặt giá bán buôn (bán sỉ) thứ new {num - idDeleteds.filter(item => item < num).length}
+                                            //                 </Typography>
+                                            //             </AccordionSummary>
+                                            //             <AccordionDetails>
+                                            //                 <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                            //                     register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                            //             </AccordionDetails>
+                                            //             <AccordionActions>
+                                            //                 <Button size="small" color="secondary" variant="contained"
+                                            //                     startIcon={<DeleteIcon />}
+                                            //                     // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                            //                     onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                            //             </AccordionActions>
+                                            //         </Accordion>
+                                            //     </>
+                                            // ))
+                                            <div/>
                                     }
-                                    {defaultIds.length > 0 ? <Button
+                                    {/* edit */}
+                                    {props.isUpdate ? <Button
                                         color="primary"
-                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length - idDeleteds.length === 5)}
+                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length  === 5)}
                                         style={{ marginTop: '10px' }}
                                         onClick={() => {
-                                            setDefaultIds([...defaultIds, defaultIds.length + 1]);
-                                            setExpandeds(prevState=>[...prevState,true])
+                                            let mId = defaultIds.length-1<=0?incrId+defaultIds.length:defaultIds.length+incrId+1
+                                            console.log("mID:", mId)
+                                            setDefaultIds([...defaultIds, mId + 1]);
+                                            setExpandeds([...expandeds,true])
+                                            // setExpandeds(prevState=>[...prevState,true])
                                         }}
                                         startIcon={<AddIcon />}
                                     >
