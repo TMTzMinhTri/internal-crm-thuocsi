@@ -42,6 +42,7 @@ import DialogActions from "@material-ui/core/DialogActions";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 import {loadPromoData} from "./index";
+import {getPromoClient} from "../../../client/promo";
 
 export async function getServerSideProps(ctx ) {
     return await doWithLoggedInUser(ctx, () => {
@@ -61,6 +62,12 @@ const defaultState = {
 
 export async function loadPromotionData(ctx) {
     let returnObject = {props: {}}
+    let query = ctx.query
+    let _promotionClient = getPromoClient(ctx,{})
+    let getPromotionResponse = await _promotionClient.getPromotionByID(query.promotionId)
+    if (getPromotionResponse && getPromotionResponse.status === "OK") {
+        returnObject.props.data = getPromotionResponse.data[0]
+    }
     return returnObject
 }
 
@@ -71,6 +78,7 @@ export default function NewPage(props) {
 
 function render(props) {
     const toast = useToast()
+    let promotion = props.data
     const [promotionRulesLine, setPromotionRulesLine] = useState([
         {
             id: 1,

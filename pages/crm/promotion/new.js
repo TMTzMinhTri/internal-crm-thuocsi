@@ -689,7 +689,7 @@ function render(props) {
                                 </Grid>
                             </CardContent>
                         {
-                            promotionScope === defaultPromotionScope.PRODUCT && open.openModalProductScopePromotion === true ? (
+                            promotionScope === defaultPromotionScope.PRODUCT ?(
                                     <RenderTableListProduct
                                         handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
                                         handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}

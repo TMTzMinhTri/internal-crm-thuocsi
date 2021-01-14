@@ -146,7 +146,7 @@ function render(props) {
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {props.data.length > 0 ? (
+                    {props.data?.length > 0 ? (
                         <TableBody>
                             {props.data.map((row,index) => (
                                 <TableRow>
@@ -166,23 +166,25 @@ function render(props) {
                                 </TableRow>
                             ))}
                         </TableBody>
-                    ) : (
-                        <TableBody>
-                            <TableRow>
-                                <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                            </TableRow>
-                        </TableBody>
+                    ): (
+                        <div></div>
                     )}
+                    {
+                        props.count > 0 ? (
+                            <MyTablePagination
+                                labelUnit="khuyến mãi"
+                                count={props.count}
+                                rowsPerPage={limit}
+                                page={page}
+                                onChangePage={(event, page, rowsPerPage) => {
+                                    Router.push(`/promotion?page=${page}&limit=${rowsPerPage}`)
+                                }}
+                            />
+                        ): (
+                            <h3>Không tìm thấy danh sách chương trình khuyến mái</h3>
+                        )
+                    }
 
-                    <MyTablePagination
-                        labelUnit="khuyến mãi"
-                        count={props.count}
-                        rowsPerPage={limit}
-                        page={page}
-                        onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/promotion?page=${page}&limit=${rowsPerPage}`)
-                        }}
-                    />
                 </Table>
             </TableContainer>
         </AppCRM>
