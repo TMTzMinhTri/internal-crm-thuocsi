@@ -35,14 +35,24 @@ export const SingleAuto = ({
     label,  // LABEL
     message, // CUSTOM MESSAGE ERROR
     onFieldChange, // HANDLE EVENT CHANGE
-    control,  // REACT HOOK FORM CONTROL
-    errors, width }) => { // REACT HOOK FORM ERRORS 
+    control,
+    required,  // REACT HOOK FORM CONTROL
+    errors, width }, props) => { // REACT HOOK FORM ERRORS 
 
     // TODO
 
     const hasError = typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
     const [qOptions, setQOptions] = useState(options);
+    const debouncedSearch = useDebounce(q?.trim(), 200);
+
+    useEffect(() => {
+        if (typeof (onFieldChange) === 'function') {
+            onFieldChange(debouncedSearch).then((res) => {
+                res?.length > 0 ? setQOptions(res) : setQOptions([{value: '', label:''}])
+            })
+        }
+    }, [debouncedSearch, props]);
 
     return (
         <div>
@@ -52,7 +62,7 @@ export const SingleAuto = ({
                         id={name}
                         options={qOptions}
                         filterSelectedOptions
-                        getOptionLabel={(option) => option.label.toString()}
+                        getOptionLabel={(option) => option.label?.toString()}
                         noOptionsText="Không có tùy chọn"
                         renderInput={(params) => (
                             <TextField
@@ -72,7 +82,6 @@ export const SingleAuto = ({
                                 style={{ width: width || "100%" }}
                                 onChange={(e) => {
                                     if (typeof (onFieldChange) === 'function') {
-
                                         onFieldChange(e.target.value)
                                     }
                                     setQ(e.target.value)
@@ -89,11 +98,12 @@ export const SingleAuto = ({
                 onChange={([, { id }]) => id}
                 rules={{
                     validate: (d) => {
-                        if (typeof d === "undefined" || d?.length == 0) {
-                            return "Vui lòng nhập"
+                        if (required && required == true) {
+                            if (typeof d === "undefined" || d?.length == 0) {
+                                return "Vui lòng nhập"
+                            }
                         }
-                    },
-                    required: "Vui lòng nhập"
+                    }
                 }}
             />
         </div>
@@ -106,8 +116,10 @@ export const MuiAuto = ({
     label,  // LABEL
     message, // CUSTOM MESSAGE ERROR
     onFieldChange, // HANDLE EVENT CHANGE
-    control,  // REACT HOOK FORM CONTROL
-    errors, width }) => { // REACT HOOK FORM ERRORS 
+    control,
+    required,  // REACT HOOK FORM CONTROL
+    errors, 
+    width }, props) => { // REACT HOOK FORM ERRORS 
 
     // TODO
 
@@ -119,15 +131,10 @@ export const MuiAuto = ({
     useEffect(() => {
         if (typeof (onFieldChange) === 'function') {
             onFieldChange(debouncedSearch).then((res) => {
-                if(res.status === "NOT_FOUND"){
-                    setQOptions([])
-                }
-                setQOptions([...res.map((category) => {
-                    return { label: category.name, name: category.name, value: category.code };
-                })])
+                res?.length > 0 ? setQOptions(res) : setQOptions([{value: '', label:''}])
             })
         }
-    }, [debouncedSearch, q]);
+    }, [debouncedSearch, props]);
     return (
         <div>
             <Controller
@@ -173,11 +180,12 @@ export const MuiAuto = ({
                 onChange={([, { id }]) => id}
                 rules={{
                     validate: (d) => {
-                        if (typeof d === "undefined" || d?.length == 0) {
-                            return "Vui lòng nhập"
+                        if (required && required == true) {
+                            if (typeof d === "undefined" || d?.length == 0) {
+                                return "Vui lòng nhập"
+                            }
                         }
-                    },
-                    required: "Vui lòng nhập"
+                    }
                 }}
             />
         </div>

@@ -63,13 +63,25 @@ function render(props) {
 
     let router = useRouter()
     const { error, success } = useToast()
-
-    const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
+    // const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
     const [provinceLists, setProvinceLists] = useState(props.provinceLists);
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
+    // const [total, setTotal] = useState(0);
+    // const [loading, setLoading] = useState(true);
+    const { register, handleSubmit, errors, reset, control } = useForm({
+        mode: 'onChange',
+        defaultValues: {
+            addition: 5000,
+            brand: "LOCAL",
+            categoryCode: [],
+            categoryCodes: [],
+            customerType: [],
+            locationCode: [],
+            multiply: 2,
+            numAddition: 5000,
+            numMultiply: 1,
+        }
+    });
     const [searchCategory, setSearchCategory] = useState("");
     const debouncedSearchCategory = useDebounce(searchCategory, 200);
 
@@ -91,9 +103,11 @@ function render(props) {
         let categoryClient = getCategoryClient();
         let res = await categoryClient.getListCategoryFromClient(0, 100, search);
         if (res.status === "OK") {
-            return res.data;
+            return res.data.map((category) => {
+                return { label: category.name, name: category.name, value: category.code };
+            });
         }
-        return res;
+        return [{ value: '', label: '' }];
     };
 
     useEffect(() => {
@@ -127,6 +141,7 @@ function render(props) {
                                     errors={errors}
                                     name="customerType"
                                     width="250px"
+                                    required={true}
                                 />
 
                             </Grid>
@@ -142,6 +157,7 @@ function render(props) {
                                     control={control}
                                     errors={errors}
                                     onFieldChange={searchCatogery}
+                                    required={true}
                                 />
                                 {/* <Controller
                                     render={({ onChange, ...props }) => (
@@ -198,6 +214,7 @@ function render(props) {
                                     name="locationCode"
                                     control={control}
                                     errors={errors}
+                                    required={true}
                                 // onFieldChange={setProvinceLists}
                                 />
                                 {/* <Controller
@@ -352,14 +369,13 @@ function render(props) {
                                     style={{ margin: 8 }}>
                                     Lưu
                                 </Button>
-                                <Link href="/crm/http://localhost:3000/crm/sku">
-                                    <ButtonGroup>
-                                        <Button variant="contained">Quay lại</Button>
-                                    </ButtonGroup>
-                                </Link>
-                                {/* {
+                                {
                                     typeof props.product === "undefined" ? (
-                                        <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
+                                        <Button variant="contained" type="reset" style={{ margin: 8 }}
+                                        onClick={() => {
+                                            reset();
+                                        }}
+                                        >Làm mới</Button>
                                     ) : (
                                             <Link href="/crm/sku">
                                                 <ButtonGroup>
@@ -367,7 +383,7 @@ function render(props) {
                                                 </ButtonGroup>
                                             </Link>
                                         )
-                                } */}
+                                }
                             </Box>
                         </Grid>
                     </Box>

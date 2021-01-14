@@ -111,13 +111,13 @@ function render(props) {
 
         const searchCatogery = async (search) => {
             let categoryClient = getCategoryClient();
-            let res = await categoryClient.getListCategoryFromClient(0, 20, search);
+            let res = await categoryClient.getListCategoryFromClient(0, 100, search);
             if (res.status === "OK") {
                 return res.data.map(category => {
                     return { label: category.name, value: category.code }
                 });
             }
-            return [];
+            return [{ value: '', label: '' }];
         };
 
         const onSubmit2 = (data, e) => console.log(data, e);
@@ -158,6 +158,7 @@ function render(props) {
                                         control={control}
                                         errors={errors}
                                         onFieldChange={searchCatogery}
+                                        required={true}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} />
@@ -212,7 +213,7 @@ function render(props) {
                                             size="small"
                                             type="number"
                                             placeholder=""
-                                            defaultValue={2}
+                                            defaultValue={props.data?.numMultiply || 1}
                                             helperText={errors.name?.message}
                                             InputLabelProps={{
                                                 shrink: true,
@@ -245,7 +246,7 @@ function render(props) {
                                             // disabled={hidden}
                                             // label=""
                                             placeholder=""
-                                            defaultValue={5000}
+                                            defaultValue={props.data?.numAddition || 5000}
                                             helperText={errors.name?.message}
                                             InputLabelProps={{
                                                 shrink: true,
@@ -282,7 +283,21 @@ function render(props) {
                                 </Button>
                                     {
                                         typeof props.product === "undefined" ? (
-                                            <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
+                                            <Button variant="contained" type="reset" style={{ margin: 8 }}
+                                                onClick={() => {
+                                                    reset({
+                                                       ...props.data 
+                                                    }, {
+                                                        errors: false, // errors will not be reset 
+                                                        dirtyFields: false, // dirtyFields will not be reset
+                                                        isDirty: false, // dirty will not be reset
+                                                        isSubmitted: false,
+                                                        touched: false,
+                                                        isValid: false,
+                                                        submitCount: false,
+                                                    });
+                                                }}
+                                            >Làm mới</Button>
                                         ) : (
                                                 <Link href="/crm/sku">
                                                     <ButtonGroup>
