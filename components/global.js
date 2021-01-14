@@ -145,11 +145,10 @@ export function formatNumber(num) {
     return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
-
-export function formatEllipsisText(text) {
-    if (text) {
-        if (text.length > 100) {
-            return text.substring(0, 100) + "..."
+export function formatEllipsisText(text, len = 100) {
+    if(text) {
+        if(text.length > 50) {
+            return text.substring(0, len) + "..."
         }
         return text
     }
