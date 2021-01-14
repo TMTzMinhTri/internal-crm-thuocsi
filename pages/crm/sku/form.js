@@ -454,7 +454,6 @@ export default function renderForm(props, toast) {
                                                     message="Vui lòng chọn sản phẩm"
                                                     placeholder="Chọn sản phẩm"
                                                     options={lstOptions}
-                                                    onFieldChange={searchCatogery}
                                                 />
                                             </div>
                                         )
