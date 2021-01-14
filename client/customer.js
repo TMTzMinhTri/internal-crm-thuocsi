@@ -57,7 +57,7 @@ class CustomerClient extends APIClient {
     updateStatus(data) {
         return this.callFromClient(
             "PUT",
-            `${URI}/account`,
+            `${URI}/account/approve`,
             data
         )
     }
