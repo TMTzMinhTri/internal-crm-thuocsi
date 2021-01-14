@@ -383,7 +383,10 @@ export default function renderForm(props, toast) {
         formData.sellerCode = props.price?.sellerCode
         formData.productCode = props.product?.code
         formData.categoryCodes = categoryCode;
-        formData.tags = [...formData.tagsName] || [];
+        formData.tags = [];
+        formData.tagsName.forEach((tag) => {
+            formData.tags.push(tag.value)
+        })
         idDeleteds.sort(function (a, b) { return b - a });
         idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
