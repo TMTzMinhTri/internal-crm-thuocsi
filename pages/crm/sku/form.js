@@ -625,11 +625,12 @@ export default function renderForm(props, toast) {
                                         // case edit sku
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
                                             <>
-                                                <Accordion classes={{root:classes.root}} key={num} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
+                                                <Accordion  style={{backgroundColor: '#f8faf8'}} key={num} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
                                                     {
                                                         let tmpExpandeds = [...expandeds]
                                                         tmpExpandeds[idx] = !tmpExpandeds[idx]
                                                         setExpandeds(tmpExpandeds)
+                                                        // classes={{root:classes.root}}
                                                     };
                                                 }}>
                                                     <AccordionSummary
