@@ -17,7 +17,7 @@ export async function getServerSideProps(ctx) {
 export async function loadProduct(ctx) {
     let data = {
         props: {
-            status: 'OK'
+            isUpdate: true,
         }
     };
     let _client = getPriceClient(ctx, {});
@@ -29,16 +29,23 @@ export async function loadProduct(ctx) {
         data.props.status = res.status
         data.props.price = {};
     } else {
+        // get list tag
         let _client1 = getTagClient(ctx, {});
         let listTag = await _client1.getListTag(0, 100, "");
-        data.props.listTag = listTag.data || [];
+        data.props.listTag = listTag.data.map((tag) => {
+            return { value: tag.slug, label: tag.name };
+        });
         res.data[0].tagsName = [];
         res.data[0].tagsName = [...res.data[0].tags] || []
         data.props.price = res?.data[0];
+
+        // whosale price
         let productCode = data.props.price.productCode;
         data.props.price.wholesalePrice = data.props.price.wholesalePrice.map(
             (price) => ({ ...price, percentageDiscount: price.percentageDiscount * 100 })
         );
+
+        // get product info
         let _client2 = getProductClient(ctx, {});
         res = await _client2.getListProductByIdsOrCodes([], [productCode]);
         if (res.data) {
@@ -47,7 +54,7 @@ export async function loadProduct(ctx) {
             data.props.product = []
         }
     }
-    // console.log(data.props.price.wholesalePrice)
+    
     return data;
 }
 
