@@ -22,14 +22,14 @@ export const defaultPromotionScope = {
 }
 
 export const defaultRulePromotion = {
-    MIN_QUANTITY: "minQuantity",
-    MIN_ORDER_VALUE: "minOrderValue"
+    MIN_QUANTITY: "min_quantity",
+    MIN_ORDER_VALUE: "min_orderValue"
 }
 
 export const defaultTypeConditionsRule = {
-    DISCOUNT_ORDER_VALUE: "discountOrderValue",
+    DISCOUNT_ORDER_VALUE: "discount_order_value",
     GIFT: "gift",
-    PRODUCT_GIFT: "productGift",
+    PRODUCT_GIFT: "product_gift",
     DISCOUNT_PERCENT: "percent",
 }
 
@@ -39,6 +39,14 @@ export const defaultNameRules = {
     priceMaxDiscountValue: "priceMaxDiscountValue",
     percentValue: "percentValue",
     priceDiscountValue: "priceDiscountValue",
+}
+
+export const defaultNameRulesQuantity = {
+    minQuantity: "minValueAndQuantity",
+    priceMinValuePercent: "priceMinValuePercent",
+    priceMaxDiscountValue: "priceMaxDiscountValue",
+    percentValue: "percentValue",
+    priceDiscountValue: "priceDiscountValue"
 }
 
 export const defaultConditionInfo = {
@@ -57,23 +65,23 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
         case defaultRulePromotion.MIN_QUANTITY:
             result = {
                 ...result,
-                minOrderValue: {},
-                minQuantity: {
+                min_order_value: {},
+                min_quantity: {
                     field: defaultRulePromotion.MIN_QUANTITY,
                 }
             }
             if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minQuantity: parseInt(value[defaultNameRules.priceMinValueAndQuantity + i]),
-                        discountValue: parseInt(value[defaultNameRules.priceDiscountValue + i]),
+                        min_quantity: parseInt(value[defaultNameRules.priceMinValueAndQuantity + i]),
+                        discount_value: parseInt(value[defaultNameRules.priceDiscountValue + i]),
                         products: listProduct,
                     })
                 }
                 result = {
                     ...result,
-                    minQuantity: {
-                        ...result.minQuantity,
+                    min_quantity: {
+                        ...result.min_quantity,
                         type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
                         conditions: conditions,
                     }
@@ -81,16 +89,16 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
             }else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minQuantity: parseInt(value[defaultNameRules.priceMinValuePercent + i]),
-                        maxDiscountValue: parseInt(value[defaultNameRules.priceMaxDiscountValue + i]),
+                        min_quantity: parseInt(value[defaultNameRules.priceMinValuePercent + i]),
+                        max_discount_order_value: parseInt(value[defaultNameRules.priceMaxDiscountValue + i]),
                         percent: parseInt(value[defaultNameRules.percentValue+i]),
                         products: listProduct,
                     })
                 }
                 result = {
                     ...result,
-                    minQuantity: {
-                        ...result.minQuantity,
+                    min_quantity: {
+                        ...result.min_quantity,
                         type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
                         conditions: conditions,
                     }
@@ -100,23 +108,23 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
         case defaultRulePromotion.MIN_ORDER_VALUE:
             result = {
                 ...result,
-                minQuantity: {},
-                minOrderValue: {
+                min_quantity: {},
+                min_order_value: {
                     field: defaultRulePromotion.MIN_ORDER_VALUE,
                 }
             }
             if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minOrderValue: parseInt(value[defaultNameRules.priceMinValueAndQuantity + i]),
-                        discountValue: parseInt(value[defaultNameRules.priceDiscountValue + i]),
+                        min_order_value: parseInt(value[defaultNameRules.priceMinValueAndQuantity + i]),
+                        discount_value: parseInt(value[defaultNameRules.priceDiscountValue + i]),
                         products: listProduct,
                     })
                 }
                 result = {
                     ...result,
-                    minOrderValue: {
-                        ...result.minOrderValue,
+                    min_order_value: {
+                        ...result.min_order_value,
                         type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
                         conditions: conditions,
                     }
@@ -124,16 +132,16 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
             }else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minOrderValue: parseInt(value[defaultNameRules.priceMinValuePercent + i]),
-                        maxDiscountValue: parseInt(value[defaultNameRules.priceMaxDiscountValue + i]),
+                        min_order_value: parseInt(value[defaultNameRules.priceMinValuePercent + i]),
+                        max_discount_value: parseInt(value[defaultNameRules.priceMaxDiscountValue + i]),
                         percent: parseInt(value[defaultNameRules.percentValue+i]),
                         products: listProduct,
                     })
                 }
                 result = {
                     ...result,
-                    minOrderValue: {
-                        ...result.minOrderValue,
+                    min_order_value: {
+                        ...result.min_order_value,
                         type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
                         conditions: conditions,
                     }

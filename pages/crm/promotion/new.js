@@ -121,26 +121,24 @@ function render(props) {
     }
 
     const handleChangeScope = async (event) => {
-        console.log('1234',event.target.value)
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
             let listCategoryResponse = await getListCategory()
-            if (listCategoryResponse && listCategoryResponse.status === "OK") {
-                setState({...state,listCategoryPromotion: listCategoryResponse.data,[event.target?.name]: event.target?.value})
+            if (!listCategoryResponse || listCategoryResponse.status !== "OK") {
+                return toast.warn('Không tìm thấy danh sách danh mục')
             }
             let productDefaultResponse = await getProduct()
-            console.log('product',productDefaultResponse)
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = []
                     productDefaultResponse.data.forEach((productResponse,index) => {
                         if (index < 5) {
                             listProductDefault.push({
                                 product: productResponse,
-                                active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID)
+                                active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID) || false
                             })
                         }
                     })
-                setState({...state,[event.target?.name]: event.target?.value,listProductDefault: listProductDefault})
+                setState({...state,[event.target?.name]: event.target?.value,listProductDefault: listProductDefault,listCategoryPromotion: listCategoryResponse.data})
                 setOpen({...open,openModalProductScopePromotion: true})
                 }
         }else {
@@ -691,14 +689,17 @@ function render(props) {
                                 </Grid>
                             </CardContent>
                         {
-                            promotionScope === defaultPromotionScope.PRODUCT ? (
+                            promotionScope === defaultPromotionScope.PRODUCT && open.openModalProductScopePromotion === true ? (
                                     <RenderTableListProduct
                                         handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
                                         handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
                                         open={open.openModalProductScopePromotion}
                                         register={register}
-                                        state={state}
                                         getValue={getValues()}
+                                        listProductDefault={listProductDefault}
+                                        promotionScope={promotionScope}
+                                        listCategoryPromotion={listCategoryPromotion}
+                                        listProductPromotion={listProductPromotion}
                                         handleAddProductPromotion={handleAddProductPromotion}
                                         handleRemoveProductPromotion={handleRemoveProductPromotion}
                                     />
@@ -1114,8 +1115,8 @@ export function RenderTableProductGift(props) {
 export function RenderTableListProduct(props) {
     console.log('props',props.state)
     const [stateProduct, setStateProduct] = useState({
-        listProductAction: props.state.listProductDefault,
-        listCategoryPromotion: props.state.listCategoryPromotion,
+        listProductAction: props.listProductDefault,
+        listCategoryPromotion: props.listCategoryPromotion,
         categorySearch: {},
         productNameSearch: "",
     })
@@ -1148,7 +1149,7 @@ export function RenderTableListProduct(props) {
                 if (index < 5) {
                     listProductAction.push({
                         product: searchProduct,
-                        active: props.state.listProductPromotion.find(productPromotion => productPromotion.productID === searchProduct.productID)
+                        active: props.listProductPromotion.find(productPromotion => productPromotion.productID === searchProduct.productID)
                     })
                 }
             })
@@ -1161,10 +1162,10 @@ export function RenderTableListProduct(props) {
             <Button variant="contained" style={{margin: "1rem 0"}} onClick={props.handleClickOpen}>Chọn sản phẩm</Button>
             <Modal open={props.open} onClose={props.handleClose} className={styles.modal}>
                 <div className={styles.modalBody}>
-                    <h3>
+                    <h1 className={styles.headerModal}>
                         Chọn sản phẩm
-                    </h3>
-                    <div>
+                    </h1>
+                    <div style={{margin: "1.25rem"}}>
                         <Grid spacing={3} container>
                             <Grid item sx={12} sm={4} md={4}>
                                 <TextField
@@ -1177,7 +1178,7 @@ export function RenderTableListProduct(props) {
                                 />
                             </Grid>
                             <Grid item sx={12} sm={4} md={4} className={styles.blockSearch}>
-                                <FormControl className={styles.search}>
+                                <FormControl className={styles.select}>
                                     <InputLabel id="category-select-outlined-label">Chọn danh mục</InputLabel>
                                     <Select
                                         autoWidth={false}
@@ -1195,8 +1196,8 @@ export function RenderTableListProduct(props) {
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            <Grid item sx={12} sm={4} md={4}>
-                                    <Button variant="contained"  onClick={handleOnSearchProductCategory}>Tìm kiếm<IconButton>
+                            <Grid item sx={12} sm={4} md={4} style={{display: "flex"}}>
+                                    <Button variant="contained"  onClick={handleOnSearchProductCategory} className={styles.buttonSearch}>Tìm kiếm<IconButton>
                                         <SearchIcon/>
                                     </IconButton>
                                     </Button>
@@ -1204,20 +1205,18 @@ export function RenderTableListProduct(props) {
                         </Grid>
                     </div>
                     <DialogContent>
-                        <div style={{marginBottom: '1rem'}}>
-                        </div>
                         <TableContainer component={Paper}>
                             <Table size="small">
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell align="center">Thao tác</TableCell>
+                                        <TableCell align="left">Thao tác</TableCell>
                                         <TableCell align="left">Thông tin sản phẩm</TableCell>
                                         <TableCell align="left">Ảnh</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 {stateProduct.listProductAction.map(({product,active}) => (
                                     <TableRow key={product.productID}>
-                                        <TableCell align="center">
+                                        <TableCell align="left">
                                             <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveProduct(product,value)} />
                                         </TableCell>
                                         <TableCell align="left">
@@ -1250,7 +1249,7 @@ export function RenderTableListProduct(props) {
                 </div>
             </Modal>
             {
-               props.state.promotionScope === defaultPromotionScope.PRODUCT ? (
+               props.promotionScope === defaultPromotionScope.PRODUCT ? (
                     <Card>
                         <TableContainer component={Paper}>
                             <Table size="small">
@@ -1261,7 +1260,7 @@ export function RenderTableListProduct(props) {
                                         <TableCell align="left">Hành Động</TableCell>
                                     </TableRow>
                                 </TableHead>
-                                {props.state.listProductPromotion.map((product) => (
+                                {props.listProductPromotion.map((product) => (
                                     <TableRow>
                                         <TableCell align="left">
                                             {
