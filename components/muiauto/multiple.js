@@ -1,3 +1,4 @@
+import { withStyles } from "@material-ui/core/styles";
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import useDebounce from "components/useDebounce";
@@ -16,7 +17,19 @@ import { Controller } from "react-hook-form";
 	reset error - PENDING
  * @param {*} param0 
  */
-const MuiAuto = ({
+
+const MuiMultipleAutocomplete = withStyles({
+    tag: {
+        height: 'auto',
+        "& .MuiChip-label": {
+            paddingBottom: '3px',
+            paddingTop: '3px',
+            whiteSpace: 'normal'
+        }
+    }
+})(Autocomplete); // Fix CSS scroll page when pick long tag
+
+const MuiMultipleAuto = ({
         name, // NAME INPUT
         options,  // DATA OPTIONS label-value
         label,  // LABEL
@@ -45,13 +58,13 @@ const MuiAuto = ({
                 })
             }
         }
-    },[debouncedSearch]);
+    },[debouncedSearch,q]);
 
     return (
         <div>
             <Controller
                 render={({ onChange, ...props }) => (
-                    <Autocomplete
+                    <MuiMultipleAutocomplete
                         id={name}
                         multiple
                         options={qOptions}
@@ -74,6 +87,9 @@ const MuiAuto = ({
                                 placeholder={placeholder}
                                 variant="outlined"
                                 size="small"
+                                onBlur={() => {
+                                    setQ('')
+                                }}
                                 onChange={(e) => setQ(e.target.value)}
                             />
                         )}
@@ -99,4 +115,4 @@ const MuiAuto = ({
     )
 }
 
-export default MuiAuto;
+export default MuiMultipleAuto;
