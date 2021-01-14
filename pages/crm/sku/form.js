@@ -9,6 +9,7 @@ import {
     Tooltip,
     Typography
 } from "@material-ui/core";
+import { makeStyles } from '@material-ui/core/styles';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
@@ -27,6 +28,12 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
+
+const useStyles = makeStyles({
+    root: {
+        backgroundColor:'#f8faf8'
+    },
+  });
 
 const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index, getValues, limitQty, ids, defaultIds, idDeleteds }) => {
 
@@ -349,6 +356,7 @@ export default function renderForm(props, toast) {
             <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
         )
     }
+    const classes = useStyles();
     const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
@@ -609,7 +617,7 @@ export default function renderForm(props, toast) {
                                     {
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
                                             <>
-                                                <Accordion key={idx} expanded={expandeds ? expandeds[idx] : false} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={() => {
+                                                <Accordion classes={{root:classes.root}} key={idx} expanded={expandeds ? expandeds[idx] : false} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={() => {
                                                     {
                                                         let tmpExpandeds = [...expandeds]
                                                         tmpExpandeds[idx] = !tmpExpandeds[idx]
@@ -641,7 +649,7 @@ export default function renderForm(props, toast) {
                                         )) :
                                             ids.map((num, idx) => (
                                                 <>
-                                                    <Accordion key={`panel${idx}`} expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                                    <Accordion  classes={{root:classes.root}} key={`panel${idx}`} expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
                                                         <AccordionSummary
                                                             expandIcon={<ExpandMoreIcon />}
                                                             aria-controls="panel1bh-content"
