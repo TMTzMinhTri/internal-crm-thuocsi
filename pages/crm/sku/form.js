@@ -639,7 +639,7 @@ export default function renderForm(props, toast) {
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                            register={register} errors={errors} index={num} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                                            register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                                     </AccordionDetails>
                                                     <AccordionActions>
                                                         <Button size="small" color="secondary" variant="contained"
