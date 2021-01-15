@@ -23,9 +23,16 @@ import SearchIcon from '@material-ui/icons/Search';
 import IconButton from "@material-ui/core/IconButton";
 import {useForm} from "react-hook-form";
 import {getPromoClient} from "../../../client/promo";
-import {displayPromotionScope, displayPromotionType, displayRule, displayStatus} from "../../../client/constant";
+import {
+    defaultPromotionStatus,
+    displayPromotionScope,
+    displayPromotionType,
+    displayRule,
+    displayStatus
+} from "../../../client/constant";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
+import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -66,6 +73,7 @@ async function updatePromotion(promotionID,status) {
 
 function render(props) {
     console.log('render',props)
+    const toast = useToast()
     let router = useRouter()
     const {register, handleSubmit, errors} = useForm();
     let [search, setSearch] = useState('')
@@ -82,7 +90,23 @@ function render(props) {
         Router.push(`/crm/promotion?q=${q}`)
     }
 
-    const handleActivePromotion = (event,promotionID) => {
+    const handleActivePromotion = async (event,promotionID) => {
+        console.log('1234',event.target.checked,promotionID)
+        if (event.target.checked) {
+            let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.ACTIVE)
+            if (!promotionResponse || promotionResponse.status !==  "OK") {
+                return toast.error(promotionResponse.mesage)
+            }else {
+                return toast.success('Cập nhật thành công')
+            }
+        }else {
+            let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.EXPIRED)
+            if (!promotionResponse || promotionResponse.status !==  "OK") {
+                return toast.error(promotionResponse.mesage)
+            }else {
+                return toast.success('Cập nhật thành công')
+            }
+        }
     }
 
     async function handleChange(event) {

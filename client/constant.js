@@ -25,6 +25,7 @@ export const defaultPromotionStatus = {
     WAITING: "WAITING",
     ACTIVE: "ACTIVE",
     FULL: "FULL",
+    HIDE: "HIDE",
     EXPIRED: "EXPIRED",
     DELETED: "DELETED",
 }
@@ -216,42 +217,42 @@ export function parseConditionValue(conditions,typePromotion,promotionTypeCondit
         case defaultRulePromotion.MIN_ORDER_VALUE:
             if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE){
                 if (conditionInfo === defaultNameRulesValue.priceMinValue+index) {
-                    return conditions[index][defaultConditionInfo.minOrderValue]
+                    return conditions[index]?conditions[index][defaultConditionInfo.minOrderValue] : ""
                 }
                 if (conditionInfo === defaultNameRulesValue.priceDiscountValue+index) {
-                    return conditions[index][defaultConditionInfo.discountValue]
+                    return conditions[index]?conditions[index][defaultConditionInfo.discountValue] : ""
                 }
             }
             if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 if (conditionInfo === defaultNameRulesValue.priceMinValuePercent+index) {
-                    return conditions[index][defaultConditionInfo.minOrderValue]
+                    return conditions[index]?conditions[index][defaultConditionInfo.minOrderValue] : ""
                 }
                 if (conditionInfo === defaultNameRulesValue.percentValue+index) {
-                    return conditions[index][defaultConditionInfo.percent]
+                    return conditions[index]?conditions[index][defaultConditionInfo.percent]: ""
                 }
                 if (conditionInfo === defaultNameRulesValue.maxDiscountValue+index) {
-                    return conditions[index][defaultConditionInfo.maxDiscountValue]
+                    return conditions[index]?conditions[index][defaultConditionInfo.maxDiscountValue] : ""
                 }
             }
             break
         case defaultRulePromotion.MIN_QUANTITY:
             if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE){
                 if (conditionInfo === defaultNameRulesQuantity.priceMinValue+index) {
-                    return conditions[index][defaultConditionInfo.priceMinValuePercent]
+                    return conditions[index]?conditions[index][defaultConditionInfo.priceMinValuePercent]: ""
                 }
                 if (conditionInfo === defaultNameRulesQuantity.priceDiscountValue+index) {
-                    return conditions[index][defaultConditionInfo.discountValue]
+                    return conditions[index]?conditions[index][defaultConditionInfo.discountValue]: ""
                 }
             }
             if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 if (conditionInfo === defaultNameRulesQuantity.priceMinValuePercent+index) {
-                    return conditions[index][defaultConditionInfo.minQuantity]
+                    return conditions[index]?conditions[index][defaultConditionInfo.minQuantity]: ""
                 }
                 if (conditionInfo === defaultNameRulesQuantity.percentValue+index) {
-                    return conditions[index][defaultConditionInfo.percent]
+                    return conditions[index]?conditions[index][defaultConditionInfo.percent]: ""
                 }
                 if (conditionInfo === defaultNameRulesQuantity.priceMaxDiscountValue+index) {
-                    return conditions[index][defaultConditionInfo.maxDiscountValue]
+                    return conditions[index]?conditions[index][defaultConditionInfo.maxDiscountValue]: ""
                 }
             }
             break

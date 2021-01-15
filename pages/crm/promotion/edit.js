@@ -24,7 +24,7 @@ import {
     defaultPromotionScope, defaultPromotionType,
     defaultRulePromotion,
     defaultTypeConditionsRule, displayNameRule, limitText, parseConditionValue, parseRuleToObject,
-    setRulesPromotion
+    setRulesPromotion, setScopeObjectPromontion
 } from "../../../client/constant";
 import Card from "@material-ui/core/Card";
 import List from "@material-ui/core/List";
@@ -76,8 +76,10 @@ export async function loadPromotionData(ctx) {
     return returnObject
 }
 
-async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,scope,rule) {
-    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,scope,rule})
+async function updatePromotion(totalCode,promotionName,promotionType,startTime,endTime,objects,rule,promotionId) {
+    let data = {totalCode,promotionName,promotionType,startTime,endTime,objects,rule,promotionId}
+    console.log('data',data)
+    return getPromoClient().updatePromotion({promotionId,totalCode,promotionName,promotionType,startTime,endTime,objects,rule})
 }
 
 async function getProduct(productName,categoryCode) {
@@ -201,16 +203,18 @@ function render(props) {
     async function onSubmit() {
         let {promotionName,totalCode,startTime,endTime} = getValues()
         let value = getValues()
-        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,promotionScope)
+        let listProductIDs = []
+        listProductPromotion.forEach(product => listProductIDs.push(product.productID))
+        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,listProductIDs)
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
-
-        // let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,defaultPromotionScope.GLOBAL,rule)
-        // if (promotionResponse.status === "OK") {
-        //     toast.success('Tạo khuyến mãi thành công')
-        // }else {
-        //     toast.error(`${promotionResponse.message}`)
-        // }
+        let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
+        let promotionResponse =updatePromotion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule,dataRender.promotionId)
+        if (promotionResponse.status === "OK") {
+            toast.success('Cập nhật khuyến mãi thành công')
+        }else {
+            toast.error(`${promotionResponse.message}`)
+        }
     }
 
     return (
