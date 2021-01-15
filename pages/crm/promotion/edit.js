@@ -23,7 +23,7 @@ import {
     defaultNameRulesValue,
     defaultPromotionScope, defaultPromotionType,
     defaultRulePromotion,
-    defaultTypeConditionsRule, parseRuleToObject,
+    defaultTypeConditionsRule, displayNameRule, parseConditionValue, parseRuleToObject,
     setRulesPromotion
 } from "../../../client/constant";
 import Card from "@material-ui/core/Card";
@@ -71,16 +71,15 @@ function render(props) {
     const toast = useToast()
     let dataRender = props.data
     let defaultState = parseRuleToObject(dataRender)
-    console.log(defaultState)
-    const [promotionRulesLine, setPromotionRulesLine] = useState([
-        {
-            id: 1,
-        },
-    ])
+    let startTime = dataRender.startTime
+    let endTime = dataRender.endTime
+    startTime = startTime.substring(0,startTime.length-4)
+    endTime = endTime.substring(0,endTime.length-4)
     const [state, setState] = useState(defaultState);
-    const {promotionOption, promotionTypeRule, promotionScope} = state
+    const [updateDateProps, setUpdateDataProps] = useState({
+    })
+    const {promotionOption, promotionTypeRule, promotionScope,promotionRulesLine,conditions} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
-
     const [open, setOpen] = useState(false);
 
     const handleClickOpen = () => {
@@ -89,7 +88,6 @@ function render(props) {
 
     const handleClose = () => {
         setOpen(false);
-        console.log('12321')
     };
 
     const handleChange = (event) => {
@@ -101,10 +99,7 @@ function render(props) {
     }
 
     const handleChangeStatus = (event) => {
-        setPromotionRulesLine([{
-            id: 1,
-        }])
-        setState({...state, [event.target.name]: event.target.value})
+        setState({...state, [event.target.name]: event.target.value,promotionRulesLine: [{id:0}]})
         console.log('value',getValues())
         reset()
         console.log('error',errors)
@@ -113,11 +108,11 @@ function render(props) {
 
     function handleRemoveCodePercent(id) {
         const newCodes = promotionRulesLine.filter((item) => item.id !== id);
-        setPromotionRulesLine(newCodes);
+        setState({...state,promotionRulesLine: newCodes});
     }
 
     function handleAddCodePercent(id) {
-        setPromotionRulesLine([...promotionRulesLine, {id: id + 1}]);
+        setState({...state,promotionRulesLine: [...promotionRulesLine,{id: id + 1}]});
     }
 
     // func onSubmit used because useForm not working with some fields
@@ -128,12 +123,12 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
 
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,defaultPromotionScope.GLOBAL,rule)
-        if (promotionResponse.status === "OK") {
-            toast.success('Tạo khuyến mãi thành công')
-        }else {
-            toast.error(`${promotionResponse.message}`)
-        }
+        // let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,defaultPromotionScope.GLOBAL,rule)
+        // if (promotionResponse.status === "OK") {
+        //     toast.success('Tạo khuyến mãi thành công')
+        // }else {
+        //     toast.error(`${promotionResponse.message}`)
+        // }
     }
 
     return (
@@ -214,7 +209,7 @@ function render(props) {
                                         name="startTime"
                                         label="Thời gian bắt đầu"
                                         placeholder=""
-                                        defaultValue={dataRender.startTime}
+                                        defaultValue={startTime}
                                         helperText={errors.startTime?.message}
                                         type="datetime-local"
                                         InputLabelProps={{
@@ -237,7 +232,7 @@ function render(props) {
                                         label="Thời gian kết thúc"
                                         placeholder=""
                                         type="datetime-local"
-                                        defaultValue={dataRender.endTime}
+                                        defaultValue={endTime}
                                         helperText={errors.endTime?.message}
                                         InputLabelProps={{
                                             shrink: true,
@@ -319,19 +314,20 @@ function render(props) {
                                                             spacing={1} container alignItems="center">
                                                             <Grid item xs={5} sm={5} md={5}>
                                                                 <TextField
-                                                                    id={defaultNameRulesValue.priceMinValue + index}
-                                                                    name={defaultNameRulesValue.priceMinValue + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)}
                                                                     label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
                                                                     placeholder=""
                                                                     type="number"
                                                                     variant="outlined"
+                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index),index)}
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRulesValue.priceMinValue + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={!!errors[defaultNameRulesValue.priceMinValue + index]}
+                                                                    error={!!errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -350,14 +346,15 @@ function render(props) {
                                                             </Grid>
                                                             <Grid item xs={5} sm={5} md={5}>
                                                                 <TextField
-                                                                    id={defaultNameRulesValue.priceDiscountValue + index}
-                                                                    name={defaultNameRulesValue.priceDiscountValue + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)}
                                                                     type="number"
                                                                     label="Số tiền giảm"
                                                                     placeholder=""
                                                                     variant="outlined"
+                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index),index)}
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRulesValue.priceDiscountValue + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
@@ -366,7 +363,7 @@ function render(props) {
                                                                             position="end">đ</InputAdornment>,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={errors[defaultNameRulesValue.priceDiscountValue + index] ? true : false}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)] ? true : false}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -430,19 +427,20 @@ function render(props) {
                                                         <Grid spacing={1} container alignItems="center">
                                                             <Grid item xs={4} sm={4} md={4}>
                                                                 <TextField
-                                                                    id={defaultNameRulesValue.priceMinValuePercent + index}
-                                                                    name={defaultNameRulesValue.priceMinValuePercent + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)}
                                                                     label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
                                                                     placeholder=""
                                                                     type="number"
+                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index),index)}
                                                                     variant="outlined"
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRulesValue.priceMinValuePercent+index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={!!errors[defaultNameRulesValue.priceMinValuePercent+index]}
+                                                                    error={!!errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)]}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -461,14 +459,15 @@ function render(props) {
                                                             </Grid>
                                                             <Grid item xs={2} sm={2} md={2}>
                                                                 <TextField
-                                                                    id={defaultNameRulesValue.percentValue + index}
-                                                                    name={defaultNameRulesValue.percentValue + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)}
                                                                     type="number"
                                                                     label="Số % giảm"
                                                                     placeholder=""
                                                                     variant="outlined"
+                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index),index)}
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRulesValue.percentValue + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
@@ -477,7 +476,7 @@ function render(props) {
                                                                             position="end">%</InputAdornment>,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={errors[defaultNameRulesValue.percentValue + index] ? true : false}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)] ? true : false}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -500,14 +499,15 @@ function render(props) {
                                                             </Grid>
                                                             <Grid item xs={4} sm={4} md={4}>
                                                                 <TextField
-                                                                    id={defaultNameRulesValue.priceMaxDiscountValue + index}
-                                                                    name={defaultNameRulesValue.priceMaxDiscountValue + index}
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)}
                                                                     type="number"
                                                                     label="Số tiền giảm tối đa"
                                                                     placeholder=""
                                                                     variant="outlined"
+                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index),index)}
                                                                     size="small"
-                                                                    helperText={errors[defaultNameRulesValue.priceMaxDiscountValue + index]?.message}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
@@ -516,7 +516,7 @@ function render(props) {
                                                                             position="end">đ</InputAdornment>,
                                                                     }}
                                                                     style={{width: '100%'}}
-                                                                    error={errors[defaultNameRulesValue.priceMaxDiscountValue + index] ? true : false}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)] ? true : false}
                                                                     required
                                                                     inputRef={
                                                                         register({
@@ -577,18 +577,18 @@ function render(props) {
                                     </Card>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.GIFT ? (
                                     <RenderTableGift
-                                        handleClickOpen={handleClickOpen}
-                                        handleClose={handleClose}
-                                        open={open}
+                                        handleClickOpen={() => setOpen({...open,openModalGift: true})}
+                                        handleClose={() => setOpen({...open,openModalGift: false})}
+                                        open={open.openModalGift}
                                         register={register}
                                         state={state}
                                         handleRemoveCodePercent={handleRemoveCodePercent}
                                         handleChange={handleChange}/>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
                                     <RenderTableProductGift
-                                        handleClickOpen={handleClickOpen}
-                                        handleClose={handleClose}
-                                        open={open}
+                                        handleClickOpen={() => setOpen({...open,openModalProductGift: true})}
+                                        handleClose={() => setOpen({...open,openModalProductGift: false})}
+                                        open={open.openModalProductGift}
                                         register={register}
                                         state={state}
                                         handleRemoveCodePercent={handleRemoveCodePercent}

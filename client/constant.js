@@ -9,7 +9,7 @@ export const queryParamGetProductGift = "GIFT"
 
 export const defaultPromotionType = {
     COMBO: "COMBO",
-    VOUCHER_CODE: " VOUCHERCODE",
+    VOUCHER_CODE: "VOUCHERCODE",
     FREESHIP: " FREESHIP",
 }
 
@@ -23,7 +23,7 @@ export const defaultPromotionScope = {
 
 export const defaultRulePromotion = {
     MIN_QUANTITY: "min_quantity",
-    MIN_ORDER_VALUE: "min_orderValue"
+    MIN_ORDER_VALUE: "min_order_value"
 }
 
 export const defaultTypeConditionsRule = {
@@ -32,6 +32,12 @@ export const defaultTypeConditionsRule = {
     PRODUCT_GIFT: "product_gift",
     DISCOUNT_PERCENT: "percent",
 }
+
+export const mapNamePromotionDefaultRule = {
+    minQuantity: "min_quantity",
+    minOrderValue: "min_order_value",
+}
+
 
 export const defaultNameRulesValue = {
     priceMinValue: "priceMinValue",
@@ -63,6 +69,7 @@ export const defaultValidateNameRuleValue = {
 }
 
 export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct) {
+    console.log('value',value)
     let result = {}
     let conditions = []
     switch (typePromotion){
@@ -77,7 +84,7 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
             if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minQuantity: parseInt(value[defaultNameRulesQuantity.priceMinValue + i]),
+                        minQuantity: parseInt(value[defaultNameRulesQuantity.priceMinValuePercent + i]),
                         discountValue: parseInt(value[defaultNameRulesQuantity.priceDiscountValue + i]),
                         products: listProduct,
                     })
@@ -93,8 +100,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
             }else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minQuantity: parseInt(value[defaultNameRulesQuantity.minQuantity + i]),
-                        maxDiscountOrderValue: parseInt(value[defaultNameRulesQuantity.priceMaxDiscountValue + i]),
+                        minQuantity: parseInt(value[defaultNameRulesQuantity.percentValue + i]),
+                        maxDiscountValue: parseInt(value[defaultNameRulesQuantity.priceMaxDiscountValue + i]),
                         percent: parseInt(value[defaultNameRulesQuantity.priceMinValuePercent+i]),
                         products: listProduct,
                     })
@@ -165,31 +172,82 @@ export function parseRuleToObject(promotion) {
             gift: {},
             quantity: 0,
         }],
+        promotionRulesLine: [],
         listProductPromotion: [],
         listProductDefault: [],
         listCategoryPromotion: [],
+        conditions: [],
     }
     let {minOrderValue,minQuantity} = promotion.rule
     if (minQuantity.field) {
-        console.log('minOrderValue',minQuantity.conditions)
-        result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE
-        result.promotionTypeRule = minQuantity.type
-        result.listProductPromotion = minQuantity.conditions
-    }else {
-        console.log('minOrderValue',minOrderValue.conditions)
         result.promotionOption = defaultRulePromotion.MIN_QUANTITY
+        result.promotionTypeRule = minQuantity.type
+    }else {
+        result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE
         result.promotionTypeRule = minOrderValue.type
-        result.listProductPromotion = minOrderValue.conditions
     }
+    let {conditions} = minQuantity.field? minQuantity : minOrderValue
+    result.conditions = conditions
+    conditions.forEach((condition,index) => {
+        result.promotionRulesLine.push({id: index})
+        if (condition.products) {
+            return result.listProductPromotion.concat(condition.products)
+        }
+    })
+    result.listProductPromotion = [... new Set(result.listProductPromotion)]
     return result
 }
 
-export function parseConditionValue(conditions,promotionOption) {
-    let {percent,minOrderValue,minQuantity,productCategory,products,skus,discountValue,maxDiscountValue} = conditions
-    switch (promotionOption) {
-        case defaultRulePromotion.MIN_QUANTITY:
-            break
+export function parseConditionValue(conditions,typePromotion,promotionTypeCondition,conditionInfo,index) {
+    switch (typePromotion) {
         case defaultRulePromotion.MIN_ORDER_VALUE:
+            if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE){
+                if (conditionInfo === defaultNameRulesValue.priceMinValue+index) {
+                    return conditions[index][defaultConditionInfo.minOrderValue]
+                }
+                if (conditionInfo === defaultNameRulesValue.priceDiscountValue+index) {
+                    return conditions[index][defaultConditionInfo.discountValue]
+                }
+            }
+            if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
+                if (conditionInfo === defaultNameRulesValue.priceMinValuePercent+index) {
+                    return conditions[index][defaultConditionInfo.minOrderValue]
+                }
+                if (conditionInfo === defaultNameRulesValue.percentValue+index) {
+                    return conditions[index][defaultConditionInfo.percent]
+                }
+                if (conditionInfo === defaultNameRulesValue.maxDiscountValue+index) {
+                    return conditions[index][defaultConditionInfo.maxDiscountValue]
+                }
+            }
+            break
+        case defaultRulePromotion.MIN_QUANTITY:
+            console.log('condition',conditionInfo,promotionTypeCondition,index)
+            if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE){
+                if (conditionInfo === defaultNameRulesQuantity.priceMinValue+index) {
+                    console.log('1',conditions[index][defaultConditionInfo.priceMinValuePercent])
+                    return conditions[index][defaultConditionInfo.priceMinValuePercent]
+                }
+                if (conditionInfo === defaultNameRulesQuantity.priceDiscountValue+index) {
+                    console.log('2',conditions[index][defaultConditionInfo.discountValue])
+                    return conditions[index][defaultConditionInfo.discountValue]
+                }
+            }
+            if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
+                if (conditionInfo === defaultNameRulesQuantity.priceMinValuePercent+index) {
+                    console.log('3',conditions[index][defaultConditionInfo.minQuantity])
+                    return conditions[index][defaultConditionInfo.minQuantity]
+                }
+                if (conditionInfo === defaultNameRulesQuantity.percentValue+index) {
+                    console.log('4', conditions[index][defaultConditionInfo.percent])
+                    return conditions[index][defaultConditionInfo.percent]
+                }
+                console.log(defaultNameRulesQuantity.maxDiscountValue+index)
+                if (conditionInfo === defaultNameRulesQuantity.maxDiscountValue+index) {
+                    console.log('5',conditions[index][defaultConditionInfo.maxDiscountValue])
+                    return conditions[index][defaultConditionInfo.maxDiscountValue]
+                }
+            }
             break
     }
 }
