@@ -21,6 +21,14 @@ export const defaultPromotionScope = {
     SKU: "SKU",
 }
 
+export const defaultPromotionStatus = {
+    WAITING: "WAITING",
+    ACTIVE: "ACTIVE",
+    FULL: "FULL",
+    EXPIRED: "EXPIRED",
+    DELETED: "DELETED",
+}
+
 export const defaultRulePromotion = {
     MIN_QUANTITY: "min_quantity",
     MIN_ORDER_VALUE: "min_order_value"
@@ -38,6 +46,10 @@ export const mapNamePromotionDefaultRule = {
     minOrderValue: "min_order_value",
 }
 
+export const defaultTypeProduct = {
+    ALL: "ALL",
+    MANY: "MANY"
+}
 
 export const defaultNameRulesValue = {
     priceMinValue: "priceMinValue",
@@ -64,11 +76,7 @@ export const defaultConditionInfo = {
     products: "products"
 }
 
-export const defaultValidateNameRuleValue = {
-
-}
-
-export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct) {
+export function setRulesPromotion(typePromotion,typeRule,value,index) {
     console.log('value',value)
     let result = {}
     let conditions = []
@@ -84,9 +92,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
             if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minQuantity: parseInt(value[defaultNameRulesQuantity.priceMinValuePercent + i]),
+                        minQuantity: parseInt(value[defaultNameRulesQuantity.priceMinValue + i]),
                         discountValue: parseInt(value[defaultNameRulesQuantity.priceDiscountValue + i]),
-                        products: listProduct,
                     })
                 }
                 result = {
@@ -100,10 +107,9 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
             }else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 for (let i = 0; i < index; i ++) {
                     conditions.push({
-                        minQuantity: parseInt(value[defaultNameRulesQuantity.percentValue + i]),
+                        minQuantity: parseInt(value[defaultNameRulesQuantity.priceMinValuePercent + i]),
                         maxDiscountValue: parseInt(value[defaultNameRulesQuantity.priceMaxDiscountValue + i]),
-                        percent: parseInt(value[defaultNameRulesQuantity.priceMinValuePercent+i]),
-                        products: listProduct,
+                        percent: parseInt(value[defaultNameRulesQuantity.percentValue+i]),
                     })
                 }
                 result = {
@@ -129,7 +135,6 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
                     conditions.push({
                         minOrderValue: parseInt(value[defaultNameRulesValue.priceMinValue + i]),
                         discountValue: parseInt(value[defaultNameRulesValue.priceDiscountValue + i]),
-                        products: listProduct,
                     })
                 }
                 result = {
@@ -146,7 +151,6 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
                         minOrderValue: parseInt(value[defaultNameRulesValue.priceMinValuePercent + i]),
                         maxDiscountValue: parseInt(value[defaultNameRulesValue.priceMaxDiscountValue + i]),
                         percent: parseInt(value[defaultNameRulesValue.percentValue+i]),
-                        products: listProduct,
                     })
                 }
                 result = {
@@ -163,17 +167,26 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listProduct
     return result
 }
 
+export function setScopeObjectPromontion(promotionScope,listProducts) {
+    return [{
+        scope: promotionScope,
+        type: listProducts.length > 0 ? defaultTypeProduct.MANY : defaultTypeProduct.ALL,
+        products: listProducts
+    }]
+}
+
 export function parseRuleToObject(promotion) {
     let result = {
         promotionOption: "",
         promotionTypeRule: "",
-        promotionScope: promotion.scope,
+        promotionScope: promotion.objects[0].scope,
         listGiftPromotion: [{
             gift: {},
             quantity: 0,
         }],
         promotionRulesLine: [],
         listProductPromotion: [],
+        listProductIDs: [],
         listProductDefault: [],
         listCategoryPromotion: [],
         conditions: [],
@@ -187,14 +200,14 @@ export function parseRuleToObject(promotion) {
         result.promotionTypeRule = minOrderValue.type
     }
     let {conditions} = minQuantity.field? minQuantity : minOrderValue
-    result.conditions = conditions
     conditions.forEach((condition,index) => {
         result.promotionRulesLine.push({id: index})
-        if (condition.products) {
-            return result.listProductPromotion.concat(condition.products)
-        }
     })
-    result.listProductPromotion = [... new Set(result.listProductPromotion)]
+    result = {
+        ...result,
+        conditions: conditions,
+        listProductIDs: promotion.objects[0].products || []
+    }
     return result
 }
 
@@ -222,29 +235,22 @@ export function parseConditionValue(conditions,typePromotion,promotionTypeCondit
             }
             break
         case defaultRulePromotion.MIN_QUANTITY:
-            console.log('condition',conditionInfo,promotionTypeCondition,index)
             if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE){
                 if (conditionInfo === defaultNameRulesQuantity.priceMinValue+index) {
-                    console.log('1',conditions[index][defaultConditionInfo.priceMinValuePercent])
                     return conditions[index][defaultConditionInfo.priceMinValuePercent]
                 }
                 if (conditionInfo === defaultNameRulesQuantity.priceDiscountValue+index) {
-                    console.log('2',conditions[index][defaultConditionInfo.discountValue])
                     return conditions[index][defaultConditionInfo.discountValue]
                 }
             }
             if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 if (conditionInfo === defaultNameRulesQuantity.priceMinValuePercent+index) {
-                    console.log('3',conditions[index][defaultConditionInfo.minQuantity])
                     return conditions[index][defaultConditionInfo.minQuantity]
                 }
                 if (conditionInfo === defaultNameRulesQuantity.percentValue+index) {
-                    console.log('4', conditions[index][defaultConditionInfo.percent])
                     return conditions[index][defaultConditionInfo.percent]
                 }
-                console.log(defaultNameRulesQuantity.maxDiscountValue+index)
-                if (conditionInfo === defaultNameRulesQuantity.maxDiscountValue+index) {
-                    console.log('5',conditions[index][defaultConditionInfo.maxDiscountValue])
+                if (conditionInfo === defaultNameRulesQuantity.priceMaxDiscountValue+index) {
                     return conditions[index][defaultConditionInfo.maxDiscountValue]
                 }
             }
@@ -290,6 +296,23 @@ export function displayPromotionScope(promotionScope) {
             return "Toàn gian hàng"
         case defaultPromotionScope.SKU:
             return "Sản phẩm của gian hàng"
+        default:
+            return "Không xác định"
+    }
+}
+
+export function displayStatus(status) {
+    switch (status) {
+        case defaultPromotionStatus.WAITING:
+            return "Chờ kích hoạt"
+        case defaultPromotionStatus.ACTIVE:
+            return "Đang chạy"
+        case defaultPromotionStatus.FULL:
+            return "Hết số lượng"
+        case defaultPromotionStatus.DELETED:
+            return "Đã xóa"
+        case defaultPromotionStatus.EXPIRED:
+            return "Hết hạn"
         default:
             return "Không xác định"
     }

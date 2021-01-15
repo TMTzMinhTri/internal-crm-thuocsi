@@ -87,11 +87,32 @@
     border-bottom: 1px solid #eeeeee;
 }
 
+.modalBodyCreate {
+    background: #FFF;
+    width: 30%;
+    display: block;
+    padding: 24px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    overflow: auto;
+    outline: 0;
+    min-height: inherit;
+    max-height: inherit;
+    border-bottom: 1px solid #eeeeee;
+}
+
 .modal {
     display: flex;
     align-items: center;
     justify-content: center;
 }
+
+.modalFooter {
+    text-align: right;
+    align-items: flex-end;
+    width: 100%;
+}
+
 
 .headerModal {
     margin-top: 0;

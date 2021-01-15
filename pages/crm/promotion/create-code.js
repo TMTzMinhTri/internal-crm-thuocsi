@@ -136,17 +136,17 @@ function render(props) {
             let productDefaultResponse = await getProduct()
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = []
-                    productDefaultResponse.data.forEach((productResponse,index) => {
-                        if (index < 5) {
-                            listProductDefault.push({
-                                product: productResponse,
-                                active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID) || false
-                            })
-                        }
-                    })
+                productDefaultResponse.data.forEach((productResponse,index) => {
+                    if (index < 5) {
+                        listProductDefault.push({
+                            product: productResponse,
+                            active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID) || false
+                        })
+                    }
+                })
                 setState({...state,[event.target?.name]: event.target?.value,listProductDefault: listProductDefault,listCategoryPromotion: listCategoryResponse.data})
                 setOpen({...open,openModalProductScopePromotion: true})
-                }
+            }
         }else {
             setState({...state,[event.target?.name]: event.target?.value})
         }
@@ -206,7 +206,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule)
+        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.VOUCHER_CODE,startTime,endTime,objects,rule)
         if (promotionResponse.status === "OK") {
             toast.success('Tạo khuyến mãi thành công')
         }else {
@@ -262,6 +262,19 @@ function render(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6} md={6}>
                                     <TextField
+                                        id="promotionCode"
+                                        name="promotionCode"
+                                        label="Mã khuyến mãi"
+                                        placeholder=""
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        inputRef={register}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
                                         id="totalCode"
                                         name="totalCode"
                                         label="Số lần áp dụng"
@@ -276,6 +289,30 @@ function render(props) {
                                         inputRef={register(
                                             {
                                                 required: "Số lần áp dụng không được để trống",
+                                                pattern: {
+                                                    value: /[0-9]/,
+                                                    message: "Chỉ chấp nhận kí tự là số"
+                                                }
+                                            }
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalApply"
+                                        name="totalApply"
+                                        label="Số lần áp dụng tối đa"
+                                        type="number"
+                                        helperText={errors.totalApply?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.totalApply ? true : false}
+                                        required
+                                        inputRef={register(
+                                            {
+                                                required: "Số lần áp dụng tối đa không được để trống",
                                                 pattern: {
                                                     value: /[0-9]/,
                                                     message: "Chỉ chấp nhận kí tự là số"
@@ -677,38 +714,38 @@ function render(props) {
                         <CardHeader
                             subheader="Áp dụng cho"
                         />
-                          <CardContent>
-                                <Grid spacing={3} container>
-                                    <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
-                                                onChange={handleChangeScope}>
-                                        <Grid spacing={3} container justify="space-around" alignItems="center">
-                                            <Grid item xs={12} sm={6} md={6}>
-                                                <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
-                                                                  label="Toàn sàn"/>
-                                            </Grid>
-                                            <Grid item xs={12} sm={6} md={6}>
-                                                <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
-                                                                  label="Sản phẩm được chọn"/>
-                                            </Grid>
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
+                                            onChange={handleChangeScope}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center">
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
+                                                              label="Toàn sàn"/>
                                         </Grid>
-                                    </RadioGroup>
-                                </Grid>
-                            </CardContent>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
+                                                              label="Sản phẩm được chọn"/>
+                                        </Grid>
+                                    </Grid>
+                                </RadioGroup>
+                            </Grid>
+                        </CardContent>
                         {
                             promotionScope === defaultPromotionScope.PRODUCT ?(
-                                    <RenderTableListProduct
-                                        handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
-                                        handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
-                                        open={open.openModalProductScopePromotion}
-                                        register={register}
-                                        getValue={getValues()}
-                                        listProductDefault={listProductDefault}
-                                        promotionScope={promotionScope}
-                                        listCategoryPromotion={listCategoryPromotion}
-                                        listProductPromotion={listProductPromotion}
-                                        handleAddProductPromotion={handleAddProductPromotion}
-                                        handleRemoveProductPromotion={handleRemoveProductPromotion}
-                                    />
+                                <RenderTableListProduct
+                                    handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
+                                    handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
+                                    open={open.openModalProductScopePromotion}
+                                    register={register}
+                                    getValue={getValues()}
+                                    listProductDefault={listProductDefault}
+                                    promotionScope={promotionScope}
+                                    listCategoryPromotion={listCategoryPromotion}
+                                    listProductPromotion={listProductPromotion}
+                                    handleAddProductPromotion={handleAddProductPromotion}
+                                    handleRemoveProductPromotion={handleRemoveProductPromotion}
+                                />
                             ): (
                                 <div></div>
                             )
@@ -1195,18 +1232,18 @@ export function RenderTableListProduct(props) {
                                         inputRef={props.register}
                                         label="Chọn danh mục">
                                         {stateProduct.listCategoryPromotion.map((category) => (
-                                                <MenuItem value={category} key={category.categoryID}>
-                                                    {limitText(category.name,20) || "...Không xác định"}
-                                                </MenuItem>
+                                            <MenuItem value={category} key={category.categoryID}>
+                                                {limitText(category.name,20) || "...Không xác định"}
+                                            </MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
                             </Grid>
                             <Grid item sx={12} sm={4} md={4} style={{display: "flex"}}>
-                                    <Button variant="contained"  onClick={handleOnSearchProductCategory} className={styles.buttonSearch}>Tìm kiếm<IconButton>
-                                        <SearchIcon/>
-                                    </IconButton>
-                                    </Button>
+                                <Button variant="contained"  onClick={handleOnSearchProductCategory} className={styles.buttonSearch}>Tìm kiếm<IconButton>
+                                    <SearchIcon/>
+                                </IconButton>
+                                </Button>
                             </Grid>
                         </Grid>
                     </div>
@@ -1255,7 +1292,7 @@ export function RenderTableListProduct(props) {
                 </div>
             </Modal>
             {
-               props.promotionScope === defaultPromotionScope.PRODUCT ? (
+                props.promotionScope === defaultPromotionScope.PRODUCT ? (
                     <Card>
                         <TableContainer component={Paper}>
                             <Table size="small">
