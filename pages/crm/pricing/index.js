@@ -139,7 +139,7 @@ function render(props) {
     function provices(provi) {
         if (provi?.length > 0) {
             if (provi[0] === 'ALL') {
-                return <Chip label="Tất cả" variant="outlined" />;
+                return <Chip size="small" label="Tất cả" variant="outlined" />;
             }
             const chips = provi.map((item, i) => {
                 if (provinceLists[item]?.name) {
@@ -197,6 +197,17 @@ function render(props) {
 
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
+                    <colgroup>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="20%"/>
+                        <col width="20%"/>
+                        <col width="10%"/>
+                        <col width="5%"/>
+                        <col width="5%"/>
+                        <col width="15%"/>
+                        <col width="5%"/>
+                    </colgroup>
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">Code</TableCell>
