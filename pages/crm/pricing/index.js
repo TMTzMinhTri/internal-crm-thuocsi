@@ -1,6 +1,6 @@
 import {
     Button, ButtonGroup,
-    Grid, InputBase, Paper, Table, TableBody, TableCell, TableContainer,
+    Grid, Paper, Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow
 } from "@material-ui/core";
 import Chip from '@material-ui/core/Chip';
@@ -8,11 +8,10 @@ import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from '@material-ui/core/styles';
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { Brand, condUserType, formatNumber, ErrorCode, formatUrlSearch, formatEllipsisText } from 'components/global';
+import { Brand, condUserType, formatEllipsisText, formatNumber, formatUrlSearch } from 'components/global';
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
@@ -163,7 +162,7 @@ function render(props) {
                     alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <Paper className={styles.search}>
+                        {/* <Paper className={styles.search}>
                             <InputBase
                                 id="q"
                                 name="q"
@@ -183,7 +182,7 @@ function render(props) {
                                 onClick={handleSubmit(onSearch)}>
                                 <SearchIcon />
                             </IconButton>
-                        </Paper>
+                        </Paper> */}
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/pricing/new">
