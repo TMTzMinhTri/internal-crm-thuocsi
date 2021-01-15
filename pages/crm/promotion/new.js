@@ -72,10 +72,8 @@ const defaultState = {
     promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
     promotionTypeRule: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
     promotionScope: defaultPromotionScope.GLOBAL,
-    listGiftPromotion: [{
-        gift: {},
-        quantity: 0,
-    }],
+    listGiftPromotion: [],
+    listProductGiftPromotion: [],
     listProductPromotion: [],
     listProductDefault: [],
     listCategoryPromotion: [],
@@ -113,7 +111,7 @@ function render(props) {
         },
     ])
     const [state, setState] = useState(defaultState);
-    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion,listCategoryPromotion,listProductDefault} = state
+    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion,listCategoryPromotion,listProductDefault,listGiftPromotion,listProductGiftPromotion} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
 
     const [open, setOpen] = useState({
@@ -196,13 +194,24 @@ function render(props) {
         setState({...state,listProductPromotion: listProductPromotion,listProductDefault: listProductDefault})
     }
 
+
+    const handleAddGift = (listGiftNew) => {
+        let listGiftAction = listGiftPromotion
+        listGiftNew.forEach(giftNew => {
+            if (giftNew.active) {
+                listGiftAction.push(giftNew)
+            }
+        })
+        setState({...state,listGiftPromotion: listGiftAction})
+    }
+
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
         let {promotionName,totalCode,startTime,endTime} = getValues()
         let value = getValues()
         let listProductIDs = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
-        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,listProductIDs)
+        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,listProductIDs,listGiftPromotion,listProductGiftPromotion)
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
@@ -365,11 +374,11 @@ function render(props) {
                                                                   control={<Radio style={{color: 'blue'}}/>}
                                                                   label="Giảm % giá sản phẩm"/>
                                             </Grid>
-                                            {/*<Grid item xs={12} sm={6} md={4}>*/}
-                                            {/*    <FormControlLabel value={defaultTypeConditionsRule.GIFT}*/}
-                                            {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
-                                            {/*                      label="Quà"/>*/}
-                                            {/*</Grid>*/}
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.GIFT}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Quà"/>
+                                            </Grid>
                                             {/*<Grid item xs={12} sm={6} md={4}>*/}
                                             {/*    <FormControlLabel value={defaultTypeConditionsRule.PRODUCT_GIFT}*/}
                                             {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
@@ -656,6 +665,8 @@ function render(props) {
                                         open={open.openModalGift}
                                         register={register}
                                         state={state}
+                                        listGiftPromotion={listGiftPromotion}
+                                        handleAddGiftAction={handleAddGift}
                                         handleRemoveCodePercent={handleRemoveCodePercent}
                                         handleChange={handleChange}/>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
@@ -678,21 +689,25 @@ function render(props) {
                             subheader="Áp dụng cho"
                         />
                           <CardContent>
-                                <Grid spacing={3} container>
-                                    <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
-                                                onChange={handleChangeScope}>
-                                        <Grid spacing={3} container justify="space-around" alignItems="center">
-                                            <Grid item xs={12} sm={6} md={6}>
-                                                <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
-                                                                  label="Toàn sàn"/>
-                                            </Grid>
-                                            <Grid item xs={12} sm={6} md={6}>
-                                                <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
-                                                                  label="Sản phẩm được chọn"/>
-                                            </Grid>
-                                        </Grid>
-                                    </RadioGroup>
-                                </Grid>
+                              <Grid spacing={3} container>
+                                  <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
+                                              onChange={handleChangeScope}>
+                                      <Grid spacing={3} container justify="space-around" alignItems="center">
+                                          <Grid item xs={12} sm={4} md={4}>
+                                              <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
+                                                                label="Toàn sàn"/>
+                                          </Grid>
+                                          <Grid item xs={12} sm={4} md={4}>
+                                              <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
+                                                                label="Sản phẩm được chọn"/>
+                                          </Grid>
+                                          <Grid item xs={12} sm={4} md={4}>
+                                              <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}
+                                                                label="Danh mục được chọn"/>
+                                          </Grid>
+                                      </Grid>
+                                  </RadioGroup>
+                              </Grid>
                             </CardContent>
                         {
                             promotionScope === defaultPromotionScope.PRODUCT ?(
@@ -733,7 +748,6 @@ function render(props) {
 export function RenderTableGift(props) {
     const [stateGift, setStateGift] = useState({
         listGiftSearch: [],
-        listGiftAction: [],
         listGiftNew: [],
     })
 
@@ -792,16 +806,6 @@ export function RenderTableGift(props) {
         setStateGift({...stateGift,listGiftNew: listGiftNew,listGiftSearch: []})
     }
 
-    const handleAddGiftAction = () => {
-        let {listGiftAction,listGiftNew} = stateGift
-        listGiftNew.forEach(giftNew => {
-            if (giftNew.active) {
-                listGiftAction.push(giftNew)
-            }
-        })
-        props.handleClose()
-    }
-
     return (
         <Card variant="outlined" style={{marginTop: '4px'}}>
             <ButtonGroup color="primary" size="small"
@@ -821,7 +825,7 @@ export function RenderTableGift(props) {
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {stateGift.listGiftAction.map(({gift,quantity,active}) => (
+                    {props.listGiftPromotion.map(({gift,quantity,active}) => (
                         <TableRow>
                             <TableCell align="left">Balo</TableCell>
                             <TableCell align="left">{gift.name}</TableCell>
@@ -923,7 +927,7 @@ export function RenderTableGift(props) {
                     <Button onClick={props.handleClose} color="secondary">
                         Hủy
                     </Button>
-                    <Button onClick={handleAddGiftAction} color="primary" autoFocus>
+                    <Button onClick={() => props.handleAddGiftAction(stateGift.listGiftNew)} color="primary" autoFocus>
                         Thêm
                     </Button>
                 </DialogActions>

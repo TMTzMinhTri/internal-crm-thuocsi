@@ -77,7 +77,7 @@ export const defaultConditionInfo = {
     products: "products"
 }
 
-export function setRulesPromotion(typePromotion,typeRule,value,index) {
+export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPromotion,listGiftProductPromotion) {
     console.log('value',value)
     let result = {}
     let conditions = []
@@ -121,6 +121,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index) {
                         conditions: conditions,
                     }
                 }
+            }else if (typeRule === defaultTypeConditionsRule.GIFT) {
+
             }
             break
         case defaultRulePromotion.MIN_ORDER_VALUE:

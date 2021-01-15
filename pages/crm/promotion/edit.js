@@ -132,10 +132,7 @@ function render(props) {
 
     const handleChangeStatus = (event) => {
         setState({...state, [event.target.name]: event.target.value,promotionRulesLine: [{id:0}]})
-        console.log('value',getValues())
         reset()
-        console.log('error',errors)
-        console.log('value',getValues())
     }
 
     function handleRemoveCodePercent(id) {
@@ -209,11 +206,12 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse =updatePromotion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule,dataRender.promotionId)
+        let promotionResponse = await updatePromotion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule,dataRender.promotionId)
+
         if (promotionResponse.status === "OK") {
             toast.success('Cập nhật khuyến mãi thành công')
         }else {
-            toast.error(`${promotionResponse.message}`)
+            toast.error(promotionResponse.message)
         }
     }
 
@@ -694,13 +692,17 @@ function render(props) {
                                 <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
                                             onChange={handleChangeScope}>
                                     <Grid spacing={3} container justify="space-around" alignItems="center">
-                                        <Grid item xs={12} sm={6} md={6}>
+                                        <Grid item xs={12} sm={4} md={4}>
                                             <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
                                                               label="Toàn sàn"/>
                                         </Grid>
-                                        <Grid item xs={12} sm={6} md={6}>
+                                        <Grid item xs={12} sm={4} md={4}>
                                             <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
                                                               label="Sản phẩm được chọn"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={4} md={4}>
+                                            <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}
+                                                              label="Danh mục được chọn"/>
                                         </Grid>
                                     </Grid>
                                 </RadioGroup>

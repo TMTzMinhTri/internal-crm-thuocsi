@@ -85,8 +85,8 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
-async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,objects,rule) {
-    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,objects,rule})
+async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,objects,rule,applyPerUser,promotionCode) {
+    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,objects,rule,applyPerUser,promotionCode})
 }
 
 async function getProduct(productName,categoryCode) {
@@ -198,7 +198,7 @@ function render(props) {
 
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {promotionName,totalCode,startTime,endTime} = getValues()
+        let {promotionName,totalCode,startTime,endTime,totalApply,promotionCode} = getValues()
         let value = getValues()
         let listProductIDs = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
@@ -206,7 +206,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.VOUCHER_CODE,startTime,endTime,objects,rule)
+        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.VOUCHER_CODE,startTime,endTime,objects,rule,totalApply,promotionCode)
         if (promotionResponse.status === "OK") {
             toast.success('Tạo khuyến mãi thành công')
         }else {
@@ -719,13 +719,17 @@ function render(props) {
                                 <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
                                             onChange={handleChangeScope}>
                                     <Grid spacing={3} container justify="space-around" alignItems="center">
-                                        <Grid item xs={12} sm={6} md={6}>
+                                        <Grid item xs={12} sm={4} md={4}>
                                             <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
                                                               label="Toàn sàn"/>
                                         </Grid>
-                                        <Grid item xs={12} sm={6} md={6}>
+                                        <Grid item xs={12} sm={4} md={4}>
                                             <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
                                                               label="Sản phẩm được chọn"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={4} md={4}>
+                                            <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}
+                                                              label="Danh mục được chọn"/>
                                         </Grid>
                                     </Grid>
                                 </RadioGroup>
