@@ -157,6 +157,7 @@ function render(props) {
                                         name="categoryCodes"
                                         control={control}
                                         errors={errors}
+                                        message="Vui lòng chọn"
                                         onFieldChange={searchCatogery}
                                         required={true}
                                     />
@@ -169,9 +170,11 @@ function render(props) {
                                             return { label: province.name, value: province.code }
                                         })]}
                                         label="Tỉnh/thành"
+                                        message="Vui lòng chọn"
                                         name="locationCode"
                                         control={control}
                                         errors={errors}
+                                        required={true}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
