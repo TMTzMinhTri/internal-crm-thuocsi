@@ -381,7 +381,7 @@ function render(props) {
                                     </Grid>
                                     <Grid item xs={12} sm={6} md={6}>
                                         <FormControlLabel value={defaultRulePromotion.MIN_QUANTITY} control={<Radio color="primary"/>}
-                                                          label="Giảm giá theo lượng sản phẩm"/>
+                                                          label="Giảm giá theo số lượng sản phẩm"/>
                                     </Grid>
                                 </Grid>
                             </RadioGroup>
@@ -1161,7 +1161,6 @@ export function RenderTableProductGift(props) {
 }
 
 export function RenderTableListProduct(props) {
-    console.log('props',props.state)
     const [stateProduct, setStateProduct] = useState({
         listProductAction: props.listProductDefault,
         listCategoryPromotion: props.listCategoryPromotion,

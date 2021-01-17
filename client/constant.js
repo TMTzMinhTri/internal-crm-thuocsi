@@ -63,6 +63,8 @@ export const defaultNameRulesValue = {
     priceMaxDiscountValue: "priceMaxDiscountValue",
     percentValue: "percentValue",
     priceDiscountValue: "priceDiscountValue",
+    gift: "gift",
+    productGift: "productGift"
 }
 
 export const defaultNameRulesQuantity = {
@@ -70,7 +72,9 @@ export const defaultNameRulesQuantity = {
     priceMinValuePercent: "quantityMinValuePercent",
     priceMaxDiscountValue: "quantityMaxDiscountValue",
     percentValue: "quantityPercentValue",
-    priceDiscountValue: "quantityDiscountValue"
+    priceDiscountValue: "quantityDiscountValue",
+    gift: "quantityGift",
+    productGift: "quantityProductGift"
 }
 
 export const defaultConditionInfo = {
@@ -196,6 +200,7 @@ export function parseRuleToObject(promotion) {
         listProductPromotion: [],
         listProductIDs: [],
         listProductDefault: [],
+        promotionUseType: promotion.useType,
         listCategoryPromotion: [],
         conditions: [],
     }

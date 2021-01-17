@@ -21,10 +21,17 @@ import Divider from "@material-ui/core/Divider";
 import Typography from "@material-ui/core/Typography";
 import {
     defaultNameRulesValue,
-    defaultPromotionScope, defaultPromotionType,
+    defaultPromotionScope,
+    defaultPromotionType,
     defaultRulePromotion,
-    defaultTypeConditionsRule, displayNameRule, limitText, parseConditionValue, parseRuleToObject,
-    setRulesPromotion, setScopeObjectPromontion
+    defaultTypeConditionsRule,
+    defaultUseTypePromotion,
+    displayNameRule,
+    limitText,
+    parseConditionValue,
+    parseRuleToObject,
+    setRulesPromotion,
+    setScopeObjectPromontion
 } from "../../../client/constant";
 import Card from "@material-ui/core/Card";
 import List from "@material-ui/core/List";
@@ -63,7 +70,6 @@ export async function loadPromotionData(ctx) {
     }
 
     let defaultState = parseRuleToObject(getPromotionResponse.data[0])
-    console.log('default',defaultState)
     if (defaultState.listProductIDs.length > 0 ) {
         let _productClient = getProductClient(ctx, {})
         let listProductPromotionResponse = await _productClient.getListProductByIdsOrCodes(defaultState.listProductIDs)
@@ -76,9 +82,8 @@ export async function loadPromotionData(ctx) {
     return returnObject
 }
 
-async function updatePromotion(totalCode,promotionName,promotionType,startTime,endTime,objects,rule,promotionId) {
-    let data = {totalCode,promotionName,promotionType,startTime,endTime,objects,rule,promotionId}
-    console.log('data',data)
+async function updatePromotion(applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId) {
+    let data = {totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId}
     return getPromoClient().updatePromotion({promotionId,totalCode,promotionName,promotionType,startTime,endTime,objects,rule})
 }
 
@@ -114,7 +119,10 @@ function render(props) {
     const [state, setState] = useState(defaultState);
     const [updateDateProps, setUpdateDataProps] = useState({
     })
-    const {promotionOption, promotionTypeRule, promotionScope,promotionRulesLine,conditions,listProductDefault,listProductPromotion,listCategoryPromotion,listGiftPromotion} = state
+    const {promotionOption, promotionTypeRule,
+        promotionScope,promotionRulesLine,conditions,
+        listProductDefault,listProductPromotion,
+        listCategoryPromotion,listGiftPromotion,promotionUseType} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
     const [open, setOpen] = useState({
         openModalGift : false,
@@ -192,13 +200,13 @@ function render(props) {
                 setOpen({...open,openModalProductScopePromotion: true})
             }
         }else {
-            setState({...state,[event.target?.name]: event.target?.value})
+            setState({...state,[event.target?.name]: event.target?.value,listProductPromotion: []})
         }
     }
 
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {promotionName,totalCode,startTime,endTime} = getValues()
+        let {promotionName,totalCode,startTime,endTime,totalApply} = getValues()
         let value = getValues()
         let listProductIDs = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
@@ -206,7 +214,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await updatePromotion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule,dataRender.promotionId)
+        let promotionResponse = await updatePromotion(parseInt(totalApply),parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
 
         if (promotionResponse.status === "OK") {
             toast.success('Cập nhật khuyến mãi thành công')
@@ -289,6 +297,31 @@ function render(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6} md={6}>
                                     <TextField
+                                        id="totalApply"
+                                        name="totalApply"
+                                        label="Số lần áp dụng tối đa"
+                                        type="number"
+                                        defaultValue={dataRender.applyPerUser}
+                                        helperText={errors.totalApply?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.totalApply ? true : false}
+                                        required
+                                        inputRef={register(
+                                            {
+                                                required: "Số lần áp dụng tối đa không được để trống",
+                                                pattern: {
+                                                    value: /[0-9]/,
+                                                    message: "Chỉ chấp nhận kí tự là số"
+                                                }
+                                            }
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
                                         id="startTime"
                                         name="startTime"
                                         label="Thời gian bắt đầu"
@@ -348,7 +381,7 @@ function render(props) {
                                     </Grid>
                                     <Grid item xs={12} sm={6} md={6}>
                                         <FormControlLabel value={defaultRulePromotion.MIN_QUANTITY} control={<Radio color="primary"/>}
-                                                          label="Giảm giá theo lượng sản phẩm"/>
+                                                          label="Giảm giá theo số lượng sản phẩm"/>
                                     </Grid>
                                 </Grid>
                             </RadioGroup>
@@ -684,6 +717,24 @@ function render(props) {
                             }
                         </CardContent>
                         <Divider/>
+                        <CardHeader subheader="Cách áp dụng"/>
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <RadioGroup aria-label="quiz" name="promotionUseType" value={promotionUseType}
+                                            onChange={handleChange}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center">
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultUseTypePromotion.MANY} control={<Radio color="primary"/>}
+                                                              label="Được áp dụng với khuyến mãi khác"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
+                                                              label="Không được áp dụng vưới khuyến mãi khác"/>
+                                        </Grid>
+                                    </Grid>
+                                </RadioGroup>
+                            </Grid>
+                        </CardContent>
                         <CardHeader
                             subheader="Áp dụng cho"
                         />

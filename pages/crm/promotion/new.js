@@ -150,7 +150,7 @@ function render(props) {
                 setOpen({...open,openModalProductScopePromotion: true})
                 }
         }else {
-            setState({...state,[event.target?.name]: event.target?.value})
+            setState({...state,[event.target?.name]: event.target?.value,listProductPromotion: []})
         }
     }
 
@@ -158,8 +158,15 @@ function render(props) {
         setPromotionRulesLine([{
             id: 1,
         }])
+
+        console.log("event",event.target)
+        console.log("value",getValues())
         setState({...state, [event.target.name]: event.target.value})
+
+        console.log("after",getValues())
         reset()
+        setValue('minquantity0',"")
+        setValue('priceMinValue',"")
     }
 
     const handleAddProductPromotion = (productList) => {
@@ -381,7 +388,7 @@ function render(props) {
                                     </Grid>
                                     <Grid item xs={12} sm={6} md={6}>
                                         <FormControlLabel value={defaultRulePromotion.MIN_QUANTITY} control={<Radio color="primary"/>}
-                                                          label="Giảm giá theo lượng sản phẩm"/>
+                                                          label="Giảm giá theo số lượng sản phẩm"/>
                                     </Grid>
                                 </Grid>
                             </RadioGroup>
@@ -403,11 +410,11 @@ function render(props) {
                                                                   control={<Radio style={{color: 'blue'}}/>}
                                                                   label="Giảm % giá sản phẩm"/>
                                             </Grid>
-                                            <Grid item xs={12} sm={6} md={4}>
-                                                <FormControlLabel value={defaultTypeConditionsRule.GIFT}
-                                                                  control={<Radio style={{color: 'blue'}}/>}
-                                                                  label="Quà"/>
-                                            </Grid>
+                                            {/*<Grid item xs={12} sm={6} md={4}>*/}
+                                            {/*    <FormControlLabel value={defaultTypeConditionsRule.GIFT}*/}
+                                            {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
+                                            {/*                      label="Quà"/>*/}
+                                            {/*</Grid>*/}
                                             {/*<Grid item xs={12} sm={6} md={4}>*/}
                                             {/*    <FormControlLabel value={defaultTypeConditionsRule.PRODUCT_GIFT}*/}
                                             {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
@@ -689,7 +696,30 @@ function render(props) {
                                     </Card>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.GIFT ? (
                                     <div>
-
+                                        <List component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionRulesLine.map((code, index) => (
+                                                    <ListItem key={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id} button>
+                                                        <RenderTableGift
+                                                            handleClickOpen={() => setOpen({...open,openModalGift: true})}
+                                                            handleClose={() => setOpen({...open,openModalGift: false})}
+                                                            open={open.openModalGift}
+                                                            promotionOption={promotionOption}
+                                                            register={register}
+                                                            errors={errors}
+                                                            code={code}
+                                                            promotionRulesLine={promotionRulesLine}
+                                                            index={index}
+                                                            handleAddCodePercent={handleAddCodePercent}
+                                                            handleRemoveCodePercent={handleRemoveCodePercent}
+                                                            listGiftPromotion={listGiftPromotion}
+                                                            state={state}
+                                                            handleChange={handleChange}
+                                                        />
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
                                     </div>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
                                     <RenderTableProductGift
@@ -847,7 +877,7 @@ export function RenderTableGift(props) {
     }
 
     return (
-        <Card variant="outlined" style={{marginTop: '4px'}}>
+        <Card variant="outlined" style={{marginTop: '4px',width: "100%"}}>
             <ButtonGroup color="primary" size="small"
                          aria-label="contained primary button group"
                          className={styles.btnDialog}
@@ -855,33 +885,101 @@ export function RenderTableGift(props) {
             >
                 <Button variant="contained" color="primary">Thêm quà</Button>
             </ButtonGroup>
-            <TableContainer component={Paper}>
-                <Table size="small">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="left">Hình ảnh</TableCell>
-                            <TableCell align="left">Tên quà</TableCell>
-                            <TableCell align="left">Số lượng</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    {props.listGiftPromotion.map(({gift,quantity,active}) => (
-                        <TableRow>
-                            <TableCell align="left">Balo</TableCell>
-                            <TableCell align="left">{gift.name}</TableCell>
-                            <TableCell align="left">quantity</TableCell>
-                            <TableCell align="center">
-                                <IconButton color="secondary"
-                                            component="span"
-                                            onClick={() => handleRemoveGift(gift)}
-                                >
-                                    <HighlightOffOutlinedIcon/>
-                                </IconButton>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </Table>
-            </TableContainer>
+            <Grid spacing={2} container justify="center">
+                <Grid item xs={12} sm={3} md={3}>
+                    <TextField
+                        id={displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)}
+                        name={displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)}
+                        label={props.promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
+                        placeholder=""
+                        type="number"
+                        variant="outlined"
+                        size="small"
+                        helperText={props.errors[displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)]?.message}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        style={{width: '100%'}}
+                        error={!!props.errors[displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)]}
+                        required
+                        inputRef={
+                            props.register({
+                                required: "Giá trị đơn hàng không được bỏ trống",
+                                maxLength: {
+                                    value: 10,
+                                    message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
+                                },
+                                minLength: {
+                                    value: props.promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6: 2,
+                                    message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
+                                },
+                            })
+                        }
+                    />
+                </Grid>
+                <Grid item xs={12} sm={7} md={7}>
+                    <TableContainer component={Paper}>
+                        <Table size="small">
+                            <TableHead>
+                                <TableRow>
+                                    <TableCell align="left">Hình ảnh</TableCell>
+                                    <TableCell align="left">Tên quà</TableCell>
+                                    <TableCell align="left">Số lượng</TableCell>
+                                    <TableCell align="center">Thao tác</TableCell>
+                                </TableRow>
+                            </TableHead>
+                            {props.listGiftPromotion.map(({gift,quantity,active}) => (
+                                <TableRow>
+                                    <TableCell align="left">Balo</TableCell>
+                                    <TableCell align="left">{gift.name}</TableCell>
+                                    <TableCell align="left">quantity</TableCell>
+                                    <TableCell align="center">
+                                        <IconButton color="secondary"
+                                                    component="span"
+                                                    onClick={() => handleRemoveGift(gift)}
+                                        >
+                                            <HighlightOffOutlinedIcon/>
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </Table>
+                    </TableContainer>
+                </Grid>
+                <Grid item xs={12} sm={2} md={2}>
+                    <Grid spacing={1} container alignItems="center">
+                        <Grid item xs={6} sm={4} md={2}>
+                            {
+                                props.promotionRulesLine.length !== 1 ? (
+                                    <IconButton color="secondary"
+                                                component="span"
+                                                onClick={() => props.handleRemoveCodePercent(props.code.id)}>
+                                        <HighlightOffOutlinedIcon/>
+                                    </IconButton>
+                                ) : (
+                                    <div/>
+                                )
+                            }
+                        </Grid>
+                        {
+                            props.index + 1 === props.promotionRulesLine.length ?
+                                (
+                                    <Grid item xs={6} sm={4} md={2}>
+                                        <IconButton color="primary"
+                                                    onClick={() => props.handleAddCodePercent(props.code.id)}
+                                                    aria-label="upload picture"
+                                                    component="span">
+                                            <AddCircleOutlineOutlinedIcon/>
+                                        </IconButton>
+                                    </Grid>
+                                ) : (
+                                    <div/>
+                                )
+                        }
+                    </Grid>
+                </Grid>
+            </Grid>
+
             <Dialog
                 open={props.open}
                 onClose={props.handleClose}
