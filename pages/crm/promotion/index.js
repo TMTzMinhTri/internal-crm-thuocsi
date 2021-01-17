@@ -67,8 +67,8 @@ export function formatNumber(num) {
     return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
-async function updatePromotion(promotionID,status) {
-    return getPromoClient().updatePromotion({promotionID,status})
+async function updatePromotion(promotionId,status) {
+    return getPromoClient().updatePromotion({promotionId,status})
 }
 
 function render(props) {
@@ -195,7 +195,7 @@ function render(props) {
                                     <TableCell align="left">
                                         <Switch
                                             onChange={event => {handleActivePromotion(event,row.promotionId)}}
-                                            className={row.status  === "ACTIVE"? true : false}
+                                            checked={row.status  === "ACTIVE"? true : false}
                                             color="primary"
                                         />
                                     </TableCell>

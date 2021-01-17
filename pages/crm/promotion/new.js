@@ -117,7 +117,7 @@ function render(props) {
         listCategoryPromotion,listProductDefault,
         listGiftPromotion,listProductGiftPromotion,promotionUseType} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
-
+    const [stateTest,setStateTest] = useState("")
     const [open, setOpen] = useState({
         openModalGift : false,
         openModalProductGift: false,
@@ -158,15 +158,8 @@ function render(props) {
         setPromotionRulesLine([{
             id: 1,
         }])
-
-        console.log("event",event.target)
-        console.log("value",getValues())
         setState({...state, [event.target.name]: event.target.value})
-
-        console.log("after",getValues())
         reset()
-        setValue('minquantity0',"")
-        setValue('priceMinValue',"")
     }
 
     const handleAddProductPromotion = (productList) => {
@@ -428,7 +421,7 @@ function render(props) {
                                 promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE ? (
                                     <Card variant="outlined" style={{marginTop: '10px'}}
                                     >
-                                        <List component="nav" aria-label="mailbox folders">
+                                        <List id="list123" component="nav" aria-label="mailbox folders">
                                             {
                                                 promotionRulesLine.map((code, index) => (
                                                     <ListItem
@@ -445,6 +438,7 @@ function render(props) {
                                                                     type="number"
                                                                     variant="outlined"
                                                                     size="small"
+                                                                    defaultValue={stateTest}
                                                                     helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,

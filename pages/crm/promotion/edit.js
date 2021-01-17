@@ -454,7 +454,7 @@ function render(props) {
                                                                                 message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
                                                                             },
                                                                             minLength: {
-                                                                                value: 6,
+                                                                                value: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6: 2,
                                                                                 message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
                                                                             },
                                                                         })
@@ -567,7 +567,7 @@ function render(props) {
                                                                                 message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
                                                                             },
                                                                             minLength: {
-                                                                                value: 6,
+                                                                                value: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6: 2,
                                                                                 message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
                                                                             },
                                                                         })
