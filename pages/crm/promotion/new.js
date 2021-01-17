@@ -659,16 +659,9 @@ function render(props) {
                                         </List>
                                     </Card>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.GIFT ? (
-                                    <RenderTableGift
-                                        handleClickOpen={() => setOpen({...open,openModalGift: true})}
-                                        handleClose={() => setOpen({...open,openModalGift: false})}
-                                        open={open.openModalGift}
-                                        register={register}
-                                        state={state}
-                                        listGiftPromotion={listGiftPromotion}
-                                        handleAddGiftAction={handleAddGift}
-                                        handleRemoveCodePercent={handleRemoveCodePercent}
-                                        handleChange={handleChange}/>
+                                    <div>
+
+                                    </div>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
                                     <RenderTableProductGift
                                         handleClickOpen={() => setOpen({...open,openModalProductGift: true})}
