@@ -52,6 +52,11 @@ export const defaultTypeProduct = {
     MANY: "MANY"
 }
 
+export const defaultUseTypePromotion = {
+    ALONE: "ALONE",
+    MANY: "MANY"
+}
+
 export const defaultNameRulesValue = {
     priceMinValue: "priceMinValue",
     priceMinValuePercent: "priceMinValuePercent",

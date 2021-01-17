@@ -53,7 +53,7 @@ import {
     setRulesPromotion,
     limitText,
     defaultNameRulesValue,
-    defaultNameRulesQuantity, displayNameRule, setScopeObjectPromontion
+    defaultNameRulesQuantity, displayNameRule, setScopeObjectPromontion, defaultUseTypePromotion
 } from "../../../client/constant";
 import {Grade} from "@material-ui/icons";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -72,6 +72,7 @@ const defaultState = {
     promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
     promotionTypeRule: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
     promotionScope: defaultPromotionScope.GLOBAL,
+    promotionUseType: defaultUseTypePromotion.MANY,
     listGiftPromotion: [],
     listProductGiftPromotion: [],
     listProductPromotion: [],
@@ -83,8 +84,8 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
-async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,objects,rule) {
-    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,objects,rule})
+async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,objects,rule,useType) {
+    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,objects,rule,useType})
 }
 
 async function getProduct(productName,categoryCode) {
@@ -111,7 +112,10 @@ function render(props) {
         },
     ])
     const [state, setState] = useState(defaultState);
-    const {promotionOption, promotionTypeRule, promotionScope,listProductPromotion,listCategoryPromotion,listProductDefault,listGiftPromotion,listProductGiftPromotion} = state
+    const {promotionOption, promotionTypeRule,
+        promotionScope,listProductPromotion,
+        listCategoryPromotion,listProductDefault,
+        listGiftPromotion,listProductGiftPromotion,promotionUseType} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
 
     const [open, setOpen] = useState({
@@ -215,7 +219,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule)
+        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule,promotionUseType)
         if (promotionResponse.status === "OK") {
             toast.success('Tạo khuyến mãi thành công')
         }else {
@@ -678,6 +682,24 @@ function render(props) {
                             }
                         </CardContent>
                         <Divider/>
+                        <CardHeader subheader="Cách áp dụng"/>
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <RadioGroup aria-label="quiz" name="promotionUseType" value={promotionUseType}
+                                            onChange={handleChange}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center">
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultUseTypePromotion.MANY} control={<Radio color="primary"/>}
+                                                              label="Được áp dụng với khuyến mãi khác"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
+                                                              label="Không được áp dụng vưới khuyến mãi khác"/>
+                                        </Grid>
+                                    </Grid>
+                                </RadioGroup>
+                            </Grid>
+                        </CardContent>
                         <CardHeader
                             subheader="Áp dụng cho"
                         />
