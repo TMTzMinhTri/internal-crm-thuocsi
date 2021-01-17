@@ -206,7 +206,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.VOUCHER_CODE,startTime,endTime,objects,rule,totalApply,promotionCode)
+        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.VOUCHER_CODE,startTime,endTime,objects,rule,parseInt(totalApply),promotionCode)
         if (promotionResponse.status === "OK") {
             toast.success('Tạo khuyến mãi thành công')
         }else {
@@ -303,6 +303,7 @@ function render(props) {
                                         name="totalApply"
                                         label="Số lần áp dụng tối đa"
                                         type="number"
+                                        defaultValue={1}
                                         helperText={errors.totalApply?.message}
                                         InputLabelProps={{
                                             shrink: true,

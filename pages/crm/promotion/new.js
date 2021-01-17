@@ -84,8 +84,8 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
-async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,objects,rule,useType) {
-    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,objects,rule,useType})
+async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,objects,applyPerUser,rule,useType) {
+    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,objects,applyPerUser,rule,useType})
 }
 
 async function getProduct(productName,categoryCode) {
@@ -211,7 +211,7 @@ function render(props) {
 
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {promotionName,totalCode,startTime,endTime} = getValues()
+        let {promotionName,totalCode,startTime,endTime,totalApply} = getValues()
         let value = getValues()
         let listProductIDs = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
@@ -219,7 +219,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,rule,promotionUseType)
+        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,parseInt(totalApply),rule,promotionUseType)
         if (promotionResponse.status === "OK") {
             toast.success('Tạo khuyến mãi thành công')
         }else {
@@ -289,6 +289,31 @@ function render(props) {
                                         inputRef={register(
                                             {
                                                 required: "Số lần áp dụng không được để trống",
+                                                pattern: {
+                                                    value: /[0-9]/,
+                                                    message: "Chỉ chấp nhận kí tự là số"
+                                                }
+                                            }
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalApply"
+                                        name="totalApply"
+                                        label="Số lần áp dụng tối đa"
+                                        type="number"
+                                        defaultValue={1}
+                                        helperText={errors.totalApply?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.totalApply ? true : false}
+                                        required
+                                        inputRef={register(
+                                            {
+                                                required: "Số lần áp dụng tối đa không được để trống",
                                                 pattern: {
                                                     value: /[0-9]/,
                                                     message: "Chỉ chấp nhận kí tự là số"
