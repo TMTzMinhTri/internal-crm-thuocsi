@@ -82,10 +82,17 @@ export async function loadPromotionData(ctx) {
             defaultState.listProductPromotion = listProductPromotionResponse.data
         }
     }
-
+    defaultState.listProductDefault = []
     let listProductDefault = await _productClient.getListProduct()
     if (listProductDefault && listProductDefault.status === "OK") {
-        defaultState.listProductDefault = listProductDefault.data.slice(0,5)
+        listProductDefault.data.forEach((product,index) => {
+            if (index < 5 ) {
+                defaultState.listProductDefault.push({
+                    product: product,
+                    active: defaultState.listProductIDs.find(productId => productId === product.productID) || false
+                })
+            }
+        })
     }
 
     returnObject.props.defaultState = defaultState
@@ -225,7 +232,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await updatePromotion(parseInt(totalApply),parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
+        let promotionResponse = await updatePromotion(parseInt(totalApply),parseInt(totalCode),promotionName,dataRender.promotionType,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
 
         if (promotionResponse.status === "OK") {
             toast.success('Cập nhật khuyến mãi thành công')
@@ -240,7 +247,7 @@ function render(props) {
                 <title>Chỉnh sửa khuyến mãi</title>
             </Head>
             <Box component={Paper}>
-                <FormGroup>
+                <FormGroup style={{width: "100%"}}>
                     <Box className={styles.contentPadding}>
                         <Grid container>
                             <Grid  xs={4}>

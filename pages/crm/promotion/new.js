@@ -237,8 +237,8 @@ function render(props) {
             <Head>
                 <title>Thêm khuyến mãi</title>
             </Head>
-            <Box component={Paper}>
-                <FormGroup>
+            <Box component={Paper} style={{width: "100%"}}>
+                <FormGroup style={{width: "100%"}}>
                     <Box className={styles.contentPadding}>
                         <Grid container>
                             <Grid  xs={4}>
