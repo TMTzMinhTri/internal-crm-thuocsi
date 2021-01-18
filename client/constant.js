@@ -213,7 +213,7 @@ export function parseRuleToObject(promotion) {
         result.promotionTypeRule = minOrderValue.type
     }
     let {conditions} = minQuantity.field? minQuantity : minOrderValue
-    conditions.forEach((condition,index) => {
+    conditions?.forEach((condition,index) => {
         result.promotionRulesLine.push({id: index})
     })
     result = {
@@ -271,6 +271,10 @@ export function parseConditionValue(conditions,typePromotion,promotionTypeCondit
     }
 }
 
+export function currencyFormat(num) {
+    return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + "đ"
+ }
+
 export function displayRule(rule) {
     let result = ""
     let {minQuantity,minOrderValue} = rule
@@ -280,22 +284,22 @@ export function displayRule(rule) {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 result +=result +`Giảm giá: ${condition.percent}% \\n Số lượng sản phẩm từ: ${condition.minQuantity}\\n`
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-                result +=result +`Giảm giá: ${condition.discountValue}đ \n Số lượng sản phẩm từ: ${condition.minQuantity} \m `
+                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)}đ \n Số lượng sản phẩm từ: ${condition.minQuantity} \n`
             }
         })
-    }else {
+    } else {
         let {conditions,field,type} = minOrderValue
         conditions?.forEach(condition => {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 result +=result +`Giảm giá: ${condition.percent}% \n Cho đơn hàng từ: ${condition.minOrderValue} \n`
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-                result +=result +`Giảm giá: :${condition.discountValue}đ \n Cho đơn hàng từ: ${condition.minOrderValue} \n`
+                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)} \n Cho đơn hàng từ: ${currencyFormat(condition.minOrderValue)} \n`
             }
         })
     }
+
     return result
 }
-
 
 export function displayPromotionScope(promotionScope) {
     switch (promotionScope) {
@@ -312,6 +316,17 @@ export function displayPromotionScope(promotionScope) {
         default:
             return "Không xác định"
     }
+}
+
+export function getPromotionScope(objects) {
+    let scope = "Không xác định";
+    objects?.forEach(obj => {
+        if (obj.scope) {
+            scope = displayPromotionScope(obj.scope)
+            return scope
+        }
+    });
+    return scope;
 }
 
 export function displayStatus(status) {
