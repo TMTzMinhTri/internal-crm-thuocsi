@@ -195,7 +195,7 @@ function render(props) {
                             <Grid container item xs={12} sm={12} md={8} spacing={3}>
                                 <Grid item xs={12} sm={12} md={5}>
                                     <Typography gutterBottom>
-                                        Multiply:
+                                        Hệ số nhân:
                             </Typography>
                                     <TextField
                                         id="multiply"
@@ -220,21 +220,27 @@ function render(props) {
                                             register({
                                                 required: "Vui lòng nhập",
                                                 valueAsNumber: true, // important
+                                                max: {
+                                                    value: 200,
+                                                    message: "Hệ số tối đa là 200"
+                                                },
+                                                min: {
+                                                    value: 1,
+                                                    message: "Hệ số tối thiểu là 1"
+                                                }
                                             })
                                         }
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={5}>
                                     <Typography gutterBottom>
-                                        Addition:
+                                        Hệ số cộng:
                                     </Typography>
                                     <TextField
                                         id="addition"
                                         name="addition"
                                         size="small"
                                         type="number"
-                                        // disabled={hidden}
-                                        // label=""
                                         placeholder=""
                                         defaultValue={5000}
                                         helperText={errors.name?.message}
@@ -254,6 +260,14 @@ function render(props) {
                                             register({
                                                 required: "Vui lòng nhập",
                                                 valueAsNumber: true, // important
+                                                max: {
+                                                    value: 100000000,
+                                                    message: "Hệ số tối đa là 100,000,000"
+                                                },
+                                                min: {
+                                                    value: 0,
+                                                    message: "Hệ số tối thiểu là 0"
+                                                }
                                             })
                                         }
                                     />
