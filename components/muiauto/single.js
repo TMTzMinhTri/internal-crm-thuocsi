@@ -38,6 +38,7 @@ const MuiSingleAuto = ({
     required, // boolean
     message, // CUSTOM MESSAGE ERROR
     onFieldChange, // HANDLE EVENT CHANGE
+    onNotSearchFieldChange,
     control,  // REACT HOOK FORM CONTROL
     errors})=>{ // REACT HOOK FORM ERRORS 
         
@@ -60,7 +61,6 @@ const MuiSingleAuto = ({
             }
         }
     },[debouncedSearch,q]);
-
     return (
         <div>
             <Controller
@@ -94,7 +94,12 @@ const MuiSingleAuto = ({
                                 onChange={(e) => setQ(e.target.value)}
                             />
                         )}
-                        onChange={(e, data) => onChange(data)}
+                        onChange={(e, data) => {
+                            onChange(data);
+                            if(typeof(onNotSearchFieldChange) === 'function'){
+                                onNotSearchFieldChange(e, data)
+                            }
+                        }}
                         {...props}
                     />
                 )}
