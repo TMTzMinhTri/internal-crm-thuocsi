@@ -28,7 +28,9 @@ import {
     displayPromotionScope,
     displayPromotionType,
     displayRule,
-    displayStatus, displayTime
+    displayStatus,
+    displayTime,
+    getPromotionScope
 } from "../../../client/constant";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
@@ -202,7 +204,7 @@ function render(props) {
                                 <TableRow>
                                     <TableCell align="left">{row.promotionName}</TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
-                                    <TableCell align="left">{displayPromotionScope(row.scope)}</TableCell>
+                                    <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
                                     <TableCell align="left">{displayRule(row.rule)}</TableCell>
                                     <TableCell align="left">{displayStatus(row.status)}</TableCell>
                                     <TableCell align="left">
