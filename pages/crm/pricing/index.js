@@ -1,6 +1,6 @@
 import {
     Button, ButtonGroup,
-    Grid, InputBase, Paper, Table, TableBody, TableCell, TableContainer,
+    Grid, Paper, Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow
 } from "@material-ui/core";
 import Chip from '@material-ui/core/Chip';
@@ -8,11 +8,10 @@ import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from '@material-ui/core/styles';
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { Brand, condUserType, formatNumber, ErrorCode, formatUrlSearch } from 'components/global';
+import { Brand, condUserType, formatEllipsisText, formatNumber, formatUrlSearch } from 'components/global';
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
@@ -129,7 +128,7 @@ function render(props) {
         if (catagory?.length > 0) {
             const chips = catagory.map((item, i) => {
                 if (categoryLists[item]?.name) {
-                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={ categoryLists[item]?.name } variant="outlined" />;
+                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={ formatEllipsisText(categoryLists[item]?.name, 30) } variant="outlined" />;
                 }
             });
             return chips;
@@ -140,7 +139,7 @@ function render(props) {
     function provices(provi) {
         if (provi?.length > 0) {
             if (provi[0] === 'ALL') {
-                return <Chip label="Tất cả" variant="outlined" />;
+                return <Chip size="small" label="Tất cả" variant="outlined" />;
             }
             const chips = provi.map((item, i) => {
                 if (provinceLists[item]?.name) {
@@ -163,7 +162,7 @@ function render(props) {
                     alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <Paper className={styles.search}>
+                        {/* <Paper className={styles.search}>
                             <InputBase
                                 id="q"
                                 name="q"
@@ -183,7 +182,7 @@ function render(props) {
                                 onClick={handleSubmit(onSearch)}>
                                 <SearchIcon />
                             </IconButton>
-                        </Paper>
+                        </Paper> */}
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/pricing/new">
@@ -198,6 +197,17 @@ function render(props) {
 
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
+                    <colgroup>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="20%"/>
+                        <col width="20%"/>
+                        <col width="10%"/>
+                        <col width="5%"/>
+                        <col width="5%"/>
+                        <col width="15%"/>
+                        <col width="5%"/>
+                    </colgroup>
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">Code</TableCell>

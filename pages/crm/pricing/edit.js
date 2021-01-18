@@ -1,9 +1,6 @@
 import {
     Box, Button, ButtonGroup,
     Divider,
-
-
-
     FormControl, Grid, InputAdornment, Paper,
     TextField,
     Typography
@@ -12,23 +9,20 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
 import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCategoryClient } from "client/category";
 import { getPricingClient } from 'client/pricing';
-import { condUserType } from 'components/global';
 import { NotFound } from 'components/components-global';
-import useDebounce from "components/useDebounce";
+import { Brand, condUserType } from 'components/global';
+import MuiMultipleAuto from "components/muiauto/multiple";
+import MuiSingleAuto from "components/muiauto/single";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
-
-
-
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -46,20 +40,24 @@ export async function loadConfigPricingData(ctx) {
     let client = getPricingClient(ctx, {});
     let categoryResult = await client.getListCategory();
     let provinceResult = await client.getProvinceLists();
-    provinceResult.data.unshift({ name: "ALL", code: "ALL" })
+    provinceResult.data.unshift({ name: "Tất cả", code: "ALL" })
     let priceData = await client.getConfigPriceByCode(query.priceCode);
 
     let priceDataTmp = []
     if (priceData.status === "OK") {
         priceData.data[0].customerType = { value: priceData.data[0].customerType, label: condUserType.filter(type => type.value === priceData.data[0].customerType)[0].label }
         if (priceData.data[0]?.locationCode !== null) {
-            priceData.data[0].locationCode = priceData.data[0].locationCode.map(_code => ({ name: provinceResult.data.filter(province => province.code === _code)[0].name, code: _code }))
+            priceData.data[0].locationCode = priceData.data[0].locationCode.map(_code => ({ label: provinceResult.data.filter(province => province.code === _code)[0].name, value: _code }))
         } else {
             priceData.data[0].locationCode = []
         }
         let listCateProduct = await client.getCategoryWithArrayID(priceData.data[0].categoryCode || [])
+        if (listCateProduct.status === 'OK') {
+            priceData.data[0].categoryCodes = listCateProduct.data.map(item => { return { label: item.name, value: item.code } })
+        } else {
+            priceData.data[0].categoryCodes = [{ label: '', value: '' }]
+        }
 
-        priceData.data[0].categoryCodes = listCateProduct.data || []
         priceData.data[0].multiply = priceData.data[0].numMultiply || []
         priceData.data[0].addition = priceData.data[0].numAddition || []
 
@@ -93,19 +91,19 @@ function render(props) {
         const [categoryLists, setCategoryLists] = useState(props.categoryLists);
         const [total, setTotal] = useState(0);
         const [loading, setLoading] = useState(true);
-        const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.data });
+        const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.data });
         const [searchCategory, setSearchCategory] = useState("");
-        const debouncedSearchCategory = useDebounce(searchCategory, 500);
+        
 
         const onSubmit = async (formData) => {
-            formData.categoryCode = formData.categoryCodes.map(category => category.code)
-            formData.locationCode = formData.locationCode.map(location => location.code)
+            formData.categoryCode = formData.categoryCodes.map(category => category.value)
+            formData.locationCode = formData.locationCode.map(location => location.value)
             formData.customerType = formData.customerType.value
             formData.code = props.data.code
             let client = getPricingClient();
             let result = await client.updatePriceGenConfig(formData)
             if (result.status === "OK") {
-                success(result.message ? 'Chỉnh sửa thành công' : 'Thông báo không xác định')
+                success(result.message ? 'Cập nhật thành công' : 'Thông báo không xác định')
             } else {
                 error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
             }
@@ -113,23 +111,17 @@ function render(props) {
 
         const searchCatogery = async (search) => {
             let categoryClient = getCategoryClient();
-            let res = await categoryClient.getListCategoryFromClient(0, 20, search);
+            let res = await categoryClient.getListCategoryFromClient(0, 100, search);
             if (res.status === "OK") {
-                return res.data;
-            }
-            return [];
-        };
-
-        useEffect(() => {
-            if (debouncedSearchCategory) {
-                searchCatogery(debouncedSearchCategory).then((results) => {
-                    const parseCategory = results.map((category) => {
-                        return { value: category.code, name: category.name, code: category.code };
-                    });
-                    setCategoryLists(parseCategory);
+                return res.data.map(category => {
+                    return { label: category.name, value: category.code }
                 });
             }
-        }, [debouncedSearchCategory]);
+            return [{ value: '', label: '' }];
+        };
+
+        const onSubmit2 = (data, e) => console.log(data, e);
+        const onError2 = (errors, e) => console.log(errors, e);
 
         return (
             <AppCRM select="/crm/pricing">
@@ -143,125 +135,47 @@ function render(props) {
                             <Grid container spacing={2} style={{ padding: '10px' }}>
                                 <Grid item xs={12} md={12} sm={12} />
                                 <Grid item xs={12} sm={12} md={2}>
-                                    <Controller
-                                        render={({ onChange, ...props }) => (
-                                            <Autocomplete
-                                                id="customerType"
-                                                size="small"
-                                                options={condUserType}
-                                                getOptionLabel={option => option.label}
-                                                getOptionSelected={(option, value) => option.label === value.label}
-                                                InputLabelProps={{
-                                                    shrink: true
-                                                }}
-                                                filterSelectedOptions
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        label="Loại khách hàng"
-                                                        error={!!errors.customerType}
-                                                        placeholder=""
-                                                        size="small"
-                                                        helperText={errors.customerType?.message}
-                                                        inputRef={
-                                                            register({
-                                                                required: "Vui lòng chọn loại khách hàng"
-                                                            })
-                                                        }
-                                                    // onChange={(e) => setSearchCategory(e.target.value)}
-                                                    />
-                                                )}
-                                                onChange={(e, data) => onChange(data)}
-                                                {...props}
-                                            />
-                                        )}
-                                        name="customerType"
+                                    <MuiSingleAuto
+                                        id="customerType"
+                                        options={condUserType}
+                                        label="Loại khách hàng"
+                                        message="Vui lòng chọn"
                                         control={control}
-                                        // onChange={([, { id }]) => id}
-
-                                        rules={{
-                                            validate: (d) => {
-                                                return typeof d != "undefined";
-                                            },
-                                        }}
+                                        errors={errors}
+                                        required={true}
+                                        name="customerType"
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <Controller
-                                        render={({ onChange, ...props }) => (
-                                            <Autocomplete
-                                                id="categoryCodes"
-                                                multiple
-                                                size="small"
-                                                options={categoryLists}
-                                                getOptionLabel={option => option.name}
-                                                getOptionSelected={(value, option) => value.name === option.name}
-                                                InputLabelProps={{
-                                                    shrink: true
-                                                }}
-                                                filterSelectedOptions
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        label="Loại sản phẩm"
-                                                        error={!!errors.categoryCodes}
-                                                        placeholder=""
-                                                        size="small"
-                                                        onChange={(e) => setSearchCategory(e.target.value)}
-                                                    />
-                                                )}
-                                                onChange={(e, data) => onChange(data)}
-                                                {...props}
-                                            />
-                                        )}
+                                    <MuiMultipleAuto
+                                        id="categoryCodes"
+                                        options={[...categoryLists.map(category => {
+                                            return { label: category.name, value: category.code }
+                                        })]}
+                                        label="Loại sản phẩm"
+                                        message="Vui lòng chọn"
                                         name="categoryCodes"
                                         control={control}
-                                        // onChange={([, { id }]) => id}
-                                        rules={{
-                                            validate: (d) => {
-                                                return typeof d != "undefined";
-                                            },
-                                        }}
+                                        errors={errors}
+                                        message="Vui lòng chọn"
+                                        onFieldChange={searchCatogery}
+                                        required={true}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <Controller
-                                        render={({ onChange, ...props }) => (
-                                            <Autocomplete
-                                                id="locationCode"
-                                                multiple
-                                                size="small"
-                                                options={provinceLists}
-                                                getOptionLabel={option => option.name}
-                                                getOptionSelected={(value, option) => value.name === option.name}
-                                                InputLabelProps={{
-                                                    shrink: true
-                                                }}
-                                                filterSelectedOptions
-                                                renderInput={(params) => (
-                                                    <TextField
-                                                        {...params}
-                                                        label="Tỉnh thành"
-                                                        error={!!errors.locationCode}
-                                                        placeholder=""
-                                                        size="small"
-                                                    // onChange={(e) => setSearchCategory(e.target.value)}
-                                                    />
-                                                )}
-                                                onChange={(e, data) => onChange(data)}
-                                                {...props}
-                                            />
-                                        )}
+                                    <MuiMultipleAuto
+                                        id="locationCode"
+                                        options={[...provinceLists.map(province => {
+                                            return { label: province.name, value: province.code }
+                                        })]}
+                                        label="Tỉnh/thành"
+                                        message="Vui lòng chọn"
                                         name="locationCode"
                                         control={control}
-                                        // onChange={([, { id }]) => id}
-                                        rules={{
-                                            validate: (d) => {
-                                                return typeof d != "undefined";
-                                            },
-                                        }}
+                                        errors={errors}
+                                        required={true}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
@@ -280,12 +194,12 @@ function render(props) {
                                                     <FormControlLabel
                                                         value="LOCAL"
                                                         control={<Radio color="primary" />}
-                                                        label="Trong nước"
+                                                        label={Brand.LOCAL.value}
                                                     />
                                                     <FormControlLabel
                                                         value="FOREIGN"
                                                         control={<Radio color="primary" />}
-                                                        label="Ngoại nhập"
+                                                        label={Brand.FOREIGN.value}
                                                     />
                                                 </RadioGroup>
                                             }
@@ -303,7 +217,7 @@ function render(props) {
                                             size="small"
                                             type="number"
                                             placeholder=""
-                                            defaultValue={2}
+                                            defaultValue={props.data?.numMultiply || 1}
                                             helperText={errors.name?.message}
                                             InputLabelProps={{
                                                 shrink: true,
@@ -336,7 +250,7 @@ function render(props) {
                                             // disabled={hidden}
                                             // label=""
                                             placeholder=""
-                                            defaultValue={5000}
+                                            defaultValue={props.data?.numAddition || 5000}
                                             helperText={errors.name?.message}
                                             InputLabelProps={{
                                                 shrink: true,
@@ -367,13 +281,27 @@ function render(props) {
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        onClick={handleSubmit(onSubmit)}
+                                        onClick={handleSubmit(onSubmit,onError2)}
                                         style={{ margin: 8 }}>
                                         Lưu
                                 </Button>
                                     {
                                         typeof props.product === "undefined" ? (
-                                            <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
+                                            <Button variant="contained" type="reset" style={{ margin: 8 }}
+                                                onClick={() => {
+                                                    reset({
+                                                       ...props.data 
+                                                    }, {
+                                                        errors: false, // errors will not be reset 
+                                                        dirtyFields: false, // dirtyFields will not be reset
+                                                        isDirty: false, // dirty will not be reset
+                                                        isSubmitted: false,
+                                                        touched: false,
+                                                        isValid: false,
+                                                        submitCount: false,
+                                                    });
+                                                }}
+                                            >Làm mới</Button>
                                         ) : (
                                                 <Link href="/crm/sku">
                                                     <ButtonGroup>

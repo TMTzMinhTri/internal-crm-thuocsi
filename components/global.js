@@ -16,22 +16,16 @@ export const ErrorCode = {
     "NOT_FOUND_TABLE": "Tìm kiếm không có kết quả phù hợp"
 }
 
-export function formatUrlSearch(str) {
-    return str.trim().replace(/\s+/g, ' ')
-        .replace(/[&]/, '%26')
-        .replace(/[+]/, '%2B')
-        .replace(/[#]/, '%23');
-}
+export const noOptionsText = "Không có tùy chọn!";
+
+
 
 export const condUserType = [
-    {
-        label: "Mặc định",
-        value: "",
-    },
-    {
-        label: "Không giới hạn",
-        value: "Infinity",
-    },
+    // {
+    //     label: "Mặc định",
+    //     value: "all",
+    // },
+    
     {
         label: "Kim cương",
         value: "Diamond",
@@ -48,14 +42,18 @@ export const condUserType = [
         label: "Bạc",
         value: "Sliver",
     },
+    {
+        label: "Không giới hạn",
+        value: "Infinity",
+    },
 ]
 
 export const Brand = {
     'LOCAL': {
-        value: 'Nội địa'
+        value: 'Trong nước'
     },
     'FOREIGN': {
-        value: 'Quốc tế'
+        value: 'Ngoại nhập'
     }
 }
 
@@ -73,6 +71,56 @@ export const ProductTypes = [
         label: "Chưa được cài giá"
     }
 ]
+
+export const scopes = [
+    {
+        value: "PHARMACY",
+        label: "Tiệm thuốc"
+    },
+    {
+        value: "CLINIC",
+        label: "Phòng khám"
+    },
+    {
+        value: "DRUGSTORE",
+        label: "Nhà thuốc"
+    },
+]
+
+export const statuses = [
+    {
+        value: "ACTIVE",
+        label: "Đang hoạt động",
+    },
+    {
+        value: "DRAFT",
+        label: "Nháp",
+    },
+    {
+        value: "NEW",
+        label: "Mới",
+    },
+    {
+        value: "GUEST",
+        label: "Khách",
+    },
+    {
+        value:"APPROVED",
+        label:"Đã kích hoạt"
+    }
+]
+
+
+export const ProductStatus = {
+    "NEW": "Mới",
+}
+
+export function formatUrlSearch(str) {
+    return str.trim().replace(/\s+/g, ' ')
+        .replace(/[&]/, '%26')
+        .replace(/[+]/, '%2B')
+        .replace(/[#]/, '%23');
+}
 
 export function formatDateTime(datetime) {
     if (datetime) {
@@ -98,11 +146,10 @@ export function formatNumber(num) {
     return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
-
-export function formatEllipsisText(text) {
-    if (text) {
-        if (text.length > 100) {
-            return text.substring(0, 100) + "..."
+export function formatEllipsisText(text, len = 100) {
+    if(text) {
+        if(text.length > 50) {
+            return text.substring(0, len) + "..."
         }
         return text
     }
@@ -161,8 +208,4 @@ export const ssrPipe = (...functions) => async (input) => {
     return {
         props: await functions.reduce((chain, func) => chain.then(func), Promise.resolve(input)),
     }
-}
-
-export const ProductStatus = {
-    "NEW": "Mới",
 }

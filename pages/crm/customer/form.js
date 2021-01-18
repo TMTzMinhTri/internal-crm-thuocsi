@@ -18,66 +18,16 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-
-const levels = [
-    {
-        value: "Infinity",
-        label: "Không giới hạn"
-    },
-    {
-        value: "Diamond",
-        label: "Kim cương",
-    },
-    {
-        value: "Platinum",
-        label: "Bạch kim",
-    },
-    {
-        value: "Gold",
-        label: "Vàng",
-    },
-    {
-        value: "Sliver",
-        label: "Bạc",
-    },
-];
-
-const statuses = [
-    {
-        value: "ACTIVE",
-        label: "Đang hoạt động",
-    },
-    {
-        value: "DRAFT",
-        label: "Nháp",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-    },
-]
-
-const scopes = [
-    {
-        value: "PHARMACY",
-        label: "Tiệm thuốc"
-    },
-    {
-        value: "CLINIC",
-        label: "Phòng khám"
-    },
-    {
-        value: "DRUGSTORE",
-        label: "Nhà thuốc"
-    },
-]
+import { condUserType, statuses, scopes } from "components/global"
+import { NotFound } from "components/components-global";
+import MuiSingleAuto from "components/muiauto/single"
 
 export async function loadData(ctx) {
-    let data = { props: {} }
+    let data = {
+        props: {
+            status: "OK"
+        }
+    }
 
     let masterDataClient = getMasterDataClient(ctx, data)
     let resp = await masterDataClient.getProvince(0, 100, '')
@@ -95,6 +45,7 @@ export async function loadData(ctx) {
         let customerResp = await customerClient.getCustomerByCustomerCode(customerCode)
         if (customerResp.status !== 'OK') {
             data.props.message = customerResp.message
+            data.props.status = customerResp.status;
             return data
         }
         let customer = customerResp.data[0]
@@ -118,6 +69,15 @@ export async function loadData(ctx) {
 }
 
 export default function renderForm(props, toast) {
+
+    const titlePage ="Cập nhật khách hàng"
+    if (props.status && props.status !== "OK") {
+        return (
+            <NotFound link='/crm/customer' titlePage={titlePage} labelLink="khách hàng"/>
+        )
+    }
+    props.isUpdate ? props.customer.provinceCode = {value: props.province?.code, label: props.province?.name, code: props.province?.code} : ''
+
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.customer : {}
     const checkWardData = props.isUpdate ? (props.customer.wardCode === '' ? {} : props.ward) : {};
@@ -137,7 +97,9 @@ export default function renderForm(props, toast) {
         mode: "onChange"
     });
 
-    const onProvinceChange = async (event, val) => {
+    const noOptionsText = "Không có tùy chọn!";
+
+    const onProvinceChange = async (e, val) => {
         setProvince()
         setDistricts([])
         setDistrict({})
@@ -153,7 +115,7 @@ export default function renderForm(props, toast) {
                 error(res.message || 'Thao tác không thành công, vui lòng thử lại sau');
             } else {
                 setDistricts(res.data)
-                setDisabledDistrict(false)
+                setDisabledDistrict(false)              
             }
         }
     }
@@ -223,14 +185,14 @@ export default function renderForm(props, toast) {
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success('Cập nhật khách hàng thành công')
+            success(titlePage + ' thành công')
         }
     }
-
+ 
     return (
         <AppCRM select="/crm/customer">
             <Head>
-                <title>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</title>
+                <title>{props.isUpdate ? titlePage : 'Thêm khách hàng'}</title>
             </Head>
             {
                 props.isUpdate && typeof props.customer === 'undefined' ? (
@@ -242,7 +204,7 @@ export default function renderForm(props, toast) {
                                         justify="space-between"
                                         alignItems="flex-start" className={styles.contentPadding}>
                                         <Grid item xs={12} md={12} sm={12}>
-                                            <Box style={{ fontSize: 24 }}>Cập nhật khách hàng</Box>
+                                            <Box style={{ fontSize: 24 }}>{titlePage}</Box>
                                         </Grid>
                                         <Grid item xs={12} md={12} sm={12}>
                                             <span>{props.message}</span>
@@ -258,7 +220,7 @@ export default function renderForm(props, toast) {
                             <FormGroup>
                                 <form>
                                     <Box className={styles.contentPadding}>
-                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</Box>
+                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? titlePage : 'Thêm khách hàng'}</Box>
                                         <Card variant="outlined">
                                             <CardContent>
                                                 <Typography variant="h6" component="h6"
@@ -294,8 +256,8 @@ export default function renderForm(props, toast) {
                                                                         message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
                                                                     },
                                                                     pattern: {
-                                                                        value: /[A-Za-z]/,
-                                                                        message: "Tên khách hàng phải có kí tự chữ"
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Tên không hợp lệ (không được dư khoảng trắng)."
                                                                     }
                                                                 })
                                                             }
@@ -391,12 +353,28 @@ export default function renderForm(props, toast) {
                                                 </Grid>
                                                 <Grid spacing={3} container>
                                                     <Grid item xs={12} sm={3} md={3}>
-                                                        <Autocomplete
+                                                        <MuiSingleAuto
+                                                            id="provinceCode"
+                                                            name="provinceCode"
+                                                            noOptionsText={noOptionsText}
+                                                            options={[...props.provinces.map(province =>
+                                                                {return {value: province.code, label: province.name, code: province.code }  }  
+                                                            )]}
+                                                            onNotSearchFieldChange={onProvinceChange}
+                                                            required={true}
+                                                            label="Tỉnh/Thành phố"
+                                                            control={control}
+                                                            errors={errors}
+                                                            message={'Vui lòng chọn tỉnh thành'}
+                                                        />
+                                                        {/* <Autocomplete
                                                             options={props.provinces}
                                                             size="small"
                                                             value={province}
                                                             onChange={onProvinceChange}
+                                                            noOptionsText={noOptionsText}
                                                             getOptionLabel={(option) => option.name}
+
                                                             renderInput={(params) =>
                                                                 <TextField
                                                                     id="provinceCode"
@@ -416,7 +394,7 @@ export default function renderForm(props, toast) {
                                                                         })
                                                                     }
                                                                     {...params} />}
-                                                        />
+                                                        /> */}
 
                                                     </Grid>
                                                     <Grid item xs={12} sm={3} md={3}>
@@ -426,6 +404,7 @@ export default function renderForm(props, toast) {
                                                             getOptionLabel={(option) => option.name}
                                                             value={district}
                                                             onChange={onDistrictChange}
+                                                            noOptionsText={noOptionsText}
                                                             disabled={isDisabledDistrict}
                                                             renderInput={(params) =>
                                                                 <TextField
@@ -456,6 +435,7 @@ export default function renderForm(props, toast) {
                                                             value={ward}
                                                             disabled={isDisabledWard}
                                                             onChange={onWardChange}
+                                                            noOptionsText={noOptionsText}
                                                             getOptionLabel={(option) => option.name}
                                                             renderInput={(params) =>
                                                                 <TextField
@@ -615,12 +595,12 @@ export default function renderForm(props, toast) {
                                                                 name="level"
                                                                 control={control}
                                                                 lable="Cấp độ"
-                                                                defaultValue={levels ? levels[0].value : ''}
+                                                                defaultValue={condUserType ? condUserType[0].value : ''}
                                                                 rules={{ required: true }}
                                                                 error={!!errors.level}
                                                                 as={
                                                                     <Select label="Cấp độ">
-                                                                        {levels.map(({ value, label }) => (
+                                                                        {condUserType.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -650,7 +630,7 @@ export default function renderForm(props, toast) {
                                                                     />
                                                                 </FormControl>
                                                             </Grid>
-                                                        ): ''
+                                                        ) : ''
                                                     }
 
                                                 </Grid>
@@ -671,7 +651,7 @@ export default function renderForm(props, toast) {
                                                                         helperText={errors.password?.message}
                                                                         inputProps={{
                                                                             autoComplete: 'new-password'
-                                                                         }}
+                                                                        }}
                                                                         InputLabelProps={{
                                                                             shrink: true,
                                                                         }}
