@@ -1,7 +1,6 @@
-import React from 'react';
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
-import renderForm, {loadData} from "./form";
-import {useToast} from '@thuocsi/nextjs-components/toast/useToast';
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import { useToast } from '@thuocsi/nextjs-components/toast/useToast';
+import renderForm, { loadData } from "./form";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, loadData)
