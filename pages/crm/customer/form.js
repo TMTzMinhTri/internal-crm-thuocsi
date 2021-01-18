@@ -93,7 +93,7 @@ export default function renderForm(props, toast) {
         mode: "onChange"
     });
 
-    const noOptionsText = "Không có tùy chọn!";
+    const noOptionsText = "Không có tùy chọn";
 
     const onProvinceChange = async (event, val) => {
         setProvince()
