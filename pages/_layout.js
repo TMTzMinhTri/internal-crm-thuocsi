@@ -46,7 +46,7 @@ export default class AppCRM extends Component {
                 },
                 {
                     key:"ORDER",
-                    name:"Hóa Đơn",
+                    name:"Đơn hàng",
                     link:"/crm/order",
                     icon:faDollarSign,
                 }

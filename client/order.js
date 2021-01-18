@@ -38,18 +38,27 @@ class OrderClient extends APIClient {
             })
     }
 
-    // createNewCustomer(data) {
-    //     return this.callFromClient(
-    //         "POST",
-    //         `${URI}/account`,
-    //         data
-    //     )
-    // }
+    getOrderItemByOrderNo(orderNo) {
+        return this.callFromNextJS(
+            "GET",
+            `${URI}/order-item`,
+            {
+                order_no: orderNo
+            })
+    }
 
     updateOrder(data) {
         return this.callFromClient(
             "PUT",
             `${URI}/order`,
+            data
+        )
+    }
+
+    updateOrderItem(data) {
+        return this.callFromClient(
+            "PUT",
+            `${URI}/order-item`,
             data
         )
     }

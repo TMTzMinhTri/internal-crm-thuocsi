@@ -101,11 +101,9 @@ function render(props) {
             </TableCell>
             <TableCell align="left">{row.data.customerName}</TableCell>
             <TableCell align="left">{row.data.customerPhone}</TableCell>
-            <TableCell align="left">{row.data.customerProvinceCode}</TableCell>
             <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
-            <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
-            <TableCell align="left">{row.data.paymentMethod}</TableCell>
             <TableCell align="left">{row.data.totalPrice}</TableCell>
+            <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
             <TableCell align="left">
                 <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
                     <a>
@@ -166,19 +164,15 @@ function render(props) {
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
                     </colgroup>
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">Mã hóa đơn</TableCell>
                             <TableCell align="left">Tên khách hàng</TableCell>
                             <TableCell align="left">Số điện thoại</TableCell>
-                            <TableCell align="left">Tỉnh</TableCell>
                             <TableCell align="left">Địa Chỉ</TableCell>
-                            <TableCell align="left">Ngày giao</TableCell>
-                            <TableCell align="left">Phương thức</TableCell>
                             <TableCell align="left">Tổng tiền</TableCell>
+                            <TableCell align="left">Ngày giao</TableCell>
                             <TableCell align="left">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
