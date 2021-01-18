@@ -182,6 +182,7 @@ export function parseRuleToObject(promotion) {
         conditions: [],
     }
     let rule = promotion.rule
+    console.log('rule',rule)
     if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
         result.promotionOption = defaultRulePromotion.MIN_QUANTITY
         result.promotionTypeRule = rule.type
@@ -189,7 +190,7 @@ export function parseRuleToObject(promotion) {
         result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE
         result.promotionTypeRule = rule.type
     }
-    let {conditions} = rule.conditions
+    let {conditions} = rule
     conditions?.forEach((condition,index) => {
         result.promotionRulesLine.push({id: index})
     })
@@ -198,6 +199,7 @@ export function parseRuleToObject(promotion) {
         conditions: conditions,
         listProductIDs: promotion.objects[0].products || []
     }
+    console.log('réult',result)
     return result
 }
 

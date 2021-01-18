@@ -115,7 +115,7 @@ function render(props) {
     let defaultState = props.defaultState
     let startTime = dataRender.startTime
     let endTime = dataRender.endTime
-    startTime = displayTime(state)
+    startTime = displayTime(startTime)
     endTime = displayTime(endTime)
     const [state, setState] = useState(defaultState);
     const [updateDateProps, setUpdateDataProps] = useState({
