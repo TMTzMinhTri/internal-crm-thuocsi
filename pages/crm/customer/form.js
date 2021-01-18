@@ -561,7 +561,7 @@ export default function renderForm(props, toast) {
                                                                 error={!!errors.scope}
                                                                 as={
                                                                     <Select label="Vai trò">
-                                                                        {scopes.map(({ value, label }) => (
+                                                                        {scopes?.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -582,7 +582,7 @@ export default function renderForm(props, toast) {
                                                                 error={!!errors.level}
                                                                 as={
                                                                     <Select label="Cấp độ">
-                                                                        {condUserType.map(({ value, label }) => (
+                                                                        {condUserType?.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -604,7 +604,7 @@ export default function renderForm(props, toast) {
                                                                         error={!!errors.status}
                                                                         as={
                                                                             <Select label="Trạng thái">
-                                                                                {statuses.map(({ value, label }) => (
+                                                                                {statuses?.map(({ value, label }) => (
                                                                                     <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                                 ))}
                                                                             </Select>

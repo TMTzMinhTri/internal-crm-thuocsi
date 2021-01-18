@@ -617,8 +617,8 @@ export default function renderForm(props, toast) {
                                     {
                                         // case edit sku
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
-                                            <>
-                                                <Accordion  style={{backgroundColor: '#f8faf8'}} key={num} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
+                                            <div key={num} style={{marginTop: 10}}>
+                                                <Accordion  style={{backgroundColor: '#f8faf8', paddingTop: '5px'}} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
                                                     {
                                                         let tmpExpandeds = [...expandeds]
                                                         tmpExpandeds[idx] = !tmpExpandeds[idx]
@@ -651,7 +651,7 @@ export default function renderForm(props, toast) {
                                                             }}>Xóa</Button>
                                                     </AccordionActions>
                                                 </Accordion>
-                                            </>
+                                            </div>
                                         )) :
                                             // ids.map((num, idx) => (
                                             //     <>
