@@ -483,7 +483,7 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Người đại diện không thể để trống",
                                                                     maxLength: {
-                                                                        value: 50,
+                                                                        value: 100,
                                                                         message: "Người đại diện có độ dài tối đa 100 kí tự"
                                                                     },
                                                                     minLength: {
