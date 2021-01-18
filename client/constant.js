@@ -82,7 +82,6 @@ export const defaultConditionInfo = {
 }
 
 export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPromotion,listGiftProductPromotion) {
-    console.log('value',value)
     let result = {}
     let conditions = []
     switch (typePromotion){
@@ -182,7 +181,6 @@ export function parseRuleToObject(promotion) {
         conditions: [],
     }
     let rule = promotion.rule
-    console.log('rule',rule)
     if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
         result.promotionOption = defaultRulePromotion.MIN_QUANTITY
         result.promotionTypeRule = rule.type
@@ -199,7 +197,6 @@ export function parseRuleToObject(promotion) {
         conditions: conditions,
         listProductIDs: promotion.objects[0].products || []
     }
-    console.log('réult',result)
     return result
 }
 
@@ -221,7 +218,7 @@ export function parseConditionValue(conditions,typePromotion,promotionTypeCondit
                 if (conditionInfo === defaultNameRulesValue.percentValue+index) {
                     return conditions[index]?conditions[index][defaultConditionInfo.percent]: ""
                 }
-                if (conditionInfo === defaultNameRulesValue.maxDiscountValue+index) {
+                if (conditionInfo === defaultNameRulesValue.priceMaxDiscountValue+index) {
                     return conditions[index]?conditions[index][defaultConditionInfo.maxDiscountValue] : ""
                 }
             }

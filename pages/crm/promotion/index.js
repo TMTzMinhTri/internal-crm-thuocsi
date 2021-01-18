@@ -95,7 +95,6 @@ function render(props) {
     }
 
     const handleActivePromotion = async (event,promotionID) => {
-        console.log('1234',event.target.checked,promotionID)
         if (event.target.checked) {
             let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.ACTIVE)
             if (!promotionResponse || promotionResponse.status !==  "OK") {
