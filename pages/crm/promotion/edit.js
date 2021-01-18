@@ -71,12 +71,17 @@ export async function loadPromotionData(ctx) {
     }
 
     let defaultState = parseRuleToObject(getPromotionResponse.data[0])
+    let _productClient = getProductClient(ctx, {})
     if (defaultState.listProductIDs.length > 0 ) {
-        let _productClient = getProductClient(ctx, {})
         let listProductPromotionResponse = await _productClient.getListProductByIdsOrCodes(defaultState.listProductIDs)
         if (listProductPromotionResponse && listProductPromotionResponse.status === "OK") {
             defaultState.listProductPromotion = listProductPromotionResponse.data
         }
+    }
+
+    let listProductDefault = await _productClient.getListProduct()
+    if (listProductDefault && listProductDefault.status === "OK") {
+        defaultState.listProductDefault = listProductDefault.data.slice(0,5)
     }
 
     returnObject.props.defaultState = defaultState
@@ -1294,16 +1299,16 @@ export function RenderTableListProduct(props) {
                                     </TableRow>
                                 </TableHead>
                                 {stateProduct.listProductAction.map(({product,active}) => (
-                                    <TableRow key={product.productID}>
+                                    <TableRow key={product?.productID}>
                                         <TableCell align="left">
                                             <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveProduct(product,value)} />
                                         </TableCell>
                                         <TableCell align="left">
-                                            {product.name}
+                                            {product?.name}
                                         </TableCell>
                                         <TableCell align="left">
                                             {
-                                                product.imageUrls? (
+                                                product?.imageUrls? (
                                                     <image src={product.imageUrls[0]}></image>
                                                 ):(
                                                     <div></div>
