@@ -11,6 +11,8 @@ import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
+import { NotFound } from "components/components-global";
+import { condUserType, scopes, statuses } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -18,8 +20,6 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import { condUserType, statuses, scopes } from "components/global"
-import { NotFound } from "components/components-global";
 
 export async function loadData(ctx) {
     let data = {
@@ -343,8 +343,8 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Địa chỉ không thể để trống",
                                                                     maxLength: {
-                                                                        value: 50,
-                                                                        message: "Địa chỉ có độ dài tối đa 50 kí tự"
+                                                                        value: 250,
+                                                                        message: "Địa chỉ có độ dài tối đa 250 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 1,
