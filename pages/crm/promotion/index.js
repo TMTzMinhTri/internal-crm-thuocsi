@@ -28,7 +28,7 @@ import {
     displayPromotionScope,
     displayPromotionType,
     displayRule,
-    displayStatus
+    displayStatus, displayTime
 } from "../../../client/constant";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
@@ -47,9 +47,11 @@ export async function loadPromoData(ctx) {
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
+    let q = query.q || ""
 
     let _promotionClient = getPromoClient(ctx,{})
-    let getPromotionResponse = await _promotionClient.getPromotion("",limit,offset,true)
+    let getPromotionResponse = await _promotionClient.getPromotion(q,limit,offset,true)
+    console.log('get',getPromotionResponse)
     if (getPromotionResponse && getPromotionResponse.status === "OK") {
         returnObject.props.data = getPromotionResponse.data
         returnObject.props.count = getPromotionResponse.total
@@ -97,6 +99,11 @@ function render(props) {
             if (!promotionResponse || promotionResponse.status !==  "OK") {
                 return toast.error(promotionResponse.mesage)
             }else {
+                props.data.forEach(d => {
+                    if (d.promotionId === promotionID) {
+                        return d.status = defaultPromotionStatus.ACTIVE
+                    }
+                })
                 return toast.success('Cập nhật thành công')
             }
         }else {
@@ -104,6 +111,11 @@ function render(props) {
             if (!promotionResponse || promotionResponse.status !==  "OK") {
                 return toast.error(promotionResponse.mesage)
             }else {
+                props.data.forEach(d => {
+                    if (d.promotionId === promotionID) {
+                        return d.status = defaultPromotionStatus.EXPIRED
+                    }
+                })
                 return toast.success('Cập nhật thành công')
             }
         }
@@ -119,6 +131,7 @@ function render(props) {
         try {
             searchPromotion(formData)
             setSearch('')
+
         } catch (error) {
             console.log(error)
         }
@@ -200,13 +213,15 @@ function render(props) {
                                         />
                                     </TableCell>
                                     <TableCell align="left">
-                                        <div>Từ : {row.startTime}</div>
-                                        <div>Đến : {row.endTime}</div>
+                                        <div>Từ : {displayTime(row.startTime)}</div>
+                                        <div>Đến : {displayTime(row.endTime)}</div>
                                     </TableCell>
                                     <TableCell align="center">
-                                        <ButtonGroup color="primary" aria-label="contained primary button group" onClick={() => router.push({pathname: '/crm/promotion/edit',query: {promotionId: row.promotionId}})}>
-                                            <Button variant="contained" size="small" color="primary">Xem</Button>
-                                        </ButtonGroup>
+                                        <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
+                                            <ButtonGroup color="primary" aria-label="contained primary button group">
+                                                <Button variant="contained" size="small" color="primary">Xem</Button>
+                                            </ButtonGroup>
+                                        </Link>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -226,7 +241,7 @@ function render(props) {
                                 }}
                             />
                         ): (
-                            <h3>Không tìm thấy danh sách chương trình khuyến mái</h3>
+                            <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
                         )
                     }
 

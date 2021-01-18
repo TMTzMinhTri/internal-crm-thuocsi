@@ -725,7 +725,7 @@ function render(props) {
                                         </Grid>
                                         <Grid item xs={12} sm={6} md={6}>
                                             <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
-                                                              label="Không được áp dụng vưới khuyến mãi khác"/>
+                                                              label="Không được áp dụng với khuyến mãi khác"/>
                                         </Grid>
                                     </Grid>
                                 </RadioGroup>
@@ -1197,6 +1197,11 @@ export function RenderTableListProduct(props) {
         setStateProduct({...stateProduct,categorySearch: event.target.value})
     }
 
+    const handleCloseModal = () => {
+        setStateProduct({...stateProduct,listProductAction: props.listProductDefault})
+        return props.handleClose()
+    }
+
     const handleActiveProduct = (product,active) => {
         let {listProductAction} = stateProduct
         listProductAction.forEach(productAction => {
@@ -1220,13 +1225,15 @@ export function RenderTableListProduct(props) {
                 }
             })
             setStateProduct({...stateProduct, listProductAction: listProductAction})
+        }else {
+            setStateProduct({...stateProduct, listProductAction: []})
         }
     }
 
     return (
         <div>
             <Button variant="contained" style={{margin: "1rem 0"}} onClick={props.handleClickOpen}>Chọn sản phẩm</Button>
-            <Modal open={props.open} onClose={props.handleClose} className={styles.modal}>
+            <Modal open={props.open} onClose={handleCloseModal} className={styles.modal}>
                 <div className={styles.modalBody}>
                     <h1 className={styles.headerModal}>
                         Chọn sản phẩm
@@ -1304,7 +1311,7 @@ export function RenderTableListProduct(props) {
                     </DialogContent>
                     <DialogActions>
                         <ButtonGroup>
-                            <Button onClick={props.handleClose} color="secondary">
+                            <Button onClick={handleCloseModal} color="secondary">
                                 Hủy
                             </Button>
                             <Button onClick={() => props.handleAddProductPromotion(stateProduct.listProductAction)} color="primary" autoFocus>

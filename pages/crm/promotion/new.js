@@ -743,7 +743,7 @@ function render(props) {
                                         </Grid>
                                         <Grid item xs={12} sm={6} md={6}>
                                             <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
-                                                              label="Không được áp dụng vưới khuyến mãi khác"/>
+                                                              label="Không được áp dụng với khuyến mãi khác"/>
                                         </Grid>
                                     </Grid>
                                 </RadioGroup>
@@ -1255,7 +1255,6 @@ export function RenderTableProductGift(props) {
 }
 
 export function RenderTableListProduct(props) {
-    console.log('props',props.state)
     const [stateProduct, setStateProduct] = useState({
         listProductAction: props.listProductDefault,
         listCategoryPromotion: props.listCategoryPromotion,
@@ -1263,10 +1262,19 @@ export function RenderTableListProduct(props) {
         productNameSearch: "",
     })
 
+    console.log('props',props.listProductDefault)
+    console.log('props',stateProduct)
+
+
     const [showAutoComplete, setShowAutoComplete]   = useState(false);
 
     const handleChangeProductSearch = (event) => {
         setStateProduct({...stateProduct,productNameSearch: event.target.value})
+    }
+
+    const handleCloseModal = () => {
+        setStateProduct({...stateProduct,listProductAction: props.listProductDefault})
+        return props.handleClose()
     }
 
     const handleChangeCategory = (event) => {
@@ -1287,22 +1295,27 @@ export function RenderTableListProduct(props) {
         let seachProductResponse = await searchProductList(stateProduct.productNameSearch, stateProduct.categorySearch.code)
         if (seachProductResponse && seachProductResponse.status === "OK") {
             let listProductAction = []
-            seachProductResponse.data.forEach((searchProduct, index) => {
+            seachProductResponse.data?.forEach((searchProduct, index) => {
                 if (index < 5) {
                     listProductAction.push({
                         product: searchProduct,
-                        active: props.listProductPromotion.find(productPromotion => productPromotion.productID === searchProduct.productID)
+                        active: props.listProductPromotion.find(productPromotion => productPromotion.productID === searchProduct.productID) || false
                     })
                 }
             })
+            console.log('111',seachProductResponse.data)
+            console.log('123124',listProductAction)
             setStateProduct({...stateProduct, listProductAction: listProductAction})
+        }else {
+            console.log('555')
+            setStateProduct({...stateProduct, listProductAction: []})
         }
     }
 
     return (
         <div>
             <Button variant="contained" style={{margin: "1rem 0"}} onClick={props.handleClickOpen}>Chọn sản phẩm</Button>
-            <Modal open={props.open} onClose={props.handleClose} className={styles.modal}>
+            <Modal open={props.open} onClose={handleCloseModal} className={styles.modal}>
                 <div className={styles.modalBody}>
                     <h1 className={styles.headerModal}>
                         Chọn sản phẩm
@@ -1380,7 +1393,7 @@ export function RenderTableListProduct(props) {
                     </DialogContent>
                     <DialogActions>
                         <ButtonGroup>
-                            <Button onClick={props.handleClose} color="secondary">
+                            <Button onClick={handleCloseModal} color="secondary">
                                 Hủy
                             </Button>
                             <Button onClick={() => props.handleAddProductPromotion(stateProduct.listProductAction)} color="primary" autoFocus>

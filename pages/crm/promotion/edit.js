@@ -26,7 +26,7 @@ import {
     defaultRulePromotion,
     defaultTypeConditionsRule,
     defaultUseTypePromotion,
-    displayNameRule,
+    displayNameRule, displayTime,
     limitText,
     parseConditionValue,
     parseRuleToObject,
@@ -53,6 +53,7 @@ import {loadPromoData} from "./index";
 import {getPromoClient} from "../../../client/promo";
 import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
+import Image from "next/image";
 
 export async function getServerSideProps(ctx ) {
     return await doWithLoggedInUser(ctx, () => {
@@ -114,8 +115,8 @@ function render(props) {
     let defaultState = props.defaultState
     let startTime = dataRender.startTime
     let endTime = dataRender.endTime
-    startTime = startTime.substring(0,startTime.length-4)
-    endTime = endTime.substring(0,endTime.length-4)
+    startTime = displayTime(state)
+    endTime = displayTime(endTime)
     const [state, setState] = useState(defaultState);
     const [updateDateProps, setUpdateDataProps] = useState({
     })
@@ -729,7 +730,7 @@ function render(props) {
                                         </Grid>
                                         <Grid item xs={12} sm={6} md={6}>
                                             <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
-                                                              label="Không được áp dụng vưới khuyến mãi khác"/>
+                                                              label="Không được áp dụng với khuyến mãi khác"/>
                                         </Grid>
                                     </Grid>
                                 </RadioGroup>
@@ -1198,6 +1199,11 @@ export function RenderTableListProduct(props) {
         setStateProduct({...stateProduct,productNameSearch: event.target.value})
     }
 
+    const handleCloseModal = () => {
+        setStateProduct({...stateProduct,listProductAction: props.listProductDefault})
+        return props.handleClose()
+    }
+
     const handleChangeCategory = (event) => {
         setStateProduct({...stateProduct,categorySearch: event.target.value})
     }
@@ -1225,13 +1231,15 @@ export function RenderTableListProduct(props) {
                 }
             })
             setStateProduct({...stateProduct, listProductAction: listProductAction})
+        }else {
+            setStateProduct({...stateProduct, listProductAction: []})
         }
     }
 
     return (
         <div>
             <Button variant="contained" style={{margin: "1rem 0"}} onClick={props.handleClickOpen}>Chọn sản phẩm</Button>
-            <Modal open={props.open} onClose={props.handleClose} className={styles.modal}>
+            <Modal open={props.open} onClose={handleCloseModal} className={styles.modal}>
                 <div className={styles.modalBody}>
                     <h1 className={styles.headerModal}>
                         Chọn sản phẩm
@@ -1309,7 +1317,7 @@ export function RenderTableListProduct(props) {
                     </DialogContent>
                     <DialogActions>
                         <ButtonGroup>
-                            <Button onClick={props.handleClose} color="secondary">
+                            <Button onClick={handleCloseModal} color="secondary">
                                 Hủy
                             </Button>
                             <Button onClick={() => props.handleAddProductPromotion(stateProduct.listProductAction)} color="primary" autoFocus>
@@ -1335,8 +1343,8 @@ export function RenderTableListProduct(props) {
                                     <TableRow>
                                         <TableCell align="left">
                                             {
-                                                product.imageUrls? (
-                                                    <image src={product.imageUrls[0]}></image>
+                                                product.imageUrls?.length > 0 ?(
+                                                    <Image src={product.imageUrls[0]}></Image>
                                                 ):(
                                                     <div></div>
                                                 )

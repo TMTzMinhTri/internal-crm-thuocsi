@@ -331,6 +331,10 @@ export function displayStatus(status) {
     }
 }
 
+export function displayTime(time) {
+    return time.substring(0,time.length-4)
+}
+
 export function displayPromotionType(type) {
     switch (type){
         case defaultPromotionType.COMBO:
