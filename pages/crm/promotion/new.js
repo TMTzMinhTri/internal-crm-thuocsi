@@ -41,6 +41,7 @@ import Checkbox from "@material-ui/core/Checkbox";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 import {getPromoClient} from "../../../client/promo";
+import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
@@ -239,7 +240,17 @@ function render(props) {
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        <Box style={{fontSize: 24}}>Thêm khuyến mãi mới</Box>
+                        <Grid container>
+                            <Grid  xs={4}>
+                                <ArrowBackIcon style={{fontSize : 30}} onClick={() => router.back()}/>
+                            </Grid>
+                            <Grid>
+                                <Box style={{fontSize: 24}}>
+                                    <h3>Thêm khuyến mãi mới</h3>
+                                </Box>
+                            </Grid>
+                        </Grid>
+
                         <CardHeader
                             subheader="Thông tin khuyến mãi"
                         />
@@ -452,7 +463,7 @@ function render(props) {
                                                                     required
                                                                     inputRef={
                                                                         register({
-                                                                            required: "Giá trị đơn hàng không được bỏ trống",
+                                                                            required: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "Giá trị đơn hàng không được bỏ trống" : "Số lượng sản phẩm không được bỏ trống",
                                                                             maxLength: {
                                                                                 value: 10,
                                                                                 message: "Giá trị đơn hàng không được vượt quá 10 kí tự"

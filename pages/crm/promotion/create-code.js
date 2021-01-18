@@ -62,6 +62,7 @@ import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import {useRouter} from "next/router";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
 
 export async function getServerSideProps(ctx) {
@@ -227,7 +228,16 @@ function render(props) {
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        <Box style={{fontSize: 24}}>Thêm khuyến mãi mới</Box>
+                        <Grid container>
+                            <Grid  xs={4}>
+                                <ArrowBackIcon style={{fontSize : 30}} onClick={() => router.back()}/>
+                            </Grid>
+                            <Grid>
+                                <Box style={{fontSize: 24}}>
+                                    <h3>Thêm khuyến mãi mới</h3>
+                                </Box>
+                            </Grid>
+                        </Grid>
                         <CardHeader
                             subheader="Thông tin khuyến mãi"
                         />

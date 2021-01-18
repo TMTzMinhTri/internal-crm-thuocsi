@@ -56,6 +56,8 @@ import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
 import Image from "next/image";
 import {route} from "next/dist/next-server/server/router";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import {useRouter} from "next/router";
 
 export async function getServerSideProps(ctx ) {
     return await doWithLoggedInUser(ctx, () => {
@@ -118,6 +120,7 @@ export default function NewPage(props) {
 
 function render(props) {
     const toast = useToast()
+    const router = useRouter()
     let dataRender = props.data
     let defaultState = props.defaultState
     let startTime = dataRender.startTime
@@ -239,7 +242,16 @@ function render(props) {
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        <Box style={{fontSize: 24}}>Chỉnh sửa khuyến mãi</Box>
+                        <Grid container>
+                            <Grid  xs={4}>
+                                <ArrowBackIcon style={{fontSize : 30}} onClick={() => router.back()}/>
+                            </Grid>
+                            <Grid>
+                                <Box style={{fontSize: 24}}>
+                                    <h3>Chỉnh sửa khuyến mãi</h3>
+                                </Box>
+                            </Grid>
+                        </Grid>
                         <CardHeader
                             subheader="Thông tin khuyến mãi"
                         />

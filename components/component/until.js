@@ -184,7 +184,7 @@ export function displayRule(rule) {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 result +=result +`Giảm giá: ${condition.percent}% \\n Số lượng sản phẩm từ: ${condition.minQuantity}\\n`
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)}đ \n Số lượng sản phẩm từ: ${condition.minQuantity} \n`
+                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)} \n Số lượng sản phẩm từ: ${condition.minQuantity} \n`
             }
         })
     } else {

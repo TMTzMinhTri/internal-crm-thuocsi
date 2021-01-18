@@ -83,7 +83,6 @@ function render(props) {
     const {register, handleSubmit, errors} = useForm();
     let [search, setSearch] = useState('')
     let [open, setOpen] = useState({
-        openModalConfirm: false,
         openModalCreate: false,
     })
     let q = router.query.q || ''
