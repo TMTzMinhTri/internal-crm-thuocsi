@@ -84,7 +84,7 @@ function render(props) {
     let [open, setOpen] = useState({
         openModalCreate: false,
     })
-    let q = router.query.q || ''
+    let promotionName = router.query.promotionName || ''
 
     const [page, setPage] = React.useState(parseInt(router.query.page || 0));
     const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(router.query.perPage) || 20);
@@ -196,10 +196,10 @@ function render(props) {
                 </Grid>
             </div>
             {
-                q === '' ? (
+                promotionName === '' ? (
                     <span/>
                 ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{promotionName}'</i></div>
                 )
             }
             <TableContainer component={Paper}>
