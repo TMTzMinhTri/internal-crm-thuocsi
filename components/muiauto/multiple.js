@@ -44,21 +44,23 @@ const MuiMultipleAuto = ({
     
     const hasError =  typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
+    const [open, setOpen] = useState(false);
     const [qOptions, setQOptions] = useState(options);
     const debouncedSearch = useDebounce(q?.trim(), 200);
 
     if(typeof required === 'undefined') {
         required = false
     }
+
     useEffect(() => {
-        if(debouncedSearch) {
+        if(debouncedSearch || open == true) {
             if (typeof onFieldChange !== 'undefined') {
                 onFieldChange(debouncedSearch).then((results) => {
                     setQOptions(results)
                 })
             }
         }
-    },[debouncedSearch,q]);
+    },[debouncedSearch,q, open]);
 
     return (
         <div>
@@ -72,6 +74,8 @@ const MuiMultipleAuto = ({
                         getOptionLabel={(option) => option.label?.toString()}
                         getOptionSelected={(option, val) => option.value === val.value}
                         noOptionsText="Không tìm thấy kết quả phù hợp"
+                        onOpen={()=> {setQ(''), setOpen(true)}}
+                        onClose={()=> setOpen(false)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -87,9 +91,6 @@ const MuiMultipleAuto = ({
                                 placeholder={placeholder}
                                 variant="outlined"
                                 size="small"
-                                onBlur={() => {
-                                    setQ('')
-                                }}
                                 onChange={(e) => setQ(e.target.value)}
                             />
                         )}
