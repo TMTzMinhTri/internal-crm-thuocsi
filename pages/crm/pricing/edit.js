@@ -158,6 +158,7 @@ function render(props) {
                                         name="categoryCodes"
                                         control={control}
                                         errors={errors}
+                                        message="Vui lòng chọn"
                                         onFieldChange={searchCatogery}
                                         required={true}
                                     />
