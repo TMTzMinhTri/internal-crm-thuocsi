@@ -276,10 +276,7 @@ export function displayRule(rule) {
     let {minQuantity,minOrderValue} = rule
     if (minQuantity?.field) {
         let {conditions,field,type} = minQuantity
-        if (!conditions) {
-            return "Không xác định"
-        }
-        conditions.forEach(condition => {
+        conditions?.forEach(condition => {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 result +=result +`Giảm giá: ${condition.percent}% \\n Số lượng sản phẩm từ: ${condition.minQuantity}\\n`
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
@@ -288,10 +285,7 @@ export function displayRule(rule) {
         })
     }else {
         let {conditions,field,type} = minOrderValue
-        if (!conditions) {
-            return "Không xác định"
-        }
-        conditions.forEach(condition => {
+        conditions?.forEach(condition => {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 result +=result +`Giảm giá: ${condition.percent}% \n Cho đơn hàng từ: ${condition.minOrderValue} \n`
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {

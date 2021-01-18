@@ -241,7 +241,7 @@ function render(props) {
                         />
                         <CardContent>
                             <Grid spacing={3} container>
-                                <Grid item xs={12} sm={6} md={6}>
+                                <Grid item xs={12} sm={12} md={12}>
                                     <TextField
                                         id="promotionName"
                                         name="promotionName"
@@ -757,18 +757,18 @@ function render(props) {
                                   <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
                                               onChange={handleChangeScope}>
                                       <Grid spacing={3} container justify="space-around" alignItems="center">
-                                          <Grid item xs={12} sm={4} md={4}>
+                                          <Grid item xs={12} sm={6} md={6}>
                                               <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
                                                                 label="Toàn sàn"/>
                                           </Grid>
-                                          <Grid item xs={12} sm={4} md={4}>
+                                          <Grid item xs={12} sm={6} md={6}>
                                               <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
                                                                 label="Sản phẩm được chọn"/>
                                           </Grid>
-                                          <Grid item xs={12} sm={4} md={4}>
-                                              <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}
-                                                                label="Danh mục được chọn"/>
-                                          </Grid>
+                                          {/*<Grid item xs={12} sm={4} md={4}>*/}
+                                          {/*    <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}*/}
+                                          {/*                      label="Danh mục được chọn"/>*/}
+                                          {/*</Grid>*/}
                                       </Grid>
                                   </RadioGroup>
                               </Grid>

@@ -57,6 +57,14 @@
     text-align: center;
 }
 
+.buttonConfirm {
+    width: 100%;
+}
+
+.buttonConfirmRight{
+    margin-left: auto !important;
+}
+
 .rootCard {
     margin: 10px;
 }

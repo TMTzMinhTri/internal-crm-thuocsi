@@ -235,16 +235,16 @@ function render(props) {
 
             <Modal open={open.openModalCreate} onClose={() => setOpen({...open,openModalCreate:  false})} className={styles.modal}>
                 <div className={styles.modalBodyCreate}>
-                    <h3 style={{textAlign: "center"}}>
+                    <h3 style={{textAlign: "center", marginBottom: "2rem"}}>
                         Chọn loại khuyến mãi cần tạo
                     </h3>
                     <div style={{margin: "auto"}}>
-                        <ButtonGroup>
+                        <ButtonGroup className={styles.buttonConfirm}>
                             <Link href={`/crm/promotion/create-code`}>
                                 <Button  variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo voucher Khuyến mãi</Button>
                             </Link>
                             <Link href={`/crm/promotion/new`}>
-                                <Button  variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo Combo khuyến mãi</Button>
+                                <Button className={styles.buttonConfirmRight} variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo Combo khuyến mãi</Button>
                             </Link>
                         </ButtonGroup>
                     </div>
