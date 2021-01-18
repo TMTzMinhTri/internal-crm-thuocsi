@@ -1,5 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-import { constURL } from "./constant";
+import { constURL } from "../components/component/constant";
 const prefix = constURL.PREFIX_PRODUCT
 
 class TagClient extends APIClient {

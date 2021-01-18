@@ -1,5 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-import {queryParamGetProductGift} from "./constant";
+import {queryParamGetProductGift} from "../components/component/constant";
 const PREFIX = `/marketplace/product/v1`
 // const PREFIX = ``
 

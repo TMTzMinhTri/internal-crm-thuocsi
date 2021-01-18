@@ -46,20 +46,24 @@ import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
 import {
     defaultPromotionScope,
-    defaultPromotionType,
-    defaultRulePromotion,
+    defaultRulePromotion,defaultPromotionType,
     defaultTypeConditionsRule,
-    queryParamGetProductGift,
+    defaultNameRulesValue,queryParamGetProductGift,
+    defaultNameRulesQuantity, defaultUseTypePromotion
+} from "../../../components/component/constant";
+import {
     setRulesPromotion,
     limitText,
-    defaultNameRulesValue,
-    defaultNameRulesQuantity, displayNameRule, setScopeObjectPromontion, defaultUseTypePromotion
-} from "../../../client/constant";
+    displayNameRule, setScopeObjectPromontion
+} from "../../../components/component/until";
 import {Grade} from "@material-ui/icons";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
+import {useRouter} from "next/router";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -105,6 +109,7 @@ async function getListCategory() {
 
 function render(props) {
     const toast = useToast()
+    const router = useRouter()
     const [promotionRulesLine, setPromotionRulesLine] = useState([
         {
             id: 1,
@@ -223,7 +228,16 @@ function render(props) {
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        <Box style={{fontSize: 24}}>Thêm khuyến mãi mới</Box>
+                        <Grid container>
+                            <Grid  xs={4}>
+                                <ArrowBackIcon style={{fontSize : 30}} onClick={() => router.back()}/>
+                            </Grid>
+                            <Grid>
+                                <Box style={{fontSize: 24}}>
+                                    <h3>Thêm khuyến mãi mới</h3>
+                                </Box>
+                            </Grid>
+                        </Grid>
                         <CardHeader
                             subheader="Thông tin khuyến mãi"
                         />
@@ -782,7 +796,7 @@ function render(props) {
                                 style={{margin: 8}}>
                                 Lưu
                             </Button>
-                            <Button variant="contained" style={{margin: 8}}>Làm mới</Button>
+                            <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>Làm mới</Button>
                         </Box>
                     </Box>
                 </FormGroup>

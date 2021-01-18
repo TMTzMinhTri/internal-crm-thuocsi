@@ -1,5 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-import {constURL} from "./constant";
+import {constURL} from "../components/component/constant";
 
 
 class PromoClient extends APIClient{
@@ -32,12 +32,13 @@ class PromoClient extends APIClient{
         )
     }
 
-    getPromotion(q,limit,offset,getTotal) {
+    getPromotion(promotionName,limit,offset,getTotal) {
+        let q = JSON.stringify({promotionName})
         return this.callFromNextJS(
             "GET",
             `${constURL.PREFIX_PROMOTION}/promotion`,
             {
-                q,limit,getTotal,offset
+                q:q,limit,getTotal,offset
             }
         )
     }

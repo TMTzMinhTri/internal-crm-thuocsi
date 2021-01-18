@@ -25,13 +25,15 @@ import {useForm} from "react-hook-form";
 import {getPromoClient} from "../../../client/promo";
 import {
     defaultPromotionStatus,
+} from "../../../components/component/constant";
+import {
     displayPromotionScope,
     displayPromotionType,
     displayRule,
     displayStatus,
-    displayTime,
+    formatTime,
     getPromotionScope
-} from "../../../client/constant";
+} from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
 import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
@@ -49,11 +51,10 @@ export async function loadPromoData(ctx) {
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
-    let q = query.q || ""
+    let promotionName = query.promotionName || ""
 
     let _promotionClient = getPromoClient(ctx,{})
-    let getPromotionResponse = await _promotionClient.getPromotion(q,limit,offset,true)
-    console.log('get',getPromotionResponse)
+    let getPromotionResponse = await _promotionClient.getPromotion(promotionName,limit,offset,true)
     if (getPromotionResponse && getPromotionResponse.status === "OK") {
         returnObject.props.data = getPromotionResponse.data
         returnObject.props.count = getPromotionResponse.total
@@ -76,26 +77,44 @@ async function updatePromotion(promotionId,status) {
 }
 
 function render(props) {
-    console.log('render',props)
     const toast = useToast()
     let router = useRouter()
     const {register, handleSubmit, errors} = useForm();
     let [search, setSearch] = useState('')
     let [open, setOpen] = useState({
-        openModalConfirm: false,
         openModalCreate: false,
     })
     let q = router.query.q || ''
-    let page = parseInt(router.query.page) || 0
-    let limit = parseInt(router.query.limit) || 20
 
+    const [page, setPage] = React.useState(parseInt(router.query.page || 0));
+    const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(router.query.perPage) || 20);
     function searchPromotion(formData) {
-        let q = formData.q
-        Router.push(`/crm/promotion?q=${q}`)
+        let promotionName = formData.promotionName
+        Router.push({
+            pathname: '/crm/promotion',
+            query:{
+                promontionName: promotionName,
+            }
+        })
     }
 
+    const handleChangePage = (event, newPage, rowsPerPage) => {
+        setPage(newPage)
+        setRowsPerPage(rowsPerPage)
+
+        router.push({
+            pathname: '/crm/promotion',
+            query: {
+                ...router.query,
+                limit: rowsPerPage,
+                page: newPage,
+                perPage: rowsPerPage,
+                offset: newPage * rowsPerPage
+            }
+        })
+    };
+
     const handleActivePromotion = async (event,promotionID) => {
-        console.log('1234',event.target.checked,promotionID)
         if (event.target.checked) {
             let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.ACTIVE)
             if (!promotionResponse || promotionResponse.status !==  "OK") {
@@ -133,7 +152,6 @@ function render(props) {
         try {
             searchPromotion(formData)
             setSearch('')
-
         } catch (error) {
             console.log(error)
         }
@@ -153,8 +171,8 @@ function render(props) {
                         <form>
                             <Paper component="form" className={styles.search}>
                                 <InputBase
-                                    id="q"
-                                    name="q"
+                                    id="promotionName"
+                                    name="promotionName"
                                     className={styles.input}
                                     value={search}
                                     onChange={handleChange}
@@ -205,7 +223,21 @@ function render(props) {
                                     <TableCell align="left">{row.promotionName}</TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
-                                    <TableCell align="left">{displayRule(row.rule)}</TableCell>
+                                    <TableCell align="left">
+                                        {
+                                            displayRule(row.rule).length > 0 ? (
+                                                displayRule(row.rule).map((rule,index) => (
+                                                    index % 2 === 0 ?(
+                                                        <div>{rule}</div>
+                                                    ): (
+                                                        <div style={{fontStyle: "italic"}}>{rule}</div>
+                                                    )
+                                            ))
+                                            ): (
+                                                <div></div>
+                                            )
+                                        }
+                                    </TableCell>
                                     <TableCell align="left">{displayStatus(row.status)}</TableCell>
                                     <TableCell align="left">
                                         <Switch
@@ -215,8 +247,8 @@ function render(props) {
                                         />
                                     </TableCell>
                                     <TableCell align="left">
-                                        <div>Từ : {displayTime(row.startTime)}</div>
-                                        <div>Đến : {displayTime(row.endTime)}</div>
+                                        <div>Từ : {formatTime(row.startTime)}</div>
+                                        <div>Đến : {formatTime(row.endTime)}</div>
                                     </TableCell>
                                     <TableCell align="center">
                                         <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
@@ -236,11 +268,9 @@ function render(props) {
                             <MyTablePagination
                                 labelUnit="khuyến mãi"
                                 count={props.count}
-                                rowsPerPage={limit}
+                                rowsPerPage={rowsPerPage}
                                 page={page}
-                                onChangePage={(event, page, rowsPerPage) => {
-                                    Router.push(`/promotion?page=${page}&limit=${rowsPerPage}`)
-                                }}
+                                onChangePage={handleChangePage}
                             />
                         ): (
                             <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>

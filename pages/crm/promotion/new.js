@@ -46,21 +46,32 @@ import Checkbox from "@material-ui/core/Checkbox";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 import { getPromoClient } from "../../../client/promo";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getProductClient } from "../../../client/product";
 import { getCategoryClient } from "../../../client/category";
 import {
   defaultPromotionScope,
-  defaultPromotionType,
   defaultRulePromotion,
   defaultTypeConditionsRule,
-  queryParamGetProductGift,
-  setRulesPromotion,
+  defaultPromotionType,
   defaultNameRulesValue,
+  defaultNameRulesQuantity,
+  defaultUseTypePromotion,
+  queryParamGetProductGift,
+} from "../../../components/component/constant";
+import {
+  setRulesPromotion,
+  limitText,
   displayNameRule,
   setScopeObjectPromontion,
-  defaultUseTypePromotion,
-} from "../../../client/constant";
+} from "../../../components/component/until";
+import { Grade } from "@material-ui/icons";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
+import { useRouter } from "next/router";
 import RenderTableListProduct from "components/component/promotion/modal-list-product";
 import RenderTableListCategory from "components/component/promotion/modal-list-category";
 
@@ -131,6 +142,7 @@ async function getListCategory() {
 
 function render(props) {
   const toast = useToast();
+  const router = useRouter();
   const [promotionRulesLine, setPromotionRulesLine] = useState([
     {
       id: 1,
@@ -381,7 +393,20 @@ function render(props) {
       <Box component={Paper}>
         <FormGroup>
           <Box className={styles.contentPadding}>
-            <Box style={{ fontSize: 24 }}>Thêm khuyến mãi mới</Box>
+            <Grid container>
+              <Grid xs={4}>
+                <ArrowBackIcon
+                  style={{ fontSize: 30 }}
+                  onClick={() => router.back()}
+                />
+              </Grid>
+              <Grid>
+                <Box style={{ fontSize: 24 }}>
+                  <h3>Thêm khuyến mãi mới</h3>
+                </Box>
+              </Grid>
+            </Grid>
+
             <CardHeader subheader="Thông tin khuyến mãi" />
             <CardContent>
               <Grid spacing={3} container>

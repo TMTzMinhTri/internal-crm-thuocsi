@@ -22,17 +22,18 @@ import Typography from "@material-ui/core/Typography";
 import {
     defaultNameRulesValue,
     defaultPromotionScope,
-    defaultPromotionType,
     defaultRulePromotion,
     defaultTypeConditionsRule,
-    defaultUseTypePromotion,
+    defaultUseTypePromotion
+} from "../../../components/component/constant";
+import {
     displayNameRule, displayTime,
     limitText,
     parseConditionValue,
     parseRuleToObject,
     setRulesPromotion,
     setScopeObjectPromontion
-} from "../../../client/constant";
+} from "../../../components/component/until";
 import Card from "@material-ui/core/Card";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -54,6 +55,9 @@ import {getPromoClient} from "../../../client/promo";
 import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
 import Image from "next/image";
+import {route} from "next/dist/next-server/server/router";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import {useRouter} from "next/router";
 
 export async function getServerSideProps(ctx ) {
     return await doWithLoggedInUser(ctx, () => {
@@ -71,12 +75,17 @@ export async function loadPromotionData(ctx) {
     }
 
     let defaultState = parseRuleToObject(getPromotionResponse.data[0])
+    let _productClient = getProductClient(ctx, {})
     if (defaultState.listProductIDs.length > 0 ) {
-        let _productClient = getProductClient(ctx, {})
         let listProductPromotionResponse = await _productClient.getListProductByIdsOrCodes(defaultState.listProductIDs)
         if (listProductPromotionResponse && listProductPromotionResponse.status === "OK") {
             defaultState.listProductPromotion = listProductPromotionResponse.data
         }
+    }
+
+    let listProductDefault = await _productClient.getListProduct()
+    if (listProductDefault && listProductDefault.status === "OK") {
+        defaultState.listProductDefault = listProductDefault.data.slice(0,5)
     }
 
     returnObject.props.defaultState = defaultState
@@ -111,6 +120,7 @@ export default function NewPage(props) {
 
 function render(props) {
     const toast = useToast()
+    const router = useRouter()
     let dataRender = props.data
     let defaultState = props.defaultState
     let startTime = dataRender.startTime
@@ -232,7 +242,16 @@ function render(props) {
             <Box component={Paper}>
                 <FormGroup>
                     <Box className={styles.contentPadding}>
-                        <Box style={{fontSize: 24}}>Chỉnh sửa khuyến mãi</Box>
+                        <Grid container>
+                            <Grid  xs={4}>
+                                <ArrowBackIcon style={{fontSize : 30}} onClick={() => router.back()}/>
+                            </Grid>
+                            <Grid>
+                                <Box style={{fontSize: 24}}>
+                                    <h3>Chỉnh sửa khuyến mãi</h3>
+                                </Box>
+                            </Grid>
+                        </Grid>
                         <CardHeader
                             subheader="Thông tin khuyến mãi"
                         />
@@ -787,7 +806,7 @@ function render(props) {
                                 style={{margin: 8}}>
                                 Lưu
                             </Button>
-                            <Button variant="contained" style={{margin: 8}}>Làm mới</Button>
+                            <Button variant="contained" style={{margin: 8}} onClick={() => router.back()}>Trở về</Button>
                         </Box>
                     </Box>
                 </FormGroup>
@@ -1294,16 +1313,16 @@ export function RenderTableListProduct(props) {
                                     </TableRow>
                                 </TableHead>
                                 {stateProduct.listProductAction.map(({product,active}) => (
-                                    <TableRow key={product.productID}>
+                                    <TableRow key={product?.productID}>
                                         <TableCell align="left">
                                             <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveProduct(product,value)} />
                                         </TableCell>
                                         <TableCell align="left">
-                                            {product.name}
+                                            {product?.name}
                                         </TableCell>
                                         <TableCell align="left">
                                             {
-                                                product.imageUrls? (
+                                                product?.imageUrls? (
                                                     <image src={product.imageUrls[0]}></image>
                                                 ):(
                                                     <div></div>
