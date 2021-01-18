@@ -31,20 +31,15 @@ export const defaultPromotionStatus = {
 }
 
 export const defaultRulePromotion = {
-    MIN_QUANTITY: "min_quantity",
-    MIN_ORDER_VALUE: "min_order_value"
+    MIN_QUANTITY: "MIN_QUANTITY",
+    MIN_ORDER_VALUE: "MIN_ORDER_VALUE"
 }
 
 export const defaultTypeConditionsRule = {
-    DISCOUNT_ORDER_VALUE: "discount_order_value",
-    GIFT: "gift",
-    PRODUCT_GIFT: "product_gift",
-    DISCOUNT_PERCENT: "percent",
-}
-
-export const mapNamePromotionDefaultRule = {
-    minQuantity: "min_quantity",
-    minOrderValue: "min_order_value",
+    DISCOUNT_ORDER_VALUE: "VALUE",
+    GIFT: "GIFT",
+    PRODUCT_GIFT: "PRODUCT_GIFT",
+    DISCOUNT_PERCENT: "PERCENT",
 }
 
 export const defaultTypeProduct = {
@@ -94,10 +89,7 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPro
         case defaultRulePromotion.MIN_QUANTITY:
             result = {
                 ...result,
-                minOrderValue: {},
-                minQuantity: {
-                    field: defaultRulePromotion.MIN_QUANTITY,
-                }
+                field: defaultRulePromotion.MIN_QUANTITY,
             }
             if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
                 for (let i = 0; i < index; i ++) {
@@ -108,11 +100,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPro
                 }
                 result = {
                     ...result,
-                    minQuantity: {
-                        ...result.minQuantity,
-                        type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
-                        conditions: conditions,
-                    }
+                    type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
+                    conditions: conditions,
                 }
             }else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 for (let i = 0; i < index; i ++) {
@@ -124,11 +113,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPro
                 }
                 result = {
                     ...result,
-                    minQuantity: {
-                        ...result.minQuantity,
-                        type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
-                        conditions: conditions,
-                    }
+                    type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
+                    conditions: conditions,
                 }
             }else if (typeRule === defaultTypeConditionsRule.GIFT) {
 
@@ -137,10 +123,7 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPro
         case defaultRulePromotion.MIN_ORDER_VALUE:
             result = {
                 ...result,
-                minQuantity: {},
-                minOrderValue: {
-                    field: defaultRulePromotion.MIN_ORDER_VALUE,
-                }
+                field: defaultRulePromotion.MIN_ORDER_VALUE,
             }
             if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
                 for (let i = 0; i < index; i ++) {
@@ -151,11 +134,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPro
                 }
                 result = {
                     ...result,
-                    minOrderValue: {
-                        ...result.minOrderValue,
-                        type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
-                        conditions: conditions,
-                    }
+                    type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
+                    conditions: conditions,
                 }
             }else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 for (let i = 0; i < index; i ++) {
@@ -167,11 +147,8 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPro
                 }
                 result = {
                     ...result,
-                    minOrderValue: {
-                        ...result.minOrderValue,
-                        type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
-                        conditions: conditions,
-                    }
+                    type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
+                    conditions: conditions,
                 }
             }
             break
@@ -204,16 +181,17 @@ export function parseRuleToObject(promotion) {
         listCategoryPromotion: [],
         conditions: [],
     }
-    let {minOrderValue,minQuantity} = promotion.rule
-    if (minQuantity.field) {
+    let rule = promotion.rule
+    console.log('rule',rule)
+    if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
         result.promotionOption = defaultRulePromotion.MIN_QUANTITY
-        result.promotionTypeRule = minQuantity.type
+        result.promotionTypeRule = rule.type
     }else {
         result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE
-        result.promotionTypeRule = minOrderValue.type
+        result.promotionTypeRule = rule.type
     }
-    let {conditions} = minQuantity.field? minQuantity : minOrderValue
-    conditions.forEach((condition,index) => {
+    let {conditions} = rule
+    conditions?.forEach((condition,index) => {
         result.promotionRulesLine.push({id: index})
     })
     result = {
@@ -221,6 +199,7 @@ export function parseRuleToObject(promotion) {
         conditions: conditions,
         listProductIDs: promotion.objects[0].products || []
     }
+    console.log('réult',result)
     return result
 }
 
@@ -271,31 +250,34 @@ export function parseConditionValue(conditions,typePromotion,promotionTypeCondit
     }
 }
 
+export function currencyFormat(num) {
+    return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + "đ"
+ }
+
 export function displayRule(rule) {
     let result = ""
-    let {minQuantity,minOrderValue} = rule
-    if (minQuantity?.field) {
-        let {conditions,field,type} = minQuantity
+    if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
+        let {conditions,field,type} = rule
         conditions?.forEach(condition => {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 result +=result +`Giảm giá: ${condition.percent}% \\n Số lượng sản phẩm từ: ${condition.minQuantity}\\n`
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-                result +=result +`Giảm giá: ${condition.discountValue}đ \n Số lượng sản phẩm từ: ${condition.minQuantity} \m `
+                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)}đ \n Số lượng sản phẩm từ: ${condition.minQuantity} \n`
             }
         })
-    }else {
-        let {conditions,field,type} = minOrderValue
+    } else {
+        let {conditions,field,type} = rule
         conditions?.forEach(condition => {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
                 result +=result +`Giảm giá: ${condition.percent}% \n Cho đơn hàng từ: ${condition.minOrderValue} \n`
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-                result +=result +`Giảm giá: :${condition.discountValue}đ \n Cho đơn hàng từ: ${condition.minOrderValue} \n`
+                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)} \n Cho đơn hàng từ: ${currencyFormat(condition.minOrderValue)} \n`
             }
         })
     }
+
     return result
 }
-
 
 export function displayPromotionScope(promotionScope) {
     switch (promotionScope) {
@@ -314,6 +296,17 @@ export function displayPromotionScope(promotionScope) {
     }
 }
 
+export function getPromotionScope(objects) {
+    let scope = "Không xác định";
+    objects?.forEach(obj => {
+        if (obj.scope) {
+            scope = displayPromotionScope(obj.scope)
+            return scope
+        }
+    });
+    return scope;
+}
+
 export function displayStatus(status) {
     switch (status) {
         case defaultPromotionStatus.WAITING:
@@ -329,6 +322,10 @@ export function displayStatus(status) {
         default:
             return "Không xác định"
     }
+}
+
+export function displayTime(time) {
+    return time.substring(0,time.length-4)
 }
 
 export function displayPromotionType(type) {

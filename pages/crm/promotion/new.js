@@ -48,10 +48,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import { getPromoClient } from "../../../client/promo";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getProductClient } from "../../../client/product";
-import {
-  getCategoryClient,
-  getListCategoryFromClient,
-} from "../../../client/category";
+import { getCategoryClient } from "../../../client/category";
 import {
   defaultPromotionScope,
   defaultPromotionType,
@@ -59,18 +56,13 @@ import {
   defaultTypeConditionsRule,
   queryParamGetProductGift,
   setRulesPromotion,
-  limitText,
   defaultNameRulesValue,
-  defaultNameRulesQuantity,
   displayNameRule,
   setScopeObjectPromontion,
   defaultUseTypePromotion,
 } from "../../../client/constant";
-import { Grade } from "@material-ui/icons";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
+import RenderTableListProduct from "components/component/promotion/modal-list-product";
+import RenderTableListCategory from "components/component/promotion/modal-list-category";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
@@ -152,6 +144,8 @@ function render(props) {
     listProductPromotion,
     listCategoryPromotion,
     listProductDefault,
+    listCategoryDefault,
+    listCategoryFull,
     listGiftPromotion,
     listProductGiftPromotion,
     promotionUseType,
@@ -213,29 +207,20 @@ function render(props) {
       if (!listCategoryResponse || listCategoryResponse.status !== "OK") {
         return toast.warn("Không tìm thấy danh sách danh mục");
       }
-      let productDefaultResponse = await getProduct();
-      if (productDefaultResponse && productDefaultResponse.status === "OK") {
-        let listProductDefault = [];
-        productDefaultResponse.data.forEach((productResponse, index) => {
-          if (index < 5) {
-            listProductDefault.push({
-              product: productResponse,
-              active:
-                listProductPromotion.find(
-                  (productPromotion) =>
-                    productPromotion.productID === productResponse.productID
-                ) || false,
-            });
-          }
+      let listCategoryDefault = [];
+      listCategoryResponse.data.forEach((categoryResponse, index) => {
+        listCategoryDefault.push({
+          category: categoryResponse,
+          active: false,
         });
-        setState({
-          ...state,
-          [event.target?.name]: event.target?.value,
-          listProductDefault: listProductDefault,
-          listCategoryPromotion: listCategoryResponse.data,
-        });
-        setOpen({ ...open, openModalCategoryScopePromotion: true });
-      }
+      });
+      setState({
+        ...state,
+        [event.target?.name]: event.target?.value,
+        listCategoryDefault: listCategoryDefault,
+        listCategoryPromotion: [],
+      });
+      setOpen({ ...open, openModalCategoryScopePromotion: true });
     } else {
       setState({
         ...state,
@@ -245,18 +230,20 @@ function render(props) {
     }
   };
 
+  const resetPrice = () => {
+    for (const [key, value] of Object.entries(defaultNameRulesValue)) {
+      let priceMinValue = displayNameRule(promotionOption, value, 0);
+      setValue(priceMinValue, "");
+    }
+  };
+
   const handleChangeStatus = (event) => {
     setPromotionRulesLine([
       {
         id: 1,
       },
     ]);
-    let currentOption = displayNameRule(
-      promotionOption,
-      defaultNameRulesValue.priceMinValue,
-      0
-    );
-    setValue(currentOption, "");
+    resetPrice();
     setState({ ...state, [event.target.name]: event.target.value });
     reset();
   };
@@ -270,6 +257,18 @@ function render(props) {
       }
     });
     setState({ ...state, listProductPromotion: listProductPromotion });
+  };
+
+  const handleAddCategoryPromotion = (categoryList) => {
+    setOpen({ ...open, openModalCategoryScopePromotion: false });
+    let listCategory = [];
+    categoryList.forEach((category) => {
+      if (category.active) {
+        listCategory.push(category.category);
+      }
+    });
+    setState({ ...state, listCategoryPromotion: listCategory });
+    console.log("listCategoryPromotion", listCategory);
   };
 
   function handleRemoveCodePercent(id) {
@@ -290,13 +289,33 @@ function render(props) {
     });
     listProductDefault.forEach((productDefault) => {
       if (productDefault.product.productID === product.productID) {
-        product.active = false;
+        productDefault.active = false;
       }
     });
     setState({
       ...state,
       listProductPromotion: listProductPromotion,
       listProductDefault: listProductDefault,
+    });
+  };
+
+  const handleRemoveCategoryPromotion = (category) => {
+    let { listCategoryPromotion, listCategoryDefault } = state;
+    listCategoryPromotion.forEach((o, index) => {
+      if (o.categoryID === category.categoryID) {
+        return listCategoryPromotion.splice(index, 1);
+      }
+    });
+    listCategoryDefault.forEach((o) => {
+      if (o.category.categoryID === category.categoryID) {
+        o.active = false;
+      }
+    });
+    console.log("listCategoryDefault", listCategoryDefault);
+    setState({
+      ...state,
+      listCategoryPromotion: listCategoryPromotion,
+      listCategoryDefault: listCategoryDefault,
     });
   };
 
@@ -1152,7 +1171,7 @@ function render(props) {
               />
             )}
             {promotionScope === defaultPromotionScope.CATEGORY && (
-              <RenderTableListProduct
+              <RenderTableListCategory
                 handleClickOpen={() =>
                   setOpen({ ...open, openModalCategoryScopePromotion: true })
                 }
@@ -1162,12 +1181,11 @@ function render(props) {
                 open={open.openModalCategoryScopePromotion}
                 register={register}
                 getValue={getValues()}
-                listProductDefault={listProductDefault}
                 promotionScope={promotionScope}
+                listCategoryDefault={listCategoryDefault}
                 listCategoryPromotion={listCategoryPromotion}
-                listProductPromotion={listProductPromotion}
-                handleAddProductPromotion={handleAddProductPromotion}
-                handleRemoveProductPromotion={handleRemoveProductPromotion}
+                handleAddCategoryPromotion={handleAddCategoryPromotion}
+                handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
               />
             )}
             <Box>
@@ -1717,220 +1735,5 @@ export function RenderTableProductGift(props) {
         </Dialog>
       </div>
     </Card>
-  );
-}
-
-export function RenderTableListProduct(props) {
-  console.log("props", props.state);
-  const [stateProduct, setStateProduct] = useState({
-    listProductAction: props.listProductDefault,
-    listCategoryPromotion: props.listCategoryPromotion,
-    categorySearch: {},
-    productNameSearch: "",
-  });
-
-  const [showAutoComplete, setShowAutoComplete] = useState(false);
-
-  const handleChangeProductSearch = (event) => {
-    setStateProduct({ ...stateProduct, productNameSearch: event.target.value });
-  };
-
-  const handleChangeCategory = (event) => {
-    setStateProduct({ ...stateProduct, categorySearch: event.target.value });
-  };
-
-  const handleActiveProduct = (product, active) => {
-    let { listProductAction } = stateProduct;
-    listProductAction.forEach((productAction) => {
-      if (productAction.product.productID === product.productID) {
-        productAction.active = active;
-      }
-    });
-    setStateProduct({ ...stateProduct, listProductAction: listProductAction });
-  };
-
-  const handleOnSearchProductCategory = async () => {
-    let seachProductResponse = await searchProductList(
-      stateProduct.productNameSearch,
-      stateProduct.categorySearch.code
-    );
-    if (seachProductResponse && seachProductResponse.status === "OK") {
-      let listProductAction = [];
-      seachProductResponse.data.forEach((searchProduct, index) => {
-        if (index < 5) {
-          listProductAction.push({
-            product: searchProduct,
-            active: props.listProductPromotion.find(
-              (productPromotion) =>
-                productPromotion.productID === searchProduct.productID
-            ),
-          });
-        }
-      });
-      setStateProduct({
-        ...stateProduct,
-        listProductAction: listProductAction,
-      });
-    }
-  };
-
-  return (
-    <div>
-      <Button
-        variant="contained"
-        style={{ margin: "1rem 0" }}
-        onClick={props.handleClickOpen}
-      >
-        Chọn sản phẩm
-      </Button>
-      <Modal
-        open={props.open}
-        onClose={props.handleClose}
-        className={styles.modal}
-      >
-        <div className={styles.modalBody}>
-          <h1 className={styles.headerModal}>Chọn sản phẩm</h1>
-          <div style={{ margin: "1.25rem" }}>
-            <Grid spacing={3} container>
-              <Grid item sx={12} sm={4} md={4}>
-                <TextField
-                  placeholder="Tên sản phẩm"
-                  label="Tên sản phẩm"
-                  name="searchProduct"
-                  onChange={handleChangeProductSearch}
-                  style={{ width: "100% !important" }}
-                  inputRef={props.register}
-                />
-              </Grid>
-              <Grid item sx={12} sm={4} md={4} className={styles.blockSearch}>
-                <FormControl className={styles.select}>
-                  <InputLabel id="category-select-outlined-label">
-                    Chọn danh mục
-                  </InputLabel>
-                  <Select
-                    autoWidth={false}
-                    style={{ width: "100% !important" }}
-                    labelId="category-select-outlined-label"
-                    id="category-select-outlined"
-                    onChange={handleChangeCategory}
-                    inputRef={props.register}
-                    label="Chọn danh mục"
-                  >
-                    {stateProduct.listCategoryPromotion.map((category) => (
-                      <MenuItem value={category} key={category.categoryID}>
-                        {limitText(category.name, 20) || "...Không xác định"}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item sx={12} sm={4} md={4} style={{ display: "flex" }}>
-                <Button
-                  variant="contained"
-                  onClick={handleOnSearchProductCategory}
-                  className={styles.buttonSearch}
-                  startIcon={<SearchIcon />}
-                >
-                  Tìm kiếm
-                </Button>
-              </Grid>
-            </Grid>
-          </div>
-          <DialogContent>
-            <TableContainer component={Paper}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell align="left">Thao tác</TableCell>
-                    <TableCell align="left">Thông tin sản phẩm</TableCell>
-                    <TableCell align="left">Ảnh</TableCell>
-                  </TableRow>
-                </TableHead>
-                {stateProduct.listProductAction.map(({ product, active }) => (
-                  <TableRow key={product.productID}>
-                    <TableCell align="left">
-                      <Checkbox
-                        checked={active}
-                        style={{ color: "green" }}
-                        onChange={(e, value) =>
-                          handleActiveProduct(product, value)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell align="left">{product.name}</TableCell>
-                    <TableCell align="left">
-                      {product.imageUrls ? (
-                        <image src={product.imageUrls[0]}></image>
-                      ) : (
-                        <div></div>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </Table>
-            </TableContainer>
-          </DialogContent>
-          <DialogActions>
-            <Button
-              onClick={props.handleClose}
-              variant="outlined"
-              color="secondary"
-            >
-              Hủy
-            </Button>
-            <Button
-              onClick={() =>
-                props.handleAddProductPromotion(stateProduct.listProductAction)
-              }
-              color="primary"
-              variant="outlined"
-              autoFocus
-            >
-              Thêm
-            </Button>
-          </DialogActions>
-        </div>
-      </Modal>
-      {props.promotionScope === defaultPromotionScope.PRODUCT ? (
-        <Card>
-          <TableContainer component={Paper}>
-            <Table size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell align="left">Ảnh</TableCell>
-                  <TableCell align="left">Thông tin sản phẩm</TableCell>
-                  <TableCell align="left">Hành Động</TableCell>
-                </TableRow>
-              </TableHead>
-              {props.listProductPromotion.map((product) => (
-                <TableRow>
-                  <TableCell align="left">
-                    {product.imageUrls ? (
-                      <image src={product.imageUrls[0]}></image>
-                    ) : (
-                      <div></div>
-                    )}
-                  </TableCell>
-                  <TableCell align="left">{product.name}</TableCell>
-                  <TableCell align="left">
-                    <IconButton
-                      color="secondary"
-                      component="span"
-                      onClick={() =>
-                        props.handleRemoveProductPromotion(product)
-                      }
-                    >
-                      <HighlightOffOutlinedIcon />
-                    </IconButton>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </Table>
-          </TableContainer>
-        </Card>
-      ) : (
-        <div></div>
-      )}
-    </div>
   );
 }
