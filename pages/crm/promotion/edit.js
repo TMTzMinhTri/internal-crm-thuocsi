@@ -24,6 +24,7 @@ import {
     defaultPromotionScope,
     defaultRulePromotion,
     defaultTypeConditionsRule,
+    defaultPromotionType,
     defaultUseTypePromotion
 } from "../../../components/component/constant";
 import {
@@ -99,9 +100,12 @@ export async function loadPromotionData(ctx) {
     return returnObject
 }
 
-async function updatePromotion(applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId) {
-    let data = {totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId}
-    return getPromoClient().updatePromotion({promotionId,totalCode,promotionName,promotionType,startTime,endTime,objects,rule})
+async function updatePromotion(promotionCode,applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId) {
+    let data = {applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId}
+    if (promotionCode !== "") {
+        data.promotionCode = promotionCode
+    }
+    return getPromoClient().updatePromotion(data)
 }
 
 async function getProduct(productName,categoryCode) {
@@ -129,6 +133,7 @@ function render(props) {
     const toast = useToast()
     const router = useRouter()
     let dataRender = props.data
+    console.log('data',dataRender)
     let defaultState = props.defaultState
     let startTime = dataRender.startTime
     let endTime = dataRender.endTime
@@ -224,7 +229,7 @@ function render(props) {
 
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {promotionName,totalCode,startTime,endTime,totalApply} = getValues()
+        let {promotionName,totalCode,startTime,endTime,totalApply,promotionCode} = getValues()
         let value = getValues()
         let listProductIDs = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
@@ -232,7 +237,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await updatePromotion(parseInt(totalApply),parseInt(totalCode),promotionName,dataRender.promotionType,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
+        let promotionResponse = await updatePromotion(promotionCode,parseInt(totalApply),parseInt(totalCode),promotionName,dataRender.promotionType,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
 
         if (promotionResponse.status === "OK") {
             toast.success('Cập nhật khuyến mãi thành công')
@@ -297,6 +302,26 @@ function render(props) {
                                         }
                                     />
                                 </Grid>
+                                {
+                                    dataRender.promotionType === defaultPromotionType.VOUCHER_CODE ? (
+                                        <Grid item xs={12} sm={6} md={6}>
+                                        <TextField
+                                            id="promotionCode"
+                                            name="promotionCode"
+                                            label="Mã khuyến mãi"
+                                            placeholder=""
+                                            defaultValue={dataRender.promotionCode}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            style={{width: '100%'}}
+                                            inputRef={register}
+                                        />
+                                        </Grid>
+                                    ): (
+                                        <Container></Container>
+                                    )
+                                }
                                 <Grid item xs={12} sm={6} md={6}>
                                     <TextField
                                         id="totalCode"
@@ -345,6 +370,36 @@ function render(props) {
                                                 }
                                             }
                                         )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalUsed"
+                                        name="totalUsed"
+                                        label="Số lượng user đã sử dụng"
+                                        placeholder=""
+                                        disabled={true}
+                                        defaultValue={dataRender.totalUsed || 0}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        inputRef={register}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalCollect"
+                                        name="totalCollect"
+                                        label="Số lần khuyến mãi đã được sử dụng"
+                                        placeholder=""
+                                        disabled={true}
+                                        defaultValue={dataRender.totalCollect || 0}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        inputRef={register}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6} md={6}>
