@@ -239,13 +239,13 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.name}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Tên khách hàng không thể để trống",
                                                                     maxLength: {
                                                                         value: 50,
-                                                                        message: "Tên khách hàng có độ dài tối đa 50 kí tự"
+                                                                        message: "Tên khách hàng có độ dài tối đa 100 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 6,
@@ -275,7 +275,7 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.email}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
@@ -305,7 +305,7 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.phone}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
@@ -330,7 +330,7 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             label="Địa chỉ"
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             placeholder=""
                                                             helperText={errors.address?.message}
                                                             InputLabelProps={{
@@ -477,14 +477,14 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.legalRepresentative}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                           
                                                             inputRef={
                                                                 register({
                                                                     required: "Người đại diện không thể để trống",
                                                                     maxLength: {
-                                                                        value: 50,
-                                                                        message: "Người đại diện có độ dài tối đa 50 kí tự"
+                                                                        value: 100,
+                                                                        message: "Người đại diện có độ dài tối đa 100 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 1,
@@ -513,7 +513,7 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.mst}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                           
                                                             inputRef={
                                                                 register({
