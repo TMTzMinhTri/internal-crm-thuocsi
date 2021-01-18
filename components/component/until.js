@@ -173,32 +173,53 @@ export function parseConditionValue(conditions,typePromotion,promotionTypeCondit
 }
 
 export function currencyFormat(num) {
-    return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,') + "đ"
+    return formatNumber(num) + "đ"
+}
+
+export function formatNumber(num) {
+    return num.toFixed(0).replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
 export function displayRule(rule) {
-    let result = ""
+    let result = []
     if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
         let {conditions,field,type} = rule
         conditions?.forEach(condition => {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
-                result +=result +`Giảm giá: ${condition.percent}% \\n Số lượng sản phẩm từ: ${condition.minQuantity}\\n`
+                result.push(`+ Giảm giá: ${condition.percent}% tối đa ${currencyFormat(condition.maxDiscountValue)}`)
+                result.push(<div>&nbsp;&nbsp;&nbsp;Số lượng sản phẩm từ: {formatNumber(condition.minQuantity)}</div>)
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)} \n Số lượng sản phẩm từ: ${condition.minQuantity} \n`
+                result.push(`+ Giảm giá: ${currencyFormat(condition.discountValue)}`)
+                result.push(<div>&nbsp;&nbsp;&nbsp;Số lượng sản phẩm từ: {formatNumber(condition.minQuantity)}</div>)
             }
         })
     } else {
         let {conditions,field,type} = rule
         conditions?.forEach(condition => {
             if (type === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
-                result +=result +`Giảm giá: ${condition.percent}% \n Cho đơn hàng từ: ${condition.minOrderValue} \n`
+                result.push(`+ Giảm giá: ${condition.percent}%`)
+                result.push(<div>&nbsp;&nbsp;&nbsp;Cho đơn hàng từ: {currencyFormat(condition.minOrderValue)}</div>)
             }else if (type === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-                result +=result +`Giảm giá: ${currencyFormat(condition.discountValue)} \n Cho đơn hàng từ: ${currencyFormat(condition.minOrderValue)} \n`
+                result.push(`+ Giảm giá: ${currencyFormat(condition.discountValue)}`)
+                result.push(<div>&nbsp;&nbsp;&nbsp;Cho đơn hàng từ: {currencyFormat(condition.minOrderValue)}</div>)
             }
         })
     }
 
     return result
+}
+
+export function formatTime(time) {
+    time = time.substring(0,time.length-4)
+    if (Number.isInteger(time)) {
+        return new Intl.DateTimeFormat('vi', {year: 'numeric', month: '2-digit',day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'}).format(new Date(time*1000));
+    } else {
+        if (time) {
+            return new Intl.DateTimeFormat('vi', {year: 'numeric', month: '2-digit',day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit'}).format(new Date(time));
+        } else {
+            return "Không xác định..."
+        }
+    }
 }
 
 export function displayPromotionScope(promotionScope) {

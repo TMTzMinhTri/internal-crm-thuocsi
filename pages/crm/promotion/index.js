@@ -31,7 +31,7 @@ import {
     displayPromotionType,
     displayRule,
     displayStatus,
-    displayTime,
+    formatTime,
     getPromotionScope
 } from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
@@ -77,7 +77,6 @@ async function updatePromotion(promotionId,status) {
 }
 
 function render(props) {
-    console.log('render',props)
     const toast = useToast()
     let router = useRouter()
     const {register, handleSubmit, errors} = useForm();
@@ -224,7 +223,21 @@ function render(props) {
                                     <TableCell align="left">{row.promotionName}</TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
-                                    <TableCell align="left">{displayRule(row.rule)}</TableCell>
+                                    <TableCell align="left">
+                                        {
+                                            displayRule(row.rule).length > 0 ? (
+                                                displayRule(row.rule).map((rule,index) => (
+                                                    index % 2 === 0 ?(
+                                                        <div>{rule}</div>
+                                                    ): (
+                                                        <div style={{fontStyle: "italic"}}>{rule}</div>
+                                                    )
+                                            ))
+                                            ): (
+                                                <div></div>
+                                            )
+                                        }
+                                    </TableCell>
                                     <TableCell align="left">{displayStatus(row.status)}</TableCell>
                                     <TableCell align="left">
                                         <Switch
@@ -234,8 +247,8 @@ function render(props) {
                                         />
                                     </TableCell>
                                     <TableCell align="left">
-                                        <div>Từ : {displayTime(row.startTime)}</div>
-                                        <div>Đến : {displayTime(row.endTime)}</div>
+                                        <div>Từ : {formatTime(row.startTime)}</div>
+                                        <div>Đến : {formatTime(row.endTime)}</div>
                                     </TableCell>
                                     <TableCell align="center">
                                         <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
