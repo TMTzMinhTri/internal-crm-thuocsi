@@ -66,9 +66,9 @@ export async function loadData(ctx) {
         data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []
 
         //map to transform level -> value
-        data.props.provinces=data.props.provinces.map(province=>({...province,value:province.code}))
-        data.props.districts=data.props.districts.map(district=>({...district,value:districts.code}))
-        data.props.wards=data.props.wards.map(ward=>({...ward,value:ward.code}))
+        data.props.provinces=data.props.provinces.map(province=>({...province,value:province.code,label:province.name}))
+        data.props.districts=data.props.districts.map(district=>({...district,value:districts.code,label:districts.name}))
+        data.props.wards=data.props.wards.map(ward=>({...ward,value:ward.code,label:ward.name}))
     }
     return data
 }
@@ -96,9 +96,9 @@ export default function renderForm(props, toast) {
     const router = useRouter();
     const { register, handleSubmit, errors, control } = useForm({
         defaultValues: editObject,
-        mode: "onChange"
+        mode: "onSubmit"
     });
-   console.log(props.provinces)
+
     const noOptionsText = "Không có tùy chọn!";
 
     const onProvinceChange = async (event, val) => {
@@ -116,6 +116,7 @@ export default function renderForm(props, toast) {
             if (res.status !== 'OK') {
                 error(res.message || 'Thao tác không thành công, vui lòng thử lại sau');
             } else {
+                res.data = res.data.map(district=>({...district,value:district.code,label:district.name}))
                 setDistricts(res.data)
                 setDisabledDistrict(false)
             }
@@ -134,6 +135,7 @@ export default function renderForm(props, toast) {
             if (res.status !== 'OK') {
                 error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
             } else {
+                res.data = res.data.map(ward=>({...ward,value:ward.code,label:ward.name}))
                 setWards(res.data)
                 setDisabledWard(false)
             }
@@ -156,13 +158,12 @@ export default function renderForm(props, toast) {
             errors.passwordConfirm.message = "Mật khẩu xác nhận không chính xác"
             return
         }
-        formData.provinceCode = province.code || ''
-        formData.districtCode = district.code || ''
-        formData.wardCode = ward.code || ''
+        formData.customerProvinceCode =  formData.customerProvinceCode.value || ''
+        formData.customerDistrictCode = formData.customerDistrictCode.value || ''
+        formData.customerWardCode = formData.customerWardCode.value || ''
 
         if (props.isUpdate) {
             formData.orderNo = props.order.orderNo
-            formData.customerDistrictCode = formData.districtCode
             await updateOrder(formData)
         } else {
 
@@ -239,7 +240,7 @@ export default function renderForm(props, toast) {
                                                     size="small"
                                                     placeholder=""
                                                     type="number"
-                                                    helperText={errors.phone?.message}
+                                                    helperText={errors.customerPhone?.message}
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
@@ -273,7 +274,7 @@ export default function renderForm(props, toast) {
                                                     label="Địa chỉ"
                                                     onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                     placeholder=""
-                                                    helperText={errors.address?.message}
+                                                    helperText={errors.customerShippingAddress?.message}
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
@@ -290,107 +291,44 @@ export default function renderForm(props, toast) {
                                         </Grid>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={3} md={3}>
-                                                {/* <Autocomplete
-                                                    options={props.provinces}
-                                                    size="small"
-                                                    value={province}
-                                                    onChange={onProvinceChange}
-                                                    noOptionsText={noOptionsText}
-                                                    getOptionLabel={(option) => option.name}
-
-                                                    renderInput={(params) =>
-                                                        <TextField
-                                                            id="provinceCode"
-                                                            name="provinceCode"
-                                                            variant="outlined"
-                                                            label="Tỉnh/Thành phố"
-                                                            helperText={errors.provinceCode?.message}
-                                                            InputLabelProps={{
-                                                                shrink: true,
-                                                            }}
-                                                            style={{ width: '100%' }}
-                                                            error={!!errors.provinceCode}
-                                                            required
-                                                            inputRef={
-                                                                register({
-                                                                    required: "Tỉnh/ Thành phố không thể để trống",
-                                                                })
-                                                            }
-                                                            {...params} />}
-                                                /> */}
                                                 <MuiSingleAuto 
-                                                id="provinceCode"
-                                                name="provinceCode" // NAME INPUT
+                                                id="customerProvinceCode"
+                                                name="customerProvinceCode" // NAME INPUT
                                                     options={props.provinces}  // DATA OPTIONS label-value
                                                     label="Tỉnh/Thành phố"  // LABEL
                                                     placeholder="Chon"
                                                     required={true} // boolean
                                                     message="Tỉnh/ Thành phố không thể để trống" // CUSTOM MESSAGE ERROR
-                                                    onFieldChange={onProvinceChange} // HANDLE EVENT CHANGE
+                                                    onNotSearchFieldChange={onProvinceChange} // HANDLE EVENT CHANGE
+                                                    control={control} // REACT HOOK FORM CONTROL
+                                                    errors={errors} />
+                                            </Grid>
+                                            <Grid item xs={12} sm={3} md={3}>
+                                                 <MuiSingleAuto 
+                                                id="customerDistrictCode"
+                                                name="customerDistrictCode" // NAME INPUT
+                                                    options={districts}  // DATA OPTIONS label-value
+                                                    label="Quận/Huyện"  // LABEL
+                                                    placeholder="Chon"
+                                                    required={true} // boolean
+                                                    message="Quận/huyện thể để trống" // CUSTOM MESSAGE ERROR
+                                                    onNotSearchFieldChange={onDistrictChange} // HANDLE EVENT CHANGE
                                                     control={control} // REACT HOOK FORM CONTROL
                                                     errors={errors} />
 
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
-                                                <Autocomplete
-                                                    options={districts}
-                                                    size="small"
-                                                    getOptionLabel={(option) => option.name}
-                                                    value={district}
-                                                    onChange={onDistrictChange}
-                                                    noOptionsText={noOptionsText}
-                                                    disabled={isDisabledDistrict}
-                                                    renderInput={(params) =>
-                                                        <TextField
-                                                            id="customerDistrictCode"
-                                                            name="customerDistrictCode"
-                                                            variant="outlined"
-                                                            label="Quận/Huyện"
-                                                            // helperText={errors.districtCode?.message}
-                                                            InputLabelProps={{
-                                                                shrink: true,
-                                                            }}
-                                                            style={{ width: '100%' }}
-                                                            // error={!!errors.districtCode}
-                                                            // required
-                                                            inputRef={
-                                                                register({
-                                                                    // required: "Quận/huyện thể để trống",
-                                                                })
-                                                            }
-                                                            {...params} />}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <Autocomplete
-                                                    size="small"
-                                                    options={wards}
-                                                    name={"ward"}
-                                                    value={ward}
-                                                    disabled={isDisabledWard}
-                                                    onChange={onWardChange}
-                                                    noOptionsText={noOptionsText}
-                                                    getOptionLabel={(option) => option.name}
-                                                    renderInput={(params) =>
-                                                        <TextField
-                                                            id="customerWardCode"
-                                                            name="customerWardCode"
-                                                            variant="outlined"
-                                                            label="Phường/Xã"
-                                                            helperText={errors.customerWardCode?.message}
-                                                            InputLabelProps={{
-                                                                shrink: true,
-                                                            }}
-                                                            style={{ width: '100%' }}
-                                                            error={!!errors.customerWardCode}
-                                                            required
-                                                            inputRef={
-                                                                register({
-                                                                    required: "Phường xã không thể để trống",
-                                                                })
-                                                            }
-                                                            {...params} />}
-                                                />
+                                                   <MuiSingleAuto 
+                                                     id="customerWardCode"
+                                                 name="customerWardCode" // NAME INPUT
+                                                    options={wards}  // DATA OPTIONS label-value
+                                                    label="Phường/Xã"
+                                                    placeholder="Chon"
+                                                    required={true} // boolean
+                                                    message="Phường xã không thể để trống" // CUSTOM MESSAGE ERROR
+                                                    onNotSearchFieldChange={onWardChange} // HANDLE EVENT CHANGE
+                                                    control={control} // REACT HOOK FORM CONTROL
+                                                    errors={errors} />
                                             </Grid>
                                         </Grid>
                                     </CardContent>

@@ -101,7 +101,7 @@ function render(props) {
             </TableCell>
             <TableCell align="left">{row.data.customerName}</TableCell>
             <TableCell align="left">{row.data.customerPhone}</TableCell>
-            <TableCell align="left">{row.data.customerDistrictCode}</TableCell>
+            <TableCell align="left">{row.data.customerProvinceCode}</TableCell>
             <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
             <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
             <TableCell align="left">{row.data.paymentMethod}</TableCell>
