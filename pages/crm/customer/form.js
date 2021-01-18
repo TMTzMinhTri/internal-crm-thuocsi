@@ -20,7 +20,6 @@ import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
 import { condUserType, statuses, scopes } from "components/global"
 import { NotFound } from "components/components-global";
-import MuiSingleAuto from "components/muiauto/single"
 
 export async function loadData(ctx) {
     let data = {
@@ -69,15 +68,12 @@ export async function loadData(ctx) {
 }
 
 export default function renderForm(props, toast) {
-
     const titlePage ="Cập nhật khách hàng"
     if (props.status && props.status !== "OK") {
         return (
             <NotFound link='/crm/customer' titlePage={titlePage} labelLink="khách hàng"/>
         )
     }
-    props.isUpdate ? props.customer.provinceCode = {value: props.province?.code, label: props.province?.name, code: props.province?.code} : ''
-
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.customer : {}
     const checkWardData = props.isUpdate ? (props.customer.wardCode === '' ? {} : props.ward) : {};
@@ -99,7 +95,7 @@ export default function renderForm(props, toast) {
 
     const noOptionsText = "Không có tùy chọn!";
 
-    const onProvinceChange = async (e, val) => {
+    const onProvinceChange = async (event, val) => {
         setProvince()
         setDistricts([])
         setDistrict({})
@@ -115,7 +111,7 @@ export default function renderForm(props, toast) {
                 error(res.message || 'Thao tác không thành công, vui lòng thử lại sau');
             } else {
                 setDistricts(res.data)
-                setDisabledDistrict(false)              
+                setDisabledDistrict(false)
             }
         }
     }
@@ -188,7 +184,7 @@ export default function renderForm(props, toast) {
             success(titlePage + ' thành công')
         }
     }
- 
+
     return (
         <AppCRM select="/crm/customer">
             <Head>
@@ -353,21 +349,7 @@ export default function renderForm(props, toast) {
                                                 </Grid>
                                                 <Grid spacing={3} container>
                                                     <Grid item xs={12} sm={3} md={3}>
-                                                        <MuiSingleAuto
-                                                            id="provinceCode"
-                                                            name="provinceCode"
-                                                            noOptionsText={noOptionsText}
-                                                            options={[...props.provinces.map(province =>
-                                                                {return {value: province.code, label: province.name, code: province.code }  }  
-                                                            )]}
-                                                            onNotSearchFieldChange={onProvinceChange}
-                                                            required={true}
-                                                            label="Tỉnh/Thành phố"
-                                                            control={control}
-                                                            errors={errors}
-                                                            message={'Vui lòng chọn tỉnh thành'}
-                                                        />
-                                                        {/* <Autocomplete
+                                                        <Autocomplete
                                                             options={props.provinces}
                                                             size="small"
                                                             value={province}
@@ -394,7 +376,7 @@ export default function renderForm(props, toast) {
                                                                         })
                                                                     }
                                                                     {...params} />}
-                                                        /> */}
+                                                        />
 
                                                     </Grid>
                                                     <Grid item xs={12} sm={3} md={3}>
@@ -579,7 +561,7 @@ export default function renderForm(props, toast) {
                                                                 error={!!errors.scope}
                                                                 as={
                                                                     <Select label="Vai trò">
-                                                                        {scopes.map(({ value, label }) => (
+                                                                        {scopes?.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -600,7 +582,7 @@ export default function renderForm(props, toast) {
                                                                 error={!!errors.level}
                                                                 as={
                                                                     <Select label="Cấp độ">
-                                                                        {condUserType.map(({ value, label }) => (
+                                                                        {condUserType?.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -622,7 +604,7 @@ export default function renderForm(props, toast) {
                                                                         error={!!errors.status}
                                                                         as={
                                                                             <Select label="Trạng thái">
-                                                                                {statuses.map(({ value, label }) => (
+                                                                                {statuses?.map(({ value, label }) => (
                                                                                     <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                                 ))}
                                                                             </Select>
