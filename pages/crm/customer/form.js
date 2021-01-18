@@ -245,7 +245,7 @@ export default function renderForm(props, toast) {
                                                                     required: "Tên khách hàng không thể để trống",
                                                                     maxLength: {
                                                                         value: 50,
-                                                                        message: "Tên khách hàng có độ dài tối đa 50 kí tự"
+                                                                        message: "Tên khách hàng có độ dài tối đa 100 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 6,
@@ -484,7 +484,7 @@ export default function renderForm(props, toast) {
                                                                     required: "Người đại diện không thể để trống",
                                                                     maxLength: {
                                                                         value: 50,
-                                                                        message: "Người đại diện có độ dài tối đa 50 kí tự"
+                                                                        message: "Người đại diện có độ dài tối đa 100 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 1,
