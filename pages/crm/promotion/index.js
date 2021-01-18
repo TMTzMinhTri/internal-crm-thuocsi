@@ -25,13 +25,15 @@ import {useForm} from "react-hook-form";
 import {getPromoClient} from "../../../client/promo";
 import {
     defaultPromotionStatus,
+} from "../../../components/component/constant";
+import {
     displayPromotionScope,
     displayPromotionType,
     displayRule,
     displayStatus,
     displayTime,
     getPromotionScope
-} from "../../../client/constant";
+} from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
 import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
@@ -49,11 +51,10 @@ export async function loadPromoData(ctx) {
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
-    let q = query.q || ""
+    let promotionName = query.promotionName || ""
 
     let _promotionClient = getPromoClient(ctx,{})
-    let getPromotionResponse = await _promotionClient.getPromotion(q,limit,offset,true)
-    console.log('get',getPromotionResponse)
+    let getPromotionResponse = await _promotionClient.getPromotion(promotionName,limit,offset,true)
     if (getPromotionResponse && getPromotionResponse.status === "OK") {
         returnObject.props.data = getPromotionResponse.data
         returnObject.props.count = getPromotionResponse.total
@@ -86,13 +87,34 @@ function render(props) {
         openModalCreate: false,
     })
     let q = router.query.q || ''
-    let page = parseInt(router.query.page) || 0
-    let limit = parseInt(router.query.limit) || 20
 
+    const [page, setPage] = React.useState(parseInt(router.query.page || 0));
+    const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(router.query.perPage) || 20);
     function searchPromotion(formData) {
-        let q = formData.q
-        Router.push(`/crm/promotion?q=${q}`)
+        let promotionName = formData.promotionName
+        Router.push({
+            pathname: '/crm/promotion',
+            query:{
+                promontionName: promotionName,
+            }
+        })
     }
+
+    const handleChangePage = (event, newPage, rowsPerPage) => {
+        setPage(newPage)
+        setRowsPerPage(rowsPerPage)
+
+        router.push({
+            pathname: '/crm/promotion',
+            query: {
+                ...router.query,
+                limit: rowsPerPage,
+                page: newPage,
+                perPage: rowsPerPage,
+                offset: newPage * rowsPerPage
+            }
+        })
+    };
 
     const handleActivePromotion = async (event,promotionID) => {
         if (event.target.checked) {
@@ -132,7 +154,6 @@ function render(props) {
         try {
             searchPromotion(formData)
             setSearch('')
-
         } catch (error) {
             console.log(error)
         }
@@ -152,8 +173,8 @@ function render(props) {
                         <form>
                             <Paper component="form" className={styles.search}>
                                 <InputBase
-                                    id="q"
-                                    name="q"
+                                    id="promotionName"
+                                    name="promotionName"
                                     className={styles.input}
                                     value={search}
                                     onChange={handleChange}
@@ -235,11 +256,9 @@ function render(props) {
                             <MyTablePagination
                                 labelUnit="khuyến mãi"
                                 count={props.count}
-                                rowsPerPage={limit}
+                                rowsPerPage={rowsPerPage}
                                 page={page}
-                                onChangePage={(event, page, rowsPerPage) => {
-                                    Router.push(`/promotion?page=${page}&limit=${rowsPerPage}`)
-                                }}
+                                onChangePage={handleChangePage}
                             />
                         ): (
                             <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>

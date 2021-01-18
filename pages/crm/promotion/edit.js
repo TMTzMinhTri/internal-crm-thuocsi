@@ -22,17 +22,18 @@ import Typography from "@material-ui/core/Typography";
 import {
     defaultNameRulesValue,
     defaultPromotionScope,
-    defaultPromotionType,
     defaultRulePromotion,
     defaultTypeConditionsRule,
-    defaultUseTypePromotion,
+    defaultUseTypePromotion
+} from "../../../components/component/constant";
+import {
     displayNameRule, displayTime,
     limitText,
     parseConditionValue,
     parseRuleToObject,
     setRulesPromotion,
     setScopeObjectPromontion
-} from "../../../client/constant";
+} from "../../../components/component/until";
 import Card from "@material-ui/core/Card";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
@@ -54,6 +55,7 @@ import {getPromoClient} from "../../../client/promo";
 import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
 import Image from "next/image";
+import {route} from "next/dist/next-server/server/router";
 
 export async function getServerSideProps(ctx ) {
     return await doWithLoggedInUser(ctx, () => {
@@ -792,7 +794,7 @@ function render(props) {
                                 style={{margin: 8}}>
                                 Lưu
                             </Button>
-                            <Button variant="contained" style={{margin: 8}}>Làm mới</Button>
+                            <Button variant="contained" style={{margin: 8}} onClick={() => router.back()}>Trở về</Button>
                         </Box>
                     </Box>
                 </FormGroup>
