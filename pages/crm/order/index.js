@@ -37,6 +37,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
+import {formatDateTime} from "components/global"
 import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
 import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
 
@@ -102,10 +103,11 @@ function render(props) {
             <TableCell align="left">{row.data.customerPhone}</TableCell>
             <TableCell align="left">{row.data.customerDistrictCode}</TableCell>
             <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
+            <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
             <TableCell align="left">{row.data.paymentMethod}</TableCell>
             <TableCell align="left">{row.data.totalPrice}</TableCell>
             <TableCell align="left">
-                <Link href={`/crm/order/edit?orderNo=${row.data.orderNo}`}>
+                <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
                     <a>
                         <Tooltip title="Cập nhật thông tin">
                             <IconButton>
@@ -158,8 +160,9 @@ function render(props) {
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
                         <col width="10%" />
-                        <col width="20%" />
-                        <col width="20%" />
+                        <col width="10%" />
+                        <col width="10%" />
+                        <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
@@ -173,6 +176,7 @@ function render(props) {
                             <TableCell align="left">Số điện thoại</TableCell>
                             <TableCell align="left">Tỉnh</TableCell>
                             <TableCell align="left">Địa Chỉ</TableCell>
+                            <TableCell align="left">Ngày giao</TableCell>
                             <TableCell align="left">Phương thức</TableCell>
                             <TableCell align="left">Tổng tiền</TableCell>
                             <TableCell align="left">Thao tác</TableCell>

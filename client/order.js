@@ -29,14 +29,14 @@ class OrderClient extends APIClient {
     //         })
     // }
 
-    // getCustomerByCustomerCode(customerCode) {
-    //     return this.callFromNextJS(
-    //         "GET",
-    //         `${URI}/account`,
-    //         {
-    //             customerCode: customerCode
-    //         })
-    // }
+    getOrderByOrderNo(orderNo) {
+        return this.callFromNextJS(
+            "GET",
+            `${URI}/order`,
+            {
+                order_no: orderNo
+            })
+    }
 
     // createNewCustomer(data) {
     //     return this.callFromClient(
@@ -46,13 +46,13 @@ class OrderClient extends APIClient {
     //     )
     // }
 
-    // updateCustomer(data) {
-    //     return this.callFromClient(
-    //         "PUT",
-    //         `${URI}/account`,
-    //         data
-    //     )
-    // }
+    updateOrder(data) {
+        return this.callFromClient(
+            "PUT",
+            `${URI}/order`,
+            data
+        )
+    }
 
     // updateStatus(data) {
     //     return this.callFromClient(
