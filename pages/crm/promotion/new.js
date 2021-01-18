@@ -273,11 +273,11 @@ function render(props) {
                                             register({
                                                 required: "Tên khuyến mãi không được để trống",
                                                 maxLength: {
-                                                    value: 250,
+                                                    value: 100,
                                                     message: "Tên khuyến mãi không được vượt quá 250 kí tự"
                                                 },
                                                 minLength: {
-                                                    value: 6,
+                                                    value: 10,
                                                     message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự"
                                                 },
                                                 pattern: {

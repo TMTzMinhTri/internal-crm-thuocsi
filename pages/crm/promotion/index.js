@@ -219,7 +219,7 @@ function render(props) {
                     {props.data?.length > 0 ? (
                         <TableBody>
                             {props.data.map((row,index) => (
-                                <TableRow>
+                                <TableRow key={index}>
                                     <TableCell align="left">{row.promotionName}</TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
