@@ -11,6 +11,8 @@ import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
+import { NotFound } from "components/components-global";
+import { condUserType, scopes, statuses } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -19,65 +21,12 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
 
-const levels = [
-    {
-        value: "Infinity",
-        label: "Không giới hạn"
-    },
-    {
-        value: "Diamond",
-        label: "Kim cương",
-    },
-    {
-        value: "Platinum",
-        label: "Bạch kim",
-    },
-    {
-        value: "Gold",
-        label: "Vàng",
-    },
-    {
-        value: "Sliver",
-        label: "Bạc",
-    },
-];
-
-const statuses = [
-    {
-        value: "ACTIVE",
-        label: "Đang hoạt động",
-    },
-    {
-        value: "DRAFT",
-        label: "Nháp",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-    },
-]
-
-const scopes = [
-    {
-        value: "PHARMACY",
-        label: "Tiệm thuốc"
-    },
-    {
-        value: "CLINIC",
-        label: "Phòng khám"
-    },
-    {
-        value: "DRUGSTORE",
-        label: "Nhà thuốc"
-    },
-]
-
 export async function loadData(ctx) {
-    let data = { props: {} }
+    let data = {
+        props: {
+            status: "OK"
+        }
+    }
 
     let masterDataClient = getMasterDataClient(ctx, data)
     let resp = await masterDataClient.getProvince(0, 100, '')
@@ -95,6 +44,7 @@ export async function loadData(ctx) {
         let customerResp = await customerClient.getCustomerByCustomerCode(customerCode)
         if (customerResp.status !== 'OK') {
             data.props.message = customerResp.message
+            data.props.status = customerResp.status;
             return data
         }
         let customer = customerResp.data[0]
@@ -118,6 +68,12 @@ export async function loadData(ctx) {
 }
 
 export default function renderForm(props, toast) {
+    const titlePage = "Cập nhật khách hàng"
+    if (props.status && props.status !== "OK") {
+        return (
+            <NotFound link='/crm/customer' titlePage={titlePage} labelLink="khách hàng" />
+        )
+    }
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.customer : {}
     const checkWardData = props.isUpdate ? (props.customer.wardCode === '' ? {} : props.ward) : {};
@@ -136,6 +92,8 @@ export default function renderForm(props, toast) {
         defaultValues: editObject,
         mode: "onChange"
     });
+
+    const noOptionsText = "Không có tùy chọn";
 
     const onProvinceChange = async (event, val) => {
         setProvince()
@@ -223,14 +181,14 @@ export default function renderForm(props, toast) {
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success('Cập nhật khách hàng thành công')
+            success(titlePage + ' thành công')
         }
     }
 
     return (
         <AppCRM select="/crm/customer">
             <Head>
-                <title>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</title>
+                <title>{props.isUpdate ? titlePage : 'Thêm khách hàng'}</title>
             </Head>
             {
                 props.isUpdate && typeof props.customer === 'undefined' ? (
@@ -242,7 +200,7 @@ export default function renderForm(props, toast) {
                                         justify="space-between"
                                         alignItems="flex-start" className={styles.contentPadding}>
                                         <Grid item xs={12} md={12} sm={12}>
-                                            <Box style={{ fontSize: 24 }}>Cập nhật khách hàng</Box>
+                                            <Box style={{ fontSize: 24 }}>{titlePage}</Box>
                                         </Grid>
                                         <Grid item xs={12} md={12} sm={12}>
                                             <span>{props.message}</span>
@@ -258,7 +216,7 @@ export default function renderForm(props, toast) {
                             <FormGroup>
                                 <form>
                                     <Box className={styles.contentPadding}>
-                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</Box>
+                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? titlePage : 'Thêm khách hàng'}</Box>
                                         <Card variant="outlined">
                                             <CardContent>
                                                 <Typography variant="h6" component="h6"
@@ -281,21 +239,21 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.name}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Tên khách hàng không thể để trống",
                                                                     maxLength: {
-                                                                        value: 250,
-                                                                        message: "Tên khách hàng có độ dài tối đa 250 kí tự"
+                                                                        value: 50,
+                                                                        message: "Tên khách hàng có độ dài tối đa 100 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 6,
                                                                         message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
                                                                     },
                                                                     pattern: {
-                                                                        value: /[A-Za-z]/,
-                                                                        message: "Tên khách hàng phải có kí tự chữ"
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Tên không hợp lệ (không được dư khoảng trắng)."
                                                                     }
                                                                 })
                                                             }
@@ -317,7 +275,7 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.email}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
@@ -347,7 +305,7 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.phone}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
@@ -372,7 +330,7 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             label="Địa chỉ"
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             placeholder=""
                                                             helperText={errors.address?.message}
                                                             InputLabelProps={{
@@ -384,6 +342,18 @@ export default function renderForm(props, toast) {
                                                             inputRef={
                                                                 register({
                                                                     required: "Địa chỉ không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 250,
+                                                                        message: "Địa chỉ có độ dài tối đa 250 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 1,
+                                                                        message: "Địa chỉ có độ dài tối thiểu 1 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Địa chỉ không hợp lệ (không được dư khoảng trắng)."
+                                                                    }
                                                                 })
                                                             }
                                                         />
@@ -396,7 +366,9 @@ export default function renderForm(props, toast) {
                                                             size="small"
                                                             value={province}
                                                             onChange={onProvinceChange}
+                                                            noOptionsText={noOptionsText}
                                                             getOptionLabel={(option) => option.name}
+
                                                             renderInput={(params) =>
                                                                 <TextField
                                                                     id="provinceCode"
@@ -426,6 +398,7 @@ export default function renderForm(props, toast) {
                                                             getOptionLabel={(option) => option.name}
                                                             value={district}
                                                             onChange={onDistrictChange}
+                                                            noOptionsText={noOptionsText}
                                                             disabled={isDisabledDistrict}
                                                             renderInput={(params) =>
                                                                 <TextField
@@ -456,6 +429,7 @@ export default function renderForm(props, toast) {
                                                             value={ward}
                                                             disabled={isDisabledWard}
                                                             onChange={onWardChange}
+                                                            noOptionsText={noOptionsText}
                                                             getOptionLabel={(option) => option.name}
                                                             renderInput={(params) =>
                                                                 <TextField
@@ -503,10 +477,23 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.legalRepresentative}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                          
                                                             inputRef={
                                                                 register({
                                                                     required: "Người đại diện không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 100,
+                                                                        message: "Người đại diện có độ dài tối đa 100 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 1,
+                                                                        message: "Người đại diện có độ dài tối thiểu 1 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Người đại diện không hợp lệ (không được dư khoảng trắng)."
+                                                                    }
                                                                 })
                                                             }
                                                         />
@@ -526,10 +513,23 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.mst}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                          
                                                             inputRef={
                                                                 register({
                                                                     required: "Mã số thuế không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 50,
+                                                                        message: "Mã số thuế có độ dài tối đa 50 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 1,
+                                                                        message: "Mã số thuế có độ dài tối thiểu 1 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Mã số thuế không hợp lệ (không được dư khoảng trắng)."
+                                                                    }
                                                                 })
                                                             }
                                                         />
@@ -599,7 +599,7 @@ export default function renderForm(props, toast) {
                                                                 error={!!errors.scope}
                                                                 as={
                                                                     <Select label="Vai trò">
-                                                                        {scopes.map(({ value, label }) => (
+                                                                        {scopes?.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -615,12 +615,12 @@ export default function renderForm(props, toast) {
                                                                 name="level"
                                                                 control={control}
                                                                 lable="Cấp độ"
-                                                                defaultValue={levels ? levels[0].value : ''}
+                                                                defaultValue={condUserType ? condUserType[0].value : ''}
                                                                 rules={{ required: true }}
                                                                 error={!!errors.level}
                                                                 as={
                                                                     <Select label="Cấp độ">
-                                                                        {levels.map(({ value, label }) => (
+                                                                        {condUserType?.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
@@ -642,7 +642,7 @@ export default function renderForm(props, toast) {
                                                                         error={!!errors.status}
                                                                         as={
                                                                             <Select label="Trạng thái">
-                                                                                {statuses.map(({ value, label }) => (
+                                                                                {statuses?.map(({ value, label }) => (
                                                                                     <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                                 ))}
                                                                             </Select>
@@ -650,7 +650,7 @@ export default function renderForm(props, toast) {
                                                                     />
                                                                 </FormControl>
                                                             </Grid>
-                                                        ): ''
+                                                        ) : ''
                                                     }
 
                                                 </Grid>
@@ -671,7 +671,7 @@ export default function renderForm(props, toast) {
                                                                         helperText={errors.password?.message}
                                                                         inputProps={{
                                                                             autoComplete: 'new-password'
-                                                                         }}
+                                                                        }}
                                                                         InputLabelProps={{
                                                                             shrink: true,
                                                                         }}

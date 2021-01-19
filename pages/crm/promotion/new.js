@@ -385,27 +385,24 @@ function render(props) {
     }
   }
 
-  return (
-    <AppCRM select="/crm/promotion">
-      <Head>
-        <title>Thêm khuyến mãi</title>
-      </Head>
-      <Box component={Paper}>
-        <FormGroup>
-          <Box className={styles.contentPadding}>
-            <Grid container>
-              <Grid xs={4}>
-                <ArrowBackIcon
-                  style={{ fontSize: 30 }}
-                  onClick={() => router.back()}
-                />
-              </Grid>
-              <Grid>
-                <Box style={{ fontSize: 24 }}>
-                  <h3>Thêm khuyến mãi mới</h3>
-                </Box>
-              </Grid>
-            </Grid>
+    return (
+        <AppCRM select="/crm/promotion">
+            <Head>
+                <title>Thêm khuyến mãi</title>
+            </Head>
+            <Box component={Paper} style={{width: "100%"}}>
+                <FormGroup style={{width: "100%"}}>
+                    <Box className={styles.contentPadding}>
+                        <Grid container>
+                            <Grid  xs={4}>
+                                <ArrowBackIcon style={{fontSize : 30}} onClick={() => router.back()}/>
+                            </Grid>
+                            <Grid>
+                                <Box style={{fontSize: 24}}>
+                                    <h3>Thêm khuyến mãi mới</h3>
+                                </Box>
+                            </Grid>
+                        </Grid>
 
             <CardHeader subheader="Thông tin khuyến mãi" />
             <CardContent>
@@ -583,12 +580,518 @@ function render(props) {
                           control={<Radio style={{ color: "blue" }} />}
                           label="Giảm tiền"
                         />
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={4}>
-                        <FormControlLabel
-                          value={defaultTypeConditionsRule.DISCOUNT_PERCENT}
-                          control={<Radio style={{ color: "blue" }} />}
-                          label="Giảm % giá sản phẩm"
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <Grid item xs={12} sm={12} md={12}>
+                                    <TextField
+                                        id="promotionName"
+                                        name="promotionName"
+                                        label="Tên khuyến mãi"
+                                        placeholder=""
+                                        helperText={errors.promotionName?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.promotionName ? true : false}
+                                        required
+                                        inputRef={
+                                            register({
+                                                required: "Tên khuyến mãi không được để trống",
+                                                maxLength: {
+                                                    value: 100,
+                                                    message: "Tên khuyến mãi không được vượt quá 250 kí tự"
+                                                },
+                                                minLength: {
+                                                    value: 10,
+                                                    message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự"
+                                                },
+                                                pattern: {
+                                                    value: /[A-Za-z]/,
+                                                    message: "Tên khuyến mãi phải có kí tự là chứ số"
+                                                }
+                                            })
+                                        }
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalCode"
+                                        name="totalCode"
+                                        label="Số lần áp dụng"
+                                        type="number"
+                                        helperText={errors.totalCode?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.totalCode ? true : false}
+                                        required
+                                        inputRef={register(
+                                            {
+                                                required: "Số lần áp dụng không được để trống",
+                                                pattern: {
+                                                    value: /[0-9]/,
+                                                    message: "Chỉ chấp nhận kí tự là số"
+                                                }
+                                            }
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalApply"
+                                        name="totalApply"
+                                        label="Số lần áp dụng tối đa"
+                                        type="number"
+                                        defaultValue={1}
+                                        helperText={errors.totalApply?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.totalApply ? true : false}
+                                        required
+                                        inputRef={register(
+                                            {
+                                                required: "Số lần áp dụng tối đa không được để trống",
+                                                pattern: {
+                                                    value: /[0-9]/,
+                                                    message: "Chỉ chấp nhận kí tự là số"
+                                                }
+                                            }
+                                        )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="startTime"
+                                        name="startTime"
+                                        label="Thời gian bắt đầu"
+                                        placeholder=""
+                                        helperText={errors.startTime?.message}
+                                        type="datetime-local"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        error={errors.startTime ? true : false}
+                                        required
+                                        inputRef={
+                                            register({
+                                                required: "Vui lòng chọn thời gian bắt đầu",
+                                            })
+                                        }
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="endTime"
+                                        name="endTime"
+                                        label="Thời gian kết thúc"
+                                        placeholder=""
+                                        type="datetime-local"
+                                        helperText={errors.endTime?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        onChange={handleChange}
+                                        error={errors.endTime ? true : false}
+                                        required
+                                        inputRef={
+                                            register({
+                                                required: "Vui lòng chọn ngày kêt thúc",
+                                            })
+                                        }
+                                    />
+                                </Grid>
+                            </Grid>
+                        </CardContent>
+                        <Divider/>
+                        <CardContent>
+                            <Typography color="textSecondary" gutterBottom>
+                                Điều kiện
+                            </Typography>
+                            <RadioGroup aria-label="quiz" name="promotionOption" value={promotionOption}
+                                        onChange={handleChangeStatus}>
+                                <Grid spacing={3} container justify="space-around" alignItems="center">
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <FormControlLabel value={defaultRulePromotion.MIN_ORDER_VALUE} control={<Radio color="primary"/>}
+                                                          label="Giảm giá theo giá trị đơn hàng"/>
+                                    </Grid>
+                                    <Grid item xs={12} sm={6} md={6}>
+                                        <FormControlLabel value={defaultRulePromotion.MIN_QUANTITY} control={<Radio color="primary"/>}
+                                                          label="Giảm giá theo số lượng sản phẩm"/>
+                                    </Grid>
+                                </Grid>
+                            </RadioGroup>
+                            <Card variant="outlined">
+                                <CardContent>
+                                    <Typography color="textSecondary" gutterBottom>
+                                        Loại
+                                    </Typography>
+                                    <RadioGroup aria-label="quiz" name="promotionTypeRule" value={promotionTypeRule}
+                                                onChange={handleChangeStatus}>
+                                        <Grid spacing={1} container justify="space-around" alignItems="center">
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Giảm tiền"/>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.DISCOUNT_PERCENT}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Giảm % giá sản phẩm"/>
+                                            </Grid>
+                                            {/*<Grid item xs={12} sm={6} md={4}>*/}
+                                            {/*    <FormControlLabel value={defaultTypeConditionsRule.GIFT}*/}
+                                            {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
+                                            {/*                      label="Quà"/>*/}
+                                            {/*</Grid>*/}
+                                            {/*<Grid item xs={12} sm={6} md={4}>*/}
+                                            {/*    <FormControlLabel value={defaultTypeConditionsRule.PRODUCT_GIFT}*/}
+                                            {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
+                                            {/*                      label="Tặng sản phẩm"/>*/}
+                                            {/*</Grid>*/}
+                                        </Grid>
+                                    </RadioGroup>
+                                </CardContent>
+                            </Card>
+                            {
+                                promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE ? (
+                                    <Card variant="outlined" style={{marginTop: '10px'}}
+                                    >
+                                        <List id="list123" component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionRulesLine.map((code, index) => (
+                                                    <ListItem
+                                                        key={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id}
+                                                        button>
+                                                        <Grid
+                                                            spacing={1} container alignItems="center">
+                                                            <Grid item xs={5} sm={5} md={5}>
+                                                                <TextField
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)}
+                                                                    label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
+                                                                    placeholder=""
+                                                                    type="number"
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    defaultValue={stateTest}
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={!!errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "Giá trị đơn hàng không được bỏ trống" : "Số lượng sản phẩm không được bỏ trống",
+                                                                            maxLength: {
+                                                                                value: 10,
+                                                                                message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6: 2,
+                                                                                message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
+                                                                            },
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={5} sm={5} md={5}>
+                                                                <TextField
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)}
+                                                                    type="number"
+                                                                    label="Số tiền giảm"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">đ</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)] ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Số tiền giảm không được bỏ trống",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Số tiền giảm không được vượt quá 250 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 3,
+                                                                                message: "Giá trị sản phẩm phải lớn hơn 1000"
+                                                                            },
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <Grid spacing={1} container alignItems="center">
+                                                                    <Grid item xs={6} sm={4} md={2}>
+                                                                        {
+                                                                            promotionRulesLine.length !== 1 ? (
+                                                                                <IconButton color="secondary"
+                                                                                            component="span"
+                                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                                    <HighlightOffOutlinedIcon/>
+                                                                                </IconButton>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                    {
+                                                                        index + 1 === promotionRulesLine.length ?
+                                                                            (
+                                                                                <Grid item xs={6} sm={4} md={2}>
+                                                                                    <IconButton color="primary"
+                                                                                                onClick={() => handleAddCodePercent(code.id)}
+                                                                                                aria-label="upload picture"
+                                                                                                component="span">
+                                                                                        <AddCircleOutlineOutlinedIcon/>
+                                                                                    </IconButton>
+                                                                                </Grid>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </Card>
+                                ) : promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT ? (
+                                    <Card variant="outlined" style={{marginTop: '10px'}}>
+                                        <List component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionRulesLine.map((code, index) => (
+                                                    <ListItem key={defaultTypeConditionsRule.DISCOUNT_PERCENT+ "_" + code.id} button>
+                                                        <Grid spacing={1} container alignItems="center">
+                                                            <Grid item xs={4} sm={4} md={4}>
+                                                                <TextField
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)}
+                                                                    label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
+                                                                    placeholder=""
+                                                                    type="number"
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={!!errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)]}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Giá trị đơn hàng không được bỏ trống",
+                                                                            maxLength: {
+                                                                                value: 10,
+                                                                                message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6 : 2,
+                                                                                message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
+                                                                            },
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <TextField
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)}
+                                                                    type="number"
+                                                                    label="Số % giảm"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">%</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)] ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Số % giảm không được để trống",
+                                                                            maxLength: {
+                                                                                value: 3,
+                                                                                message: "Số % giảm không đượt vượt quá 3 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 1,
+                                                                                message: "Số % giảm có độ dài lớn hơn 1 kí tự"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[0-9]/,
+                                                                                message: "Chỉ chấp nhận kí tự là số"
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={4} sm={4} md={4}>
+                                                                <TextField
+                                                                    id={displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)}
+                                                                    name={displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)}
+                                                                    type="number"
+                                                                    label="Số tiền giảm tối đa"
+                                                                    placeholder=""
+                                                                    variant="outlined"
+                                                                    size="small"
+                                                                    helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)]?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    InputProps={{
+                                                                        endAdornment: <InputAdornment
+                                                                            position="end">đ</InputAdornment>,
+                                                                    }}
+                                                                    style={{width: '100%'}}
+                                                                    error={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)] ? true : false}
+                                                                    required
+                                                                    inputRef={
+                                                                        register({
+                                                                            required: "Số tiền giảm tối đa không được để trống",
+                                                                            maxLength: {
+                                                                                value: 250,
+                                                                                message: "Số tiền giảm tối đa không đượt vượt quá 250 kí tự"
+                                                                            },
+                                                                            minLength: {
+                                                                                value: 4,
+                                                                                message: "Số tiền giảm tối đa phải có độ dài lớn hơn 4 kí tự"
+                                                                            },
+                                                                            pattern: {
+                                                                                value: /[0-9]/,
+                                                                                message: "Chỉ chấp nhận kí tự là số"
+                                                                            }
+                                                                        })
+                                                                    }
+                                                                />
+                                                            </Grid>
+                                                            <Grid item xs={2} sm={2} md={2}>
+                                                                <Grid spacing={1} container alignItems="center">
+                                                                    <Grid item xs={6} sm={4} md={2}>
+                                                                        {
+                                                                            promotionRulesLine.length !== 1 ? (
+                                                                                <IconButton color="secondary"
+                                                                                            component="span"
+                                                                                            onClick={() => handleRemoveCodePercent(code.id)}>
+                                                                                    <HighlightOffOutlinedIcon/>
+                                                                                </IconButton>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                    {
+                                                                        index + 1 === promotionRulesLine.length ?
+                                                                            (
+                                                                                <Grid item xs={6} sm={4} md={2}>
+                                                                                    <IconButton color="primary"
+                                                                                                onClick={() => handleAddCodePercent(code.id)}
+                                                                                                aria-label="upload picture"
+                                                                                                component="span">
+                                                                                        <AddCircleOutlineOutlinedIcon/>
+                                                                                    </IconButton>
+                                                                                </Grid>
+                                                                            ) : (
+                                                                                <div/>
+                                                                            )
+                                                                    }
+                                                                </Grid>
+                                                            </Grid>
+                                                        </Grid>
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </Card>
+                                ) : promotionTypeRule === defaultTypeConditionsRule.GIFT ? (
+                                    <div>
+                                        <List component="nav" aria-label="mailbox folders">
+                                            {
+                                                promotionRulesLine.map((code, index) => (
+                                                    <ListItem key={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id} button>
+                                                        <RenderTableGift
+                                                            handleClickOpen={() => setOpen({...open,openModalGift: true})}
+                                                            handleClose={() => setOpen({...open,openModalGift: false})}
+                                                            open={open.openModalGift}
+                                                            promotionOption={promotionOption}
+                                                            register={register}
+                                                            errors={errors}
+                                                            code={code}
+                                                            promotionRulesLine={promotionRulesLine}
+                                                            index={index}
+                                                            handleAddCodePercent={handleAddCodePercent}
+                                                            handleRemoveCodePercent={handleRemoveCodePercent}
+                                                            listGiftPromotion={listGiftPromotion}
+                                                            state={state}
+                                                            handleChange={handleChange}
+                                                        />
+                                                    </ListItem>
+                                                ))
+                                            }
+                                        </List>
+                                    </div>
+                                ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
+                                    <RenderTableProductGift
+                                        handleClickOpen={() => setOpen({...open,openModalProductGift: true})}
+                                        handleClose={() => setOpen({...open,openModalProductGift: false})}
+                                        open={open.openModalProductGift}
+                                        register={register}
+                                        state={state}
+                                        handleRemoveCodePercent={handleRemoveCodePercent}
+                                        handleChange={handleChange}
+                                    />
+                                ): (
+                                    <div/>
+                                )
+                            }
+                        </CardContent>
+                        <Divider/>
+                        <CardHeader subheader="Cách áp dụng"/>
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <RadioGroup aria-label="quiz" name="promotionUseType" value={promotionUseType}
+                                            onChange={handleChange}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center">
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultUseTypePromotion.MANY} control={<Radio color="primary"/>}
+                                                              label="Được áp dụng với khuyến mãi khác"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
+                                                              label="Không được áp dụng với khuyến mãi khác"/>
+                                        </Grid>
+                                    </Grid>
+                                </RadioGroup>
+                            </Grid>
+                        </CardContent>
+                        <CardHeader
+                            subheader="Áp dụng cho"
                         />
                       </Grid>
                       {/*<Grid item xs={12} sm={6} md={4}>*/}

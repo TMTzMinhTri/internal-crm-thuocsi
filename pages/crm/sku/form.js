@@ -17,9 +17,10 @@ import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import { getPriceClient } from "client/price";
-import { SellPrices } from "components/global";
+import { NotFound } from "components/components-global";
+import { Brand, SellPrices } from "components/global";
+import MuiMultipleAuto from "components/muiauto/multiple";
 import Head from "next/head";
 import Link from "next/link";
 import AppCRM from "pages/_layout";
@@ -27,7 +28,8 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
 
-const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index }) => {
+const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index, getValues, limitQty, ids, defaultIds, idDeleteds }) => {
+
     let arrName = name + `[${index}]`
     return (
         <div style={{ width: '100%' }}>
@@ -106,7 +108,8 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 // label=""
                                 placeholder=""
                                 defaultValue={10}
-                                helperText={errors[name]?.maxQuantity?.message}
+                                helperText={errors[name]?.maxQuantity.type === 'required' ? "Vui lòng nhập" : errors[name]?.maxQuantity.type === 'max' ?
+                                    "Vui lòng số lượng tối đa thấp hơn giá bán buôn" : null}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -116,12 +119,13 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 // }}
                                 // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                 style={{ width: '100%' }}
-                                error={!!errors[name]?.price}
+                                error={!!errors[name]?.maxQuantity}
                                 required
                                 inputRef={
                                     register({
-                                        required: "Vui lòng nhập giá bán",
-                                        valueAsNumber: true, // important
+                                        required: true,
+                                        valueAsNumber: true, // important,
+                                        max: getValues().wholesalePrice ? getValues().wholesalePrice[0]?.maxQuantity - 1 : null
                                     })
                                 }
                             />
@@ -239,7 +243,10 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     placeholder=""
                                     defaultValue={10}
                                     error={errors[name] ? !!errors[name][index]?.maxQuantity : false}
-                                    helperText={errors[name] ? errors[name][index]?.maxQuantity?.message : ''}
+                                    helperText={errors[name] && errors[name][index]?.maxQuantity.type === 'required' ? "Vui lòng nhập" :
+                                        errors[name] && errors[name][index]?.maxQuantity.type === 'min' && index == 0 ? "Vui lòng nhập tối đa lớn hơn bán lẻ" :
+                                            errors[name] && errors[name][index]?.maxQuantity.type === 'min' ? "Vui lòng nhập số lượng tối đa lớn hơn số lượng tối đa của bán buôn trước" :
+                                                errors[name] && errors[name][index]?.maxQuantity.type === 'max' ? "Vui lòng nhập số lượng tối đa bé hơn số lượng tối đa của bán buôn sau" : null}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
@@ -249,8 +256,11 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     required
                                     inputRef={
                                         register({
-                                            required: "Vui lòng nhập",
+                                            required: true,
                                             valueAsNumber: true, // important
+                                            min: index === 0 ? getValues().retailPrice?.maxQuantity + 1 : getValues().wholesalePrice ? getValues().wholesalePrice[index - 1]?.maxQuantity + 1 : 0,
+                                            // max: (index === ids.length - idDeleteds.length - 1 || index === defaultIds.length - idDeleteds.length - 1) ? null :
+                                            //     getValues().wholesalePrice ? getValues().wholesalePrice[index + 1]?.maxQuantity - 1 : null
                                         })
                                     }
                                 />
@@ -334,20 +344,32 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
 }
 
 export default function renderForm(props, toast) {
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange', defaultValues: props.price });
+    console.log(props)
+    if (props.status && props.status !== "OK") {
+        return (
+            <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
+        )
+    }
+    
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
-    const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind + 1) || [])
-    const [ids, setIds] = useState(defaultIds);
+    const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind) || [])
+    const [ids, setIds] = useState([]);
     const [idDeleteds, setIdDeleteds] = useState([]);
+    const [expandeds, setExpandeds] = useState(props.price?.wholesalePrice?.map((value, ind) => true) || []);
     const [expanded, setExpanded] = React.useState(false);
     const [listTag, setListTag] = useState(props.listTag);
     const [brand, setBrand] = useState(getValues('brand') || 'LOCAL');
     const [categoryCode, setCategoryCode] = useState(props.price?.categoryCodes || []);
+    const [limitQty, setLimitQty] = useState(2)
     let sellerCode = "MedX";
+    // tamnt
+    const [incrId, setIncrId] = useState(0);
+    
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
-        idDeleteds.sort(function (a, b) { return b-a });
+        idDeleteds.sort(function (a, b) { return b - a });
         idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
         let _client = getPriceClient()
@@ -366,9 +388,15 @@ export default function renderForm(props, toast) {
         formData.sellerCode = props.price?.sellerCode
         formData.productCode = props.product?.code
         formData.categoryCodes = categoryCode;
-        formData.tags = [...formData.tagsName] || [];
-        idDeleteds.sort(function (a, b) { return b - a });
-        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
+        formData.tags = [];
+        formData.tagsName.forEach((tag) => {
+            formData.tags.push(tag.value)
+        })
+
+        let wholesale = formData.wholesalePrice?.filter((item) => item && item.type !== "")
+        formData.wholesalePrice = wholesale
+    
+        console.log("after:", formData.wholesalePrice)
         setLoading(true);
         let _client = getPriceClient()
         let result = await _client.updatePrice(formData)
@@ -404,8 +432,10 @@ export default function renderForm(props, toast) {
         setExpanded(isExpanded ? panel : false);
     };
 
-
     let lstOptions = props?.products
+
+    const onSubmit2 = (data, e) => console.log(data, e);
+    const onError2 = (errors, e) => console.log(errors, e);
 
     return (
         <AppCRM select="/crm/sku">
@@ -419,10 +449,29 @@ export default function renderForm(props, toast) {
                         <Box style={{ margin: 10 }}>
                             <Grid container spacing={1}>
                                 <Grid item xs={12} sm={6} md={6}>
-                                    <Typography gutterBottom>
-                                        Sản phẩm: <b>{props.product?.name}</b>
-                                    </Typography>
                                     {
+                                        props.isUpdate === true?(
+                                            // Case 1: Product can not change
+                                            <Typography gutterBottom>
+                                                Sản phẩm: <b>{props.product?.name}</b>
+                                            </Typography>
+                                        ):(
+                                            // Case 2: Select product
+                                            <div>
+                                                <MuiMultipleAuto 
+                                                    name="productCode"
+                                                    control={control}
+                                                    errors={errors}
+                                                    message="Vui lòng chọn sản phẩm"
+                                                    placeholder="Chọn sản phẩm"
+                                                    options={lstOptions}
+                                                />
+                                            </div>
+                                        )
+                                    }
+                                    
+                                    
+                                    {/* {
                                         typeof lstOptions !== "undefined" ? (
                                             <Controller
                                                 render={({ onChange, ...props }) => (
@@ -449,6 +498,7 @@ export default function renderForm(props, toast) {
                                                         {...props}
                                                     />
                                                 )}
+                                                noOptionsText={noOptionsText}
                                                 name="productCode"
                                                 control={control}
                                                 onChange={([, { id }]) => id}
@@ -461,11 +511,20 @@ export default function renderForm(props, toast) {
                                         ) : (
                                                 <div />
                                             )
-                                    }
+                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={12} sm={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <Controller
+                                    <MuiMultipleAuto 
+                                        name="tagsName"
+                                        control={control}
+                                        errors={errors}
+                                        message="Vui lòng nhập"
+                                        placeholder="Tuỳ chọn"
+                                        label="Chọn tag"
+                                        options={listTag}
+                                    />
+                                    {/* <Controller
                                         render={({ onChange, ...props }) => (
                                             <Autocomplete
                                                 id="tagsName"
@@ -475,6 +534,7 @@ export default function renderForm(props, toast) {
                                                 // options={listSearchCategory.map(
                                                 // 	(category) => category.label
                                                 // )}
+                                                noOptionsText={noOptionsText}
                                                 InputLabelProps={{
                                                     shrink: true
                                                 }}
@@ -502,12 +562,12 @@ export default function renderForm(props, toast) {
                                     //         return typeof d != "undefined";
                                     //     },
                                     // }}
-                                    />
+                                    /> */}
                                     <Grid item xs={12} md={12} sm={12} /></Grid>
 
                                 <Grid item xs={12} sm={12} md={12}>
                                     <FormControl component="fieldset" className={styles.marginTopBottom}>
-                                        <FormLabel component="legend">Nơi bán</FormLabel>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>Nơi bán</FormLabel>
                                         <Controller
                                             rules={{ required: true }}
                                             control={control}
@@ -522,13 +582,13 @@ export default function renderForm(props, toast) {
                                                 >
                                                     <FormControlLabel
                                                         value="LOCAL"
-                                                        control={<Radio color="primary"/>}
-                                                        label="Trong nước"
+                                                        control={<Radio color="primary" />}
+                                                        label={Brand.LOCAL.value}
                                                     />
                                                     <FormControlLabel
                                                         value="FOREIGN"
-                                                        control={<Radio color="primary"/>}
-                                                        label="Ngoại nhập"
+                                                        control={<Radio color="primary" />}
+                                                        label={Brand.FOREIGN.value}
                                                     />
                                                 </RadioGroup>
                                             }
@@ -543,21 +603,29 @@ export default function renderForm(props, toast) {
                                         </Tooltip>
                                     </Typography>
                                     {/* Setup gia ban le */}
-                                    {/* <pre>z{JSON.stringify(getValues().productCode?true:false )}</pre> */}
                                     <RenderPriceConfig name={'retailPrice'} control={control} register={register}
-                                        hidden={typeof props.product === "undefined" && !getValues().productCode} errors={errors} index={0} />
+                                        hidden={typeof props.product === "undefined" && !getValues().productCode} errors={errors} index={0} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                 </Grid>
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <Typography gutterBottom>
+                                <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
+                                    <Typography gutterBottom style={{ fontSize: '1.25rem' }}>
                                         Cài đặt giá bán buôn:
                                     <Tooltip title="Danh sách cài đặt bán buôn (bán sỉ)" placement="right-start">
                                             <HelpOutlinedIcon fontSize="small" />
                                         </Tooltip>
                                     </Typography>
+                                    
                                     {
+                                        // case edit sku
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
-                                            <>
-                                                <Accordion expanded={true} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
+                                            <div key={num} style={{marginTop: 10}}>
+                                                <Accordion  style={{backgroundColor: '#f8faf8', paddingTop: '5px'}} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
+                                                    {
+                                                        let tmpExpandeds = [...expandeds]
+                                                        tmpExpandeds[idx] = !tmpExpandeds[idx]
+                                                        setExpandeds(tmpExpandeds)
+                                                        // classes={{root:classes.root}}
+                                                    };
+                                                }}>
                                                     <AccordionSummary
                                                         expandIcon={<ExpandMoreIcon />}
                                                         aria-controls="panel1bh-content"
@@ -565,56 +633,66 @@ export default function renderForm(props, toast) {
                                                         id="panel1bh-header"
                                                     >
                                                         <Typography color="textSecondary">
-                                                            Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
+                                                            Cài đặt giá bán buôn (bán sỉ) thứ {idx+1}
+                                                            {/* <pre>{JSON.stringify(expandeds)}</pre> */}
                                                         </Typography>
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                            register={register} errors={errors} index={idx} />
+                                                            register={register} errors={errors} index={num} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                                     </AccordionDetails>
                                                     <AccordionActions>
                                                         <Button size="small" color="secondary" variant="contained"
                                                             startIcon={<DeleteIcon />}
-                                                            // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
-                                                            onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                                            onClick={() => {
+                                                                setIncrId(incrId+1)
+                                                                setDefaultIds(defaultIds.filter((_id) => _id !== num))
+                                                                setExpandeds(expandeds.filter((val, index) => index !== idx))
+                                                            }}>Xóa</Button>
                                                     </AccordionActions>
                                                 </Accordion>
-                                            </>
+                                            </div>
                                         )) :
-                                            ids.map((num, idx) => (
-                                                <>
-                                                    <Accordion expanded={expanded === `panel${idx}`} style={{ display: idDeleteds.includes(num) ? 'none' : '' }} onChange={handleChange(`panel${idx}`)}>
-                                                        <AccordionSummary
-                                                            expandIcon={<ExpandMoreIcon />}
-                                                            aria-controls="panel1bh-content"
-                                                            onClick={(e) => e.stopPropagation()}
-                                                            id="panel1bh-header"
-                                                        >
-                                                            <Typography color="textSecondary">
-                                                                Cài đặt giá bán buôn (bán sỉ) thứ {num - idDeleteds.filter(item => item<num).length}
-                                                            </Typography>
-                                                        </AccordionSummary>
-                                                        <AccordionDetails>
-                                                            <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                                register={register} errors={errors} index={idx} />
-                                                        </AccordionDetails>
-                                                        <AccordionActions>
-                                                            <Button size="small" color="secondary" variant="contained"
-                                                                startIcon={<DeleteIcon />}
-                                                                // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
-                                                                onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
-                                                        </AccordionActions>
-                                                    </Accordion>
-                                                </>
-                                            ))
+                                            // ids.map((num, idx) => (
+                                            //     <>
+                                            //         <Accordion classes={{root:classes.root}} key={`panel${num}`} expanded={expanded === `panel${num}`} onChange={handleChange(`panel${num}`)}>
+                                            //             <AccordionSummary
+                                            //                 expandIcon={<ExpandMoreIcon />}
+                                            //                 aria-controls="panel1bh-content"
+                                            //                 onClick={(e) => e.stopPropagation()}
+                                            //                 id="panel1bh-header"
+                                            //             >
+                                            //                 <Typography color="textSecondary">
+                                            //                     Cài đặt giá bán buôn (bán sỉ) thứ new {num - idDeleteds.filter(item => item < num).length}
+                                            //                 </Typography>
+                                            //             </AccordionSummary>
+                                            //             <AccordionDetails>
+                                            //                 <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                            //                     register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                            //             </AccordionDetails>
+                                            //             <AccordionActions>
+                                            //                 <Button size="small" color="secondary" variant="contained"
+                                            //                     startIcon={<DeleteIcon />}
+                                            //                     // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                            //                     onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                            //             </AccordionActions>
+                                            //         </Accordion>
+                                            //     </>
+                                            // ))
+                                            <div/>
+
                                     }
-                                    {defaultIds.length > 0 ? <Button
+                                    {/* edit */}
+                                    {props.isUpdate ? <Button
                                         color="primary"
-                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length - idDeleteds.length === 5)}
+                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length  === 5)}
                                         style={{ marginTop: '10px' }}
                                         onClick={() => {
-                                            setDefaultIds([...defaultIds, defaultIds.length + 1])
-                                            setExpanded(`panel${defaultIds.length}`)
+                                            let mId = defaultIds.length-1<=0?incrId+defaultIds.length:defaultIds.length+incrId+1
+                                            console.log("mID:", mId)
+                                            setDefaultIds([...defaultIds, mId + 1]);
+                                            setExpandeds([...expandeds,true])
+                                            // setExpandeds(prevState=>[...prevState,true])
                                         }}
                                         startIcon={<AddIcon />}
                                     >
@@ -642,7 +720,7 @@ export default function renderForm(props, toast) {
                                 variant="contained"
                                 color="primary"
                                 disabled={(typeof props.product === "undefined" && !getValues().productCode)}
-                                onClick={handleSubmit(onSubmit)}
+                                onClick={handleSubmit(onSubmit, onError2)}
                                 style={{ margin: 8 }}>
                                 Lưu
                             </Button>

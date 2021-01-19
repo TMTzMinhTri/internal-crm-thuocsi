@@ -6,6 +6,9 @@ import {
     TableBody,
     TableCell,
     TableContainer,
+    FormControl,
+    Select,MenuItem,
+    InputLabel,
     TableHead,
     TableRow
 } from "@material-ui/core";
@@ -84,7 +87,7 @@ function render(props) {
     let [open, setOpen] = useState({
         openModalCreate: false,
     })
-    let q = router.query.q || ''
+    let promotionName = router.query.promotionName || ''
 
     const [page, setPage] = React.useState(parseInt(router.query.page || 0));
     const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(router.query.perPage) || 20);
@@ -196,10 +199,10 @@ function render(props) {
                 </Grid>
             </div>
             {
-                q === '' ? (
+                promotionName === '' ? (
                     <span/>
                 ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{promotionName}'</i></div>
                 )
             }
             <TableContainer component={Paper}>
@@ -219,7 +222,7 @@ function render(props) {
                     {props.data?.length > 0 ? (
                         <TableBody>
                             {props.data.map((row,index) => (
-                                <TableRow>
+                                <TableRow key={index}>
                                     <TableCell align="left">{row.promotionName}</TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
@@ -286,14 +289,34 @@ function render(props) {
                         Chọn loại khuyến mãi cần tạo
                     </h3>
                     <div style={{margin: "auto"}}>
-                        <ButtonGroup className={styles.buttonConfirm}>
+                        {/* <ButtonGroup className={styles.buttonConfirm}>
                             <Link href={`/crm/promotion/create-code`}>
                                 <Button  variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo voucher Khuyến mãi</Button>
                             </Link>
                             <Link href={`/crm/promotion/new`}>
                                 <Button className={styles.buttonConfirmRight} variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo Combo khuyến mãi</Button>
                             </Link>
-                        </ButtonGroup>
+                        </ButtonGroup> */}
+                          <FormControl className={styles.select}>
+                                    <InputLabel id="category-select-outlined-label">Chọn loại Khuyến Mãi</InputLabel>
+                                    <Select
+                                        autoWidth={false}
+                                        style={{width: '100% !important'}}
+                                        labelId="category-select-outlined-label"
+                                        id="category-select-outlined"
+                                        label="Chọn danh mục">
+                                        <Link href={`/crm/promotion/create-code`}>
+                                        <MenuItem value={"VOUCHER_CODE"} key={"VOUCHER_CODE"} onClick={() => setOpen({...open,openModalCreate: false})}>
+                                            Tạo voucher khuyến mãi
+                                        </MenuItem>
+                                        </Link>
+                                        <Link href={`/crm/promotion/new`}>
+                                        <MenuItem value={"COMBO"} key={"COMBO"} onClick={() => setOpen({...open,openModalCreate: false})}>
+                                            Tạo combo khuyến mãi
+                                        </MenuItem>
+                                        </Link>
+                                    </Select>
+                         </FormControl>
                     </div>
                 </div>
             </Modal>

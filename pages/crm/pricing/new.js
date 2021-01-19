@@ -1,34 +1,28 @@
-import Head from "next/head";
-import React, { useEffect, useState } from 'react';
-import Router, { useRouter } from "next/router";
-
 import {
-    Button, ButtonGroup,
-    Box, Divider,
-    Paper,
-    TextField, InputAdornment,
-    Typography,
-    Grid, FormControl
+    Box, Button, ButtonGroup,
+    Divider,
+    FormControl, Grid, InputAdornment, Paper,
+    TextField,
+    Typography
 } from "@material-ui/core";
-import Radio from '@material-ui/core/Radio';
-import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormLabel from '@material-ui/core/FormLabel';
-import styles from "./pricing.module.css"
-import Chip from '@material-ui/core/Chip';
-import { makeStyles } from '@material-ui/core/styles';
-import Autocomplete from "@material-ui/lab/Autocomplete";
-
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
-import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import AppCRM from "pages/_layout";
-import { getPricingClient } from 'client/pricing';
-import { condUserType } from 'components/global';
-import { Controller, useForm } from "react-hook-form";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import useDebounce from "components/useDebounce"
 import { getCategoryClient } from "client/category";
-
+import { getPricingClient } from 'client/pricing';
+import { Brand, condUserType } from 'components/global';
+import MuiMultipleAuto from "components/muiauto/multiple";
+import MuiSingleAuto from "components/muiauto/single";
+import Head from "next/head";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import AppCRM from "pages/_layout";
+import React, { useState } from 'react';
+import { Controller, useForm } from "react-hook-form";
+import styles from "./pricing.module.css";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -46,7 +40,7 @@ export async function loadConfigPricingData(ctx) {
     let client = getPricingClient(ctx, {});
     let categoryResult = await client.getListCategory();
     let provinceResult = await client.getProvinceLists();
-    provinceResult.data.unshift({ name: "ALL", code: "ALL" })
+    provinceResult.data.unshift({ name: "Tất cả", code: "ALL" })
     return {
         props: {
             provinceLists: provinceResult.data || [],
@@ -64,23 +58,36 @@ function render(props) {
 
     let router = useRouter()
     const { error, success } = useToast()
-
-    const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
+    // const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
     const [provinceLists, setProvinceLists] = useState(props.provinceLists);
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onChange' });
+    // const [total, setTotal] = useState(0);
+    // const [loading, setLoading] = useState(true);
+    const { register, handleSubmit, errors, reset, control } = useForm({
+        mode: 'onSubmit',
+        defaultValues: {
+            addition: 5000,
+            brand: "LOCAL",
+            categoryCode: [],
+            categoryCodes: [],
+            locationCode: [],
+            multiply: 2,
+            numAddition: 5000,
+            numMultiply: 1,
+            customerType: condUserType[0]
+        }
+    });
     const [searchCategory, setSearchCategory] = useState("");
-    const debouncedSearchCategory = useDebounce(searchCategory, 500);
 
     const onSubmit = async (formData) => {
-        formData.categoryCode = formData.categoryCodes.map(category => category.code)
-        formData.locationCode = formData.locationCode.map(location => location.code)
+        console.log(formData)
+        formData.categoryCode = formData.categoryCodes.map(category => category.value)
+        formData.locationCode = formData.locationCode.map(location => location.value)
         formData.customerType = formData.customerType.value
         let client = getPricingClient();
         let result = await client.createNewPriceGenConfig(formData)
         if (result.status === "OK") {
+            success('Tạo mới thành công')
             router.push(`/crm/pricing/edit?priceCode=${result.data[0].code}`)
         } else {
             error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
@@ -89,23 +96,14 @@ function render(props) {
 
     const searchCatogery = async (search) => {
         let categoryClient = getCategoryClient();
-        let res = await categoryClient.getListCategoryFromClient(0, 20, search);
+        let res = await categoryClient.getListCategoryFromClient(0, 100, search);
         if (res.status === "OK") {
-            return res.data;
+            return res.data.map((category) => {
+                return { label: category.name, value: category.code };
+            });
         }
         return [];
     };
-
-    useEffect(() => {
-        if (debouncedSearchCategory) {
-            searchCatogery(debouncedSearchCategory).then((results) => {
-                const parseCategory = results.map((category) => {
-                    return { value: category.code, name: category.name , code:category.code };
-                });
-                setCategoryLists(parseCategory);
-            });
-        }
-    }, [debouncedSearchCategory]);
 
     return (
         <AppCRM select="/crm/pricing">
@@ -119,130 +117,56 @@ function render(props) {
                         <Grid container spacing={2} style={{ padding: '10px' }}>
                             <Grid item xs={12} md={12} sm={12} />
                             <Grid item xs={12} sm={12} md={2}>
-                                <Controller
-                                    render={({ onChange, ...props }) => (
-                                        <Autocomplete
-                                            id="customerType"
-                                            size="small"
-                                            options={condUserType}
-                                            getOptionLabel={option => option.label}
-                                            getOptionSelected={(option, value) => option.label === value.label}
-                                            InputLabelProps={{
-                                                shrink: true
-                                            }}
-                                            filterSelectedOptions
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Loại khách hàng"
-                                                    error={!!errors.customerType}
-                                                    placeholder=""
-                                                    size="small"
-                                                    helperText={errors.customerType?.message}
-                                                    inputRef={
-                                                        register({
-                                                            required: "Vui lòng chọn loại khách hàng"
-                                                        })
-                                                    }
-                                                // onChange={(e) => setSearchCategory(e.target.value)}
-                                                />
-                                            )}
-                                            onChange={(e, data) => onChange(data)}
-                                            {...props}
-                                        />
-                                    )}
+                                <MuiSingleAuto
+                                    id="customerType"
+                                    options={condUserType}
+                                    label="Loại khách hàng"
+                                    control={control}
+                                    errors={errors}
                                     name="customerType"
-                                    control={control}
-                                    // onChange={([, { id }]) => id}
+                                    message="Vui lòng chọn"
+                                    required={true}
+                                />
 
-                                    rules={{
-                                        validate: (d) => {
-                                            return typeof d != "undefined";
-                                        },
-                                    }}
-                                />
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} />
                             <Grid item xs={12} sm={12} md={6}>
-                                <Controller
-                                    render={({ onChange, ...props }) => (
-                                        <Autocomplete
-                                            id="categoryCodes"
-                                            multiple
-                                            size="small"
-                                            options={categoryLists}
-                                            getOptionLabel={option => option.name}
-                                            getOptionSelected={(value, option) => value.name === option.name}
-                                            InputLabelProps={{
-                                                shrink: true
-                                            }}
-                                            filterSelectedOptions
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Loại sản phẩm"
-                                                    error={!!errors.categoryCodes}
-                                                    placeholder=""
-                                                    size="small"
-                                                onChange={(e) => setSearchCategory(e.target.value)}
-                                                />
-                                            )}
-                                            onChange={(e, data) => onChange(data)}
-                                            {...props}
-                                        />
-                                    )}
+                                <MuiMultipleAuto
+                                    id="categoryCodes"
+                                    options={[...categoryLists.map(category => {
+                                        return { label: category.name, value: category.code }
+                                    })]}
+                                    label="Loại sản phẩm"
                                     name="categoryCodes"
+                                    message="Vui lòng chọn"
+                                    placeholder="Chọn"
                                     control={control}
-                                    // onChange={([, { id }]) => id}
-                                    rules={{
-                                        validate: (d) => {
-                                            return typeof d != "undefined";
-                                        },
-                                    }}
+                                    errors={errors}
+                                    onFieldChange={searchCatogery}
+                                    required={true}
                                 />
+                                
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} />
                             <Grid item xs={12} sm={12} md={6}>
-                                <Controller
-                                    render={({ onChange, ...props }) => (
-                                        <Autocomplete
-                                            id="locationCode"
-                                            multiple
-                                            size="small"
-                                            options={provinceLists}
-                                            getOptionLabel={option => option.name}
-                                            getOptionSelected={(value, option) => value.name === option.name}
-                                            InputLabelProps={{
-                                                shrink: true
-                                            }}
-                                            filterSelectedOptions
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    {...params}
-                                                    label="Tỉnh thành"
-                                                    error={!!errors.locationCode}
-                                                    placeholder=""
-                                                    size="small"
-                                                // onChange={(e) => setSearchCategory(e.target.value)}
-                                                />
-                                            )}
-                                            onChange={(e, data) => onChange(data)}
-                                            {...props}
-                                        />
-                                    )}
+                                <MuiMultipleAuto
+                                    id="locationCode"
+                                    options={[...provinceLists.map(category => {
+                                        return { label: category.name, value: category.code }
+                                    })]}
+                                    label="Tỉnh/thành"
                                     name="locationCode"
+                                    placeholder="Chọn"
                                     control={control}
-                                    // onChange={([, { id }]) => id}
-                                    rules={{
-                                        validate: (d) => {
-                                            return typeof d != "undefined";
-                                        },
-                                    }}
+                                    errors={errors}
+                                    message="Vui lòng chọn"
+                                    required={true}
                                 />
+                                
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
                                 <FormControl component="fieldset" className={styles.marginTopBottom}>
-                                    <FormLabel component="legend">Nơi bán</FormLabel>
+                                    <FormLabel component="legend" style={{color: 'black !important'}}>Nơi bán</FormLabel>
                                     <Controller
                                         rules={{ required: true }}
                                         control={control}
@@ -255,13 +179,13 @@ function render(props) {
                                             >
                                                 <FormControlLabel
                                                     value="LOCAL"
-                                                    control={<Radio />}
-                                                    label="Trong nước"
+                                                    control={<Radio color="primary" />}
+                                                    label={Brand.LOCAL.value}
                                                 />
                                                 <FormControlLabel
                                                     value="FOREIGN"
-                                                    control={<Radio />}
-                                                    label="Ngoại nhập"
+                                                    control={<Radio color="primary" />}
+                                                    label={Brand.FOREIGN.value}
                                                 />
                                             </RadioGroup>
                                         }
@@ -271,7 +195,7 @@ function render(props) {
                             <Grid container item xs={12} sm={12} md={8} spacing={3}>
                                 <Grid item xs={12} sm={12} md={5}>
                                     <Typography gutterBottom>
-                                        Multiply:
+                                        Hệ số nhân(*):
                             </Typography>
                                     <TextField
                                         id="multiply"
@@ -296,21 +220,27 @@ function render(props) {
                                             register({
                                                 required: "Vui lòng nhập",
                                                 valueAsNumber: true, // important
+                                                max: {
+                                                    value: 200,
+                                                    message: "Hệ số tối đa là 200"
+                                                },
+                                                min: {
+                                                    value: 1,
+                                                    message: "Hệ số tối thiểu là 1"
+                                                }
                                             })
                                         }
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={5}>
                                     <Typography gutterBottom>
-                                        Addition:
+                                        Hệ số cộng(*):
                                     </Typography>
                                     <TextField
                                         id="addition"
                                         name="addition"
                                         size="small"
                                         type="number"
-                                        // disabled={hidden}
-                                        // label=""
                                         placeholder=""
                                         defaultValue={5000}
                                         helperText={errors.name?.message}
@@ -330,6 +260,14 @@ function render(props) {
                                             register({
                                                 required: "Vui lòng nhập",
                                                 valueAsNumber: true, // important
+                                                max: {
+                                                    value: 100000000,
+                                                    message: "Hệ số tối đa là 100,000,000"
+                                                },
+                                                min: {
+                                                    value: 0,
+                                                    message: "Hệ số tối thiểu là 0"
+                                                }
                                             })
                                         }
                                     />
@@ -346,10 +284,14 @@ function render(props) {
                                     onClick={handleSubmit(onSubmit)}
                                     style={{ margin: 8 }}>
                                     Lưu
-                            </Button>
+                                </Button>
                                 {
                                     typeof props.product === "undefined" ? (
-                                        <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
+                                        <Button variant="contained" type="reset" style={{ margin: 8 }}
+                                        onClick={() => {
+                                            reset();
+                                        }}
+                                        >Làm mới</Button>
                                     ) : (
                                             <Link href="/crm/sku">
                                                 <ButtonGroup>

@@ -226,7 +226,7 @@ function render(props) {
                 <title>Thêm khuyến mãi</title>
             </Head>
             <Box component={Paper}>
-                <FormGroup>
+                <FormGroup style={{width: "100%"}}>
                     <Box className={styles.contentPadding}>
                         <Grid container>
                             <Grid  xs={4}>

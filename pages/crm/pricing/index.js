@@ -1,6 +1,6 @@
 import {
     Button, ButtonGroup,
-    Grid, InputBase, Paper, Table, TableBody, TableCell, TableContainer,
+    Grid, Paper, Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow
 } from "@material-ui/core";
 import Chip from '@material-ui/core/Chip';
@@ -8,11 +8,10 @@ import IconButton from "@material-ui/core/IconButton";
 import { makeStyles } from '@material-ui/core/styles';
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import SearchIcon from '@material-ui/icons/Search';
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { Brand, condUserType, formatNumber } from 'components/global';
+import { Brand, condUserType, formatEllipsisText, formatNumber, formatUrlSearch } from 'components/global';
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
@@ -58,12 +57,13 @@ export async function loadConfigPricingData(ctx) {
         if (res.data.length > 0) {
             let categoryCodes = res.data.map((item) => item.categoryCode);
             categoryCodes = new Set(categoryCodes.flat());
-
+            categoryCodes = [...categoryCodes].filter(item => item !== null)
             let [categoryList, provinceList] = await Promise.all([
                 configPriceClient.getCategoryWithArrayID([...categoryCodes]),
                 configPriceClient.getProvinceLists()
             ]);
             if (categoryList.status === "OK") {
+                
                 if (categoryList.data.length > 0) {
                     categoryList.data.map((item) => { categoryLists[item.code] = { ...item } });
                 }
@@ -79,7 +79,8 @@ export async function loadConfigPricingData(ctx) {
             provinceLists,
             categoryLists,
             total,
-            message: res.message
+            // message: res.message,
+            message: "Không tìm thấy kết quả phù hợp"
         }
     };
 }
@@ -92,8 +93,9 @@ function render(props) {
 
     const classes = useStyles();
     let router = useRouter()
-    let [search, setSearch] = useState('')
+
     let q = router.query.q || ''
+    let [search, setSearch] = useState(q)
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
 
@@ -102,12 +104,7 @@ function render(props) {
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
-    const {register, handleSubmit, errors} = useForm();
-
-    function searchPrice(formData) {
-        let q = formData.q
-        Router.push(`/crm/price?q=${q}`)
-    }
+    const { register, handleSubmit, errors } = useForm();
 
     async function handleChange(event) {
         const target = event.target;
@@ -115,13 +112,9 @@ function render(props) {
         setSearch(value)
     }
 
-    function onSearch(formData) {
-        try {
-            searchPrice(formData)
-            setSearch('')
-        } catch (error) {
-            console.log(error)
-        }
+    function onSearch() {
+        q = formatUrlSearch(search)
+        router.push(`?q=${q}`)
     }
 
     useEffect(() => {
@@ -134,8 +127,8 @@ function render(props) {
     function typeCategorys(catagory) {
         if (catagory?.length > 0) {
             const chips = catagory.map((item, i) => {
-                if (categoryLists[item]?.shortName) {
-                    return <Chip key={i} size="small" label={categoryLists[item]?.shortName} variant="outlined" />;
+                if (categoryLists[item]?.name) {
+                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={ formatEllipsisText(categoryLists[item]?.name, 30) } variant="outlined" />;
                 }
             });
             return chips;
@@ -146,11 +139,11 @@ function render(props) {
     function provices(provi) {
         if (provi?.length > 0) {
             if (provi[0] === 'ALL') {
-                return <Chip label="Tất cả" variant="outlined" />;
+                return <Chip size="small" label="Tất cả" variant="outlined" />;
             }
             const chips = provi.map((item, i) => {
                 if (provinceLists[item]?.name) {
-                    return <Chip key={i} size="small" label={provinceLists[item]?.name} variant="outlined" />;
+                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={provinceLists[item]?.name} variant="outlined" />;
                 }
             });
             return chips;
@@ -165,46 +158,56 @@ function render(props) {
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
-                      justify="space-evenly"
-                      alignItems="center"
+                    justify="space-evenly"
+                    alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <Paper component="form" className={styles.search}>
+                        {/* <Paper className={styles.search}>
                             <InputBase
                                 id="q"
                                 name="q"
                                 className={styles.input}
                                 value={search}
                                 onChange={handleChange}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter' || event.keyCode === 13) {
+                                        onSearch()
+                                    }
+                                }}
                                 inputRef={register}
                                 placeholder="Tìm kiếm giá"
-                                inputProps={{'aria-label': 'Tìm kiếm giá'}}
+                                inputProps={{ 'aria-label': 'Tìm kiếm giá' }}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
-                                        onClick={handleSubmit(onSearch)}>
-                                <SearchIcon/>
+                                onClick={handleSubmit(onSearch)}>
+                                <SearchIcon />
                             </IconButton>
-                        </Paper>
+                        </Paper> */}
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
                         <Link href="/crm/pricing/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
-                                         className={styles.rightGroup}>
+                                className={styles.rightGroup}>
                                 <Button variant="contained" color="primary">Thêm giá mới</Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
                 </Grid>
             </div>
-            {
-                q === '' ? (
-                    <span/>
-                ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
-                )
-            }
+
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
+                    <colgroup>
+                        <col width="10%"/>
+                        <col width="10%"/>
+                        <col width="20%"/>
+                        <col width="20%"/>
+                        <col width="10%"/>
+                        <col width="5%"/>
+                        <col width="5%"/>
+                        <col width="15%"/>
+                        <col width="5%"/>
+                    </colgroup>
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">Code</TableCell>
@@ -248,12 +251,12 @@ function render(props) {
                         }
                     </TableBody>
                     <MyTablePagination
-                        labelUnit="Config"
+                        labelUnit="Cấu hình giá"
                         count={total}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}&q=${q}`)
                         }}
                     />
                 </Table>

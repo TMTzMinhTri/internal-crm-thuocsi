@@ -25,27 +25,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-// import {levels, statuses} from "./form"
-
-const statuses = [
-    {
-        value: "ACTIVE",
-        label: "Đang hoạt động",
-    },
-    {
-        value: "DRAFT",
-        label: "Nháp",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-    },
-]
-
+import { ErrorCode, formatUrlSearch, statuses } from 'components/global';
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -54,7 +34,7 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadSellerData(ctx) {
-    let data = {props: {}}
+    let data = { props: {} }
     let query = ctx.query
     let q = typeof (query.q) === "undefined" ? '' : query.q
     let page = query.page || 0
@@ -64,10 +44,10 @@ export async function loadSellerData(ctx) {
     let sellerClient = getSellerClient(ctx, data)
     let resp = await sellerClient.getSeller(offset, limit, q)
     if (resp.status !== 'OK') {
-        return {props: {data: [], count: 0, message: resp.message}}
+        return {props: {data: [], count: 0, message: 'Không tìm thấy nhà bán hàng nào'}}
     }
     // Pass data to the page via props
-    return {props: {data: resp.data, count: resp.total}}
+    return { props: { data: resp.data, count: resp.total } }
 }
 
 export default function SellerPage(props) {
@@ -76,16 +56,11 @@ export default function SellerPage(props) {
 
 function render(props) {
     let router = useRouter()
-    const {register, handleSubmit, errors} = useForm();
-    let [search, setSearch] = useState('')
+    const { register, handleSubmit, errors } = useForm();
     let q = router.query.q || ''
+    let [search, setSearch] = useState(q)
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
-
-    function searchSeller(formData) {
-        let q = formData.q
-        Router.push(`/crm/seller?q=${q}`)
-    }
 
     async function handleChange(event) {
         const target = event.target;
@@ -93,20 +68,16 @@ function render(props) {
         setSearch(value)
     }
 
-    function onSearch(formData) {
-        try {
-            searchSeller(formData)
-            setSearch('')
-        } catch (error) {
-            console.log(error)
-        }
+    function onSearch() {
+        let q = formatUrlSearch(search)
+        router.push(`?q=${q}`)
     }
 
     const RenderRow = (row, i) => (
         <TableRow key={i}>
             <TableCell component="th" scope="row">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.email}</TableCell>
+            <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
             <TableCell align="center">
@@ -114,7 +85,7 @@ function render(props) {
                     <a>
                         <Tooltip title="Cập nhật thông tin">
                             <IconButton>
-                                <EditIcon fontSize="small"/>
+                                <EditIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     </a>
@@ -130,36 +101,35 @@ function render(props) {
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
-                      justify="flex-start"
-                      alignItems="center"
+                    justify="flex-start"
+                    alignItems="center"
                 >
                     <Grid item xs={12} sm={6} md={6}>
-                        <Paper component="form" className={styles.search}>
+                        <Paper className={styles.search}>
                             <InputBase
                                 id="q"
                                 name="q"
                                 className={styles.input}
                                 value={search}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter' || event.keyCode === 13) {
+                                        onSearch()
+                                    }
+                                }}
                                 onChange={handleChange}
                                 inputRef={register}
-                                placeholder="Tìm kiếm người bán hàng"
-                                inputProps={{'aria-label': 'Tìm kiếm người bán hàng'}}
+                                placeholder="Tìm kiếm nhà bán hàng"
+                                inputProps={{'aria-label': 'Tìm kiếm nhà bán hàng'}}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
-                                        onClick={handleSubmit(onSearch)}>
-                                <SearchIcon/>
+                                onClick={handleSubmit(onSearch)}>
+                                <SearchIcon />
                             </IconButton>
                         </Paper>
                     </Grid>
                 </Grid>
             </div>
-            {
-                q === '' ? (
-                    <span/>
-                ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
-                )
-            }
+
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
@@ -175,24 +145,24 @@ function render(props) {
                     {props.data.length > 0 ? (
                         <TableBody>
                             {props.data.map((row, i) => (
-                                <RenderRow data={row} key={i}/>
+                                <RenderRow data={row} key={i} />
                             ))}
                         </TableBody>
                     ) : (
-                        <TableBody>
-                            <TableRow>
-                                <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                            </TableRow>
-                        </TableBody>
-                    )}
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        )}
 
                     <MyTablePagination
-                        labelUnit="người bán hàng"
+                        labelUnit="Người bán hàng"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}
                         onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/crm/seller?page=${page}&limit=${rowsPerPage}`)
+                            Router.push(`/crm/seller?page=${page}&limit=${rowsPerPage}&q=${q}`)
                         }}
                     />
                 </Table>
