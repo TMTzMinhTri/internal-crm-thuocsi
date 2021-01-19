@@ -277,7 +277,7 @@ export default function renderForm(props, toast) {
                 </DialogTitle>
                 <DialogContent>
                     <TextField
-                        defaultValue={0}
+                        defaultValue={1}
                         style={{ margin: '0 auto', width: '100%' }}
                         // variant="outlined"
                         id="quantityItem"
@@ -290,7 +290,7 @@ export default function renderForm(props, toast) {
                         placeholder=""
                         onChange={event => {
                             if(event.target.value < 1){
-                                event.target.value = 0;
+                                event.target.value = 1;
                             }
                         }}
                         // error={!!errors.quantityItem}
