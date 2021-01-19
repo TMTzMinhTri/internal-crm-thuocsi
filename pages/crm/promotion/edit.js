@@ -59,6 +59,7 @@ import Image from "next/image";
 import {route} from "next/dist/next-server/server/router";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {useRouter} from "next/router";
+import RenderTableListCategory from "../../../components/component/promotion/modal-list-category";
 
 export async function getServerSideProps(ctx ) {
     return await doWithLoggedInUser(ctx, () => {
@@ -94,6 +95,12 @@ export async function loadPromotionData(ctx) {
                 })
             }
         })
+    }
+
+    let _categoryClient = getCategoryClient(ctx,{})
+    let listCategoryResponse = await _categoryClient.getListCategory()
+    if (listCategoryResponse && listCategoryResponse.status === "OK") {
+        defaultState = listCategoryResponse.data
     }
 
     returnObject.props.defaultState = defaultState
@@ -145,12 +152,13 @@ function render(props) {
     const {promotionOption, promotionTypeRule,
         promotionScope,promotionRulesLine,conditions,
         listProductDefault,listProductPromotion,
-        listCategoryPromotion,listGiftPromotion,promotionUseType} = state
+        listCategoryPromotion,listGiftPromotion,promotionUseType,listCategoryDefault} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
     const [open, setOpen] = useState({
         openModalGift : false,
         openModalProductGift: false,
         openModalProductScopePromotion: false,
+        openModalCategoryScopePromotion: false,
     });
 
     const handleChange = (event) => {
@@ -185,6 +193,37 @@ function render(props) {
         })
         setState({...state,listProductPromotion:listProductPromotion})
     }
+
+    const handleAddCategoryPromotion = (categoryList) => {
+        setOpen({...open, openModalCategoryScopePromotion: false});
+        let listCategory = [];
+        categoryList.forEach((category) => {
+            if (category.active) {
+                listCategory.push(category.category);
+            }
+        });
+        setState({...state, listCategoryPromotion: listCategory});
+    };
+
+    const handleRemoveCategoryPromotion = (category) => {
+        let {listCategoryPromotion, listCategoryDefault} = state;
+        listCategoryPromotion.forEach((o, index) => {
+            if (o.categoryID === category.categoryID) {
+                return listCategoryPromotion.splice(index, 1);
+            }
+        });
+        listCategoryDefault.forEach((o) => {
+            if (o.category.categoryID === category.categoryID) {
+                o.active = false;
+            }
+        });
+        console.log("listCategoryDefault", listCategoryDefault);
+        setState({
+            ...state,
+            listCategoryPromotion: listCategoryPromotion,
+            listCategoryDefault: listCategoryDefault,
+        });
+    };
 
     const handleRemoveProductPromotion = (product) => {
         let {listProductPromotion,listProductDefault} = state
@@ -833,16 +872,15 @@ function render(props) {
                                             <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
                                                               label="Sản phẩm được chọn"/>
                                         </Grid>
-                                        {/*<Grid item xs={12} sm={4} md={4}>*/}
-                                        {/*    <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}*/}
-                                        {/*                      label="Danh mục được chọn"/>*/}
-                                        {/*</Grid>*/}
+                                        <Grid item xs={12} sm={4} md={4}>
+                                            <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}
+                                                              label="Danh mục được chọn"/>
+                                        </Grid>
                                     </Grid>
                                 </RadioGroup>
                             </Grid>
                         </CardContent>
-                        {
-                            promotionScope === defaultPromotionScope.PRODUCT ?(
+                        {promotionScope === defaultPromotionScope.PRODUCT &&(
                                 <RenderTableListProduct
                                     handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
                                     handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
@@ -855,11 +893,26 @@ function render(props) {
                                     listProductPromotion={listProductPromotion}
                                     handleAddProductPromotion={handleAddProductPromotion}
                                     handleRemoveProductPromotion={handleRemoveProductPromotion}
-                                />
-                            ): (
-                                <div></div>
-                            )
+                                />)
                         }
+                        {promotionScope === defaultPromotionScope.CATEGORY && (
+                            <RenderTableListCategory
+                                handleClickOpen={() =>
+                                    setOpen({...open, openModalCategoryScopePromotion: true})
+                                }
+                                handleClose={() =>
+                                    setOpen({...open, openModalCategoryScopePromotion: false})
+                                }
+                                open={open.openModalCategoryScopePromotion}
+                                register={register}
+                                getValue={getValues()}
+                                promotionScope={promotionScope}
+                                listCategoryDefault={listCategoryDefault}
+                                listCategoryPromotion={listCategoryPromotion}
+                                handleAddCategoryPromotion={handleAddCategoryPromotion}
+                                handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
+                            />
+                        )}
                         <Box>
                             <Button
                                 variant="contained"

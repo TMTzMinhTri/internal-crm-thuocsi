@@ -20,6 +20,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
+import MuiSingleAuto from "components/muiauto/single"
 
 export async function loadData(ctx) {
     let data = {
@@ -76,6 +77,9 @@ export default function renderForm(props, toast) {
     }
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.customer : {}
+
+    props.isUpdate ? props.customer.provinceCode = {value: props.province?.code, label: props.province?.name, code: props.province?.code} : ''
+
     const checkWardData = props.isUpdate ? (props.customer.wardCode === '' ? {} : props.ward) : {};
     const [loading, setLoading] = useState(false);
     const [province, setProvince] = useState(props.province);
@@ -361,7 +365,20 @@ export default function renderForm(props, toast) {
                                                 </Grid>
                                                 <Grid spacing={3} container>
                                                     <Grid item xs={12} sm={3} md={3}>
-                                                        <Autocomplete
+                                                        <MuiSingleAuto
+                                                            id="provinceCode"
+                                                            name="provinceCode"
+                                                            noOptionsText={noOptionsText}
+                                                            options={[...props.provinces.map(province => { return { value: province.code, label: province.name, code: province.code } }
+                                                            )]}
+                                                            onNotSearchFieldChange={onProvinceChange}
+                                                            required={true}
+                                                            label="Tỉnh/Thành phố"
+                                                            control={control}
+                                                            errors={errors}
+                                                            message={'Vui lòng chọn tỉnh thành'}
+                                                        />
+                                                        {/* <Autocomplete
                                                             options={props.provinces}
                                                             size="small"
                                                             value={province}
@@ -388,7 +405,7 @@ export default function renderForm(props, toast) {
                                                                         })
                                                                     }
                                                                     {...params} />}
-                                                        />
+                                                        /> */}
 
                                                     </Grid>
                                                     <Grid item xs={12} sm={3} md={3}>
@@ -478,7 +495,7 @@ export default function renderForm(props, toast) {
                                                             error={!!errors.legalRepresentative}
                                                             required
                                                             // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-                                                          
+
                                                             inputRef={
                                                                 register({
                                                                     required: "Người đại diện không thể để trống",
@@ -514,7 +531,7 @@ export default function renderForm(props, toast) {
                                                             error={!!errors.mst}
                                                             required
                                                             // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-                                                          
+
                                                             inputRef={
                                                                 register({
                                                                     required: "Mã số thuế không thể để trống",
