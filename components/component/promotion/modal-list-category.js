@@ -1,43 +1,43 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import {
-    Button,
-    Modal,
-    Paper,
-    InputLabel,
-    Grid,
-    Table,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Select,
-    MenuItem,
-    FormControl,
-    IconButton,
-    Checkbox,
-    DialogContent,
-    DialogActions,
-    Card,
+  Button,
+  Modal,
+  Paper,
+  InputLabel,
+  Grid,
+  Table,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Select,
+  MenuItem,
+  FormControl,
+  IconButton,
+  Checkbox,
+  DialogContent,
+  DialogActions,
+  Card,
 } from "@material-ui/core";
 import styles from "./promotion.module.css";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
-import {defaultPromotionScope, limitText} from "../constant";
+import { defaultPromotionScope, limitText } from "../constant";
 
 const RenderTableListCategory = (props) => {
-    const {
-        promotionScope,
-        open,
-        register,
-        listCategoryPromotion,
-        listCategoryDefault,
-    } = props;
+  const {
+    promotionScope,
+    open,
+    register,
+    listCategoryPromotion,
+    listCategoryDefault,
+  } = props;
 
-    const {
-        handleAddCategoryPromotion,
-        handleClickOpen,
-        handleClose,
-        handleRemoveCategoryPromotion,
-    } = props;
+  const {
+    handleAddCategoryPromotion,
+    handleClickOpen,
+    handleClose,
+    handleRemoveCategoryPromotion,
+  } = props;
 
 
     const [stateCategory, setStateCategory] = useState({

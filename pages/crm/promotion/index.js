@@ -17,25 +17,26 @@ import Head from "next/head";
 import Link from "next/link";
 import Router, {useRouter} from "next/router";
 import AppCRM from "pages/_layout";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
+import {
+    doWithLoggedInUser,
+    renderWithLoggedInUser,
+} from "@thuocsi/nextjs-components/lib/login";
 import React, {useState} from "react";
 import styles from "./promotion.module.css";
 import Grid from "@material-ui/core/Grid";
 import InputBase from "@material-ui/core/InputBase";
-import SearchIcon from '@material-ui/icons/Search';
+import SearchIcon from "@material-ui/icons/Search";
 import IconButton from "@material-ui/core/IconButton";
 import {useForm} from "react-hook-form";
 import {getPromoClient} from "../../../client/promo";
-import {
-    defaultPromotionStatus,
-} from "../../../components/component/constant";
+import {defaultPromotionStatus} from "../../../components/component/constant";
 import {
     displayPromotionScope,
     displayPromotionType,
     displayRule,
     displayStatus,
     formatTime,
-    getPromotionScope
+    getPromotionScope,
 } from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
@@ -43,18 +44,18 @@ import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return loadPromoData(ctx)
-    })
+        return loadPromoData(ctx);
+    });
 }
 
 export async function loadPromoData(ctx) {
     // Fetch data from external API
-    let returnObject = {props: {}}
-    let query = ctx.query
-    let page = query.page || 0
-    let limit = query.limit || 20
-    let offset = page * limit
-    let promotionName = query.promotionName || ""
+    let returnObject = {props: {}};
+    let query = ctx.query;
+    let page = query.page || 0;
+    let limit = query.limit || 20;
+    let offset = page * limit;
+    let promotionName = query.promotionName || "";
 
     let _promotionClient = getPromoClient(ctx, {})
     let getPromotionResponse = await _promotionClient.getPromotion(promotionName, limit, offset, true)
@@ -64,15 +65,15 @@ export async function loadPromoData(ctx) {
     }
 
     // Pass data to the page via props
-    return returnObject
+    return returnObject;
 }
 
 export default function PromotionPage(props) {
-    return renderWithLoggedInUser(props, render)
+    return renderWithLoggedInUser(props, render);
 }
 
 export function formatNumber(num) {
-    return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
+    return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 }
 
 async function updatePromotion(promotionId, status) {
@@ -82,7 +83,7 @@ async function updatePromotion(promotionId, status) {
 function render(props) {
     const toast = useToast()
     let router = useRouter()
-    const {register,getValues, handleSubmit, errors} = useForm();
+    const {register, getValues, handleSubmit, errors} = useForm();
     let [stateTypePromotion, setStateTypePromotion] = useState('VOUCHER_CODE');
     let [search, setSearch] = useState('')
     let [open, setOpen] = useState({
@@ -95,11 +96,11 @@ function render(props) {
 
     const handleSelectTypePromotion = () => {
         setOpen({
-            ...open,openModalCreate: false,
+            ...open, openModalCreate: false,
         })
         router.push({
             pathname: '/crm/promotion/new',
-            query:  {
+            query: {
                 type: stateTypePromotion,
             }
         })
@@ -116,19 +117,19 @@ function render(props) {
     }
 
     const handleChangePage = (event, newPage, rowsPerPage) => {
-        setPage(newPage)
-        setRowsPerPage(rowsPerPage)
+        setPage(newPage);
+        setRowsPerPage(rowsPerPage);
 
         router.push({
-            pathname: '/crm/promotion',
+            pathname: "/crm/promotion",
             query: {
                 ...router.query,
                 limit: rowsPerPage,
                 page: newPage,
                 perPage: rowsPerPage,
-                offset: newPage * rowsPerPage
-            }
-        })
+                offset: newPage * rowsPerPage,
+            },
+        });
     };
 
     const handleChangeTypePromotion = (event) => {
@@ -163,18 +164,19 @@ function render(props) {
         }
     }
 
+
     async function handleChange(event) {
         const target = event.target;
         const value = target.value;
-        setSearch(value)
+        setSearch(value);
     }
 
     function onSearch(formData) {
         try {
-            searchPromotion(formData)
-            setSearch('')
+            searchPromotion(formData);
+            setSearch("");
         } catch (error) {
-            console.log(error)
+            console.log(error);
         }
     }
 
@@ -312,7 +314,8 @@ function render(props) {
                     </h3>
                     <div style={{margin: "auto"}}>
                         <FormControl className={styles.select}>
-                            <InputLabel id="promotion-select-outlined-label" variant={"outlined"}>Chọn loại Khuyến Mãi</InputLabel>
+                            <InputLabel id="promotion-select-outlined-label" variant={"outlined"}>Chọn loại Khuyến
+                                Mãi</InputLabel>
                             <Select
                                 autoWidth={false}
                                 style={{width: '100% !important'}}
