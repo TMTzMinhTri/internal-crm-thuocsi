@@ -1,5 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-import { constURL } from "./constant";
+import { constURL } from "../components/component/constant";
 const prefix = constURL.PREFIX_PRODUCT
 class CategoryClient extends APIClient {
 
@@ -25,6 +25,14 @@ class CategoryClient extends APIClient {
                 q: q,
                 offset: offset,
                 limit: limit,
+                getTotal: true
+            })
+    }
+
+    getListCategoryFromClient() {
+        return this.callFromClient(
+            "GET",
+            `${prefix}/category/list`, {
                 getTotal: true
             })
     }

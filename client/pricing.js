@@ -1,5 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-import { constURL } from "./constant";
+import { constURL } from "../components/component/constant";
 
 const prefixMaster = constURL.PREFIX_MASTER
 const prefix = constURL.PREFIX_PRICING

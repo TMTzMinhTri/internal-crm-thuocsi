@@ -1,8 +1,46 @@
-import { APIClient } from "@thuocsi/nextjs-lib/utils";
-class PromoClient {
+import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
+import {constURL} from "../components/component/constant";
+
+
+class PromoClient extends APIClient{
 
     constructor(ctx, data) {
-        this.client = new APIClient(ctx, data)
+        super(ctx, data)
+    }
+
+    createPromotion(data) {
+        console.log('data',data)
+        return this.callFromClient(
+            "POST",
+            `${constURL.PREFIX_PROMOTION}/promotion`,data
+        )
+    }
+
+    updatePromotion(data) {
+        console.log('data',data)
+        return this.callFromClient(
+            "PUT",
+            `${constURL.PREFIX_PROMOTION}/promotion`,data
+        )
+    }
+
+    getPromotionByID(promotionId) {
+        return this.callFromNextJS(
+            "GET",
+            `${constURL.PREFIX_PROMOTION}/promotion`,
+            {promotionId}
+        )
+    }
+
+    getPromotion(promotionName,limit,offset,getTotal) {
+        let q = JSON.stringify({promotionName})
+        return this.callFromNextJS(
+            "GET",
+            `${constURL.PREFIX_PROMOTION}/promotion`,
+            {
+                q:q,limit,getTotal,offset
+            }
+        )
     }
 
     // TODO
