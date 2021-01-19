@@ -29,7 +29,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import IconButton from "@material-ui/core/IconButton";
 import {useForm} from "react-hook-form";
 import {getPromoClient} from "../../../client/promo";
-import {defaultPromotionStatus} from "../../../components/component/constant";
+import {defaultPromotionStatus, defaultPromotionType} from "../../../components/component/constant";
 import {
     displayPromotionScope,
     displayPromotionType,
@@ -84,7 +84,7 @@ function render(props) {
     const toast = useToast()
     let router = useRouter()
     const {register, getValues, handleSubmit, errors} = useForm();
-    let [stateTypePromotion, setStateTypePromotion] = useState('VOUCHER_CODE');
+    let [stateTypePromotion, setStateTypePromotion] = useState(defaultPromotionType.VOUCHER_CODE);
     let [search, setSearch] = useState('')
     let [open, setOpen] = useState({
         openModalCreate: false,
@@ -326,7 +326,7 @@ function render(props) {
                                 name="selectTypePromontion"
                                 value={stateTypePromotion}
                                 label="Chọn loại mã khuyến mãi">
-                                <MenuItem value={"VOUCHER_CODE"} key={"VOUCHER_CODE"}>
+                                <MenuItem value={"VOUCHERCODE"} key={"VOUCHERCODE"}>
                                     Tạo voucher khuyến mãi
                                 </MenuItem>
                                 <MenuItem value={"COMBO"} key={"COMBO"}>

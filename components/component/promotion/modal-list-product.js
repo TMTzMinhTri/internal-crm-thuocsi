@@ -120,6 +120,7 @@ const RenderTableListProduct = (props) => {
                                     placeholder="Tên sản phẩm"
                                     label="Tên sản phẩm"
                                     name="searchProduct"
+                                    variant="outlined"
                                     onChange={handleChangeProductSearch}
                                     style={{width: "100% !important"}}
                                     inputRef={props.register}
@@ -127,7 +128,7 @@ const RenderTableListProduct = (props) => {
                             </Grid>
                             <Grid item sx={12} sm={4} md={4} className={styles.blockSearch}>
                                 <FormControl className={styles.select}>
-                                    <InputLabel id="category-select-outlined-label">
+                                    <InputLabel id="category-select-outlined-label" variant="outlined">
                                         Chọn danh mục
                                     </InputLabel>
                                     <Select
@@ -135,6 +136,7 @@ const RenderTableListProduct = (props) => {
                                         style={{width: "100% !important"}}
                                         labelId="category-select-outlined-label"
                                         id="category-select-outlined"
+                                        variant="outlined"
                                         onChange={handleChangeCategory}
                                         label="Chọn danh mục"
                                     >
