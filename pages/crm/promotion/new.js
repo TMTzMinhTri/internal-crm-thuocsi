@@ -370,34 +370,31 @@ function render(props) {
                         />
 
                         <Divider/>
-                        <CardHeader subheader="Cách áp dụng"/>
+                        <CardHeader subheader="Cách áp dụng khuyến mãi"/>
                         <CardContent>
                             <Grid spacing={3} container>
-                                <RadioGroup aria-label="quiz" name="promotionUseType" value={promotionUseType} onChange={handleChange}>
-                                    <Grid spacing={3} container justify="space-around" alignItems="center">
-                                        <Grid item xs={12} sm={6} md={6}>
-                                            <FormControlLabel
-                                                value={defaultUseTypePromotion.MANY}
-                                                control={<Radio color="primary"/>}
-                                                label="Được áp dụng với khuyến mãi khác"
-                                            />
+                                <RadioGroup aria-label="quiz" name="promotionUseType" value={promotionUseType}
+                                            onChange={handleChange} style={{width : "100%"}}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center" style={{marginLeft : 30}}>
+                                        <Grid item xs={12} sm={4} md={4}>
+                                            <FormControlLabel value={defaultUseTypePromotion.MANY} control={<Radio color="primary"/>}
+                                                              label="Đồng thời với những khuyến mãi khác"/>
                                         </Grid>
-                                        <Grid item xs={12} sm={6} md={6}>
-                                            <FormControlLabel
-                                                value={defaultUseTypePromotion.ALONE}
-                                                control={<Radio color="primary"/>}
-                                                label="Không được áp dụng vưới khuyến mãi khác"
-                                            />
+                                        <Grid item xs={12} sm={4} md={4}>
+                                            <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
+                                                              label="Duy nhất cho 1 đơn hàng"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={4} md={4}>
                                         </Grid>
                                     </Grid>
                                 </RadioGroup>
                             </Grid>
                         </CardContent>
-                        <CardHeader subheader="Áp dụng cho"/>
+                        <CardHeader subheader="Phạm vi áp dụng khuyến mãi"/>
                         <CardContent>
                             <Grid spacing={3} container>
-                                <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope} onChange={handleChangeScope}>
-                                    <Grid spacing={3} container justify="space-around" alignItems="center">
+                                <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope} onChange={handleChangeScope} style={{width : "100%"}}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center" style={{marginLeft : 30}}>
                                         <Grid item xs={12} sm={4} md={4}>
                                             <FormControlLabel
                                                 value={defaultPromotionScope.GLOBAL}
@@ -416,7 +413,7 @@ function render(props) {
                                             <FormControlLabel
                                                 value={defaultPromotionScope.CATEGORY}
                                                 control={<Radio color="primary"/>}
-                                                label="Danh mục được chọn"
+                                                label="Danh mục sản phẩm"
                                             />
                                         </Grid>
                                     </Grid>
@@ -460,19 +457,21 @@ function render(props) {
                                 handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
                             />
                         )}
-                        <Box>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                onClick={handleSubmit(onSubmit)}
-                                style={{margin: 8}}
-                            >
-                                Lưu
-                            </Button>
-                            <Button variant="contained" style={{margin: 8}}>
-                                Làm mới
-                            </Button>
-                        </Box>
+                        <Grid item container direction="row" xs={12} sm={4} md={4}>   
+                            <Box>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleSubmit(onSubmit)}
+                                    style={{margin: 8}}
+                                >
+                                    Lưu
+                                </Button>
+                                <Button variant="contained" style={{margin: 8}}>
+                                    Làm mới
+                                </Button>
+                            </Box>
+                        </Grid>
                     </Box>
                 </FormGroup>
             </Box>

@@ -121,7 +121,7 @@ const ApplyFields = (props) => {
                 <FormControlLabel
                   value={defaultPromotionScope.CATEGORY}
                   control={<Radio color="primary" />}
-                  label="Danh mục được chọn"
+                  label="Danh mục sản phẩm"
                 />
               </Grid>
             </Grid>

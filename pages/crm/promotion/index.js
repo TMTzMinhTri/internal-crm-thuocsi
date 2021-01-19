@@ -310,12 +310,11 @@ function render(props) {
                    className={styles.modal}>
                 <div className={styles.modalBodyCreate}>
                     <h3 style={{textAlign: "center", marginBottom: "2rem"}}>
-                        Chọn loại khuyến mãi cần tạo
+                        Loại khuyến mãi
                     </h3>
                     <div style={{margin: "auto"}}>
                         <FormControl className={styles.select}>
-                            <InputLabel id="promotion-select-outlined-label" variant={"outlined"}>Chọn loại Khuyến
-                                Mãi</InputLabel>
+                            <InputLabel id="promotion-select-outlined-label" variant={"outlined"}>Loại khuyến mãi</InputLabel>
                             <Select
                                 autoWidth={false}
                                 style={{width: '100% !important'}}
@@ -325,12 +324,12 @@ function render(props) {
                                 onChange={handleChangeTypePromotion}
                                 name="selectTypePromontion"
                                 value={stateTypePromotion}
-                                label="Chọn loại mã khuyến mãi">
+                                label="Loại khuyến mãi">
                                 <MenuItem value={"VOUCHERCODE"} key={"VOUCHERCODE"}>
-                                    Tạo voucher khuyến mãi
+                                    Voucher khuyến mãi
                                 </MenuItem>
                                 <MenuItem value={"COMBO"} key={"COMBO"}>
-                                    Tạo combo khuyến mãi
+                                    Combo linh hoạt
                                 </MenuItem>
                             </Select>
                         </FormControl>
@@ -340,7 +339,7 @@ function render(props) {
                                     onClick={() => setOpen({...open, openModalCreate: false})}
                                     style={{marginRight: "1rem"}}>ĐÓNG</Button>
                             <Button variant="contained" color="primary"
-                                    onClick={handleSelectTypePromotion}>Xác nhận</Button>
+                                    onClick={handleSelectTypePromotion}>Tạo khuyến mãi</Button>
                         </ButtonGroup>
                     </div>
                 </div>
