@@ -39,30 +39,21 @@ const RenderTableListCategory = (props) => {
         handleRemoveCategoryPromotion,
     } = props;
 
-    let listCategoryAction = []
-
-    listCategoryDefault?.forEach(categoryDefault => {
-        listCategoryAction.push({
-            category : categoryDefault,
-            active: listCategoryPromotion?.find(categoryPromotion => categoryPromotion.categoryID === categoryDefault.categoryID)
-        })
-    })
 
     const [stateCategory, setStateCategory] = useState({
-        listCategoryAction: listCategoryAction,
-        listCategoryTemp: listCategoryAction,
+        listCategoryAction: listCategoryDefault,
     });
 
     const handleActiveCategory = (category, active) => {
-        let {listCategoryTemp} = stateCategory;
-        listCategoryTemp.forEach((o) => {
+        let listCategoryAction = stateCategory.listCategoryAction;
+        listCategoryAction.forEach((o) => {
             if (o.category.categoryID === category.categoryID) {
-                o.active = active;
+                return o.active = active;
             }
         });
         setStateCategory({
             ...stateCategory,
-            listCategoryTemp: listCategoryPromotion,
+            listCategoryAction: listCategoryAction,
         });
     };
 
@@ -71,11 +62,10 @@ const RenderTableListCategory = (props) => {
             <Button
                 variant="contained"
                 style={{margin: "1rem 0"}}
-                onClick={handleClickOpen}
-            >
+                onClick={handleClickOpen}>
                 Chọn danh mục
             </Button>
-            <Modal open={open} onClose={handleClose} className={styles.modal}>
+            <Modal open={open} onClose={() => {handleClose()}} className={styles.modal}>
                 <div className={styles.modalBody}>
                     <h1 className={styles.headerModal}>Chọn danh mục</h1>
                     <DialogContent className={styles.modalContent}>
@@ -89,9 +79,9 @@ const RenderTableListCategory = (props) => {
                                 </TableHead>
                                 {
                                     stateCategory.listCategoryAction.length > 0 && (
-                                        stateCategory.listCategoryPromotion?.map(
+                                        stateCategory.listCategoryAction?.map(
                                                 ({category, active}) => (
-                                                    <TableRow key={category?.categoryID}>
+                                                    <TableRow key={category?.code}>
                                                         <TableCell align="left">
                                                             <Checkbox
                                                                 checked={active}
@@ -114,7 +104,7 @@ const RenderTableListCategory = (props) => {
                         <Button onClick={handleClose} variant="contained" color="secondary">
                             Hủy
                         </Button>
-                        <Button onClick={() => handleAddCategoryPromotion(stateCategory.listCategoryPromotion)} color="contained" variant="outlined" autoFocus>
+                        <Button onClick={() => handleAddCategoryPromotion(stateCategory.listCategoryAction)} color="primary" variant="contained" autoFocus>
                             Thêm
                         </Button>
                     </DialogActions>
@@ -131,7 +121,7 @@ const RenderTableListCategory = (props) => {
                                 </TableRow>
                             </TableHead>
                             {listCategoryPromotion?.map((category) => (
-                                <TableRow>
+                                <TableRow key={category?.code}>
                                     <TableCell align="center">{category.name}</TableCell>
                                     <TableCell align="left">
                                         <IconButton

@@ -238,6 +238,7 @@ function render(props) {
     };
 
     const handleAddCategoryPromotion = (categoryList) => {
+        console.log('categoryList',categoryList)
         setOpen({...open, openModalCategoryScopePromotion: false});
         let listCategory = [];
         categoryList.forEach((category) => {
@@ -964,8 +965,6 @@ function render(props) {
                                     setOpen({...open, openModalCategoryScopePromotion: false})
                                 }
                                 open={open.openModalCategoryScopePromotion}
-                                register={register}
-                                getValue={getValues()}
                                 promotionScope={promotionScope}
                                 listCategoryDefault={listCategoryDefault}
                                 listCategoryPromotion={listCategoryPromotion}

@@ -93,16 +93,22 @@ export async function loadPromotionData(ctx) {
             if (index < 5) {
                 defaultState.listProductDefault.push({
                     product: product,
-                    active: defaultState.listProductIDs.find(productId => productId === product.productID) || false
+                    active: defaultState.listProductIDs?.find(productId => productId === product.productID) || false
                 })
             }
         })
     }
 
+    defaultState.listCategoryDefault = []
     let _categoryClient = getCategoryClient(ctx, {})
     let listCategoryResponse = await _categoryClient.getListCategoryTemp()
     if (listCategoryResponse && listCategoryResponse.status === "OK") {
-        defaultState.listCategoryDefault = listCategoryResponse.data
+        listCategoryResponse.data.forEach((category, index) => {
+                defaultState.listCategoryDefault.push({
+                    category: category,
+                    active: defaultState.listCategoryCodes?.find(categoryCode => categoryCode === category.code) || false
+                })
+        })
     }
 
     let listCategoryPromotionResponse = await _categoryClient.getListCategoryByCodes(defaultState.listCategoryCodes)
@@ -158,7 +164,6 @@ function render(props) {
     const toast = useToast()
     const router = useRouter()
     let dataRender = props.data
-    console.log('data', dataRender)
     let defaultState = props.defaultState
     let startTime = dataRender.startTime
     let endTime = dataRender.endTime
@@ -236,7 +241,6 @@ function render(props) {
                 o.active = false;
             }
         });
-        console.log("listCategoryDefault", listCategoryDefault);
         setState({
             ...state,
             listCategoryPromotion: listCategoryPromotion,
@@ -262,31 +266,24 @@ function render(props) {
     const handleChangeScope = async (event) => {
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
-            let listCategoryResponse = await getListCategory()
-            if (!listCategoryResponse || listCategoryResponse.status !== "OK") {
-                return toast.warn('Không tìm thấy danh sách danh mục')
-            }
-            let productDefaultResponse = await getProduct()
-            if (productDefaultResponse && productDefaultResponse.status === "OK") {
-                let listProductDefault = []
-                productDefaultResponse.data.forEach((productResponse, index) => {
-                    if (index < 5) {
-                        listProductDefault.push({
-                            product: productResponse,
-                            active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID) || false
-                        })
-                    }
-                })
                 setState({
                     ...state,
+                    listProductPromotion: defaultState.listProductPromotion,
                     [event.target?.name]: event.target?.value,
-                    listProductDefault: listProductDefault,
-                    listCategoryPromotion: listCategoryResponse.data
                 })
                 setOpen({...open, openModalProductScopePromotion: true})
-            }
+        }  else if (event.target.value === defaultPromotionScope.CATEGORY) {
+            setState({
+                ...state,
+                listCategoryPromotion: defaultState.listCategoryPromotion,
+                [event.target?.name]: event.target?.value,
+            });
+            setOpen({...open, openModalCategoryScopePromotion: true});
         } else {
-            setState({...state, [event.target?.name]: event.target?.value, listProductPromotion: []})
+            setState({...state, [event.target?.name]: event.target?.value,
+                listCategoryPromotion: defaultState.listCategoryPromotion,
+                listProductPromotion: defaultState.listProductPromotion,
+            })
         }
     }
 
@@ -295,11 +292,13 @@ function render(props) {
         let {promotionName, totalCode, startTime, endTime, totalApply, promotionCode} = getValues()
         let value = getValues()
         let listProductIDs = []
+        let listCategoryCodes = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
+        listCategoryPromotion.forEach(category => listCategoryCodes.push(category.code))
         let rule = setRulesPromotion(promotionOption, promotionTypeRule, value, promotionRulesLine.length, listProductIDs)
         startTime = startTime + ":00Z"
         endTime = endTime + ":00Z"
-        let objects = setScopeObjectPromontion(promotionScope, listProductIDs)
+        let objects = setScopeObjectPromontion(promotionScope, listProductIDs,listCategoryCodes)
         let promotionResponse = await updatePromotion(promotionCode, parseInt(totalApply), parseInt(totalCode), promotionName, dataRender.promotionType, startTime, endTime, objects, promotionUseType, rule, dataRender.promotionId)
 
         if (promotionResponse.status === "OK") {
@@ -933,12 +932,8 @@ function render(props) {
                                 handleClickOpen={() =>
                                     setOpen({...open, openModalCategoryScopePromotion: true})
                                 }
-                                handleClose={() =>
-                                    setOpen({...open, openModalCategoryScopePromotion: false})
-                                }
+                                handleClose={() => {setOpen({...open, openModalCategoryScopePromotion: false})}}
                                 open={open.openModalCategoryScopePromotion}
-                                register={register}
-                                getValue={getValues()}
                                 promotionScope={promotionScope}
                                 listCategoryDefault={listCategoryDefault}
                                 listCategoryPromotion={listCategoryPromotion}

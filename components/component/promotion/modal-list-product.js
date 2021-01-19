@@ -173,7 +173,7 @@ const RenderTableListProduct = (props) => {
                                     </TableRow>
                                 </TableHead>
                                 {stateProduct.listProductAction.map(({product, active}) => (
-                                    <TableRow key={product.productID}>
+                                    <TableRow key={product?.productID}>
                                         <TableCell align="left">
                                             <Checkbox
                                                 checked={active}
@@ -229,7 +229,7 @@ const RenderTableListProduct = (props) => {
                                 </TableRow>
                             </TableHead>
                             {props.listProductPromotion.map((product) => (
-                                <TableRow>
+                                <TableRow key={product?.productID}>
                                     <TableCell align="left">
                                         {product.imageUrls ? (
                                             <image src={product.imageUrls[0]}></image>
