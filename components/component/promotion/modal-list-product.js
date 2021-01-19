@@ -197,9 +197,7 @@ const RenderTableListProduct = (props) => {
                     <DialogActions>
                         <Button
                             onClick={props.handleClose}
-                            variant="outlined"
-                            color="secondary"
-                        >
+                            variant="contained">
                             Hủy
                         </Button>
                         <Button
@@ -207,7 +205,7 @@ const RenderTableListProduct = (props) => {
                                 props.handleAddProductPromotion(stateProduct.listProductAction)
                             }
                             color="primary"
-                            variant="outlined"
+                            variant="contained"
                             autoFocus
                         >
                             Thêm
