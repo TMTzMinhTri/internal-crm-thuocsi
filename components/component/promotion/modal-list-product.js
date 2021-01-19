@@ -110,6 +110,7 @@ const RenderTableListProduct = (props) => {
         <div>
             <Button
                 variant="contained"
+                color="primary"
                 style={{margin: "1rem 0"}}
                 onClick={() => {
                     props.handleClickOpen()
@@ -122,7 +123,7 @@ const RenderTableListProduct = (props) => {
                 onClose={() => {props.handleClose()}}
                 className={styles.modal}>
                 <div className={styles.modalBody}>
-                    <h1 className={styles.headerModal}>Chọn sản phẩm</h1>
+                    <h1 className={styles.headerModal}>Danh sách sản phẩm</h1>
                     <div style={{margin: "1.25rem"}}>
                         <Grid 
                             sx={12} 
@@ -183,7 +184,7 @@ const RenderTableListProduct = (props) => {
                                     <TableRow>
                                         <TableCell align="left">Thao tác</TableCell>
                                         <TableCell align="left">Ảnh</TableCell>
-                                        <TableCell align="left">Thông tin sản phẩm</TableCell>
+                                        <TableCell align="left">Tên sản phẩm</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 {stateProduct.listProductAction.map(({product, active}) => (
@@ -236,7 +237,7 @@ const RenderTableListProduct = (props) => {
                             <TableHead>
                                 <TableRow>
                                     <TableCell align="left">Ảnh</TableCell>
-                                    <TableCell align="left">Thông tin sản phẩm</TableCell>
+                                    <TableCell align="left">Tên sản phẩm</TableCell>
                                     <TableCell align="left">Hành Động</TableCell>
                                 </TableRow>
                             </TableHead>

@@ -21,7 +21,8 @@ import {
 } from "@material-ui/core";
 import styles from "./promotion.module.css";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
-import { defaultPromotionScope, limitText } from "../constant";
+import { defaultPromotionScope } from "../constant";
+import { limitText } from "../until";
 
 const RenderTableListCategory = (props) => {
   const {
@@ -56,10 +57,31 @@ const RenderTableListCategory = (props) => {
     });
   };
 
+  const handleCloseModal = () => {
+    let listCategoryAction = stateCategory.listCategoryAction;
+    listCategoryAction.map((o, index) => {
+      let bool = false;
+      listCategoryPromotion.map((promotion) => {
+        console.log(promotion, "promo");
+        if (o.category.categoryID == promotion.categoryID) {
+          bool = true;
+        }
+      });
+      o.active = bool;
+    });
+    console.log(listCategoryAction, "listCategoryAction");
+    setStateCategory({
+      ...stateCategory,
+      listCategoryAction: listCategoryAction,
+    });
+    handleClose();
+  };
+
   return (
     <div>
       <Button
         variant="contained"
+        color="primary"
         style={{ margin: "1rem 0" }}
         onClick={handleClickOpen}
       >
@@ -73,17 +95,17 @@ const RenderTableListCategory = (props) => {
         className={styles.modal}
       >
         <div className={styles.modalBody}>
-          <h1 className={styles.headerModal}>Chọn danh mục</h1>
+          <h1 className={styles.headerModal}>Danh mục sản phẩm</h1>
           <DialogContent className={styles.modalContent}>
             <TableContainer component={Paper}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell align="left" width="40%">
-                      Thao tác
+                    <TableCell align="left">
+                      Chọn
                     </TableCell>
-                    <TableCell align="left" width="60%">
-                      Thông tin danh mục
+                    <TableCell align="left">
+                      Tên danh mục
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -101,7 +123,7 @@ const RenderTableListCategory = (props) => {
                           />
                         </TableCell>
                         <TableCell align="left">
-                          {category?.name || ""}
+                          {limitText(category?.name, 50) || ""}
                         </TableCell>
                       </TableRow>
                     )
@@ -110,7 +132,7 @@ const RenderTableListCategory = (props) => {
             </TableContainer>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} variant="contained">
+            <Button onClick={handleCloseModal} variant="contained">
               Hủy
             </Button>
             <Button
@@ -132,7 +154,7 @@ const RenderTableListCategory = (props) => {
             <Table size="small">
               <TableHead>
                 <TableRow>
-                  <TableCell align="center">Thông tin danh mục</TableCell>
+                  <TableCell align="center">Tên danh mục</TableCell>
                   <TableCell align="left">Hành Động</TableCell>
                 </TableRow>
               </TableHead>
