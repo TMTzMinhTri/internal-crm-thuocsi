@@ -22,13 +22,12 @@ import {
   defaultRulePromotion,
   defaultTypeConditionsRule,
 } from "../constant";
-import { useForm } from "react-hook-form";
 import { displayNameRule, parseConditionValue } from "../until";
 import RenderTableGift from "./modal-gift";
 import RenderTableProductGift from "./modal-product-gift";
 
 const ConditionFields = (props) => {
-  const { state, errors } = props;
+  const { state, errors, register, getValues, setError, edit = false } = props;
   const {
     handleChangeStatus,
     handleRemoveCodePercent,
@@ -49,7 +48,56 @@ const ConditionFields = (props) => {
     openModalProductScopePromotion: false,
   });
 
-  const { register, getValues } = useForm();
+  const textError = (type) => {
+    switch (type) {
+      case defaultRulePromotion.MIN_ORDER_VALUE:
+        return "Giá trị ";
+      case defaultRulePromotion.MIN_QUANTITY:
+        return "Số lượng ";
+      default:
+        return "";
+    }
+  };
+
+  const isExistValue = (order, arr) => {
+    let bool = false;
+    arr.forEach((o, index) => {
+      if (
+        order != index &&
+        getValues(
+          displayNameRule(
+            promotionOption,
+            defaultNameRulesValue.priceMinValue,
+            index
+          )
+        ) ==
+          getValues(
+            displayNameRule(
+              promotionOption,
+              defaultNameRulesValue.priceMinValue,
+              order
+            )
+          )
+      ) {
+        setError(
+          displayNameRule(
+            promotionOption,
+            defaultNameRulesValue.priceMinValue,
+            order
+          ),
+          {
+            type: "manual",
+            message: "Giá trị đã tồn tại",
+          }
+        );
+
+        bool = true;
+        return;
+      }
+    });
+
+    return bool;
+  };
 
   return (
     <CardContent>
@@ -159,17 +207,21 @@ const ConditionFields = (props) => {
                       placeholder=""
                       type="number"
                       variant="outlined"
-                      defaultValue={parseConditionValue(
-                        conditions,
-                        promotionOption,
-                        promotionTypeRule,
-                        displayNameRule(
-                          promotionOption,
-                          defaultNameRulesValue.priceMinValue,
-                          index
-                        ),
-                        index
-                      )}
+                      defaultValue={
+                        edit
+                          ? parseConditionValue(
+                              conditions,
+                              promotionOption,
+                              promotionTypeRule,
+                              displayNameRule(
+                                promotionOption,
+                                defaultNameRulesValue.priceMinValue,
+                                index
+                              ),
+                              index
+                            )
+                          : ""
+                      }
                       size="small"
                       helperText={
                         errors[
@@ -178,7 +230,15 @@ const ConditionFields = (props) => {
                             defaultNameRulesValue.priceMinValue,
                             index
                           )
-                        ]?.message
+                        ]?.type == "validate"
+                          ? "Giá trị đã tồn tại"
+                          : errors[
+                              displayNameRule(
+                                promotionOption,
+                                defaultNameRulesValue.priceMinValue,
+                                index
+                              )
+                            ]?.message
                       }
                       InputLabelProps={{
                         shrink: true,
@@ -195,21 +255,16 @@ const ConditionFields = (props) => {
                       }
                       required
                       inputRef={register({
-                        required: "Giá trị đơn hàng không được bỏ trống",
-                        min: 10,
-                        //   index > 0
-                        //     ? getValues(
-                        //         displayNameRule(
-                        //           promotionOption,
-                        //           defaultNameRulesValue.priceMinValue,
-                        //           index - 1
-                        //         )
-                        //       )
-                        //     : 0,
+                        validate: (value) =>
+                          !isExistValue(index, promotionRulesLine),
+                        required:
+                          textError(promotionOption) +
+                          " đơn hàng không được bỏ trống",
                         maxLength: {
                           value: 10,
                           message:
-                            "Giá trị đơn hàng không được vượt quá 10 kí tự",
+                            textError(promotionOption) +
+                            " đơn hàng không được vượt quá 10 kí tự",
                         },
                         minLength: {
                           value:
@@ -217,7 +272,9 @@ const ConditionFields = (props) => {
                             defaultRulePromotion.MIN_ORDER_VALUE
                               ? 6
                               : 2,
-                          message: "Giá trị đơn hàng phải lớn hơn 6 kí tự",
+                          message:
+                            textError(promotionOption) +
+                            " đơn hàng phải lớn hơn 6 kí tự",
                         },
                       })}
                     />
@@ -238,17 +295,21 @@ const ConditionFields = (props) => {
                       label="Số tiền giảm"
                       placeholder=""
                       variant="outlined"
-                      defaultValue={parseConditionValue(
-                        conditions,
-                        promotionOption,
-                        promotionTypeRule,
-                        displayNameRule(
-                          promotionOption,
-                          defaultNameRulesValue.priceDiscountValue,
-                          index
-                        ),
-                        index
-                      )}
+                      defaultValue={
+                        edit
+                          ? parseConditionValue(
+                              conditions,
+                              promotionOption,
+                              promotionTypeRule,
+                              displayNameRule(
+                                promotionOption,
+                                defaultNameRulesValue.priceDiscountValue,
+                                index
+                              ),
+                              index
+                            )
+                          : ""
+                      }
                       size="small"
                       helperText={
                         errors[
@@ -287,7 +348,7 @@ const ConditionFields = (props) => {
                           message: "Số tiền giảm không được vượt quá 250 kí tự",
                         },
                         minLength: {
-                          value: 3,
+                          value: 4,
                           message: "Giá trị sản phẩm phải lớn hơn 1000",
                         },
                       })}
@@ -357,17 +418,21 @@ const ConditionFields = (props) => {
                       }
                       placeholder=""
                       type="number"
-                      defaultValue={parseConditionValue(
-                        conditions,
-                        promotionOption,
-                        promotionTypeRule,
-                        displayNameRule(
-                          promotionOption,
-                          defaultNameRulesValue.priceMinValuePercent,
-                          index
-                        ),
-                        index
-                      )}
+                      defaultValue={
+                        edit
+                          ? parseConditionValue(
+                              conditions,
+                              promotionOption,
+                              promotionTypeRule,
+                              displayNameRule(
+                                promotionOption,
+                                defaultNameRulesValue.priceMinValuePercent,
+                                index
+                              ),
+                              index
+                            )
+                          : ""
+                      }
                       variant="outlined"
                       size="small"
                       helperText={
@@ -394,11 +459,13 @@ const ConditionFields = (props) => {
                       }
                       required
                       inputRef={register({
-                        required: "Giá trị đơn hàng không được bỏ trống",
+                        required:
+                          textError(promotionOption) + " không được bỏ trống",
                         maxLength: {
                           value: 10,
                           message:
-                            "Giá trị đơn hàng không được vượt quá 10 kí tự",
+                            textError(promotionOption) +
+                            " không được vượt quá 10 kí tự",
                         },
                         minLength: {
                           value:
@@ -406,7 +473,9 @@ const ConditionFields = (props) => {
                             defaultRulePromotion.MIN_ORDER_VALUE
                               ? 6
                               : 2,
-                          message: "Giá trị đơn hàng phải lớn hơn 6 kí tự",
+                          message:
+                            textError(promotionOption) +
+                            " phải lớn hơn 6 kí tự",
                         },
                       })}
                     />
@@ -427,17 +496,23 @@ const ConditionFields = (props) => {
                       label="Số % giảm"
                       placeholder=""
                       variant="outlined"
-                      defaultValue={parseConditionValue(
-                        conditions,
-                        promotionOption,
-                        promotionTypeRule,
-                        displayNameRule(
-                          promotionOption,
-                          defaultNameRulesValue.percentValue,
-                          index
-                        ),
-                        index
-                      )}
+                      defaultValue={
+                        edit
+                          ? edit
+                            ? parseConditionValue(
+                                conditions,
+                                promotionOption,
+                                promotionTypeRule,
+                                displayNameRule(
+                                  promotionOption,
+                                  defaultNameRulesValue.percentValue,
+                                  index
+                                ),
+                                index
+                              )
+                            : ""
+                          : ""
+                      }
                       size="small"
                       helperText={
                         errors[
@@ -470,14 +545,14 @@ const ConditionFields = (props) => {
                       }
                       required
                       inputRef={register({
-                        required: "Số % giảm không được để trống",
+                        required: "Không được để trống",
                         maxLength: {
                           value: 3,
-                          message: "Số % giảm không đượt vượt quá 3 kí tự",
+                          message: "Không quá 3 kí tự",
                         },
                         minLength: {
                           value: 1,
-                          message: "Số % giảm có độ dài lớn hơn 1 kí tự",
+                          message: "Độ dài lớn hơn 1 kí tự",
                         },
                         pattern: {
                           value: /[0-9]/,
@@ -502,17 +577,21 @@ const ConditionFields = (props) => {
                       label="Số tiền giảm tối đa"
                       placeholder=""
                       variant="outlined"
-                      defaultValue={parseConditionValue(
-                        conditions,
-                        promotionOption,
-                        promotionTypeRule,
-                        displayNameRule(
-                          promotionOption,
-                          defaultNameRulesValue.priceMaxDiscountValue,
-                          index
-                        ),
-                        index
-                      )}
+                      defaultValue={
+                        edit
+                          ? parseConditionValue(
+                              conditions,
+                              promotionOption,
+                              promotionTypeRule,
+                              displayNameRule(
+                                promotionOption,
+                                defaultNameRulesValue.priceMaxDiscountValue,
+                                index
+                              ),
+                              index
+                            )
+                          : ""
+                      }
                       size="small"
                       helperText={
                         errors[

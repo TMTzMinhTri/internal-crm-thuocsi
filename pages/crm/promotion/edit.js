@@ -32,7 +32,10 @@ import {
   doWithLoggedInUser,
   renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
-import { defaultPromotionScope } from "../../../components/component/constant";
+import {
+  defaultPromotionScope,
+  defaultPromotionType,
+} from "../../../components/component/constant";
 import {
   displayTime,
   limitText,
@@ -57,6 +60,7 @@ import { useRouter } from "next/router";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
 import ApplyFields from "components/component/promotion/apply-fields";
+import RenderTableListCategory from "components/component/promotion/modal-list-category";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, () => {
@@ -76,6 +80,7 @@ export async function loadPromotionData(ctx) {
   }
 
   let defaultState = parseRuleToObject(getPromotionResponse.data[0]);
+
   let _productClient = getProductClient(ctx, {});
   if (defaultState.listProductIDs.length > 0) {
     let listProductPromotionResponse = await _productClient.getListProductByIdsOrCodes(
@@ -89,9 +94,26 @@ export async function loadPromotionData(ctx) {
     }
   }
 
+  defaultState.listProductDefault = [];
   let listProductDefault = await _productClient.getListProduct();
   if (listProductDefault && listProductDefault.status === "OK") {
-    defaultState.listProductDefault = listProductDefault.data.slice(0, 5);
+    listProductDefault.data.forEach((product, index) => {
+      if (index < 5) {
+        defaultState.listProductDefault.push({
+          product: product,
+          active:
+            defaultState.listProductIDs.find(
+              (productId) => productId === product.productID
+            ) || false,
+        });
+      }
+    });
+  }
+
+  let _categoryClient = getCategoryClient(ctx, {});
+  let listCategoryResponse = await _categoryClient.getListCategory();
+  if (listCategoryResponse && listCategoryResponse.status === "OK") {
+    defaultState = listCategoryResponse.data;
   }
 
   returnObject.props.defaultState = defaultState;
@@ -99,6 +121,7 @@ export async function loadPromotionData(ctx) {
 }
 
 async function updatePromotion(
+  promotionCode,
   applyPerUser,
   totalCode,
   promotionName,
@@ -111,6 +134,7 @@ async function updatePromotion(
   promotionId
 ) {
   let data = {
+    applyPerUser,
     totalCode,
     promotionName,
     promotionType,
@@ -121,16 +145,10 @@ async function updatePromotion(
     rule,
     promotionId,
   };
-  return getPromoClient().updatePromotion({
-    promotionId,
-    totalCode,
-    promotionName,
-    promotionType,
-    startTime,
-    endTime,
-    objects,
-    rule,
-  });
+  if (promotionCode !== "") {
+    data.promotionCode = promotionCode;
+  }
+  return getPromoClient().updatePromotion(data);
 }
 
 async function getProduct(productName, categoryCode) {
@@ -160,7 +178,9 @@ function render(props) {
   const toast = useToast();
   const router = useRouter();
   let dataRender = props.data;
+  console.log(dataRender, "dataRender");
   let defaultState = props.defaultState;
+  console.log(defaultState, "defaultState");
   let startTime = dataRender.startTime;
   let endTime = dataRender.endTime;
   startTime = displayTime(startTime);
@@ -178,6 +198,7 @@ function render(props) {
     listCategoryPromotion,
     listGiftPromotion,
     promotionUseType,
+    listCategoryDefault,
   } = state;
   const {
     register,
@@ -192,6 +213,7 @@ function render(props) {
     openModalGift: false,
     openModalProductGift: false,
     openModalProductScopePromotion: false,
+    openModalCategoryScopePromotion: false,
   });
 
   const handleChange = (event) => {
@@ -283,6 +305,26 @@ function render(props) {
         });
         setOpen({ ...open, openModalProductScopePromotion: true });
       }
+    } else if (event.target.value === defaultPromotionScope.CATEGORY) {
+      event.persist();
+      let listCategoryResponse = await getListCategory();
+      if (!listCategoryResponse || listCategoryResponse.status !== "OK") {
+        return toast.warn("Không tìm thấy danh sách danh mục");
+      }
+      let listCategoryDefault = [];
+      listCategoryResponse.data.forEach((categoryResponse, index) => {
+        listCategoryDefault.push({
+          category: categoryResponse,
+          active: false,
+        });
+      });
+      setState({
+        ...state,
+        [event.target?.name]: event.target?.value,
+        listCategoryDefault: listCategoryDefault,
+        listCategoryPromotion: [],
+      });
+      setOpen({ ...open, openModalCategoryScopePromotion: true });
     } else {
       setState({
         ...state,
@@ -290,6 +332,36 @@ function render(props) {
         listProductPromotion: [],
       });
     }
+  };
+
+  const handleRemoveCategoryPromotion = (category) => {
+    let { listCategoryPromotion, listCategoryDefault } = state;
+    listCategoryPromotion.forEach((o, index) => {
+      if (o.categoryID === category.categoryID) {
+        return listCategoryPromotion.splice(index, 1);
+      }
+    });
+    listCategoryDefault.forEach((o) => {
+      if (o.category.categoryID === category.categoryID) {
+        o.active = false;
+      }
+    });
+    setState({
+      ...state,
+      listCategoryPromotion: listCategoryPromotion,
+      listCategoryDefault: listCategoryDefault,
+    });
+  };
+
+  const handleAddCategoryPromotion = (categoryList) => {
+    setOpen({ ...open, openModalCategoryScopePromotion: false });
+    let listCategory = [];
+    categoryList.forEach((category) => {
+      if (category.active) {
+        listCategory.push(category.category);
+      }
+    });
+    setState({ ...state, listCategoryPromotion: listCategory });
   };
 
   // func onSubmit used because useForm not working with some fields
@@ -313,10 +385,12 @@ function render(props) {
       promotionRulesLine.length,
       listProductIDs
     );
+    console.log("dataRender,", dataRender.promotionId);
     startTime = startTime + ":00Z";
     endTime = endTime + ":00Z";
     let objects = setScopeObjectPromontion(promotionScope, listProductIDs);
     let promotionResponse = await updatePromotion(
+      dataRender.promotionCode,
       parseInt(totalApply),
       parseInt(totalCode),
       promotionName,
@@ -342,88 +416,95 @@ function render(props) {
         <title>Chỉnh sửa khuyến mãi</title>
       </Head>
       <Box component={Paper}>
-        <FormGroup>
-          <Box className={styles.contentPadding}>
-            <Grid container>
-              <Grid xs={4}>
-                <ArrowBackIcon
-                  style={{ fontSize: 30 }}
-                  onClick={() => router.back()}
-                />
+        <form>
+          <FormGroup>
+            <Box className={styles.contentPadding}>
+              <Grid container>
+                <Grid xs={4}>
+                  <ArrowBackIcon
+                    style={{ fontSize: 30 }}
+                    onClick={() => router.back()}
+                  />
+                </Grid>
+                <Grid>
+                  <Box style={{ fontSize: 24 }}>
+                    <h3>Chỉnh sửa khuyến mãi</h3>
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid>
-                <Box style={{ fontSize: 24 }}>
-                  <h3>Chỉnh sửa khuyến mãi</h3>
-                </Box>
-              </Grid>
-            </Grid>
-            <InfomationFields
-              dataRender={dataRender}
-              errors={errors}
-              startTime={startTime}
-              endTime={endTime}
-              handleChange={handleChange}
-            />
-
-            <Divider />
-
-            <ConditionFields
-              state={state}
-              errors={errors}
-              handleAddCodePercent={handleAddCodePercent}
-              handleChangeStatus={handleChangeStatus}
-              handleRemoveCodePercent={handleRemoveCodePercent}
-              handleChange={handleChange}
-            />
-
-            <Divider />
-
-            <ApplyFields
-              state={state}
-              handleChange={handleChange}
-              handleChangeScope={handleChangeScope}
-            />
-
-            {promotionScope === defaultPromotionScope.PRODUCT ? (
-              <RenderTableListProduct
-                handleClickOpen={() =>
-                  setOpen({ ...open, openModalProductScopePromotion: true })
-                }
-                handleClose={() =>
-                  setOpen({ ...open, openModalProductScopePromotion: false })
-                }
-                open={open.openModalProductScopePromotion}
+              <InfomationFields
+                dataRender={dataRender}
+                errors={errors}
+                startTime={startTime}
+                endTime={endTime}
+                handleChange={handleChange}
                 register={register}
-                getValue={getValues()}
-                listProductDefault={listProductDefault}
-                promotionScope={promotionScope}
-                listCategoryPromotion={listCategoryPromotion}
-                listProductPromotion={listProductPromotion}
-                handleAddProductPromotion={handleAddProductPromotion}
-                handleRemoveProductPromotion={handleRemoveProductPromotion}
+                edit
               />
-            ) : (
-              <div></div>
-            )}
-            <Box>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleSubmit(onSubmit)}
-                style={{ margin: 8 }}
-              >
-                Lưu
-              </Button>
-              <Button
-                variant="contained"
-                style={{ margin: 8 }}
-                onClick={() => router.back()}
-              >
-                Trở về
-              </Button>
+
+              <Divider />
+
+              <ConditionFields
+                state={state}
+                errors={errors}
+                handleAddCodePercent={handleAddCodePercent}
+                handleChangeStatus={handleChangeStatus}
+                handleRemoveCodePercent={handleRemoveCodePercent}
+                handleChange={handleChange}
+                register={register}
+                getValues={getValues}
+                setError={setError}
+                edit
+              />
+
+              <Divider />
+
+              <ApplyFields
+                state={state}
+                handleChange={handleChange}
+                handleChangeScope={handleChangeScope}
+              />
+
+              {promotionScope === defaultPromotionScope.PRODUCT && (
+                <RenderTableListProduct
+                  handleClickOpen={() =>
+                    setOpen({ ...open, openModalProductScopePromotion: true })
+                  }
+                  handleClose={() =>
+                    setOpen({ ...open, openModalProductScopePromotion: false })
+                  }
+                  open={open.openModalProductScopePromotion}
+                  register={register}
+                  getValue={getValues()}
+                  listProductDefault={listProductDefault}
+                  promotionScope={promotionScope}
+                  listCategoryPromotion={listCategoryPromotion}
+                  listProductPromotion={listProductPromotion}
+                  handleAddProductPromotion={handleAddProductPromotion}
+                  handleRemoveProductPromotion={handleRemoveProductPromotion}
+                />
+              )}
+
+              <Box>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleSubmit(onSubmit)}
+                  style={{ margin: 8 }}
+                >
+                  Lưu
+                </Button>
+                <Button
+                  variant="contained"
+                  style={{ margin: 8 }}
+                  onClick={() => router.back()}
+                >
+                  Trở về
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        </FormGroup>
+          </FormGroup>
+        </form>
       </Box>
     </AppCRM>
   );

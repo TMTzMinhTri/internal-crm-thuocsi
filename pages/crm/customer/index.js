@@ -1,35 +1,34 @@
 import {
     Button,
     ButtonGroup,
-    Paper,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle,
+    DialogTitle, Paper,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow,
+    TableRow
 } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from "@material-ui/icons/Search";
 import {
     doWithLoggedInUser,
-    renderWithLoggedInUser,
+    renderWithLoggedInUser
 } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCustomerClient } from "client/customer";
+import { condUserType, formatUrlSearch, statuses } from 'components/global';
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -37,8 +36,6 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
-import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -271,7 +268,7 @@ function render(props) {
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
-                        <col width="10%" />
+                        <col width="10%"  />
                     </colgroup>
                     <TableHead>
                         <TableRow>

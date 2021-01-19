@@ -84,10 +84,13 @@ const ApplyFields = (props) => {
                   label="Sản phẩm được chọn"
                 />
               </Grid>
-              {/*<Grid item xs={12} sm={4} md={4}>*/}
-              {/*    <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}*/}
-              {/*                      label="Danh mục được chọn"/>*/}
-              {/*</Grid>*/}
+              <Grid item xs={12} sm={4} md={4}>
+                <FormControlLabel
+                  value={defaultPromotionScope.CATEGORY}
+                  control={<Radio color="primary" />}
+                  label="Danh mục được chọn"
+                />
+              </Grid>
             </Grid>
           </RadioGroup>
         </Grid>

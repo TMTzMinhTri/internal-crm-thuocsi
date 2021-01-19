@@ -1,12 +1,33 @@
 import React from "react";
 
-import { CardContent, CardHeader, Grid, TextField } from "@material-ui/core";
-import { useForm } from "react-hook-form";
+import {
+  CardContent,
+  CardHeader,
+  Container,
+  Grid,
+  TextField,
+} from "@material-ui/core";
+import { defaultPromotionType } from "../constant";
 
 const InfomationFields = (props) => {
-  const { dataRender, errors, endTime, startTime } = props;
+  const {
+    dataRender = {
+      promotionName: "",
+      totalCode: "",
+      applyPerUser: 1,
+      promotionCode: "",
+      totalUsed: 0,
+      totalCollect: 0,
+    },
+    errors,
+    endTime = new Date(),
+    startTime = new Date(),
+    register,
+    edit = false,
+  } = props;
+
   const { handleChange } = props;
-  const { register } = useForm();
+
   return (
     <>
       <CardHeader subheader="Thông tin khuyến mãi" />
@@ -89,6 +110,60 @@ const InfomationFields = (props) => {
               })}
             />
           </Grid>
+          {edit &&
+          dataRender.promotionType === defaultPromotionType.VOUCHER_CODE ? (
+            <Grid item xs={12} sm={6} md={6}>
+              <TextField
+                id="promotionCode"
+                name="promotionCode"
+                label="Mã khuyến mãi"
+                placeholder=""
+                defaultValue={dataRender.promotionCode}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                style={{ width: "100%" }}
+                inputRef={register}
+              />
+            </Grid>
+          ) : (
+            <Container />
+          )}
+          {edit && (
+            <>
+              <Grid item xs={12} sm={6} md={6}>
+                <TextField
+                  id="totalUsed"
+                  name="totalUsed"
+                  label="Số lượng user đã sử dụng"
+                  placeholder=""
+                  disabled={true}
+                  defaultValue={dataRender.totalUsed || 0}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  style={{ width: "100%" }}
+                  inputRef={register}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6} md={6}>
+                <TextField
+                  id="totalCollect"
+                  name="totalCollect"
+                  label="Số lần khuyến mãi đã được sử dụng"
+                  placeholder=""
+                  disabled={true}
+                  defaultValue={dataRender.totalCollect || 0}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  style={{ width: "100%" }}
+                  inputRef={register}
+                />
+              </Grid>
+            </>
+          )}
+
           <Grid item xs={12} sm={6} md={6}>
             <TextField
               id="startTime"
@@ -111,7 +186,7 @@ const InfomationFields = (props) => {
           </Grid>
           <Grid item xs={12} sm={6} md={6}>
             <TextField
-              id="endTime"
+              id="endTime = new Date()"
               name="endTime"
               label="Thời gian kết thúc"
               placeholder=""

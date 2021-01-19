@@ -6,6 +6,10 @@ import {
   TableBody,
   TableCell,
   TableContainer,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
   TableHead,
   TableRow,
 } from "@material-ui/core";
@@ -330,27 +334,45 @@ function render(props) {
             Chọn loại khuyến mãi cần tạo
           </h3>
           <div style={{ margin: "auto" }}>
-            <ButtonGroup className={styles.buttonConfirm}>
-              <Link href={`/crm/promotion/create-code`}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setOpen({ ...open, openModalCreate: false })}
-                >
-                  Tạo voucher Khuyến mãi
-                </Button>
-              </Link>
-              <Link href={`/crm/promotion/new`}>
-                <Button
-                  className={styles.buttonConfirmRight}
-                  variant="contained"
-                  color="primary"
-                  onClick={() => setOpen({ ...open, openModalCreate: false })}
-                >
-                  Tạo Combo khuyến mãi
-                </Button>
-              </Link>
-            </ButtonGroup>
+            {/* <ButtonGroup className={styles.buttonConfirm}>
+                            <Link href={`/crm/promotion/create-code`}>
+                                <Button  variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo voucher Khuyến mãi</Button>
+                            </Link>
+                            <Link href={`/crm/promotion/new`}>
+                                <Button className={styles.buttonConfirmRight} variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo Combo khuyến mãi</Button>
+                            </Link>
+                        </ButtonGroup> */}
+            <FormControl className={styles.select}>
+              <InputLabel id="category-select-outlined-label">
+                Chọn loại Khuyến Mãi
+              </InputLabel>
+              <Select
+                autoWidth={false}
+                style={{ width: "100% !important" }}
+                labelId="category-select-outlined-label"
+                id="category-select-outlined"
+                label="Chọn danh mục"
+              >
+                <Link href={`/crm/promotion/create-code`}>
+                  <MenuItem
+                    value={"VOUCHER_CODE"}
+                    key={"VOUCHER_CODE"}
+                    onClick={() => setOpen({ ...open, openModalCreate: false })}
+                  >
+                    Tạo voucher khuyến mãi
+                  </MenuItem>
+                </Link>
+                <Link href={`/crm/promotion/new`}>
+                  <MenuItem
+                    value={"COMBO"}
+                    key={"COMBO"}
+                    onClick={() => setOpen({ ...open, openModalCreate: false })}
+                  >
+                    Tạo combo khuyến mãi
+                  </MenuItem>
+                </Link>
+              </Select>
+            </FormControl>
           </div>
         </div>
       </Modal>
