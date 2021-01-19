@@ -73,6 +73,7 @@ const defaultState = {
     listGiftPromotion: [],
     listProductGiftPromotion: [],
     listProductPromotion: [],
+    listCategoryDefault: [],
     listProductDefault: [],
     listCategoryPromotion: [],
 };
@@ -81,28 +82,9 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props, render);
 }
 
-async function createPromontion(
-    totalCode,
-    promotionName,
-    promotionType,
-    startTime,
-    endTime,
-    objects,
-    applyPerUser,
-    rule,
-    useType
-) {
-    return getPromoClient().createPromotion({
-        totalCode,
-        promotionName,
-        promotionType,
-        startTime,
-        endTime,
-        objects,
-        applyPerUser,
-        rule,
-        useType,
-    });
+async function createPromontion(totalCode, promotionName, promotionType, startTime, endTime, objects, applyPerUser, rule, useType) {
+    let data = { totalCode, promotionName, promotionType, startTime, endTime, objects, applyPerUser, rule, useType}
+    return getPromoClient().createPromotion(data);
 }
 
 async function getProduct(productName, categoryCode) {
@@ -264,7 +246,6 @@ function render(props) {
             }
         });
         setState({...state, listCategoryPromotion: listCategory});
-        console.log("listCategoryPromotion", listCategory);
     };
 
     function handleRemoveCodePercent(id) {
@@ -307,7 +288,6 @@ function render(props) {
                 o.active = false;
             }
         });
-        console.log("listCategoryDefault", listCategoryDefault);
         setState({
             ...state,
             listCategoryPromotion: listCategoryPromotion,
@@ -336,32 +316,14 @@ function render(props) {
         } = getValues();
         let value = getValues();
         let listProductIDs = [];
-        listProductPromotion.forEach((product) =>
-            listProductIDs.push(product.productID)
-        );
-        let rule = setRulesPromotion(
-            promotionOption,
-            promotionTypeRule,
-            value,
-            promotionRulesLine.length,
-            listProductIDs,
-            listGiftPromotion,
-            listProductGiftPromotion
-        );
+        let listCategoryCodes = [];
+        listProductPromotion.forEach((product) => listProductIDs.push(product.productID));
+        listCategoryPromotion.forEach((category) => listCategoryCodes.push(category.code));
+        let rule = setRulesPromotion(promotionOption, promotionTypeRule, value, promotionRulesLine.length, listGiftPromotion, listProductGiftPromotion);
         startTime = startTime + ":00Z";
         endTime = endTime + ":00Z";
-        let objects = setScopeObjectPromontion(promotionScope, listProductIDs);
-        let promotionResponse = await createPromontion(
-            parseInt(totalCode),
-            promotionName,
-            defaultPromotionType.COMBO,
-            startTime,
-            endTime,
-            objects,
-            parseInt(totalApply),
-            rule,
-            promotionUseType
-        );
+        let objects = setScopeObjectPromontion(promotionScope, listProductIDs,listCategoryCodes);
+        let promotionResponse = await createPromontion(parseInt(totalCode), promotionName, defaultPromotionType.COMBO, startTime, endTime, objects, parseInt(totalApply), rule, promotionUseType);
         if (promotionResponse.status === "OK") {
             toast.success("Tạo khuyến mãi thành công");
         } else {
@@ -514,21 +476,15 @@ function render(props) {
                                 Điều kiện
                             </Typography>
                             <RadioGroup aria-label="quiz" name="promotionOption" value={promotionOption}
-                                onChange={handleChangeStatus}>
+                                        onChange={handleChangeStatus}>
                                 <Grid spacing={3} container justify="space-around" alignItems="center">
                                     <Grid item xs={12} sm={6} md={6}>
-                                        <FormControlLabel
-                                            value={defaultRulePromotion.MIN_ORDER_VALUE}
-                                            control={<Radio color="primary"/>}
-                                            label="Giảm giá theo giá trị đơn hàng"
-                                        />
+                                        <FormControlLabel value={defaultRulePromotion.MIN_ORDER_VALUE} control={<Radio color="primary"/>}
+                                                          label="Giảm giá theo giá trị đơn hàng"/>
                                     </Grid>
                                     <Grid item xs={12} sm={6} md={6}>
-                                        <FormControlLabel
-                                            value={defaultRulePromotion.MIN_QUANTITY}
-                                            control={<Radio color="primary"/>}
-                                            label="Giảm giá theo số lượng sản phẩm"
-                                        />
+                                        <FormControlLabel value={defaultRulePromotion.MIN_QUANTITY} control={<Radio color="primary"/>}
+                                                          label="Giảm giá theo số lượng sản phẩm"/>
                                     </Grid>
                                 </Grid>
                             </RadioGroup>
@@ -540,41 +496,32 @@ function render(props) {
                                     <RadioGroup aria-label="quiz" name="promotionTypeRule" value={promotionTypeRule}
                                                 onChange={handleChangeStatus}>
                                         <Grid spacing={1} container justify="space-around" alignItems="center">
-                                            <RadioGroup aria-label="quiz" name="promotionTypeRule"
-                                                        value={promotionTypeRule}
-                                                        onChange={handleChangeStatus}>
-                                                <Grid spacing={1} container justify="space-around"
-                                                      alignItems="center">
-                                                    <Grid item xs={12} sm={6} md={4}>
-                                                        <FormControlLabel
-                                                            value={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE}
-                                                            control={<Radio style={{color: 'blue'}}/>}
-                                                            label="Giảm tiền"/>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={6} md={4}>
-                                                        <FormControlLabel
-                                                            value={defaultTypeConditionsRule.DISCOUNT_PERCENT}
-                                                            control={<Radio style={{color: 'blue'}}/>}
-                                                            label="Giảm % giá sản phẩm"/>
-                                                    </Grid>
-                                                    {/*<Grid item xs={12} sm={6} md={4}>*/}
-                                                    {/*    <FormControlLabel value={defaultTypeConditionsRule.GIFT}*/}
-                                                    {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
-                                                    {/*                      label="Quà"/>*/}
-                                                    {/*</Grid>*/}
-                                                    {/*<Grid item xs={12} sm={6} md={4}>*/}
-                                                    {/*    <FormControlLabel value={defaultTypeConditionsRule.PRODUCT_GIFT}*/}
-                                                    {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
-                                                    {/*                      label="Tặng sản phẩm"/>*/}
-                                                    {/*</Grid>*/}
-                                                </Grid>
-                                            </RadioGroup>
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Giảm tiền"/>
+                                            </Grid>
+                                            <Grid item xs={12} sm={6} md={4}>
+                                                <FormControlLabel value={defaultTypeConditionsRule.DISCOUNT_PERCENT}
+                                                                  control={<Radio style={{color: 'blue'}}/>}
+                                                                  label="Giảm % giá sản phẩm"/>
+                                            </Grid>
+                                            {/*<Grid item xs={12} sm={6} md={4}>*/}
+                                            {/*    <FormControlLabel value={defaultTypeConditionsRule.GIFT}*/}
+                                            {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
+                                            {/*                      label="Quà"/>*/}
+                                            {/*</Grid>*/}
+                                            {/*<Grid item xs={12} sm={6} md={4}>*/}
+                                            {/*    <FormControlLabel value={defaultTypeConditionsRule.PRODUCT_GIFT}*/}
+                                            {/*                      control={<Radio style={{color: 'blue'}}/>}*/}
+                                            {/*                      label="Tặng sản phẩm"/>*/}
+                                            {/*</Grid>*/}
                                         </Grid>
                                     </RadioGroup>
                                 </CardContent>
                             </Card>
-                            {promotionTypeRule ===
-                            defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE ? (
+                            {
+                                promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE ? (
                                 <Card variant="outlined" style={{marginTop: "10px"}}>
                                     <List id="list123" component="nav" aria-label="mailbox folders">
                                         {promotionRulesLine.map((code, index) => (
@@ -1342,11 +1289,7 @@ export function RenderTableGift(props) {
                     <Button onClick={props.handleClose} color="secondary">
                         Hủy
                     </Button>
-                    <Button
-                        onClick={() => props.handleAddGiftAction(stateGift.listGiftNew)}
-                        color="primary"
-                        autoFocus
-                    >
+                    <Button onClick={() => props.handleAddGiftAction(stateGift.listGiftNew)} color="primary" autoFocus>
                         Thêm
                     </Button>
                 </DialogActions>
