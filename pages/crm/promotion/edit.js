@@ -24,6 +24,7 @@ import {
     defaultPromotionScope,
     defaultRulePromotion,
     defaultTypeConditionsRule,
+    defaultPromotionType,
     defaultUseTypePromotion
 } from "../../../components/component/constant";
 import {
@@ -58,6 +59,7 @@ import Image from "next/image";
 import {route} from "next/dist/next-server/server/router";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import {useRouter} from "next/router";
+import RenderTableListCategory from "../../../components/component/promotion/modal-list-category";
 
 export async function getServerSideProps(ctx ) {
     return await doWithLoggedInUser(ctx, () => {
@@ -82,19 +84,35 @@ export async function loadPromotionData(ctx) {
             defaultState.listProductPromotion = listProductPromotionResponse.data
         }
     }
-
+    defaultState.listProductDefault = []
     let listProductDefault = await _productClient.getListProduct()
     if (listProductDefault && listProductDefault.status === "OK") {
-        defaultState.listProductDefault = listProductDefault.data.slice(0,5)
+        listProductDefault.data.forEach((product,index) => {
+            if (index < 5 ) {
+                defaultState.listProductDefault.push({
+                    product: product,
+                    active: defaultState.listProductIDs.find(productId => productId === product.productID) || false
+                })
+            }
+        })
+    }
+
+    let _categoryClient = getCategoryClient(ctx,{})
+    let listCategoryResponse = await _categoryClient.getListCategory()
+    if (listCategoryResponse && listCategoryResponse.status === "OK") {
+        defaultState = listCategoryResponse.data
     }
 
     returnObject.props.defaultState = defaultState
     return returnObject
 }
 
-async function updatePromotion(applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId) {
-    let data = {totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId}
-    return getPromoClient().updatePromotion({promotionId,totalCode,promotionName,promotionType,startTime,endTime,objects,rule})
+async function updatePromotion(promotionCode,applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId) {
+    let data = {applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId}
+    if (promotionCode !== "") {
+        data.promotionCode = promotionCode
+    }
+    return getPromoClient().updatePromotion(data)
 }
 
 async function getProduct(productName,categoryCode) {
@@ -122,6 +140,7 @@ function render(props) {
     const toast = useToast()
     const router = useRouter()
     let dataRender = props.data
+    console.log('data',dataRender)
     let defaultState = props.defaultState
     let startTime = dataRender.startTime
     let endTime = dataRender.endTime
@@ -133,12 +152,13 @@ function render(props) {
     const {promotionOption, promotionTypeRule,
         promotionScope,promotionRulesLine,conditions,
         listProductDefault,listProductPromotion,
-        listCategoryPromotion,listGiftPromotion,promotionUseType} = state
+        listCategoryPromotion,listGiftPromotion,promotionUseType,listCategoryDefault} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
     const [open, setOpen] = useState({
         openModalGift : false,
         openModalProductGift: false,
         openModalProductScopePromotion: false,
+        openModalCategoryScopePromotion: false,
     });
 
     const handleChange = (event) => {
@@ -173,6 +193,37 @@ function render(props) {
         })
         setState({...state,listProductPromotion:listProductPromotion})
     }
+
+    const handleAddCategoryPromotion = (categoryList) => {
+        setOpen({...open, openModalCategoryScopePromotion: false});
+        let listCategory = [];
+        categoryList.forEach((category) => {
+            if (category.active) {
+                listCategory.push(category.category);
+            }
+        });
+        setState({...state, listCategoryPromotion: listCategory});
+    };
+
+    const handleRemoveCategoryPromotion = (category) => {
+        let {listCategoryPromotion, listCategoryDefault} = state;
+        listCategoryPromotion.forEach((o, index) => {
+            if (o.categoryID === category.categoryID) {
+                return listCategoryPromotion.splice(index, 1);
+            }
+        });
+        listCategoryDefault.forEach((o) => {
+            if (o.category.categoryID === category.categoryID) {
+                o.active = false;
+            }
+        });
+        console.log("listCategoryDefault", listCategoryDefault);
+        setState({
+            ...state,
+            listCategoryPromotion: listCategoryPromotion,
+            listCategoryDefault: listCategoryDefault,
+        });
+    };
 
     const handleRemoveProductPromotion = (product) => {
         let {listProductPromotion,listProductDefault} = state
@@ -217,7 +268,7 @@ function render(props) {
 
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {promotionName,totalCode,startTime,endTime,totalApply} = getValues()
+        let {promotionName,totalCode,startTime,endTime,totalApply,promotionCode} = getValues()
         let value = getValues()
         let listProductIDs = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
@@ -225,7 +276,7 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await updatePromotion(parseInt(totalApply),parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
+        let promotionResponse = await updatePromotion(promotionCode,parseInt(totalApply),parseInt(totalCode),promotionName,dataRender.promotionType,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
 
         if (promotionResponse.status === "OK") {
             toast.success('Cập nhật khuyến mãi thành công')
@@ -240,7 +291,7 @@ function render(props) {
                 <title>Chỉnh sửa khuyến mãi</title>
             </Head>
             <Box component={Paper}>
-                <FormGroup>
+                <FormGroup style={{width: "100%"}}>
                     <Box className={styles.contentPadding}>
                         <Grid container>
                             <Grid  xs={4}>
@@ -290,6 +341,26 @@ function render(props) {
                                         }
                                     />
                                 </Grid>
+                                {
+                                    dataRender.promotionType === defaultPromotionType.VOUCHER_CODE ? (
+                                        <Grid item xs={12} sm={6} md={6}>
+                                        <TextField
+                                            id="promotionCode"
+                                            name="promotionCode"
+                                            label="Mã khuyến mãi"
+                                            placeholder=""
+                                            defaultValue={dataRender.promotionCode}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            style={{width: '100%'}}
+                                            inputRef={register}
+                                        />
+                                        </Grid>
+                                    ): (
+                                        <Container></Container>
+                                    )
+                                }
                                 <Grid item xs={12} sm={6} md={6}>
                                     <TextField
                                         id="totalCode"
@@ -338,6 +409,36 @@ function render(props) {
                                                 }
                                             }
                                         )}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalUsed"
+                                        name="totalUsed"
+                                        label="Số lượng user đã sử dụng"
+                                        placeholder=""
+                                        disabled={true}
+                                        defaultValue={dataRender.totalUsed || 0}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        inputRef={register}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="totalCollect"
+                                        name="totalCollect"
+                                        label="Số lần khuyến mãi đã được sử dụng"
+                                        placeholder=""
+                                        disabled={true}
+                                        defaultValue={dataRender.totalCollect || 0}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        inputRef={register}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6} md={6}>
@@ -771,16 +872,15 @@ function render(props) {
                                             <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
                                                               label="Sản phẩm được chọn"/>
                                         </Grid>
-                                        {/*<Grid item xs={12} sm={4} md={4}>*/}
-                                        {/*    <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}*/}
-                                        {/*                      label="Danh mục được chọn"/>*/}
-                                        {/*</Grid>*/}
+                                        <Grid item xs={12} sm={4} md={4}>
+                                            <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}
+                                                              label="Danh mục được chọn"/>
+                                        </Grid>
                                     </Grid>
                                 </RadioGroup>
                             </Grid>
                         </CardContent>
-                        {
-                            promotionScope === defaultPromotionScope.PRODUCT ?(
+                        {promotionScope === defaultPromotionScope.PRODUCT &&(
                                 <RenderTableListProduct
                                     handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
                                     handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
@@ -793,11 +893,26 @@ function render(props) {
                                     listProductPromotion={listProductPromotion}
                                     handleAddProductPromotion={handleAddProductPromotion}
                                     handleRemoveProductPromotion={handleRemoveProductPromotion}
-                                />
-                            ): (
-                                <div></div>
-                            )
+                                />)
                         }
+                        {promotionScope === defaultPromotionScope.CATEGORY && (
+                            <RenderTableListCategory
+                                handleClickOpen={() =>
+                                    setOpen({...open, openModalCategoryScopePromotion: true})
+                                }
+                                handleClose={() =>
+                                    setOpen({...open, openModalCategoryScopePromotion: false})
+                                }
+                                open={open.openModalCategoryScopePromotion}
+                                register={register}
+                                getValue={getValues()}
+                                promotionScope={promotionScope}
+                                listCategoryDefault={listCategoryDefault}
+                                listCategoryPromotion={listCategoryPromotion}
+                                handleAddCategoryPromotion={handleAddCategoryPromotion}
+                                handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
+                            />
+                        )}
                         <Box>
                             <Button
                                 variant="contained"
