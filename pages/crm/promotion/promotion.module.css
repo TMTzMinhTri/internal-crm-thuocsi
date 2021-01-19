@@ -58,12 +58,11 @@
 }
 
 .buttonConfirm {
+    margin: 1rem 0;
     width: 100%;
+    align-items: center;
 }
 
-.buttonConfirmRight{
-    margin-left: auto !important;
-}
 
 .rootCard {
     margin: 10px;
@@ -116,9 +115,10 @@
 }
 
 .modalFooter {
+    margin: 1rem 0 ;
     text-align: right;
     align-items: flex-end;
-    width: 100%;
+    float: right;
 }
 
 

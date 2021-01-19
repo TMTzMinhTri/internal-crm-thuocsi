@@ -7,7 +7,7 @@ import {
     TableCell,
     TableContainer,
     FormControl,
-    Select,MenuItem,
+    Select, MenuItem,
     InputLabel,
     TableHead,
     TableRow
@@ -56,8 +56,8 @@ export async function loadPromoData(ctx) {
     let offset = page * limit
     let promotionName = query.promotionName || ""
 
-    let _promotionClient = getPromoClient(ctx,{})
-    let getPromotionResponse = await _promotionClient.getPromotion(promotionName,limit,offset,true)
+    let _promotionClient = getPromoClient(ctx, {})
+    let getPromotionResponse = await _promotionClient.getPromotion(promotionName, limit, offset, true)
     if (getPromotionResponse && getPromotionResponse.status === "OK") {
         returnObject.props.data = getPromotionResponse.data
         returnObject.props.count = getPromotionResponse.total
@@ -75,14 +75,15 @@ export function formatNumber(num) {
     return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
-async function updatePromotion(promotionId,status) {
-    return getPromoClient().updatePromotion({promotionId,status})
+async function updatePromotion(promotionId, status) {
+    return getPromoClient().updatePromotion({promotionId, status})
 }
 
 function render(props) {
     const toast = useToast()
     let router = useRouter()
-    const {register, handleSubmit, errors} = useForm();
+    const {register,getValues, handleSubmit, errors} = useForm();
+    let [stateTypePromotion, setStateTypePromotion] = useState('VOUCHER_CODE');
     let [search, setSearch] = useState('')
     let [open, setOpen] = useState({
         openModalCreate: false,
@@ -91,11 +92,24 @@ function render(props) {
 
     const [page, setPage] = React.useState(parseInt(router.query.page || 0));
     const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(router.query.perPage) || 20);
+
+    const handleSelectTypePromotion = () => {
+        setOpen({
+            ...open,openModalCreate: false,
+        })
+        router.push({
+            pathname: '/crm/promotion/new',
+            query:  {
+                type: stateTypePromotion,
+            }
+        })
+    }
+
     function searchPromotion(formData) {
         let promotionName = formData.promotionName
         Router.push({
             pathname: '/crm/promotion',
-            query:{
+            query: {
                 promontionName: promotionName,
             }
         })
@@ -117,12 +131,16 @@ function render(props) {
         })
     };
 
-    const handleActivePromotion = async (event,promotionID) => {
+    const handleChangeTypePromotion = (event) => {
+        setStateTypePromotion(event.target.value)
+    }
+
+    const handleActivePromotion = async (event, promotionID) => {
         if (event.target.checked) {
-            let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.ACTIVE)
-            if (!promotionResponse || promotionResponse.status !==  "OK") {
+            let promotionResponse = await updatePromotion(promotionID, defaultPromotionStatus.ACTIVE)
+            if (!promotionResponse || promotionResponse.status !== "OK") {
                 return toast.error(promotionResponse.mesage)
-            }else {
+            } else {
                 props.data.forEach(d => {
                     if (d.promotionId === promotionID) {
                         return d.status = defaultPromotionStatus.ACTIVE
@@ -130,11 +148,11 @@ function render(props) {
                 })
                 return toast.success('Cập nhật thành công')
             }
-        }else {
-            let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.EXPIRED)
-            if (!promotionResponse || promotionResponse.status !==  "OK") {
+        } else {
+            let promotionResponse = await updatePromotion(promotionID, defaultPromotionStatus.EXPIRED)
+            if (!promotionResponse || promotionResponse.status !== "OK") {
                 return toast.error(promotionResponse.mesage)
-            }else {
+            } else {
                 props.data.forEach(d => {
                     if (d.promotionId === promotionID) {
                         return d.status = defaultPromotionStatus.EXPIRED
@@ -191,10 +209,11 @@ function render(props) {
                         </form>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                            <ButtonGroup color="primary" aria-label="contained primary button group"
-                                         className={styles.rightGroup} onClick={() => setOpen({...open,openModalCreate: true})}>
-                                <Button variant="contained" color="primary">Thêm khuyến mãi</Button>
-                            </ButtonGroup>
+                        <ButtonGroup color="primary" aria-label="contained primary button group"
+                                     className={styles.rightGroup}
+                                     onClick={() => setOpen({...open, openModalCreate: true})}>
+                            <Button variant="contained" color="primary">Thêm khuyến mãi</Button>
+                        </ButtonGroup>
                     </Grid>
                 </Grid>
             </div>
@@ -221,7 +240,7 @@ function render(props) {
                     </TableHead>
                     {props.data?.length > 0 ? (
                         <TableBody>
-                            {props.data.map((row,index) => (
+                            {props.data.map((row, index) => (
                                 <TableRow key={index}>
                                     <TableCell align="left">{row.promotionName}</TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
@@ -229,14 +248,14 @@ function render(props) {
                                     <TableCell align="left">
                                         {
                                             displayRule(row.rule).length > 0 ? (
-                                                displayRule(row.rule).map((rule,index) => (
-                                                    index % 2 === 0 ?(
+                                                displayRule(row.rule).map((rule, index) => (
+                                                    index % 2 === 0 ? (
                                                         <div>{rule}</div>
-                                                    ): (
+                                                    ) : (
                                                         <div style={{fontStyle: "italic"}}>{rule}</div>
                                                     )
-                                            ))
-                                            ): (
+                                                ))
+                                            ) : (
                                                 <div></div>
                                             )
                                         }
@@ -244,8 +263,10 @@ function render(props) {
                                     <TableCell align="left">{displayStatus(row.status)}</TableCell>
                                     <TableCell align="left">
                                         <Switch
-                                            onChange={event => {handleActivePromotion(event,row.promotionId)}}
-                                            checked={row.status  === "ACTIVE"? true : false}
+                                            onChange={event => {
+                                                handleActivePromotion(event, row.promotionId)
+                                            }}
+                                            checked={row.status === "ACTIVE" ? true : false}
                                             color="primary"
                                         />
                                     </TableCell>
@@ -263,7 +284,7 @@ function render(props) {
                                 </TableRow>
                             ))}
                         </TableBody>
-                    ): (
+                    ) : (
                         <div></div>
                     )}
                     {
@@ -275,7 +296,7 @@ function render(props) {
                                 page={page}
                                 onChangePage={handleChangePage}
                             />
-                        ): (
+                        ) : (
                             <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
                         )
                     }
@@ -283,40 +304,41 @@ function render(props) {
                 </Table>
             </TableContainer>
 
-            <Modal open={open.openModalCreate} onClose={() => setOpen({...open,openModalCreate:  false})} className={styles.modal}>
+            <Modal open={open.openModalCreate} onClose={() => setOpen({...open, openModalCreate: false})}
+                   className={styles.modal}>
                 <div className={styles.modalBodyCreate}>
                     <h3 style={{textAlign: "center", marginBottom: "2rem"}}>
                         Chọn loại khuyến mãi cần tạo
                     </h3>
                     <div style={{margin: "auto"}}>
-                        {/* <ButtonGroup className={styles.buttonConfirm}>
-                            <Link href={`/crm/promotion/create-code`}>
-                                <Button  variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo voucher Khuyến mãi</Button>
-                            </Link>
-                            <Link href={`/crm/promotion/new`}>
-                                <Button className={styles.buttonConfirmRight} variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo Combo khuyến mãi</Button>
-                            </Link>
-                        </ButtonGroup> */}
-                          <FormControl className={styles.select}>
-                                    <InputLabel id="category-select-outlined-label">Chọn loại Khuyến Mãi</InputLabel>
-                                    <Select
-                                        autoWidth={false}
-                                        style={{width: '100% !important'}}
-                                        labelId="category-select-outlined-label"
-                                        id="category-select-outlined"
-                                        label="Chọn danh mục">
-                                        <Link href={`/crm/promotion/create-code`}>
-                                        <MenuItem value={"VOUCHER_CODE"} key={"VOUCHER_CODE"} onClick={() => setOpen({...open,openModalCreate: false})}>
-                                            Tạo voucher khuyến mãi
-                                        </MenuItem>
-                                        </Link>
-                                        <Link href={`/crm/promotion/new`}>
-                                        <MenuItem value={"COMBO"} key={"COMBO"} onClick={() => setOpen({...open,openModalCreate: false})}>
-                                            Tạo combo khuyến mãi
-                                        </MenuItem>
-                                        </Link>
-                                    </Select>
-                         </FormControl>
+                        <FormControl className={styles.select}>
+                            <InputLabel id="promotion-select-outlined-label" variant={"outlined"}>Chọn loại Khuyến Mãi</InputLabel>
+                            <Select
+                                autoWidth={false}
+                                style={{width: '100% !important'}}
+                                labelId="promotion-select-outlined-label"
+                                id="category-select-outlined"
+                                variant={"outlined"}
+                                onChange={handleChangeTypePromotion}
+                                name="selectTypePromontion"
+                                value={stateTypePromotion}
+                                label="Chọn loại mã khuyến mãi">
+                                <MenuItem value={"VOUCHER_CODE"} key={"VOUCHER_CODE"}>
+                                    Tạo voucher khuyến mãi
+                                </MenuItem>
+                                <MenuItem value={"COMBO"} key={"COMBO"}>
+                                    Tạo combo khuyến mãi
+                                </MenuItem>
+                            </Select>
+                        </FormControl>
+                        <ButtonGroup color="primary" aria-label="contained primary button group"
+                                     className={styles.modalFooter}>
+                            <Button variant="contained" color="inherit"
+                                    onClick={() => setOpen({...open, openModalCreate: false})}
+                                    style={{marginRight: "1rem"}}>ĐÓNG</Button>
+                            <Button variant="contained" color="primary"
+                                    onClick={handleSelectTypePromotion}>Xác nhận</Button>
+                        </ButtonGroup>
                     </div>
                 </div>
             </Modal>

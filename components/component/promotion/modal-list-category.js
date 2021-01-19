@@ -39,41 +39,30 @@ const RenderTableListCategory = (props) => {
         handleRemoveCategoryPromotion,
     } = props;
 
-    console.log("listCategoryPromotion", listCategoryPromotion);
+    let listCategoryAction = []
+
+    listCategoryDefault?.forEach(categoryDefault => {
+        listCategoryAction.push({
+            category : categoryDefault,
+            active: listCategoryPromotion?.find(categoryPromotion => categoryPromotion.categoryID === categoryDefault.categoryID)
+        })
+    })
 
     const [stateCategory, setStateCategory] = useState({
-        listCategoryAction: listCategoryPromotion,
-        listCategoryPromotion: listCategoryDefault,
-        categorySearch: {},
-        productNameSearch: "",
+        listCategoryAction: listCategoryAction,
+        listCategoryTemp: listCategoryAction,
     });
 
-    const [showAutoComplete, setShowAutoComplete] = useState(false);
-
-    const handleOpenModal = () => {
-        // console.log("listCategoryDefault", listCategoryDefault);
-        setStateCategory({
-            ...stateCategory,
-            listCategoryAction: listCategoryPromotion,
-            listCategoryPromotion: listCategoryDefault,
-        });
-        handleClickOpen();
-    };
-
-    const handleChangeCategory = (event) => {
-        setStateCategory({...stateCategory, categorySearch: event.target.value});
-    };
-
     const handleActiveCategory = (category, active) => {
-        let {listCategoryPromotion} = stateCategory;
-        listCategoryPromotion.forEach((o) => {
+        let {listCategoryTemp} = stateCategory;
+        listCategoryTemp.forEach((o) => {
             if (o.category.categoryID === category.categoryID) {
                 o.active = active;
             }
         });
         setStateCategory({
             ...stateCategory,
-            listCategoryPromotion: listCategoryPromotion,
+            listCategoryTemp: listCategoryPromotion,
         });
     };
 
@@ -98,29 +87,26 @@ const RenderTableListCategory = (props) => {
                                         <TableCell align="left" width="60%">Thông tin danh mục</TableCell>
                                     </TableRow>
                                 </TableHead>
-                                {stateCategory.listCategoryPromotion.map(
-                                    ({category, active}) => (
-                                        <TableRow key={category.productID}>
-                                            <TableCell align="left">
-                                                <Checkbox
-                                                    checked={active}
-                                                    style={{color: "green"}}
-                                                    onChange={(e, value) =>
-                                                        handleActiveCategory(category, value)
-                                                    }
-                                                />
-                                            </TableCell>
-                                            <TableCell align="left">{category.name}</TableCell>
-                                            <TableCell align="left">
-                                                {category.imageUrls ? (
-                                                    <image src={category.imageUrls[0]}></image>
-                                                ) : (
-                                                    <div></div>
-                                                )}
-                                            </TableCell>
-                                        </TableRow>
+                                {
+                                    stateCategory.listCategoryAction.length > 0 && (
+                                        stateCategory.listCategoryPromotion?.map(
+                                                ({category, active}) => (
+                                                    <TableRow key={category?.categoryID}>
+                                                        <TableCell align="left">
+                                                            <Checkbox
+                                                                checked={active}
+                                                                style={{color: "green"}}
+                                                                onChange={(e, value) =>
+                                                                    handleActiveCategory(category, value)
+                                                                }
+                                                            />
+                                                        </TableCell>
+                                                        <TableCell align="left">{category?.name || ""}</TableCell>
+                                                    </TableRow>
+                                                )
+                                            )
                                     )
-                                )}
+                                }
                             </Table>
                         </TableContainer>
                     </DialogContent>
@@ -140,21 +126,13 @@ const RenderTableListCategory = (props) => {
                         <Table size="small">
                             <TableHead>
                                 <TableRow>
-                                    <TableCell align="left">Ảnh</TableCell>
-                                    <TableCell align="left">Thông tin sản phẩm</TableCell>
+                                    <TableCell align="center">Thông tin danh mục</TableCell>
                                     <TableCell align="left">Hành Động</TableCell>
                                 </TableRow>
                             </TableHead>
-                            {listCategoryPromotion.map((category) => (
+                            {listCategoryPromotion?.map((category) => (
                                 <TableRow>
-                                    <TableCell align="left">
-                                        {category.imageUrls ? (
-                                            <image src={category.imageUrls[0]}></image>
-                                        ) : (
-                                            <div></div>
-                                        )}
-                                    </TableCell>
-                                    <TableCell align="left">{category.name}</TableCell>
+                                    <TableCell align="center">{category.name}</TableCell>
                                     <TableCell align="left">
                                         <IconButton
                                             color="secondary"

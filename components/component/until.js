@@ -83,12 +83,12 @@ export function setRulesPromotion(typePromotion,typeRule,value,index,listGiftPro
 export function setScopeObjectPromontion(promotionScope,listProducts,categoryCodes) {
     let result =  [{
         scope: promotionScope,
-        type: listProducts.length > 0 || categoryCodes.length > 0 ? defaultTypeProduct.MANY : defaultTypeProduct.ALL,
+        type: listProducts?.length > 0 || categoryCodes?.length > 0 ? defaultTypeProduct.MANY : defaultTypeProduct.ALL,
     }]
-    if (listProducts.length > 0) {
+    if (listProducts?.length > 0) {
         result[0].products = listProducts
     }
-    if (categoryCodes.length > 0) {
+    if (categoryCodes?.length > 0) {
         result[0].categoryCodes = categoryCodes
     }
     return result
@@ -107,6 +107,7 @@ export function parseRuleToObject(promotion) {
         listProductPromotion: [],
         listProductIDs: [],
         listProductDefault: [],
+        listCategoryCodes: [],
         promotionUseType: promotion.useType,
         listCategoryPromotion: [],
         conditions: [],
@@ -126,7 +127,8 @@ export function parseRuleToObject(promotion) {
     result = {
         ...result,
         conditions: conditions,
-        listProductIDs: promotion.objects[0].products || []
+        listProductIDs: promotion.objects[0].products || [],
+        listCategoryCodes: promotion.objects[0].categoryCodes || []
     }
     return result
 }
