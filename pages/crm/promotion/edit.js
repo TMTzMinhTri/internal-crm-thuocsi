@@ -437,7 +437,7 @@ function render(props) {
                   setOpen({ ...open, openModalProductScopePromotion: false })
                 }
                 handleOpenListCategory={() =>
-                  setOpen({ ...open, openModalCategoryScopePromotion: true })
+                  setOpen({ ...open, openModalCategoryScopePromotion: true})
                 }
                 handleCloseListCategory={() =>
                   setOpen({ ...open, openModalCategoryScopePromotion: false })

@@ -110,7 +110,7 @@ const RenderTableListCategory = (props) => {
             </TableContainer>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleClose} variant="contained" color="secondary">
+            <Button onClick={handleClose} variant="contained">
               Hủy
             </Button>
             <Button
