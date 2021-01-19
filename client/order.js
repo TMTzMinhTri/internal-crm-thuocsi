@@ -13,7 +13,7 @@ class OrderClient extends APIClient {
             "GET",
             `${URI}/order/list`,
             {
-                // q: q,
+                q: q,
                 offset: offset,
                 limit: limit,
                 // getTotal: true

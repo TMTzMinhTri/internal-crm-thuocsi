@@ -30,7 +30,7 @@ import IconButton from "@material-ui/core/IconButton";
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./order.module.css";
 import { condUserType, statuses, scopes } from "components/global"
@@ -113,7 +113,7 @@ export default function renderForm(props, toast) {
     const [idxChangedItem, setIdxChangedItem] = useState()
     const [province, setProvince] = useState(props.province);
     const [orderItem, setOrderItem] = useState(props.orderItem)
-    const [quantityItem,setQuantityItem] = useState(0)
+    const [quantityItem, setQuantityItem] = useState(0)
     const [districts, setDistricts] = useState(props.districts || []);
     const [district, setDistrict] = useState(props.district || {});
     const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
@@ -124,8 +124,8 @@ export default function renderForm(props, toast) {
     const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
     const [isDisabledWard, setDisabledWard] = useState(isWard);
     const router = useRouter();
-    const { register, handleSubmit, errors, control } = useForm({
-        defaultValues: editObject,
+    const { register, handleSubmit, errors, control, getValues } = useForm({
+        defaultValues: { ...editObject, quantityItem: 1 },
         mode: "onSubmit"
     });
 
@@ -248,8 +248,9 @@ export default function renderForm(props, toast) {
     }
 
 
-    const changeQuantityHandler = (formData) => {
-        let quantityItem = parseInt(formData.quantityItem, 10)
+    const changeQuantityHandler = () => {
+        let quantityItem = parseInt(getValues('quantityItem'), 10)
+        console.log(quantityItem)
         let tmpOrderItem = orderItem.map((item, idx) => {
             if (idx == idxChangedItem) {
                 return { ...item, quantity: quantityItem, totalPrice: quantityItem * item.price }
@@ -257,15 +258,16 @@ export default function renderForm(props, toast) {
             return item
         })
         // better performance
-        props.order.totalPrice = props.order.totalPrice - props.orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
+        props.order.totalPrice = props.order.totalPrice - orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
         setOrderItem(tmpOrderItem)
         setOpenChangeQuantityDialog(false)
     }
 
+
     const ChangeQuantityDialog = () => (
         <div>
             <Dialog
-                open={true}
+                open={openChangeQuantityDialog}
                 onClose={() => setOpenChangeQuantityDialog(false)}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
@@ -275,7 +277,7 @@ export default function renderForm(props, toast) {
                 </DialogTitle>
                 <DialogContent>
                     <TextField
-                        defaultValue={1}
+                        defaultValue={0}
                         style={{ margin: '0 auto', width: '100%' }}
                         // variant="outlined"
                         id="quantityItem"
@@ -286,24 +288,28 @@ export default function renderForm(props, toast) {
                             shrink: true,
                         }}
                         placeholder=""
-                        // onChange={event => setQuantityItem(event.target.value)}
-                        error={!!errors.quantityItem}
-                        helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
+                        onChange={event => {
+                            if(event.target.value < 1){
+                                event.target.value = 0;
+                            }
+                        }}
+                        // error={!!errors.quantityItem}
+                        // helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
                         inputRef={register({
-                            valueAsNumber: true, 
-                            min: 1
+                            valueAsNumber: true,
+                            min: 0
                         })}
                         label="Số lượng"
-                    
-
                     />
+            
+                    {errors.quantityItem && <p>This is required</p>}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenChangeQuantityDialog(false)} color="primary">
                         Hủy bỏ
                     </Button>
                     {/* <Button onClick={(event) => changeQuantityHandler(event)} color="primary"  autoFocus> */}
-                    <Button onClick={handleSubmit(changeQuantityHandler)} color="primary" autoFocus>
+                    <Button onClick={() => changeQuantityHandler()} color="primary" autoFocus>
                         Đồng ý
                      </Button>
                 </DialogActions>
@@ -317,7 +323,8 @@ export default function renderForm(props, toast) {
                 <Box component={Paper} display="block">
                     <FormGroup>
                         <form>
-                            {openChangeQuantityDialog ? <ChangeQuantityDialog /> : null}
+                            {/* {openChangeQuantityDialog ? : null} */}
+                            <ChangeQuantityDialog />
                             <Box className={styles.contentPadding}>
                                 <Card variant="outlined">
                                     <CardContent>

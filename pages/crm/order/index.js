@@ -59,7 +59,7 @@ export async function loadOrderData(ctx) {
     let offset = page * limit
 
     let orderClient = getOrderClient(ctx, data)
-    let resp = await orderClient.getOrder(offset, limit)
+    let resp = await orderClient.getOrder(offset, limit,q)
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
             return { props: { data: [], count: 0, message: 'Không tìm thấy đơn hàng' } }
@@ -110,7 +110,7 @@ function render(props) {
             <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
             <TableCell align="left">{row.data.totalPrice}</TableCell>
             <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
-            <TableCell align="center">{row.data.status === "Conmfirmed" ? <DoneIcon style={{ color: 'green' }} /> : row.data.status === "WaitConfirm" ? <HourglassFullIcon style={{ color: 'yellow' }}
+            <TableCell align="center">{row.data.status === "Conmfirmed" ? <DoneIcon style={{ color: 'green' }} /> : row.data.status === "WaitConfirm" ? <HourglassFullIcon style={{ color: 'orange' }}
             /> : row.data.status === "Canceled" ? <ClearIcon style={{ color: 'red' }} /> : null}</TableCell>
             <TableCell align="left">
                 <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
