@@ -24,7 +24,8 @@ import styles from "./promotion.module.css";
 import SearchIcon from "@material-ui/icons/Search";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
 import { getProductClient } from "client/product";
-import { defaultPromotionScope, limitText } from "client/constant";
+import { defaultPromotionScope } from "../constant";
+import { limitText } from "../until";
 
 async function searchProductList(q, categoryCode) {
   return await getProductClient().searchProductListFromClient(q, categoryCode);

@@ -21,7 +21,7 @@ import {
 } from "@material-ui/core";
 import styles from "./promotion.module.css";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
-import { defaultPromotionScope, limitText } from "client/constant";
+import { defaultPromotionScope, limitText } from "../constant";
 
 const RenderTableListCategory = (props) => {
   const {
