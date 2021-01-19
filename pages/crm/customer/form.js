@@ -13,6 +13,7 @@ import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
 import { NotFound } from "components/components-global";
 import { condUserType, scopes, statuses } from "components/global";
+import MuiSingleAuto from "components/muiauto/single";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -20,7 +21,6 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import MuiSingleAuto from "components/muiauto/single"
 
 export async function loadData(ctx) {
     let data = {
@@ -369,8 +369,8 @@ export default function renderForm(props, toast) {
                                                             id="provinceCode"
                                                             name="provinceCode"
                                                             noOptionsText={noOptionsText}
-                                                            options={[...props.provinces.map(province => { return { value: province.code, label: province.name, code: province.code } }
-                                                            )]}
+                                                            options={typeof props.provinces !== 'undefined'?[...props.provinces.map(province => { return { value: province.code, label: province.name, code: province.code } }
+                                                                )]:[]}
                                                             onNotSearchFieldChange={onProvinceChange}
                                                             required={true}
                                                             label="Tỉnh/Thành phố"
