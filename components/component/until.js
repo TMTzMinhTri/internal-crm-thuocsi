@@ -106,66 +106,57 @@ export function setRulesPromotion(
   return result;
 }
 
-export function setScopeObjectPromontion(
-  promotionScope,
-  listProducts,
-  categoryCodes
-) {
-  let result = [
-    {
-      scope: promotionScope,
-      type:
-        listProducts?.length > 0 || categoryCodes?.length > 0
-          ? defaultTypeProduct.MANY
-          : defaultTypeProduct.ALL,
-    },
-  ];
-  if (listProducts?.length > 0) {
-    result[0].products = listProducts;
-  }
-  if (categoryCodes?.length > 0) {
-    result[0].categoryCodes = categoryCodes;
-  }
-  return result;
+export function setScopeObjectPromontion(promotionScope,listProducts,categoryCodes) {
+    let result =  [{
+        scope: promotionScope,
+        type: listProducts?.length > 0 || categoryCodes?.length > 0 ? defaultTypeProduct.MANY : defaultTypeProduct.ALL,
+    }]
+    if (listProducts?.length > 0) {
+        result[0].products = listProducts
+    }
+    if (categoryCodes?.length > 0) {
+        result[0].categoryCodes = categoryCodes
+    }
+    return result
 }
 
 export function parseRuleToObject(promotion) {
-  let result = {
-    promotionOption: "",
-    promotionTypeRule: "",
-    promotionScope: promotion.objects[0].scope,
-    listGiftPromotion: [
-      {
-        gift: {},
-        quantity: 0,
-      },
-    ],
-    promotionRulesLine: [],
-    listProductPromotion: [],
-    listProductIDs: [],
-    listProductDefault: [],
-    promotionUseType: promotion.useType,
-    listCategoryPromotion: [],
-    conditions: [],
-  };
-  let rule = promotion.rule;
-  if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
-    result.promotionOption = defaultRulePromotion.MIN_QUANTITY;
-    result.promotionTypeRule = rule.type;
-  } else {
-    result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE;
-    result.promotionTypeRule = rule.type;
-  }
-  let { conditions } = rule;
-  conditions?.forEach((condition, index) => {
-    result.promotionRulesLine.push({ id: index });
-  });
-  result = {
-    ...result,
-    conditions: conditions,
-    listProductIDs: promotion.objects[0].products || [],
-  };
-  return result;
+    let result = {
+        promotionOption: "",
+        promotionTypeRule: "",
+        promotionScope: promotion.objects[0].scope,
+        listGiftPromotion: [{
+            gift: {},
+            quantity: 0,
+        }],
+        promotionRulesLine: [],
+        listProductPromotion: [],
+        listProductIDs: [],
+        listProductDefault: [],
+        listCategoryCodes: [],
+        promotionUseType: promotion.useType,
+        listCategoryPromotion: [],
+        conditions: [],
+    }
+    let rule = promotion.rule
+    if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
+        result.promotionOption = defaultRulePromotion.MIN_QUANTITY
+        result.promotionTypeRule = rule.type
+    }else {
+        result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE
+        result.promotionTypeRule = rule.type
+    }
+    let {conditions} = rule
+    conditions?.forEach((condition,index) => {
+        result.promotionRulesLine.push({id: index})
+    })
+    result = {
+        ...result,
+        conditions: conditions,
+        listProductIDs: promotion.objects[0].products || [],
+        listCategoryCodes: promotion.objects[0].categoryCodes || []
+    }
+    return result
 }
 
 export function parseConditionValue(

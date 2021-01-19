@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 import {
   CardContent,
@@ -9,13 +9,31 @@ import {
   Typography,
 } from "@material-ui/core";
 import { defaultPromotionScope, defaultUseTypePromotion } from "../constant";
+import RenderTableListProduct from "./modal-list-product";
+import RenderTableListCategory from "./modal-list-category";
 
 const ApplyFields = (props) => {
-  const { state } = props;
-  const { handleChange, handleChangeScope } = props;
-
-  const { promotionScope, promotionUseType } = state;
-
+  const { state, register, open } = props;
+  const {
+    handleChange,
+    handleChangeScope,
+    handleOpenListProduct,
+    handleCloseListProduct,
+    handleOpenListCategory,
+    handleCloseListCategory,
+    handleAddProductPromotion,
+    handleRemoveProductPromotion,
+    handleAddCategoryPromotion,
+    handleRemoveCategoryPromotion,
+  } = props;
+  const {
+    promotionScope,
+    listProductDefault,
+    listProductPromotion,
+    listCategoryPromotion,
+    promotionUseType,
+    listCategoryDefault,
+  } = state;
   return (
     <>
       <CardContent>
@@ -70,14 +88,14 @@ const ApplyFields = (props) => {
               justify="space-around"
               alignItems="center"
             >
-              <Grid item xs={12} sm={6} md={6}>
+              <Grid item xs={12} sm={4} md={4}>
                 <FormControlLabel
                   value={defaultPromotionScope.GLOBAL}
                   control={<Radio color="primary" />}
                   label="Toàn sàn"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={6}>
+              <Grid item xs={12} sm={4} md={4}>
                 <FormControlLabel
                   value={defaultPromotionScope.PRODUCT}
                   control={<Radio color="primary" />}
@@ -95,6 +113,33 @@ const ApplyFields = (props) => {
           </RadioGroup>
         </Grid>
       </CardContent>
+      {promotionScope === defaultPromotionScope.PRODUCT && (
+        <RenderTableListProduct
+          handleClickOpen={handleOpenListProduct}
+          handleClose={handleCloseListProduct}
+          open={open.openModalProductScopePromotion}
+          register={register}
+          listProductDefault={listProductDefault}
+          promotionScope={promotionScope}
+          listCategoryPromotion={listCategoryPromotion}
+          listProductPromotion={listProductPromotion}
+          handleAddProductPromotion={handleAddProductPromotion}
+          handleRemoveProductPromotion={handleRemoveProductPromotion}
+        />
+      )}
+
+      {promotionScope === defaultPromotionScope.CATEGORY && (
+        <RenderTableListCategory
+          handleClickOpen={handleOpenListCategory}
+          handleClose={handleCloseListCategory}
+          open={open.openModalCategoryScopePromotion}
+          promotionScope={promotionScope}
+          listCategoryDefault={listCategoryDefault}
+          listCategoryPromotion={listCategoryPromotion}
+          handleAddCategoryPromotion={handleAddCategoryPromotion}
+          handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
+        />
+      )}
     </>
   );
 };
