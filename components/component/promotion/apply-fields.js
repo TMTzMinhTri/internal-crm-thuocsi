@@ -38,34 +38,44 @@ const ApplyFields = (props) => {
     <>
       <CardContent>
         <Typography color="textSecondary" gutterBottom>
-          Cách áp dụng
+          Chọn cách sử dụng khuyến mãi
         </Typography>
-        <Grid spacing={3} container>
+        <Grid
+          xs={12}
+          item
+          direction="row"
+          container>
           <RadioGroup
             aria-label="quiz"
             name="promotionUseType"
             value={promotionUseType}
             onChange={handleChange}
+            style={{width : '100%'}}
           >
             <Grid
-              spacing={3}
+              xs={12}
+              item
               container
+              direction="row"
               justify="space-around"
               alignItems="center"
+              style={{marginLeft : 30}}
             >
-              <Grid item xs={12} sm={6} md={6}>
+              <Grid item xs={4} direction="column" container>
                 <FormControlLabel
                   value={defaultUseTypePromotion.MANY}
                   control={<Radio color="primary" />}
-                  label="Được áp dụng với khuyến mãi khác"
+                  label="Áp dụng đồng thời với các khuyến mãi khác"
                 />
               </Grid>
-              <Grid item xs={12} sm={6} md={6}>
+              <Grid item xs={4} direction="column" container>
                 <FormControlLabel
                   value={defaultUseTypePromotion.ALONE}
                   control={<Radio color="primary" />}
-                  label="Không được áp dụng với khuyến mãi khác"
+                  label="Áp dụng 1 mã trên 1 đơn hàng"
                 />
+              </Grid>
+              <Grid item xs={4} direction="column" container>
               </Grid>
             </Grid>
           </RadioGroup>
@@ -73,14 +83,19 @@ const ApplyFields = (props) => {
       </CardContent>
       <CardContent>
         <Typography color="textSecondary" gutterBottom>
-          Áp dụng cho
+          Phạm vi áp dụng
         </Typography>
-        <Grid spacing={3} container>
+        <Grid xs={12}
+          item
+          direction="row"
+          container              
+          style={{marginLeft : 30}}>
           <RadioGroup
             aria-label="quiz"
             name="promotionScope"
             value={promotionScope}
             onChange={handleChangeScope}
+            style={{width : '100%'}}
           >
             <Grid
               spacing={3}

@@ -20,6 +20,7 @@ import {
     DialogActions,
     Card,
 } from "@material-ui/core";
+import { makeStyles } from "@material-ui/core/styles";
 import styles from "./promotion.module.css";
 import SearchIcon from "@material-ui/icons/Search";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
@@ -27,11 +28,20 @@ import {getProductClient} from "client/product";
 import {defaultPromotionScope} from "../constant";
 import {limitText} from "../until";
 
+const useStyles = makeStyles(theme => ({
+    menuPaper: {
+      maxHeight: 400,
+      marginTop : 60
+    }
+  }));
+
 async function searchProductList(q, categoryCode) {
     return await getProductClient().searchProductListFromClient(q, categoryCode);
 }
 
 const RenderTableListProduct = (props) => {
+    const classes = useStyles();
+
     const [stateProduct, setStateProduct] = useState({
         listProductAction: props.listProductDefault,
         listCategoryPromotion: props.listCategoryPromotion,
@@ -114,19 +124,23 @@ const RenderTableListProduct = (props) => {
                 <div className={styles.modalBody}>
                     <h1 className={styles.headerModal}>Chọn sản phẩm</h1>
                     <div style={{margin: "1.25rem"}}>
-                        <Grid spacing={3} container>
-                            <Grid item sx={12} sm={4} md={4}>
+                        <Grid 
+                            sx={12} 
+                            item  
+                            direction="row"
+                            container>
+                            <Grid item sx={12} sm={5} md={5}>
                                 <TextField
                                     placeholder="Tên sản phẩm"
                                     label="Tên sản phẩm"
                                     name="searchProduct"
                                     variant="outlined"
                                     onChange={handleChangeProductSearch}
-                                    style={{width: "100% !important"}}
+                                    fullWidth={true} 
                                     inputRef={props.register}
                                 />
                             </Grid>
-                            <Grid item sx={12} sm={4} md={4} className={styles.blockSearch}>
+                            <Grid item sx={12} sm={5} md={5} className={styles.blockSearch}>
                                 <FormControl className={styles.select}>
                                     <InputLabel id="category-select-outlined-label" variant="outlined">
                                         Chọn danh mục
@@ -139,6 +153,7 @@ const RenderTableListProduct = (props) => {
                                         variant="outlined"
                                         onChange={handleChangeCategory}
                                         label="Chọn danh mục"
+                                        MenuProps={{ classes: { paper: classes.menuPaper } }}
                                     >
                                         {stateProduct.listCategoryPromotion.map((category) => (
                                             <MenuItem value={category} key={category.categoryID}>
@@ -148,9 +163,10 @@ const RenderTableListProduct = (props) => {
                                     </Select>
                                 </FormControl>
                             </Grid>
-                            <Grid item sx={12} sm={4} md={4} style={{display: "flex"}}>
+                            <Grid item sx={12} sm={2} md={2} style={{display: "flex"}}>
                                 <Button
                                     variant="contained"
+                                    color="primary"
                                     onClick={handleOnSearchProductCategory}
                                     className={styles.buttonSearch}
                                     startIcon={<SearchIcon/>}
@@ -166,8 +182,8 @@ const RenderTableListProduct = (props) => {
                                 <TableHead>
                                     <TableRow>
                                         <TableCell align="left">Thao tác</TableCell>
-                                        <TableCell align="left">Thông tin sản phẩm</TableCell>
                                         <TableCell align="left">Ảnh</TableCell>
+                                        <TableCell align="left">Thông tin sản phẩm</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 {stateProduct.listProductAction.map(({product, active}) => (
@@ -181,7 +197,6 @@ const RenderTableListProduct = (props) => {
                                                 }
                                             />
                                         </TableCell>
-                                        <TableCell align="left">{product.name}</TableCell>
                                         <TableCell align="left">
                                             {product.imageUrls ? (
                                                 <image src={product.imageUrls[0]}></image>
@@ -189,6 +204,7 @@ const RenderTableListProduct = (props) => {
                                                 <div></div>
                                             )}
                                         </TableCell>
+                                        <TableCell align="left">{product.name}</TableCell>
                                     </TableRow>
                                 ))}
                             </Table>
