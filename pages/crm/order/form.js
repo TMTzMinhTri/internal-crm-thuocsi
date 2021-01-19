@@ -16,6 +16,7 @@ import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
+import { formatNumber , orderStatus } from "components/global"
 import FormControl from "@material-ui/core/FormControl";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -193,8 +194,8 @@ export default function renderForm(props, toast) {
         // formData.customerWardCode = formData.customerWardCode.value || ''
 
         if (props.isUpdate) {
-            // formData.orderNo = props.order.orderNo
-            // await updateOrder(formData)
+            formData.orderNo = props.order.orderNo
+            await updateOrder(formData)
             await updateOrderItem(orderItem)
         } else {
 
@@ -235,9 +236,9 @@ export default function renderForm(props, toast) {
             <TableRow key={index}>
                 <TableCell align="left">{data.image}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
-                <TableCell align="left">{data.price}</TableCell>
-                <TableCell align="left">{data.quantity}</TableCell>
-                <TableCell align="left">{data.totalPrice}</TableCell>
+                <TableCell align="center">{data.price}</TableCell>
+                <TableCell align="center">{data.quantity}</TableCell>
+                <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
                 <TableCell align="center">
                     <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); }}>
                         <TrendingUpIcon fontSize="small" />
@@ -289,7 +290,7 @@ export default function renderForm(props, toast) {
                         }}
                         placeholder=""
                         onChange={event => {
-                            if(event.target.value < 1){
+                            if (event.target.value < 1) {
                                 event.target.value = 1;
                             }
                         }}
@@ -301,7 +302,7 @@ export default function renderForm(props, toast) {
                         })}
                         label="Số lượng"
                     />
-            
+
                     {errors.quantityItem && <p>This is required</p>}
                 </DialogContent>
                 <DialogActions>
@@ -565,6 +566,25 @@ export default function renderForm(props, toast) {
                                                     style={{ width: '100%' }}
                                                 />
                                             </Grid>
+                                            <Grid item xs={12} sm={3} md={3}>
+                                                <FormControl style={{ width: '100%' }} size="small" variant="outlined">
+                                                    <InputLabel id="department-select-label">Trạng thái</InputLabel>
+                                                    <Controller
+                                                        name="status"
+                                                        control={control}
+                                                        defaultValue={orderStatus ? orderStatus[0].value : ''}
+                                                        rules={{ required: true }}
+                                                        error={!!errors.status}
+                                                        as={
+                                                            <Select label="Trạng thái">
+                                                                {orderStatus?.map(({ value, label }) => (
+                                                                    <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                                ))}
+                                                            </Select>
+                                                        }
+                                                    />
+                                                </FormControl>
+                                            </Grid>
                                         </Grid>
                                     </CardContent>
                                 </Card>
@@ -582,9 +602,9 @@ export default function renderForm(props, toast) {
                                             <TableRow>
                                                 <TableCell align="left">Hình ảnh</TableCell>
                                                 <TableCell align="left">Tên sản phẩm</TableCell>
-                                                <TableCell align="left">Giá</TableCell>
-                                                <TableCell align="left">Số lượng</TableCell>
-                                                <TableCell align="left">Thành tiền</TableCell>
+                                                <TableCell align="center">Giá</TableCell>
+                                                <TableCell align="center">Số lượng</TableCell>
+                                                <TableCell align="right">Thành tiền</TableCell>
                                                 <TableCell align="center">Thay đổi số lượng</TableCell>
                                             </TableRow>
                                         </TableHead>

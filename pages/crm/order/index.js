@@ -40,7 +40,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
-import { formatDateTime } from "components/global"
+import { formatDateTime,formatNumber } from "components/global"
 import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
 import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
 
@@ -108,10 +108,10 @@ function render(props) {
             <TableCell align="left">{row.data.customerName}</TableCell>
             <TableCell align="left">{row.data.customerPhone}</TableCell>
             <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
-            <TableCell align="left">{row.data.totalPrice}</TableCell>
+            <TableCell align="right">{formatNumber(row.data.totalPrice)}</TableCell>
             <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
-            <TableCell align="center">{row.data.status === "Conmfirmed" ? <DoneIcon style={{ color: 'green' }} /> : row.data.status === "WaitConfirm" ? <HourglassFullIcon style={{ color: 'orange' }}
-            /> : row.data.status === "Canceled" ? <ClearIcon style={{ color: 'red' }} /> : null}</TableCell>
+            <TableCell align="center">{row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
+            : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}</TableCell>
             <TableCell align="left">
                 <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
                     <a>
@@ -129,7 +129,7 @@ function render(props) {
     return (
         <AppCRM select="/crm/order">
             <Head>
-                <title>Danh sách hóa đơn</title>
+                <title>Danh sách đơn hàng</title>
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
@@ -150,8 +150,8 @@ function render(props) {
                                         onSearch()
                                     }
                                 }}
-                                placeholder="Nhập mã hóa đơn"
-                                inputProps={{ 'aria-label': 'Nhập mã hóa đơn' }}
+                                placeholder="Nhập mã đơn hàng"
+                                inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
                                 onClick={handleSubmit(onSearch)}>
@@ -176,11 +176,11 @@ function render(props) {
                     </colgroup>
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">Mã hóa đơn</TableCell>
+                            <TableCell align="left">Mã đơn hàng</TableCell>
                             <TableCell align="left">Tên khách hàng</TableCell>
                             <TableCell align="left">Số điện thoại</TableCell>
                             <TableCell align="left">Địa Chỉ</TableCell>
-                            <TableCell align="left">Tổng tiền</TableCell>
+                            <TableCell align="right">Tổng tiền</TableCell>
                             <TableCell align="left">Ngày giao</TableCell>
                             <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="left">Thao tác</TableCell>
@@ -201,7 +201,7 @@ function render(props) {
                         )}
 
                     <MyTablePagination
-                        labelUnit="hoá đơn"
+                        labelUnit="đơn hàng"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}
@@ -213,6 +213,6 @@ function render(props) {
                     />
                 </Table>
             </TableContainer>
-        </AppCRM>
+        </AppCRM> 
     );
 }
