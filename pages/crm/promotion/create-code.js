@@ -1,111 +1,94 @@
 import {
     Box,
-    Button, ButtonGroup, CardContent,
-    CardHeader,
-    FormControl, FormControlLabel,
-    FormGroup,
-    InputLabel,
-    MenuItem, Modal,
-    Paper, Radio, RadioGroup,
-    Select, Table, TableCell, TableContainer, TableHead, TableRow,
+    Button,
+    ButtonGroup,
+    CardContent,
+    CardHeader, Container,
+    FormControlLabel,
+    FormGroup, Modal,
+    Paper,
+    Radio,
+    RadioGroup,
+    Table,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     TextField
 } from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, {useState} from 'react';
+import {useForm} from 'react-hook-form';
 import styles from "./promotion.module.css";
-import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
 import Grid from "@material-ui/core/Grid";
 import Divider from "@material-ui/core/Divider";
-import Typography from "@material-ui/core/Typography";
-import {
-    defaultNameRulesValue,
-    defaultPromotionScope,
-    defaultRulePromotion,
-    defaultTypeConditionsRule,
-    defaultPromotionType,
-    defaultUseTypePromotion
-} from "../../../components/component/constant";
-import {
-    displayNameRule, displayTime,
-    limitText,
-    parseConditionValue,
-    parseRuleToObject,
-    setRulesPromotion,
-    setScopeObjectPromontion
-} from "../../../components/component/until";
-import Card from "@material-ui/core/Card";
-import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
 import InputAdornment from "@material-ui/core/InputAdornment";
 import IconButton from "@material-ui/core/IconButton";
-import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
-import AddCircleOutlineOutlinedIcon from "@material-ui/icons/AddCircleOutlineOutlined";
-import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
-import Dialog from "@material-ui/core/Dialog";
+import HighlightOffOutlinedIcon from '@material-ui/icons/HighlightOffOutlined';
+import AddCircleOutlineOutlinedIcon from '@material-ui/icons/AddCircleOutlineOutlined';
+import ListItem from "@material-ui/core/ListItem";
+import List from "@material-ui/core/List";
+import {doWithLoggedInUser, renderWithLoggedInUser} from "@thuocsi/nextjs-components/lib/login";
+import Card from "@material-ui/core/Card";
+import Typography from "@material-ui/core/Typography";
 import DialogTitle from "@material-ui/core/DialogTitle";
-import DialogContent from "@material-ui/core/DialogContent";
-import Autocomplete from "@material-ui/lab/Autocomplete";
-import Checkbox from "@material-ui/core/Checkbox";
 import DialogActions from "@material-ui/core/DialogActions";
+import Dialog from "@material-ui/core/Dialog";
+import Autocomplete from "@material-ui/lab/Autocomplete";
+import DialogContent from "@material-ui/core/DialogContent";
+import Checkbox from "@material-ui/core/Checkbox";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
-import {loadPromoData} from "./index";
 import {getPromoClient} from "../../../client/promo";
+import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
-import Image from "next/image";
-import {route} from "next/dist/next-server/server/router";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import {
+    defaultPromotionScope,
+    defaultRulePromotion,defaultPromotionType,
+    defaultTypeConditionsRule,
+    defaultNameRulesValue,queryParamGetProductGift,
+    defaultNameRulesQuantity, defaultUseTypePromotion
+} from "../../../components/component/constant";
+import {
+    setRulesPromotion,
+    limitText,
+    displayNameRule, setScopeObjectPromontion
+} from "../../../components/component/until";
+import {Grade} from "@material-ui/icons";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import FormControl from "@material-ui/core/FormControl";
 import {useRouter} from "next/router";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 
-export async function getServerSideProps(ctx ) {
-    return await doWithLoggedInUser(ctx, () => {
-        return loadPromotionData(ctx)
+
+export async function getServerSideProps(ctx) {
+    return await doWithLoggedInUser(ctx, (ctx) => {
+        return {props: {}}
     })
 }
 
-export async function loadPromotionData(ctx) {
-    let returnObject = {props: {}}
-    let query = ctx.query
-    let _promotionClient = getPromoClient(ctx,{})
-    let getPromotionResponse = await _promotionClient.getPromotionByID(query.promotionId)
-    if (getPromotionResponse && getPromotionResponse.status === "OK") {
-        returnObject.props.data = getPromotionResponse.data[0]
-    }
 
-    let defaultState = parseRuleToObject(getPromotionResponse.data[0])
-    let _productClient = getProductClient(ctx, {})
-    if (defaultState.listProductIDs.length > 0 ) {
-        let listProductPromotionResponse = await _productClient.getListProductByIdsOrCodes(defaultState.listProductIDs)
-        if (listProductPromotionResponse && listProductPromotionResponse.status === "OK") {
-            defaultState.listProductPromotion = listProductPromotionResponse.data
-        }
-    }
-    defaultState.listProductDefault = []
-    let listProductDefault = await _productClient.getListProduct()
-    if (listProductDefault && listProductDefault.status === "OK") {
-        listProductDefault.data.forEach((product,index) => {
-            if (index < 5 ) {
-                defaultState.listProductDefault.push({
-                    product: product,
-                    active: defaultState.listProductIDs.find(productId => productId === product.productID) || false
-                })
-            }
-        })
-    }
-
-    returnObject.props.defaultState = defaultState
-    return returnObject
+const defaultState = {
+    promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
+    promotionTypeRule: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
+    promotionScope: defaultPromotionScope.GLOBAL,
+    promotionUseType: defaultUseTypePromotion.MANY,
+    listGiftPromotion: [],
+    listProductPromotion: [],
+    listProductDefault: [],
+    listCategoryPromotion: [],
 }
 
-async function updatePromotion(promotionCode,applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId) {
-    let data = {applyPerUser,totalCode,promotionName,promotionType,startTime,endTime,objects,useType,rule,promotionId}
-    if (promotionCode !== "") {
-        data.promotionCode = promotionCode
-    }
-    return getPromoClient().updatePromotion(data)
+export default function NewPage(props) {
+    return renderWithLoggedInUser(props, render)
+}
+
+async function createPromontion(useType,totalCode,promotionName,promotionType,startTime,endTime,objects,rule,applyPerUser,promotionCode) {
+    return getPromoClient().createPromotion({useType,totalCode,promotionName,promotionType,startTime,endTime,objects,rule,applyPerUser,promotionCode})
 }
 
 async function getProduct(productName,categoryCode) {
@@ -124,29 +107,21 @@ async function getListCategory() {
     return await getCategoryClient().getListCategoryFromClient()
 }
 
-
-export default function NewPage(props) {
-    return renderWithLoggedInUser(props, render)
-}
-
 function render(props) {
     const toast = useToast()
     const router = useRouter()
-    let dataRender = props.data
-    console.log('data',dataRender)
-    let defaultState = props.defaultState
-    let startTime = dataRender.startTime
-    let endTime = dataRender.endTime
-    startTime = displayTime(startTime)
-    endTime = displayTime(endTime)
+    const [promotionRulesLine, setPromotionRulesLine] = useState([
+        {
+            id: 1,
+        },
+    ])
     const [state, setState] = useState(defaultState);
-    const [updateDateProps, setUpdateDataProps] = useState({
-    })
     const {promotionOption, promotionTypeRule,
-        promotionScope,promotionRulesLine,conditions,
-        listProductDefault,listProductPromotion,
-        listCategoryPromotion,listGiftPromotion,promotionUseType} = state
+        promotionScope,listProductPromotion,
+        listCategoryPromotion,listProductDefault,
+        promotionUseType} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
+
     const [open, setOpen] = useState({
         openModalGift : false,
         openModalProductGift: false,
@@ -155,50 +130,6 @@ function render(props) {
 
     const handleChange = (event) => {
         setState({...state, [event.target.name]: event.target.value})
-    }
-
-    const handleChangeState = (name,value) => {
-        setState({...state,name:value})
-    }
-
-    const handleChangeStatus = (event) => {
-        setState({...state, [event.target.name]: event.target.value,promotionRulesLine: [{id:0}]})
-        reset()
-    }
-
-    function handleRemoveCodePercent(id) {
-        const newCodes = promotionRulesLine.filter((item) => item.id !== id);
-        setState({...state,promotionRulesLine: newCodes});
-    }
-
-    function handleAddCodePercent(id) {
-        setState({...state,promotionRulesLine: [...promotionRulesLine,{id: id + 1}]});
-    }
-
-    const handleAddProductPromotion = (productList) => {
-        setOpen({...open,openModalProductScopePromotion: false})
-        let listProductPromotion = []
-        productList.forEach(product => {
-            if (product.active) {
-                listProductPromotion.push(product.product)
-            }
-        })
-        setState({...state,listProductPromotion:listProductPromotion})
-    }
-
-    const handleRemoveProductPromotion = (product) => {
-        let {listProductPromotion,listProductDefault} = state
-        listProductPromotion.forEach((productPromotion,index) => {
-            if (productPromotion.productID === product.productID) {
-                return listProductPromotion.splice(index,1)
-            }
-        })
-        listProductDefault.forEach(productDefault => {
-            if (productDefault.product.productID === product.productID) {
-                product.active=false
-            }
-        })
-        setState({...state,listProductPromotion: listProductPromotion,listProductDefault: listProductDefault})
     }
 
     const handleChangeScope = async (event) => {
@@ -223,8 +154,52 @@ function render(props) {
                 setOpen({...open,openModalProductScopePromotion: true})
             }
         }else {
-            setState({...state,[event.target?.name]: event.target?.value,listProductPromotion: []})
+            setState({...state,[event.target?.name]: event.target?.value})
         }
+    }
+
+    const handleChangeStatus = (event) => {
+        setPromotionRulesLine([{
+            id: 1,
+        }])
+        setState({...state, [event.target.name]: event.target.value})
+        reset()
+    }
+
+    const handleAddProductPromotion = (productList) => {
+        setOpen({...open,openModalProductScopePromotion: false})
+        let listProductPromotion = []
+        productList.forEach(product => {
+            if (product.active) {
+                listProductPromotion.push(product.product)
+            }
+        })
+        setState({...state,listProductPromotion:listProductPromotion})
+    }
+
+    function handleRemoveCodePercent(id) {
+        const newCodes = promotionRulesLine.filter((item) => item.id !== id);
+        setPromotionRulesLine(newCodes);
+    }
+
+    function handleAddCodePercent(id) {
+        setPromotionRulesLine([...promotionRulesLine, {id: id + 1}]);
+    }
+
+
+    const handleRemoveProductPromotion = (product) => {
+        let {listProductPromotion,listProductDefault} = state
+        listProductPromotion.forEach((productPromotion,index) => {
+            if (productPromotion.productID === product.productID) {
+                return listProductPromotion.splice(index,1)
+            }
+        })
+        listProductDefault.forEach(productDefault => {
+            if (productDefault.product.productID === product.productID) {
+                product.active=false
+            }
+        })
+        setState({...state,listProductPromotion: listProductPromotion,listProductDefault: listProductDefault})
     }
 
     // func onSubmit used because useForm not working with some fields
@@ -237,19 +212,18 @@ function render(props) {
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await updatePromotion(promotionCode,parseInt(totalApply),parseInt(totalCode),promotionName,dataRender.promotionType,startTime,endTime,objects,promotionUseType,rule,dataRender.promotionId)
-
+        let promotionResponse = await createPromontion(promotionUseType,parseInt(totalCode),promotionName,defaultPromotionType.VOUCHER_CODE,startTime,endTime,objects,rule,parseInt(totalApply),promotionCode)
         if (promotionResponse.status === "OK") {
-            toast.success('Cập nhật khuyến mãi thành công')
+            toast.success('Tạo khuyến mãi thành công')
         }else {
-            toast.error(promotionResponse.message)
+            toast.error(`${promotionResponse.message}`)
         }
     }
 
     return (
         <AppCRM select="/crm/promotion">
             <Head>
-                <title>Chỉnh sửa khuyến mãi</title>
+                <title>Thêm khuyến mãi</title>
             </Head>
             <Box component={Paper}>
                 <FormGroup style={{width: "100%"}}>
@@ -260,7 +234,7 @@ function render(props) {
                             </Grid>
                             <Grid>
                                 <Box style={{fontSize: 24}}>
-                                    <h3>Chỉnh sửa khuyến mãi</h3>
+                                    <h3>Thêm khuyến mãi mới</h3>
                                 </Box>
                             </Grid>
                         </Grid>
@@ -275,7 +249,6 @@ function render(props) {
                                         name="promotionName"
                                         label="Tên khuyến mãi"
                                         placeholder=""
-                                        defaultValue={dataRender.promotionName}
                                         helperText={errors.promotionName?.message}
                                         InputLabelProps={{
                                             shrink: true,
@@ -302,33 +275,25 @@ function render(props) {
                                         }
                                     />
                                 </Grid>
-                                {
-                                    dataRender.promotionType === defaultPromotionType.VOUCHER_CODE ? (
-                                        <Grid item xs={12} sm={6} md={6}>
-                                        <TextField
-                                            id="promotionCode"
-                                            name="promotionCode"
-                                            label="Mã khuyến mãi"
-                                            placeholder=""
-                                            defaultValue={dataRender.promotionCode}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            style={{width: '100%'}}
-                                            inputRef={register}
-                                        />
-                                        </Grid>
-                                    ): (
-                                        <Container></Container>
-                                    )
-                                }
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="promotionCode"
+                                        name="promotionCode"
+                                        label="Mã khuyến mãi"
+                                        placeholder=""
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        inputRef={register}
+                                    />
+                                </Grid>
                                 <Grid item xs={12} sm={6} md={6}>
                                     <TextField
                                         id="totalCode"
                                         name="totalCode"
                                         label="Số lần áp dụng"
                                         type="number"
-                                        defaultValue={dataRender.totalCode}
                                         helperText={errors.totalCode?.message}
                                         InputLabelProps={{
                                             shrink: true,
@@ -353,7 +318,7 @@ function render(props) {
                                         name="totalApply"
                                         label="Số lần áp dụng tối đa"
                                         type="number"
-                                        defaultValue={dataRender.applyPerUser}
+                                        defaultValue={1}
                                         helperText={errors.totalApply?.message}
                                         InputLabelProps={{
                                             shrink: true,
@@ -374,41 +339,10 @@ function render(props) {
                                 </Grid>
                                 <Grid item xs={12} sm={6} md={6}>
                                     <TextField
-                                        id="totalUsed"
-                                        name="totalUsed"
-                                        label="Số lượng user đã sử dụng"
-                                        placeholder=""
-                                        disabled={true}
-                                        defaultValue={dataRender.totalUsed || 0}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        style={{width: '100%'}}
-                                        inputRef={register}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <TextField
-                                        id="totalCollect"
-                                        name="totalCollect"
-                                        label="Số lần khuyến mãi đã được sử dụng"
-                                        placeholder=""
-                                        disabled={true}
-                                        defaultValue={dataRender.totalCollect || 0}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        style={{width: '100%'}}
-                                        inputRef={register}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={6} md={6}>
-                                    <TextField
                                         id="startTime"
                                         name="startTime"
                                         label="Thời gian bắt đầu"
                                         placeholder=""
-                                        defaultValue={startTime}
                                         helperText={errors.startTime?.message}
                                         type="datetime-local"
                                         InputLabelProps={{
@@ -431,7 +365,6 @@ function render(props) {
                                         label="Thời gian kết thúc"
                                         placeholder=""
                                         type="datetime-local"
-                                        defaultValue={endTime}
                                         helperText={errors.endTime?.message}
                                         InputLabelProps={{
                                             shrink: true,
@@ -519,7 +452,6 @@ function render(props) {
                                                                     placeholder=""
                                                                     type="number"
                                                                     variant="outlined"
-                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index),index)}
                                                                     size="small"
                                                                     helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]?.message}
                                                                     InputLabelProps={{
@@ -551,7 +483,6 @@ function render(props) {
                                                                     label="Số tiền giảm"
                                                                     placeholder=""
                                                                     variant="outlined"
-                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index),index)}
                                                                     size="small"
                                                                     helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceDiscountValue,index)]?.message}
                                                                     InputLabelProps={{
@@ -631,7 +562,6 @@ function render(props) {
                                                                     label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
                                                                     placeholder=""
                                                                     type="number"
-                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index),index)}
                                                                     variant="outlined"
                                                                     size="small"
                                                                     helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValuePercent,index)]?.message}
@@ -649,7 +579,7 @@ function render(props) {
                                                                                 message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
                                                                             },
                                                                             minLength: {
-                                                                                value: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6: 2,
+                                                                                value: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6 : 2,
                                                                                 message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
                                                                             },
                                                                         })
@@ -664,7 +594,6 @@ function render(props) {
                                                                     label="Số % giảm"
                                                                     placeholder=""
                                                                     variant="outlined"
-                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index),index)}
                                                                     size="small"
                                                                     helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.percentValue,index)]?.message}
                                                                     InputLabelProps={{
@@ -704,7 +633,6 @@ function render(props) {
                                                                     label="Số tiền giảm tối đa"
                                                                     placeholder=""
                                                                     variant="outlined"
-                                                                    defaultValue={parseConditionValue(conditions,promotionOption,promotionTypeRule,displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index),index)}
                                                                     size="small"
                                                                     helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMaxDiscountValue,index)]?.message}
                                                                     InputLabelProps={{
@@ -868,7 +796,7 @@ function render(props) {
                                 style={{margin: 8}}>
                                 Lưu
                             </Button>
-                            <Button variant="contained" style={{margin: 8}} onClick={() => router.back()}>Trở về</Button>
+                            <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>Làm mới</Button>
                         </Box>
                     </Box>
                 </FormGroup>
@@ -887,7 +815,7 @@ export function RenderTableGift(props) {
     const [showAutoComplete, setShowAutoComplete]   = useState(false);
 
     const handleSearchProductGift = async (productName) => {
-        let giftResponse = await searchGift(productName)
+        let giftResponse = await getProduct(productName,queryParamGetProductGift)
         if (giftResponse.status === "OK") {
             setStateGift({...stateGift, listGiftSearch: giftResponse.data})
         }
@@ -1090,9 +1018,8 @@ export function RenderTableProductGift(props) {
     const [showAutoComplete, setShowAutoComplete]   = useState(false);
 
     const handleSearchProductGift = async (productName) => {
-        let categoryGiftResponse = await getListGift()
         if (categoryGiftResponse.status === "OK") {
-            let giftResponse = await searchGift(categoryGiftResponse.data[0].code)
+            let giftResponse = await getProduct(categoryGiftResponse.data[0].code)
             if (giftResponse.status === "OK") {
                 setStateProductGift({...stateProductGift, listProductGiftSearch: giftResponse.data})
             }
@@ -1280,13 +1207,13 @@ export function RenderTableListProduct(props) {
         setStateProduct({...stateProduct,productNameSearch: event.target.value})
     }
 
+    const handleChangeCategory = (event) => {
+        setStateProduct({...stateProduct,categorySearch: event.target.value})
+    }
+
     const handleCloseModal = () => {
         setStateProduct({...stateProduct,listProductAction: props.listProductDefault})
         return props.handleClose()
-    }
-
-    const handleChangeCategory = (event) => {
-        setStateProduct({...stateProduct,categorySearch: event.target.value})
     }
 
     const handleActiveProduct = (product,active) => {
@@ -1375,16 +1302,16 @@ export function RenderTableListProduct(props) {
                                     </TableRow>
                                 </TableHead>
                                 {stateProduct.listProductAction.map(({product,active}) => (
-                                    <TableRow key={product?.productID}>
+                                    <TableRow key={product.productID}>
                                         <TableCell align="left">
                                             <Checkbox checked={active} style={{color: 'green'}} onChange={(e,value) => handleActiveProduct(product,value)} />
                                         </TableCell>
                                         <TableCell align="left">
-                                            {product?.name}
+                                            {product.name}
                                         </TableCell>
                                         <TableCell align="left">
                                             {
-                                                product?.imageUrls? (
+                                                product.imageUrls? (
                                                     <image src={product.imageUrls[0]}></image>
                                                 ):(
                                                     <div></div>
@@ -1424,8 +1351,8 @@ export function RenderTableListProduct(props) {
                                     <TableRow>
                                         <TableCell align="left">
                                             {
-                                                product.imageUrls?.length > 0 ?(
-                                                    <Image src={product.imageUrls[0]}></Image>
+                                                product.imageUrls? (
+                                                    <image src={product.imageUrls[0]}></image>
                                                 ):(
                                                     <div></div>
                                                 )
