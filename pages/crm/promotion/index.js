@@ -6,6 +6,9 @@ import {
     TableBody,
     TableCell,
     TableContainer,
+    FormControl,
+    Select,MenuItem,
+    InputLabel,
     TableHead,
     TableRow
 } from "@material-ui/core";
@@ -22,6 +25,21 @@ import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from '@material-ui/icons/Search';
 import IconButton from "@material-ui/core/IconButton";
 import {useForm} from "react-hook-form";
+import {getPromoClient} from "../../../client/promo";
+import {
+    defaultPromotionStatus,
+} from "../../../components/component/constant";
+import {
+    displayPromotionScope,
+    displayPromotionType,
+    displayRule,
+    displayStatus,
+    formatTime,
+    getPromotionScope
+} from "../../../components/component/until";
+import Switch from "@material-ui/core/Switch";
+import Modal from "@material-ui/core/Modal";
+import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -31,63 +49,22 @@ export async function getServerSideProps(ctx) {
 
 export async function loadPromoData(ctx) {
     // Fetch data from external API
+    let returnObject = {props: {}}
     let query = ctx.query
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
+    let promotionName = query.promotionName || ""
 
-    let result = {
-        data: [
-            {
-                promotionID: '1',
-                name: 'Thứ sáu đen tối',
-                code: '123_321#2',
-                type: 'black friday',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                promotionID: '2',
-                name: 'Thứ 5 trong sáng',
-                code: '123312^#2',
-                type: 'light day',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                promotionID: '3',
-                name: 'Noel',
-                code: '7&311#2',
-                type: 'meri chris',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                promotionID: '4',
-                name: 'Tết tết',
-                code: '31265#2',
-                type: 'holiday',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-            {
-                promotionID: '5',
-                name: 'Super',
-                code: '312432#2',
-                type: 'super',
-                timeShow: '12/03/2021',
-                start: '12/12/2012',
-                end: '20/02/2020'
-            },
-        ],
-        total: 10,
+    let _promotionClient = getPromoClient(ctx,{})
+    let getPromotionResponse = await _promotionClient.getPromotion(promotionName,limit,offset,true)
+    if (getPromotionResponse && getPromotionResponse.status === "OK") {
+        returnObject.props.data = getPromotionResponse.data
+        returnObject.props.count = getPromotionResponse.total
     }
+
     // Pass data to the page via props
-    return {props: {data: result.data, count: result.total}}
+    return returnObject
 }
 
 export default function PromotionPage(props) {
@@ -98,17 +75,74 @@ export function formatNumber(num) {
     return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,')
 }
 
+async function updatePromotion(promotionId,status) {
+    return getPromoClient().updatePromotion({promotionId,status})
+}
+
 function render(props) {
+    const toast = useToast()
     let router = useRouter()
     const {register, handleSubmit, errors} = useForm();
     let [search, setSearch] = useState('')
-    let q = router.query.q || ''
-    let page = parseInt(router.query.page) || 0
-    let limit = parseInt(router.query.limit) || 20
+    let [open, setOpen] = useState({
+        openModalCreate: false,
+    })
+    let promotionName = router.query.promotionName || ''
 
+    const [page, setPage] = React.useState(parseInt(router.query.page || 0));
+    const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(router.query.perPage) || 20);
     function searchPromotion(formData) {
-        let q = formData.q
-        Router.push(`/crm/promotion?q=${q}`)
+        let promotionName = formData.promotionName
+        Router.push({
+            pathname: '/crm/promotion',
+            query:{
+                promontionName: promotionName,
+            }
+        })
+    }
+
+    const handleChangePage = (event, newPage, rowsPerPage) => {
+        setPage(newPage)
+        setRowsPerPage(rowsPerPage)
+
+        router.push({
+            pathname: '/crm/promotion',
+            query: {
+                ...router.query,
+                limit: rowsPerPage,
+                page: newPage,
+                perPage: rowsPerPage,
+                offset: newPage * rowsPerPage
+            }
+        })
+    };
+
+    const handleActivePromotion = async (event,promotionID) => {
+        if (event.target.checked) {
+            let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.ACTIVE)
+            if (!promotionResponse || promotionResponse.status !==  "OK") {
+                return toast.error(promotionResponse.mesage)
+            }else {
+                props.data.forEach(d => {
+                    if (d.promotionId === promotionID) {
+                        return d.status = defaultPromotionStatus.ACTIVE
+                    }
+                })
+                return toast.success('Cập nhật thành công')
+            }
+        }else {
+            let promotionResponse = await updatePromotion(promotionID,defaultPromotionStatus.EXPIRED)
+            if (!promotionResponse || promotionResponse.status !==  "OK") {
+                return toast.error(promotionResponse.mesage)
+            }else {
+                props.data.forEach(d => {
+                    if (d.promotionId === promotionID) {
+                        return d.status = defaultPromotionStatus.EXPIRED
+                    }
+                })
+                return toast.success('Cập nhật thành công')
+            }
+        }
     }
 
     async function handleChange(event) {
@@ -125,25 +159,6 @@ function render(props) {
             console.log(error)
         }
     }
-    
-    const RenderRow = (row) => (
-        <TableRow>
-            <TableCell component="th" scope="row">{row.data.promotionID}</TableCell>
-            <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left">{row.data.code}</TableCell>
-            <TableCell align="left">{row.data.type}</TableCell>
-            <TableCell align="left">{row.data.timeShow}</TableCell>
-            <TableCell align="left">{row.data.start}</TableCell>
-            <TableCell align="left">{row.data.end}</TableCell>
-            <TableCell align="center">
-                <Link href={`/cms/promotion/edit?promotionID=${row.promotionID}`}>
-                    <ButtonGroup color="primary" aria-label="contained primary button group">
-                        <Button variant="contained" size="small" color="primary">Xem</Button>
-                    </ButtonGroup>
-                </Link>
-            </TableCell>
-        </TableRow>
-    )
 
     return (
         <AppCRM select="/crm/promotion">
@@ -159,8 +174,8 @@ function render(props) {
                         <form>
                             <Paper component="form" className={styles.search}>
                                 <InputBase
-                                    id="q"
-                                    name="q"
+                                    id="promotionName"
+                                    name="promotionName"
                                     className={styles.input}
                                     value={search}
                                     onChange={handleChange}
@@ -176,61 +191,135 @@ function render(props) {
                         </form>
                     </Grid>
                     <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/promotion/new">
                             <ButtonGroup color="primary" aria-label="contained primary button group"
-                                         className={styles.rightGroup}>
+                                         className={styles.rightGroup} onClick={() => setOpen({...open,openModalCreate: true})}>
                                 <Button variant="contained" color="primary">Thêm khuyến mãi</Button>
                             </ButtonGroup>
-                        </Link>
                     </Grid>
                 </Grid>
             </div>
             {
-                q === '' ? (
+                promotionName === '' ? (
                     <span/>
                 ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{q}'</i></div>
+                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{promotionName}'</i></div>
                 )
             }
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">ID</TableCell>
                             <TableCell align="left">Tên</TableCell>
-                            <TableCell align="left">Mã khuyến mãi</TableCell>
                             <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Thời gian hiển thị</TableCell>
-                            <TableCell align="left">Bắt đầu</TableCell>
-                            <TableCell align="left">Kết thúc</TableCell>
+                            <TableCell align="left">Áp dụng cho</TableCell>
+                            <TableCell align="left">Chi tiết khuyến mãi</TableCell>
+                            <TableCell align="left">Trạng Thái</TableCell>
+                            <TableCell align="left">Đang chạy</TableCell>
+                            <TableCell align="left">Thời gian</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {props.data.length > 0 ? (
+                    {props.data?.length > 0 ? (
                         <TableBody>
-                            {props.data.map(row => (
-                                <RenderRow data={row}/>
+                            {props.data.map((row,index) => (
+                                <TableRow key={index}>
+                                    <TableCell align="left">{row.promotionName}</TableCell>
+                                    <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
+                                    <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
+                                    <TableCell align="left">
+                                        {
+                                            displayRule(row.rule).length > 0 ? (
+                                                displayRule(row.rule).map((rule,index) => (
+                                                    index % 2 === 0 ?(
+                                                        <div>{rule}</div>
+                                                    ): (
+                                                        <div style={{fontStyle: "italic"}}>{rule}</div>
+                                                    )
+                                            ))
+                                            ): (
+                                                <div></div>
+                                            )
+                                        }
+                                    </TableCell>
+                                    <TableCell align="left">{displayStatus(row.status)}</TableCell>
+                                    <TableCell align="left">
+                                        <Switch
+                                            onChange={event => {handleActivePromotion(event,row.promotionId)}}
+                                            checked={row.status  === "ACTIVE"? true : false}
+                                            color="primary"
+                                        />
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        <div>Từ : {formatTime(row.startTime)}</div>
+                                        <div>Đến : {formatTime(row.endTime)}</div>
+                                    </TableCell>
+                                    <TableCell align="center">
+                                        <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
+                                            <ButtonGroup color="primary" aria-label="contained primary button group">
+                                                <Button variant="contained" size="small" color="primary">Xem</Button>
+                                            </ButtonGroup>
+                                        </Link>
+                                    </TableCell>
+                                </TableRow>
                             ))}
                         </TableBody>
-                    ) : (
-                        <TableBody>
-                            <TableRow>
-                                <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                            </TableRow>
-                        </TableBody>
+                    ): (
+                        <div></div>
                     )}
+                    {
+                        props.count > 0 ? (
+                            <MyTablePagination
+                                labelUnit="khuyến mãi"
+                                count={props.count}
+                                rowsPerPage={rowsPerPage}
+                                page={page}
+                                onChangePage={handleChangePage}
+                            />
+                        ): (
+                            <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
+                        )
+                    }
 
-                    <MyTablePagination
-                        labelUnit="khuyến mãi"
-                        count={props.count}
-                        rowsPerPage={limit}
-                        page={page}
-                        onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/promotion?page=${page}&limit=${rowsPerPage}`)
-                        }}
-                    />
                 </Table>
             </TableContainer>
+
+            <Modal open={open.openModalCreate} onClose={() => setOpen({...open,openModalCreate:  false})} className={styles.modal}>
+                <div className={styles.modalBodyCreate}>
+                    <h3 style={{textAlign: "center", marginBottom: "2rem"}}>
+                        Chọn loại khuyến mãi cần tạo
+                    </h3>
+                    <div style={{margin: "auto"}}>
+                        {/* <ButtonGroup className={styles.buttonConfirm}>
+                            <Link href={`/crm/promotion/create-code`}>
+                                <Button  variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo voucher Khuyến mãi</Button>
+                            </Link>
+                            <Link href={`/crm/promotion/new`}>
+                                <Button className={styles.buttonConfirmRight} variant="contained" color="primary" onClick={() => setOpen({...open,openModalCreate: false})}>Tạo Combo khuyến mãi</Button>
+                            </Link>
+                        </ButtonGroup> */}
+                          <FormControl className={styles.select}>
+                                    <InputLabel id="category-select-outlined-label">Chọn loại Khuyến Mãi</InputLabel>
+                                    <Select
+                                        autoWidth={false}
+                                        style={{width: '100% !important'}}
+                                        labelId="category-select-outlined-label"
+                                        id="category-select-outlined"
+                                        label="Chọn danh mục">
+                                        <Link href={`/crm/promotion/create-code`}>
+                                        <MenuItem value={"VOUCHER_CODE"} key={"VOUCHER_CODE"} onClick={() => setOpen({...open,openModalCreate: false})}>
+                                            Tạo voucher khuyến mãi
+                                        </MenuItem>
+                                        </Link>
+                                        <Link href={`/crm/promotion/new`}>
+                                        <MenuItem value={"COMBO"} key={"COMBO"} onClick={() => setOpen({...open,openModalCreate: false})}>
+                                            Tạo combo khuyến mãi
+                                        </MenuItem>
+                                        </Link>
+                                    </Select>
+                         </FormControl>
+                    </div>
+                </div>
+            </Modal>
         </AppCRM>
     )
 }

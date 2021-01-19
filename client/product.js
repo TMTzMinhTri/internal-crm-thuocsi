@@ -1,4 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
+import {queryParamGetProductGift} from "../components/component/constant";
 const PREFIX = `/marketplace/product/v1`
 // const PREFIX = ``
 
@@ -46,6 +47,15 @@ class ProductClient extends APIClient {
             })
     }
 
+    getProductByCategoryCode(categoryCode) {
+        return this.callFromClient(
+            "GET",
+            `${PREFIX}/product/category/list`,
+            {categoryCode}
+            )
+    }
+
+
     getProductList(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
@@ -55,6 +65,52 @@ class ProductClient extends APIClient {
             limit: limit,
             getTotal: true
         })
+    }
+
+    searchProductCategoryListFromClient(productName,categoryCode) {
+        let data = {}
+        if (productName) {
+            data = {
+                ...data,
+                q: productName
+            }
+        }
+        if (categoryCode) {
+            data = {
+                ...data,
+                categoryCode: categoryCode,
+            }
+        }
+        return this.callFromClient(
+            "GET",
+            `${PREFIX}/product/category/list`, data)
+    }
+
+    searchProductListFromClient(productName,categoryCode) {
+        let data = {}
+        if (productName) {
+            data = {
+                ...data,
+                q: productName
+            }
+        }
+        if (categoryCode) {
+            data = {
+                ...data,
+                categoryCode: categoryCode,
+            }
+        }
+        return this.callFromClient(
+            "GET",
+            `${PREFIX}/product/list`, data)
+    }
+
+    async getProductListFromClient(q) {
+        return this.callFromClient(
+            "GET",
+            `${PREFIX}/product/category/list`, {
+                q: q,
+            })
     }
 
     getProductHasPrice(offset, limit, q) {
