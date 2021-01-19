@@ -237,8 +237,8 @@ function render(props) {
             <Head>
                 <title>Thêm khuyến mãi</title>
             </Head>
-            <Box component={Paper}>
-                <FormGroup>
+            <Box component={Paper} style={{width: "100%"}}>
+                <FormGroup style={{width: "100%"}}>
                     <Box className={styles.contentPadding}>
                         <Grid container>
                             <Grid  xs={4}>
@@ -273,11 +273,11 @@ function render(props) {
                                             register({
                                                 required: "Tên khuyến mãi không được để trống",
                                                 maxLength: {
-                                                    value: 250,
+                                                    value: 100,
                                                     message: "Tên khuyến mãi không được vượt quá 250 kí tự"
                                                 },
                                                 minLength: {
-                                                    value: 6,
+                                                    value: 10,
                                                     message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự"
                                                 },
                                                 pattern: {
