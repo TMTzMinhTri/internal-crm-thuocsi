@@ -1379,9 +1379,9 @@
   resolved "https://registry.yarnpkg.com/@opentelemetry/context-base/-/context-base-0.14.0.tgz#c67fc20a4d891447ca1a855d7d70fa79a3533001"
   integrity sha512-sDOAZcYwynHFTbLo6n8kIbLiVF3a3BLkrmehJUyEbT9F+Smbi47kLGS2gG2g0fjBLR/Lr1InPD7kXL7FaTqEkw==
 
-"@thuocsi/nextjs-components@git+https://gitlab.com/thuocsi.vn-sdk/nextjs-components.git#v0.1.13":
+"@thuocsi/nextjs-components@git+https://thuocsi.quochoatqh@gitlab.com/thuocsi.vn-sdk/nextjs-components.git#v0.1.13":
   version "0.1.2"
-  resolved "git+https://gitlab.com/thuocsi.vn-sdk/nextjs-components.git#08d32807a2815c091f186abeb75f137d1adf0219"
+  resolved "git+https://thuocsi.quochoatqh@gitlab.com/thuocsi.vn-sdk/nextjs-components.git#08d32807a2815c091f186abeb75f137d1adf0219"
   dependencies:
     "@fortawesome/fontawesome-svg-core" "^1.2.32"
     "@fortawesome/free-brands-svg-icons" "^5.15.1"
