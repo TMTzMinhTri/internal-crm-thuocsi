@@ -12,6 +12,7 @@ import {
     DialogTitle,
     TableFooter
 } from "@material-ui/core";
+import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
@@ -87,14 +88,13 @@ export async function loadData(ctx) {
         data.props.wards = data.props.wards.map(ward => ({ ...ward, value: ward.code, label: ward.name }))
 
         //get list order-item 
-        // let orderItemResp = await orderClient.getOrderItemByOrderNo(order_no)
-        // if (orderItemResp.status !== 'OK') {
-        //     data.props.message = orderItemResp.message
-        //     data.props.status = orderItemResp.status;
-        //     return data
-        // }
-        // data.props.orderItem = orderItemResp.data[0]
-   
+        let orderItemResp = await orderClient.getOrderItemByOrderNo(order_no)
+        if (orderItemResp.status !== 'OK') {
+            data.props.message = orderItemResp.message
+            data.props.status = orderItemResp.status;
+            return data
+        }
+        data.props.orderItem = orderItemResp.data
     }
     return data
 }
@@ -110,13 +110,13 @@ export default function renderForm(props, toast) {
     let editObject = props.isUpdate ? props.order : {}
     const checkWardData = props.isUpdate ? (props.order.wardCode === '' ? {} : props.ward) : {};
     const [loading, setLoading] = useState(false);
-    const [quantityItem,setQuantityItem] = useState(1)
-    const [idxChangedItem,setIdxChangedItem] = useState()
+    const [idxChangedItem, setIdxChangedItem] = useState()
     const [province, setProvince] = useState(props.province);
-    // const [orderItem,setOrderItem] = useState(props.orderItem.data)
+    const [orderItem, setOrderItem] = useState(props.orderItem)
+    const [quantityItem,setQuantityItem] = useState(0)
     const [districts, setDistricts] = useState(props.districts || []);
     const [district, setDistrict] = useState(props.district || {});
-    const [openChangeQuantityDialog,setOpenChangeQuantityDialog] = useState(false)
+    const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
     const [wards, setWards] = useState(props.wards || []);
     const [ward, setWard] = useState(checkWardData);
     const isWard = ((props.ward === undefined) || (Object.keys(checkWardData).length === 0 && checkWardData.constructor === Object)) ? true : false;
@@ -188,14 +188,13 @@ export default function renderForm(props, toast) {
             errors.passwordConfirm.message = "Mật khẩu xác nhận không chính xác"
             return
         }
-        formData.customerProvinceCode = formData.customerProvinceCode.value || ''
-        formData.customerDistrictCode = formData.customerDistrictCode.value || ''
-        formData.customerWardCode = formData.customerWardCode.value || ''
+        // formData.customerProvinceCode = formData.customerProvinceCode.value || ''
+        // formData.customerDistrictCode = formData.customerDistrictCode.value || ''
+        // formData.customerWardCode = formData.customerWardCode.value || ''
 
         if (props.isUpdate) {
-            formData.orderNo = props.order.orderNo
-            console.log(formData)
-            await updateOrder(formData)
+            // formData.orderNo = props.order.orderNo
+            // await updateOrder(formData)
             await updateOrderItem(orderItem)
         } else {
 
@@ -215,9 +214,14 @@ export default function renderForm(props, toast) {
     async function updateOrderItem(orderItem) {
         let orderClient = getOrderClient()
         let resp
-        for(let i=0;i<orderItem.length;i++) {
-            console.log(orderItem[i])
-            resp = await orderClient.updateOrderItem(orderItem[i])
+        for (let i = 0; i < orderItem.length; i++) {
+            resp = await orderClient.updateOrderItem({
+                totalPrice: parseInt(orderItem[i].price * orderItem[i].quantity), orderNo: orderItem[i].orderNo, orderItemNo: orderItem[i].orderItemNo
+                , quantity: parseInt(orderItem[i].quantity, 10)
+            })
+            if (resp.status !== 'OK') {
+                error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            }
         }
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
@@ -226,34 +230,34 @@ export default function renderForm(props, toast) {
         }
     }
 
-    const RenderRow = ({data,index}) => {
-        return  (
+    const RenderRow = ({ data, index }) => {
+        return (
             <TableRow key={index}>
                 <TableCell align="left">{data.image}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
                 <TableCell align="left">{data.price}</TableCell>
                 <TableCell align="left">{data.quantity}</TableCell>
                 <TableCell align="left">{data.totalPrice}</TableCell>
-                <TableCell align="left">
-                 <IconButton onClick={() => {setIdxChangedItem(index); setOpenChangeQuantityDialog(true);}}>
-                        <LockOpenIcon fontSize="small" />
-                </IconButton>
+                <TableCell align="center">
+                    <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); }}>
+                        <TrendingUpIcon fontSize="small" />
+                    </IconButton>
                 </TableCell>
             </TableRow>
         );
     }
-    
 
-    const changeQuantityHandler = () => {
-        console.log("thay doi")
-        console.log(idxChangedItem)
-        let tmpOrderItem = orderItem.map((item,idx)=> {
-            if(idx==idxChangedItem) {
-                return {...item,quantity:quantityItem,totalPrice:quantityItem*item.price}
+
+    const changeQuantityHandler = (formData) => {
+        let quantityItem = parseInt(formData.quantityItem, 10)
+        let tmpOrderItem = orderItem.map((item, idx) => {
+            if (idx == idxChangedItem) {
+                return { ...item, quantity: quantityItem, totalPrice: quantityItem * item.price }
             }
             return item
         })
-        console.log(tmpOrderItem)
+        // better performance
+        props.order.totalPrice = props.order.totalPrice - props.orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
         setOrderItem(tmpOrderItem)
         setOpenChangeQuantityDialog(false)
     }
@@ -269,25 +273,37 @@ export default function renderForm(props, toast) {
                 <DialogTitle id="alert-dialog-title">
                     {"Thay đổi số lượng sản phẩm"}
                 </DialogTitle>
-               <DialogContent>
-               <TextField
-                    defaultValue={quantityItem}
-                    style={{margin:'0 auto',width:'50%'}}
-                    variant="outlined"
-                    size="small"
-                    type="number"
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                    label="Số lượng"
-                    onChange={event=>{setQuantityItem(event.target.value)}}
-                />
-               </DialogContent>
+                <DialogContent>
+                    <TextField
+                        defaultValue={1}
+                        style={{ margin: '0 auto', width: '100%' }}
+                        // variant="outlined"
+                        id="quantityItem"
+                        name="quantityItem"
+                        size="small"
+                        type="number"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        placeholder=""
+                        // onChange={event => setQuantityItem(event.target.value)}
+                        error={!!errors.quantityItem}
+                        helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
+                        inputRef={register({
+                            valueAsNumber: true, 
+                            min: 1
+                        })}
+                        label="Số lượng"
+                    
+
+                    />
+                </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenChangeQuantityDialog(false)} color="primary">
                         Hủy bỏ
                     </Button>
-                    <Button onClick={(event)=>changeQuantityHandler(event)} color="primary" autoFocus>
+                    {/* <Button onClick={(event) => changeQuantityHandler(event)} color="primary"  autoFocus> */}
+                    <Button onClick={handleSubmit(changeQuantityHandler)} color="primary" autoFocus>
                         Đồng ý
                      </Button>
                 </DialogActions>
@@ -299,9 +315,9 @@ export default function renderForm(props, toast) {
         <AppCRM select="/crm/order">
             {
                 <Box component={Paper} display="block">
-                    { openChangeQuantityDialog ? <ChangeQuantityDialog /> : null }
                     <FormGroup>
                         <form>
+                            {openChangeQuantityDialog ? <ChangeQuantityDialog /> : null}
                             <Box className={styles.contentPadding}>
                                 <Card variant="outlined">
                                     <CardContent>
@@ -318,6 +334,10 @@ export default function renderForm(props, toast) {
                                                     size="small"
                                                     label="Tên khách hàng"
                                                     placeholder=""
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
                                                     helperText={errors.name?.message}
                                                     InputLabelProps={{
                                                         shrink: true,
@@ -355,6 +375,10 @@ export default function renderForm(props, toast) {
                                                     variant="outlined"
                                                     size="small"
                                                     placeholder=""
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
                                                     type="number"
                                                     helperText={errors.customerPhone?.message}
                                                     InputLabelProps={{
@@ -388,6 +412,10 @@ export default function renderForm(props, toast) {
                                                     variant="outlined"
                                                     size="small"
                                                     label="Địa chỉ"
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
                                                     onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                     placeholder=""
                                                     helperText={errors.customerShippingAddress?.message}
@@ -407,7 +435,22 @@ export default function renderForm(props, toast) {
                                         </Grid>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={3} md={3}>
-                                                <MuiSingleAuto
+                                                <TextField
+                                                    id="customerProvinceCode"
+                                                    name="customerProvinceCode"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label="Tỉnh/Thành Phố"
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                />
+                                                {/* <MuiSingleAuto
                                                     id="customerProvinceCode"
                                                     name="customerProvinceCode" // NAME INPUT
                                                     options={props.provinces}  // DATA OPTIONS label-value
@@ -417,10 +460,26 @@ export default function renderForm(props, toast) {
                                                     message="Tỉnh/ Thành phố không thể để trống" // CUSTOM MESSAGE ERROR
                                                     onNotSearchFieldChange={onProvinceChange} // HANDLE EVENT CHANGE
                                                     control={control} // REACT HOOK FORM CONTROL
-                                                    errors={errors} />
+                                                    readOnly={true}
+                                                    errors={errors} /> */}
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
-                                                <MuiSingleAuto
+                                                <TextField
+                                                    id="customerDistrictCode"
+                                                    name="customerDistrictCode"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label="Quận/Huyện"
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                />
+                                                {/* <MuiSingleAuto
                                                     id="customerDistrictCode"
                                                     name="customerDistrictCode" // NAME INPUT
                                                     options={districts}  // DATA OPTIONS label-value
@@ -431,11 +490,26 @@ export default function renderForm(props, toast) {
                                                     message="Quận/huyện thể để trống" // CUSTOM MESSAGE ERROR
                                                     onNotSearchFieldChange={onDistrictChange} // HANDLE EVENT CHANGE
                                                     control={control} // REACT HOOK FORM CONTROL
-                                                    errors={errors} />
+                                                    errors={errors} /> */}
 
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
-                                                <MuiSingleAuto
+                                                <TextField
+                                                    id="customerWardCode"
+                                                    name="customerWardCode"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label="Phường/Xã"
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                />
+                                                {/* <MuiSingleAuto
                                                     id="customerWardCode"
                                                     name="customerWardCode" // NAME INPUT
                                                     options={wards}  // DATA OPTIONS label-value
@@ -445,18 +519,55 @@ export default function renderForm(props, toast) {
                                                     message="Phường xã không thể để trống" // CUSTOM MESSAGE ERROR
                                                     onNotSearchFieldChange={onWardChange} // HANDLE EVENT CHANGE
                                                     control={control} // REACT HOOK FORM CONTROL
-                                                    errors={errors} />
+                                                    errors={errors} /> */}
+                                            </Grid>
+                                        </Grid>
+                                        <Grid spacing={3} container>
+
+                                            <Grid item xs={12} sm={3} md={3}>
+                                                <TextField
+                                                    id="deliveryPlatform"
+                                                    name="deliveryPlatform"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label="Hình thức vận chuyển"
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={3} md={3}>
+                                                <TextField
+                                                    id="paymentMethod"
+                                                    name="paymentMethod"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label="Phương thức thanh toán"
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                />
                                             </Grid>
                                         </Grid>
                                     </CardContent>
-
                                 </Card>
                                 <TableContainer component={Paper}>
                                     <Table size="small" aria-label="a dense table">
                                         <colgroup>
-                                            <col width="25%" />
                                             <col width="20%" />
                                             <col width="20%" />
+                                            <col width="15%" />
+                                            <col width="10%" />
                                             <col width="15%" />
                                             <col width="20%" />
                                         </colgroup>
@@ -467,12 +578,13 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="left">Giá</TableCell>
                                                 <TableCell align="left">Số lượng</TableCell>
                                                 <TableCell align="left">Thành tiền</TableCell>
+                                                <TableCell align="center">Thay đổi số lượng</TableCell>
                                             </TableRow>
                                         </TableHead>
-                                        {/* {orderItem && orderItem.length > 0 ? (
+                                        {orderItem && orderItem.length > 0 ? (
                                             <TableBody>
                                                 {orderItem.map((row, i) => (
-                                                    <RenderRow data={row} key={i} index={i}/>
+                                                    <RenderRow data={row} key={i} index={i} />
                                                 ))}
                                             </TableBody>
                                         ) : (
@@ -481,27 +593,36 @@ export default function renderForm(props, toast) {
                                                         <TableCell colSpan={3} align="left">{props.orderItem.message}</TableCell>
                                                     </TableRow>
                                                 </TableBody>
-                                            )} */}
+                                            )}
+                                        <TableFooter>
+                                            <TableRow>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left">Phí vận chuyển</TableCell>
+                                                <TableCell align="center">{props.order.shippingFee}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left">Giảm giá</TableCell>
+                                                <TableCell align="center">{props.order.totalDiscount}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left" style={{ fontWeight: 'bold', color: 'black' }}>Tổng tiền</TableCell>
+                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black' }} >{props.order.totalPrice}</TableCell>
+                                            </TableRow>
+                                        </TableFooter>
                                     </Table>
                                 </TableContainer>
-                                <Grid container style={{ margin: '20px' }}>
-                                    <Grid item xs={12} sm={9} md={9}></Grid>
-                                    <Grid item xs={12} sm={2} md={2}>
-                                        <Card variant="outlined">
-                                            <CardContent>
-                                                <Typography color="textSecondary" gutterBottom>
 
-                                                </Typography>
-                                                <Typography variant="body2" component="p">
-                                                    Giảm giá : {props.order.totalDiscount}
-                                                </Typography>
-                                                <Typography variant="body2" component="p">
-                                                    Tổng tiền : {props.order.totalPrice}
-                                                </Typography>
-                                            </CardContent>
-                                        </Card>
-                                    </Grid>
-                                </Grid>
 
                                 <Divider />
 

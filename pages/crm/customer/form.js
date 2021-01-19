@@ -11,6 +11,8 @@ import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
+import { NotFound } from "components/components-global";
+import { condUserType, scopes, statuses } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -18,8 +20,6 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import { condUserType, statuses, scopes } from "components/global"
-import { NotFound } from "components/components-global";
 
 export async function loadData(ctx) {
     let data = {
@@ -68,10 +68,10 @@ export async function loadData(ctx) {
 }
 
 export default function renderForm(props, toast) {
-    const titlePage ="Cập nhật khách hàng"
+    const titlePage = "Cập nhật khách hàng"
     if (props.status && props.status !== "OK") {
         return (
-            <NotFound link='/crm/customer' titlePage={titlePage} labelLink="khách hàng"/>
+            <NotFound link='/crm/customer' titlePage={titlePage} labelLink="khách hàng" />
         )
     }
     let { error, success } = toast;
@@ -93,7 +93,7 @@ export default function renderForm(props, toast) {
         mode: "onChange"
     });
 
-    const noOptionsText = "Không có tùy chọn!";
+    const noOptionsText = "Không có tùy chọn";
 
     const onProvinceChange = async (event, val) => {
         setProvince()
@@ -239,13 +239,13 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.name}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Tên khách hàng không thể để trống",
                                                                     maxLength: {
                                                                         value: 50,
-                                                                        message: "Tên khách hàng có độ dài tối đa 50 kí tự"
+                                                                        message: "Tên khách hàng có độ dài tối đa 100 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 6,
@@ -275,7 +275,7 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.email}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
@@ -305,7 +305,7 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.phone}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
@@ -330,7 +330,7 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             label="Địa chỉ"
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             placeholder=""
                                                             helperText={errors.address?.message}
                                                             InputLabelProps={{
@@ -342,6 +342,18 @@ export default function renderForm(props, toast) {
                                                             inputRef={
                                                                 register({
                                                                     required: "Địa chỉ không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 250,
+                                                                        message: "Địa chỉ có độ dài tối đa 250 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 1,
+                                                                        message: "Địa chỉ có độ dài tối thiểu 1 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Địa chỉ không hợp lệ (không được dư khoảng trắng)."
+                                                                    }
                                                                 })
                                                             }
                                                         />
@@ -465,10 +477,23 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.legalRepresentative}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                          
                                                             inputRef={
                                                                 register({
                                                                     required: "Người đại diện không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 100,
+                                                                        message: "Người đại diện có độ dài tối đa 100 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 1,
+                                                                        message: "Người đại diện có độ dài tối thiểu 1 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Người đại diện không hợp lệ (không được dư khoảng trắng)."
+                                                                    }
                                                                 })
                                                             }
                                                         />
@@ -488,10 +513,23 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.mst}
                                                             required
-                                                            onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
+                                                          
                                                             inputRef={
                                                                 register({
                                                                     required: "Mã số thuế không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 50,
+                                                                        message: "Mã số thuế có độ dài tối đa 50 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 1,
+                                                                        message: "Mã số thuế có độ dài tối thiểu 1 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /^(?!.*[ ]{2})/,
+                                                                        message: "Mã số thuế không hợp lệ (không được dư khoảng trắng)."
+                                                                    }
                                                                 })
                                                             }
                                                         />

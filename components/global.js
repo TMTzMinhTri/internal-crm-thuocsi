@@ -88,10 +88,10 @@ export const scopes = [
 ]
 
 export const statuses = [
-    {
-        value: "ACTIVE",
-        label: "Đang hoạt động",
-    },
+    // {
+    //     value: "ACTIVE",
+    //     label: "Đang hoạt động",
+    // },
     {
         value: "DRAFT",
         label: "Nháp",

@@ -57,6 +57,76 @@
     text-align: center;
 }
 
+.buttonConfirm {
+    width: 100%;
+}
+
+.buttonConfirmRight{
+    margin-left: auto !important;
+}
+
 .rootCard {
     margin: 10px;
+}
+
+.blockSearch {
+    padding: 0 20px;
+}
+
+.select {
+    width: 100%!important;
+}
+
+.MuiInputBase-root {
+    width: 100%;
+}
+
+.modalBody {
+    background: #FFF;
+    width: 70%;
+    display: block;
+    padding: 24px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    overflow: auto;
+    outline: 0;
+    min-height: inherit;
+    max-height: inherit;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.modalBodyCreate {
+    background: #FFF;
+    width: 30%;
+    display: block;
+    padding: 24px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    overflow: auto;
+    outline: 0;
+    min-height: inherit;
+    max-height: inherit;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.modal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modalFooter {
+    text-align: right;
+    align-items: flex-end;
+    width: 100%;
+}
+
+
+.headerModal {
+    margin-top: 0;
+    text-align: center;
+}
+
+.buttonSearch {
+    margin-left: auto !important;
 }

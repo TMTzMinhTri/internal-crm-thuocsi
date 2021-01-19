@@ -15,6 +15,9 @@ import {
     TableRow,
 } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
+import DoneIcon from '@material-ui/icons/Done';
+import ClearIcon from '@material-ui/icons/Clear';
+import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -37,7 +40,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
-import {formatDateTime} from "components/global"
+import { formatDateTime } from "components/global"
 import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
 import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
 
@@ -59,14 +62,17 @@ export async function loadOrderData(ctx) {
     let resp = await orderClient.getOrder(offset, limit)
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
-            return { props: { data: [], count: 0, message: 'Không tìm thấy hóa đơn' } }
+            return { props: { data: [], count: 0, message: 'Không tìm thấy đơn hàng' } }
         }
         return { props: { data: [], count: 0, message: resp.message } }
     }
     // Pass data to the page via props
-    return { props: { data: resp.data,
-        //  count: resp.total 
-    } }
+    return {
+        props: {
+            data: resp.data,
+            count: resp.total
+        }
+    }
 }
 
 export default function OrderPage(props) {
@@ -76,7 +82,7 @@ export default function OrderPage(props) {
 function render(props) {
     let router = useRouter();
     const { register, handleSubmit, errors } = useForm();
-    
+
     let q = router.query.q || "";
     const [search, setSearch] = useState(q);
     let page = parseInt(router.query.page) || 0;
@@ -104,6 +110,8 @@ function render(props) {
             <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
             <TableCell align="left">{row.data.totalPrice}</TableCell>
             <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
+            <TableCell align="center">{row.data.status === "Conmfirmed" ? <DoneIcon style={{ color: 'green' }} /> : row.data.status === "WaitConfirm" ? <HourglassFullIcon style={{ color: 'yellow' }}
+            /> : row.data.status === "Canceled" ? <ClearIcon style={{ color: 'red' }} /> : null}</TableCell>
             <TableCell align="left">
                 <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
                     <a>
@@ -151,12 +159,13 @@ function render(props) {
                             </IconButton>
                         </Paper>
                     </Grid>
-              </Grid>
+                </Grid>
             </div>
 
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
+                        <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
@@ -173,6 +182,7 @@ function render(props) {
                             <TableCell align="left">Địa Chỉ</TableCell>
                             <TableCell align="left">Tổng tiền</TableCell>
                             <TableCell align="left">Ngày giao</TableCell>
+                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="left">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>

@@ -41,17 +41,15 @@ import Checkbox from "@material-ui/core/Checkbox";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 import {getPromoClient} from "../../../client/promo";
-import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
 import {
     defaultPromotionScope,
-    defaultRulePromotion,
+    defaultRulePromotion,defaultPromotionType,
     defaultTypeConditionsRule,
-    defaultPromotionType,
-    defaultNameRulesValue,
-    defaultNameRulesQuantity, defaultUseTypePromotion,queryParamGetProductGift
+    defaultNameRulesValue,queryParamGetProductGift,
+    defaultNameRulesQuantity, defaultUseTypePromotion
 } from "../../../components/component/constant";
 import {
     setRulesPromotion,
@@ -63,8 +61,10 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
-import {route} from "next/dist/next-server/server/router";
 import {useRouter} from "next/router";
+import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+
+
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
         return {props: {}}
@@ -78,7 +78,6 @@ const defaultState = {
     promotionScope: defaultPromotionScope.GLOBAL,
     promotionUseType: defaultUseTypePromotion.MANY,
     listGiftPromotion: [],
-    listProductGiftPromotion: [],
     listProductPromotion: [],
     listProductDefault: [],
     listCategoryPromotion: [],
@@ -88,8 +87,8 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
-async function createPromontion(totalCode,promotionName,promotionType,startTime,endTime,objects,applyPerUser,rule,useType) {
-    return getPromoClient().createPromotion({totalCode,promotionName,promotionType,startTime,endTime,objects,applyPerUser,rule,useType})
+async function createPromontion(useType,totalCode,promotionName,promotionType,startTime,endTime,objects,rule,applyPerUser,promotionCode) {
+    return getPromoClient().createPromotion({useType,totalCode,promotionName,promotionType,startTime,endTime,objects,rule,applyPerUser,promotionCode})
 }
 
 async function getProduct(productName,categoryCode) {
@@ -120,9 +119,9 @@ function render(props) {
     const {promotionOption, promotionTypeRule,
         promotionScope,listProductPromotion,
         listCategoryPromotion,listProductDefault,
-        listGiftPromotion,listProductGiftPromotion,promotionUseType} = state
+        promotionUseType} = state
     const {register,getValues, handleSubmit,setError,setValue,reset, errors} = useForm();
-    const [stateTest,setStateTest] = useState("")
+
     const [open, setOpen] = useState({
         openModalGift : false,
         openModalProductGift: false,
@@ -143,19 +142,19 @@ function render(props) {
             let productDefaultResponse = await getProduct()
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = []
-                    productDefaultResponse.data.forEach((productResponse,index) => {
-                        if (index < 5) {
-                            listProductDefault.push({
-                                product: productResponse,
-                                active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID) || false
-                            })
-                        }
-                    })
+                productDefaultResponse.data.forEach((productResponse,index) => {
+                    if (index < 5) {
+                        listProductDefault.push({
+                            product: productResponse,
+                            active: listProductPromotion.find(productPromotion => productPromotion.productID === productResponse.productID) || false
+                        })
+                    }
+                })
                 setState({...state,[event.target?.name]: event.target?.value,listProductDefault: listProductDefault,listCategoryPromotion: listCategoryResponse.data})
                 setOpen({...open,openModalProductScopePromotion: true})
-                }
+            }
         }else {
-            setState({...state,[event.target?.name]: event.target?.value,listProductPromotion: []})
+            setState({...state,[event.target?.name]: event.target?.value})
         }
     }
 
@@ -203,28 +202,17 @@ function render(props) {
         setState({...state,listProductPromotion: listProductPromotion,listProductDefault: listProductDefault})
     }
 
-
-    const handleAddGift = (listGiftNew) => {
-        let listGiftAction = listGiftPromotion
-        listGiftNew.forEach(giftNew => {
-            if (giftNew.active) {
-                listGiftAction.push(giftNew)
-            }
-        })
-        setState({...state,listGiftPromotion: listGiftAction})
-    }
-
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {promotionName,totalCode,startTime,endTime,totalApply} = getValues()
+        let {promotionName,totalCode,startTime,endTime,totalApply,promotionCode} = getValues()
         let value = getValues()
         let listProductIDs = []
         listProductPromotion.forEach(product => listProductIDs.push(product.productID))
-        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,listProductIDs,listGiftPromotion,listProductGiftPromotion)
+        let rule = setRulesPromotion(promotionOption,promotionTypeRule,value,promotionRulesLine.length,listProductIDs)
         startTime  = startTime + ":00Z"
         endTime  = endTime + ":00Z"
         let objects = setScopeObjectPromontion(promotionScope,listProductIDs)
-        let promotionResponse = await createPromontion(parseInt(totalCode),promotionName,defaultPromotionType.COMBO,startTime,endTime,objects,parseInt(totalApply),rule,promotionUseType)
+        let promotionResponse = await createPromontion(promotionUseType,parseInt(totalCode),promotionName,defaultPromotionType.VOUCHER_CODE,startTime,endTime,objects,rule,parseInt(totalApply),promotionCode)
         if (promotionResponse.status === "OK") {
             toast.success('Tạo khuyến mãi thành công')
         }else {
@@ -250,13 +238,12 @@ function render(props) {
                                 </Box>
                             </Grid>
                         </Grid>
-
                         <CardHeader
                             subheader="Thông tin khuyến mãi"
                         />
                         <CardContent>
                             <Grid spacing={3} container>
-                                <Grid item xs={12} sm={12} md={12}>
+                                <Grid item xs={12} sm={6} md={6}>
                                     <TextField
                                         id="promotionName"
                                         name="promotionName"
@@ -286,6 +273,19 @@ function render(props) {
                                                 }
                                             })
                                         }
+                                    />
+                                </Grid>
+                                <Grid item xs={12} sm={6} md={6}>
+                                    <TextField
+                                        id="promotionCode"
+                                        name="promotionCode"
+                                        label="Mã khuyến mãi"
+                                        placeholder=""
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{width: '100%'}}
+                                        inputRef={register}
                                     />
                                 </Grid>
                                 <Grid item xs={12} sm={6} md={6}>
@@ -436,7 +436,7 @@ function render(props) {
                                 promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE ? (
                                     <Card variant="outlined" style={{marginTop: '10px'}}
                                     >
-                                        <List id="list123" component="nav" aria-label="mailbox folders">
+                                        <List component="nav" aria-label="mailbox folders">
                                             {
                                                 promotionRulesLine.map((code, index) => (
                                                     <ListItem
@@ -453,7 +453,6 @@ function render(props) {
                                                                     type="number"
                                                                     variant="outlined"
                                                                     size="small"
-                                                                    defaultValue={stateTest}
                                                                     helperText={errors[displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue,index)]?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
@@ -463,7 +462,7 @@ function render(props) {
                                                                     required
                                                                     inputRef={
                                                                         register({
-                                                                            required: promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "Giá trị đơn hàng không được bỏ trống" : "Số lượng sản phẩm không được bỏ trống",
+                                                                            required: "Giá trị đơn hàng không được bỏ trống",
                                                                             maxLength: {
                                                                                 value: 10,
                                                                                 message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
@@ -704,32 +703,14 @@ function render(props) {
                                         </List>
                                     </Card>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.GIFT ? (
-                                    <div>
-                                        <List component="nav" aria-label="mailbox folders">
-                                            {
-                                                promotionRulesLine.map((code, index) => (
-                                                    <ListItem key={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id} button>
-                                                        <RenderTableGift
-                                                            handleClickOpen={() => setOpen({...open,openModalGift: true})}
-                                                            handleClose={() => setOpen({...open,openModalGift: false})}
-                                                            open={open.openModalGift}
-                                                            promotionOption={promotionOption}
-                                                            register={register}
-                                                            errors={errors}
-                                                            code={code}
-                                                            promotionRulesLine={promotionRulesLine}
-                                                            index={index}
-                                                            handleAddCodePercent={handleAddCodePercent}
-                                                            handleRemoveCodePercent={handleRemoveCodePercent}
-                                                            listGiftPromotion={listGiftPromotion}
-                                                            state={state}
-                                                            handleChange={handleChange}
-                                                        />
-                                                    </ListItem>
-                                                ))
-                                            }
-                                        </List>
-                                    </div>
+                                    <RenderTableGift
+                                        handleClickOpen={() => setOpen({...open,openModalGift: true})}
+                                        handleClose={() => setOpen({...open,openModalGift: false})}
+                                        open={open.openModalGift}
+                                        register={register}
+                                        state={state}
+                                        handleRemoveCodePercent={handleRemoveCodePercent}
+                                        handleChange={handleChange}/>
                                 ) : promotionTypeRule === defaultTypeConditionsRule.PRODUCT_GIFT ? (
                                     <RenderTableProductGift
                                         handleClickOpen={() => setOpen({...open,openModalProductGift: true})}
@@ -767,42 +748,42 @@ function render(props) {
                         <CardHeader
                             subheader="Áp dụng cho"
                         />
-                          <CardContent>
-                              <Grid spacing={3} container>
-                                  <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
-                                              onChange={handleChangeScope}>
-                                      <Grid spacing={3} container justify="space-around" alignItems="center">
-                                          <Grid item xs={12} sm={6} md={6}>
-                                              <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
-                                                                label="Toàn sàn"/>
-                                          </Grid>
-                                          <Grid item xs={12} sm={6} md={6}>
-                                              <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
-                                                                label="Sản phẩm được chọn"/>
-                                          </Grid>
-                                          {/*<Grid item xs={12} sm={4} md={4}>*/}
-                                          {/*    <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}*/}
-                                          {/*                      label="Danh mục được chọn"/>*/}
-                                          {/*</Grid>*/}
-                                      </Grid>
-                                  </RadioGroup>
-                              </Grid>
-                            </CardContent>
+                        <CardContent>
+                            <Grid spacing={3} container>
+                                <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope}
+                                            onChange={handleChangeScope}>
+                                    <Grid spacing={3} container justify="space-around" alignItems="center">
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultPromotionScope.GLOBAL} control={<Radio color="primary"/>}
+                                                              label="Toàn sàn"/>
+                                        </Grid>
+                                        <Grid item xs={12} sm={6} md={6}>
+                                            <FormControlLabel value={defaultPromotionScope.PRODUCT} control={<Radio color="primary"/>}
+                                                              label="Sản phẩm được chọn"/>
+                                        </Grid>
+                                        {/*<Grid item xs={12} sm={4} md={4}>*/}
+                                        {/*    <FormControlLabel value={defaultPromotionScope.CATEGORY} control={<Radio color="primary"/>}*/}
+                                        {/*                      label="Danh mục được chọn"/>*/}
+                                        {/*</Grid>*/}
+                                    </Grid>
+                                </RadioGroup>
+                            </Grid>
+                        </CardContent>
                         {
                             promotionScope === defaultPromotionScope.PRODUCT ?(
-                                    <RenderTableListProduct
-                                        handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
-                                        handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
-                                        open={open.openModalProductScopePromotion}
-                                        register={register}
-                                        getValue={getValues()}
-                                        listProductDefault={listProductDefault}
-                                        promotionScope={promotionScope}
-                                        listCategoryPromotion={listCategoryPromotion}
-                                        listProductPromotion={listProductPromotion}
-                                        handleAddProductPromotion={handleAddProductPromotion}
-                                        handleRemoveProductPromotion={handleRemoveProductPromotion}
-                                    />
+                                <RenderTableListProduct
+                                    handleClickOpen={() => setOpen({...open,openModalProductScopePromotion: true})}
+                                    handleClose={() => setOpen({...open,openModalProductScopePromotion: false})}
+                                    open={open.openModalProductScopePromotion}
+                                    register={register}
+                                    getValue={getValues()}
+                                    listProductDefault={listProductDefault}
+                                    promotionScope={promotionScope}
+                                    listCategoryPromotion={listCategoryPromotion}
+                                    listProductPromotion={listProductPromotion}
+                                    handleAddProductPromotion={handleAddProductPromotion}
+                                    handleRemoveProductPromotion={handleRemoveProductPromotion}
+                                />
                             ): (
                                 <div></div>
                             )
@@ -815,7 +796,7 @@ function render(props) {
                                 style={{margin: 8}}>
                                 Lưu
                             </Button>
-                            <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()} >Làm mới</Button>
+                            <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>Làm mới</Button>
                         </Box>
                     </Box>
                 </FormGroup>
@@ -827,6 +808,7 @@ function render(props) {
 export function RenderTableGift(props) {
     const [stateGift, setStateGift] = useState({
         listGiftSearch: [],
+        listGiftAction: [],
         listGiftNew: [],
     })
 
@@ -885,8 +867,18 @@ export function RenderTableGift(props) {
         setStateGift({...stateGift,listGiftNew: listGiftNew,listGiftSearch: []})
     }
 
+    const handleAddGiftAction = () => {
+        let {listGiftAction,listGiftNew} = stateGift
+        listGiftNew.forEach(giftNew => {
+            if (giftNew.active) {
+                listGiftAction.push(giftNew)
+            }
+        })
+        props.handleClose()
+    }
+
     return (
-        <Card variant="outlined" style={{marginTop: '4px',width: "100%"}}>
+        <Card variant="outlined" style={{marginTop: '4px'}}>
             <ButtonGroup color="primary" size="small"
                          aria-label="contained primary button group"
                          className={styles.btnDialog}
@@ -894,101 +886,33 @@ export function RenderTableGift(props) {
             >
                 <Button variant="contained" color="primary">Thêm quà</Button>
             </ButtonGroup>
-            <Grid spacing={2} container justify="center">
-                <Grid item xs={12} sm={3} md={3}>
-                    <TextField
-                        id={displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)}
-                        name={displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)}
-                        label={props.promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? "Giá trị đơn hàng": "Số lượng sản phẩm"}
-                        placeholder=""
-                        type="number"
-                        variant="outlined"
-                        size="small"
-                        helperText={props.errors[displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)]?.message}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        style={{width: '100%'}}
-                        error={!!props.errors[displayNameRule(props.promotionOption,defaultNameRulesValue.gift,props.index)]}
-                        required
-                        inputRef={
-                            props.register({
-                                required: "Giá trị đơn hàng không được bỏ trống",
-                                maxLength: {
-                                    value: 10,
-                                    message: "Giá trị đơn hàng không được vượt quá 10 kí tự"
-                                },
-                                minLength: {
-                                    value: props.promotionOption === defaultRulePromotion.MIN_ORDER_VALUE? 6: 2,
-                                    message: "Giá trị đơn hàng phải lớn hơn 6 kí tự"
-                                },
-                            })
-                        }
-                    />
-                </Grid>
-                <Grid item xs={12} sm={7} md={7}>
-                    <TableContainer component={Paper}>
-                        <Table size="small">
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell align="left">Hình ảnh</TableCell>
-                                    <TableCell align="left">Tên quà</TableCell>
-                                    <TableCell align="left">Số lượng</TableCell>
-                                    <TableCell align="center">Thao tác</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            {props.listGiftPromotion.map(({gift,quantity,active}) => (
-                                <TableRow>
-                                    <TableCell align="left">Balo</TableCell>
-                                    <TableCell align="left">{gift.name}</TableCell>
-                                    <TableCell align="left">quantity</TableCell>
-                                    <TableCell align="center">
-                                        <IconButton color="secondary"
-                                                    component="span"
-                                                    onClick={() => handleRemoveGift(gift)}
-                                        >
-                                            <HighlightOffOutlinedIcon/>
-                                        </IconButton>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </Table>
-                    </TableContainer>
-                </Grid>
-                <Grid item xs={12} sm={2} md={2}>
-                    <Grid spacing={1} container alignItems="center">
-                        <Grid item xs={6} sm={4} md={2}>
-                            {
-                                props.promotionRulesLine.length !== 1 ? (
-                                    <IconButton color="secondary"
-                                                component="span"
-                                                onClick={() => props.handleRemoveCodePercent(props.code.id)}>
-                                        <HighlightOffOutlinedIcon/>
-                                    </IconButton>
-                                ) : (
-                                    <div/>
-                                )
-                            }
-                        </Grid>
-                        {
-                            props.index + 1 === props.promotionRulesLine.length ?
-                                (
-                                    <Grid item xs={6} sm={4} md={2}>
-                                        <IconButton color="primary"
-                                                    onClick={() => props.handleAddCodePercent(props.code.id)}
-                                                    aria-label="upload picture"
-                                                    component="span">
-                                            <AddCircleOutlineOutlinedIcon/>
-                                        </IconButton>
-                                    </Grid>
-                                ) : (
-                                    <div/>
-                                )
-                        }
-                    </Grid>
-                </Grid>
-            </Grid>
-
+            <TableContainer component={Paper}>
+                <Table size="small">
+                    <TableHead>
+                        <TableRow>
+                            <TableCell align="left">Hình ảnh</TableCell>
+                            <TableCell align="left">Tên quà</TableCell>
+                            <TableCell align="left">Số lượng</TableCell>
+                            <TableCell align="center">Thao tác</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    {stateGift.listGiftAction.map(({gift,quantity,active}) => (
+                        <TableRow>
+                            <TableCell align="left">Balo</TableCell>
+                            <TableCell align="left">{gift.name}</TableCell>
+                            <TableCell align="left">quantity</TableCell>
+                            <TableCell align="center">
+                                <IconButton color="secondary"
+                                            component="span"
+                                            onClick={() => handleRemoveGift(gift)}
+                                >
+                                    <HighlightOffOutlinedIcon/>
+                                </IconButton>
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </Table>
+            </TableContainer>
             <Dialog
                 open={props.open}
                 onClose={props.handleClose}
@@ -1074,7 +998,7 @@ export function RenderTableGift(props) {
                     <Button onClick={props.handleClose} color="secondary">
                         Hủy
                     </Button>
-                    <Button onClick={() => props.handleAddGiftAction(stateGift.listGiftNew)} color="primary" autoFocus>
+                    <Button onClick={handleAddGiftAction} color="primary" autoFocus>
                         Thêm
                     </Button>
                 </DialogActions>
@@ -1277,23 +1201,19 @@ export function RenderTableListProduct(props) {
         productNameSearch: "",
     })
 
-    console.log('props',props.listProductDefault)
-    console.log('props',stateProduct)
-
-
     const [showAutoComplete, setShowAutoComplete]   = useState(false);
 
     const handleChangeProductSearch = (event) => {
         setStateProduct({...stateProduct,productNameSearch: event.target.value})
     }
 
+    const handleChangeCategory = (event) => {
+        setStateProduct({...stateProduct,categorySearch: event.target.value})
+    }
+
     const handleCloseModal = () => {
         setStateProduct({...stateProduct,listProductAction: props.listProductDefault})
         return props.handleClose()
-    }
-
-    const handleChangeCategory = (event) => {
-        setStateProduct({...stateProduct,categorySearch: event.target.value})
     }
 
     const handleActiveProduct = (product,active) => {
@@ -1310,19 +1230,16 @@ export function RenderTableListProduct(props) {
         let seachProductResponse = await searchProductList(stateProduct.productNameSearch, stateProduct.categorySearch.code)
         if (seachProductResponse && seachProductResponse.status === "OK") {
             let listProductAction = []
-            seachProductResponse.data?.forEach((searchProduct, index) => {
+            seachProductResponse.data.forEach((searchProduct, index) => {
                 if (index < 5) {
                     listProductAction.push({
                         product: searchProduct,
-                        active: props.listProductPromotion.find(productPromotion => productPromotion.productID === searchProduct.productID) || false
+                        active: props.listProductPromotion.find(productPromotion => productPromotion.productID === searchProduct.productID)
                     })
                 }
             })
-            console.log('111',seachProductResponse.data)
-            console.log('123124',listProductAction)
             setStateProduct({...stateProduct, listProductAction: listProductAction})
         }else {
-            console.log('555')
             setStateProduct({...stateProduct, listProductAction: []})
         }
     }
@@ -1359,18 +1276,18 @@ export function RenderTableListProduct(props) {
                                         inputRef={props.register}
                                         label="Chọn danh mục">
                                         {stateProduct.listCategoryPromotion.map((category) => (
-                                                <MenuItem value={category} key={category.categoryID}>
-                                                    {limitText(category.name,20) || "...Không xác định"}
-                                                </MenuItem>
+                                            <MenuItem value={category} key={category.categoryID}>
+                                                {limitText(category.name,20) || "...Không xác định"}
+                                            </MenuItem>
                                         ))}
                                     </Select>
                                 </FormControl>
                             </Grid>
                             <Grid item sx={12} sm={4} md={4} style={{display: "flex"}}>
-                                    <Button variant="contained"  onClick={handleOnSearchProductCategory} className={styles.buttonSearch}>Tìm kiếm<IconButton>
-                                        <SearchIcon/>
-                                    </IconButton>
-                                    </Button>
+                                <Button variant="contained"  onClick={handleOnSearchProductCategory} className={styles.buttonSearch}>Tìm kiếm<IconButton>
+                                    <SearchIcon/>
+                                </IconButton>
+                                </Button>
                             </Grid>
                         </Grid>
                     </div>
@@ -1419,7 +1336,7 @@ export function RenderTableListProduct(props) {
                 </div>
             </Modal>
             {
-               props.promotionScope === defaultPromotionScope.PRODUCT ? (
+                props.promotionScope === defaultPromotionScope.PRODUCT ? (
                     <Card>
                         <TableContainer component={Paper}>
                             <Table size="small">
