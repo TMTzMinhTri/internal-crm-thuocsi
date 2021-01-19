@@ -24,7 +24,8 @@ const MuiMultipleAutocomplete = withStyles({
         "& .MuiChip-label": {
             paddingBottom: '3px',
             paddingTop: '3px',
-            whiteSpace: 'normal'
+            whiteSpace: 'normal',
+            overflowWrap: 'anywhere'
         }
     }
 })(Autocomplete); // Fix CSS scroll page when pick long tag
