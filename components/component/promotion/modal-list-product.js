@@ -65,6 +65,7 @@ const RenderTableListProduct = (props) => {
             }
         });
         setStateProduct({...stateProduct, listProductAction: listProductAction});
+        console.log('defau',props.listProductDefault)
     };
 
     const handleOnSearchProductCategory = async () => {
@@ -93,11 +94,6 @@ const RenderTableListProduct = (props) => {
         } else {
             setStateProduct({...stateProduct, listProductAction: []});
         }
-
-        setStateProduct({
-            ...stateProduct,
-            listProductAction: listProductAction,
-        });
     };
 
     return (
@@ -105,15 +101,16 @@ const RenderTableListProduct = (props) => {
             <Button
                 variant="contained"
                 style={{margin: "1rem 0"}}
-                onClick={props.handleClickOpen}
-            >
+                onClick={() => {
+                    props.handleClickOpen()
+                    setStateProduct({...stateProduct,productNameSearch: "",categorySearch: {}})}
+                }>
                 Chọn sản phẩm
             </Button>
             <Modal
                 open={props.open}
-                onClose={props.handleClose}
-                className={styles.modal}
-            >
+                onClose={() => {props.handleClose()}}
+                className={styles.modal}>
                 <div className={styles.modalBody}>
                     <h1 className={styles.headerModal}>Chọn sản phẩm</h1>
                     <div style={{margin: "1.25rem"}}>
@@ -139,7 +136,6 @@ const RenderTableListProduct = (props) => {
                                         labelId="category-select-outlined-label"
                                         id="category-select-outlined"
                                         onChange={handleChangeCategory}
-                                        inputRef={props.register}
                                         label="Chọn danh mục"
                                     >
                                         {stateProduct.listCategoryPromotion.map((category) => (

@@ -163,11 +163,7 @@ function render(props) {
                     if (index < 5) {
                         listProductDefault.push({
                             product: productResponse,
-                            active:
-                                listProductPromotion.find(
-                                    (productPromotion) =>
-                                        productPromotion.productID === productResponse.productID
-                                ) || false,
+                            active: false,
                         });
                     }
                 });
@@ -175,6 +171,7 @@ function render(props) {
                     ...state,
                     [event.target?.name]: event.target?.value,
                     listProductDefault: listProductDefault,
+                    listProductPromotion: [],
                     listCategoryPromotion: listCategoryResponse.data,
                 });
                 setOpen({...open, openModalProductScopePromotion: true});
@@ -203,6 +200,7 @@ function render(props) {
             setState({
                 ...state,
                 [event.target?.name]: event.target?.value,
+                listCategoryPromotion: [],
                 listProductPromotion: [],
             });
         }
