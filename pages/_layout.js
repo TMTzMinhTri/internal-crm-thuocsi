@@ -45,6 +45,18 @@ export default class AppCRM extends Component {
                     icon:faUsers,
                 },
                 {
+                    key:"ORDER",
+                    name:"Đơn hàng",
+                    link:"/crm/order",
+                    icon:faDollarSign,
+                },
+                // {
+                //     key: "DISCOUNT",
+                //     name: "Khuyến mãi",
+                //     link: "/crm/promotion",
+                //     icon: faPercentage
+                // },
+                {
                     key: "DISCOUNT",
                     name: "Khuyến mãi",
                     link: "/crm/promotion",

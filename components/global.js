@@ -87,6 +87,21 @@ export const scopes = [
     },
 ]
 
+export const orderStatus = [
+    {
+        value: "Confirmed",
+        label: "Đã xác nhận",
+    },
+    {
+        value: "WaitConfirm",
+        label: "Chờ xác nhận",
+    },
+    {
+        value: "Canceled",
+        label: "Hủy bỏ",
+    }
+]
+
 export const statuses = [
     // {
     //     value: "ACTIVE",
