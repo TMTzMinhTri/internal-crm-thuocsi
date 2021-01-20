@@ -127,7 +127,7 @@ const ConditionFields = (props) => {
                     </Grid>
                 </Grid>
             </RadioGroup>
-            <Card variant="outlined">
+            <Card>
                 <CardContent>
                     <Typography color="textSecondary" gutterBottom>
                         Loại
@@ -158,26 +158,12 @@ const ConditionFields = (props) => {
                                     label="Giảm % giá sản phẩm"
                                 />
                             </Grid>
-                            {/* <Grid item xs={12} sm={6} md={4}>
-                <FormControlLabel
-                  value={defaultTypeConditionsRule.GIFT}
-                  control={<Radio style={{ color: "blue" }} />}
-                  label="Quà"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6} md={4}>
-                <FormControlLabel
-                  value={defaultTypeConditionsRule.PRODUCT_GIFT}
-                  control={<Radio style={{ color: "blue" }} />}
-                  label="Tặng sản phẩm"
-                />
-              </Grid> */}
                         </Grid>
                     </RadioGroup>
                 </CardContent>
             </Card>
             {promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE ? (
-                <Card variant="outlined" style={{marginTop: "10px"}}>
+                <Card style={{marginTop: "10px"}}>
                     <List component="nav" aria-label="mailbox folders">
                         {promotionRulesLine.map((code, index) => (
                             <ListItem
@@ -194,7 +180,7 @@ const ConditionFields = (props) => {
                                             label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "Giá trị đơn hàng" : "Số lượng sản phẩm"}
                                             placeholder=""
                                             type="number"
-                                            variant="outlined"
+                                            variant={"filled"}
                                             defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index), index) : ""}
                                             size="small"
                                             helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)]?.type === "validate" ? "Giá trị đã tồn tại"
@@ -235,7 +221,7 @@ const ConditionFields = (props) => {
                                             type="number"
                                             label="Số tiền giảm"
                                             placeholder=""
-                                            variant="outlined"
+                                            variant={"filled"}
                                             defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceDiscountValue, index), index) : ""}
                                             size="small"
                                             helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceDiscountValue, index)]?.message}
@@ -300,7 +286,7 @@ const ConditionFields = (props) => {
                     </List>
                 </Card>
             ) : promotionTypeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT ? (
-                <Card variant="outlined" style={{marginTop: "10px"}}>
+                <Card style={{marginTop: "10px"}}>
                     <List component="nav" aria-label="mailbox folders">
                         {promotionRulesLine.map((code, index) => (
                             <ListItem
@@ -315,8 +301,8 @@ const ConditionFields = (props) => {
                                             label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "Giá trị đơn hàng" : "Số lượng sản phẩm"}
                                             placeholder=""
                                             type="number"
+                                            variant={"filled"}
                                             defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index), index) : ""}
-                                            variant="outlined"
                                             size="small"
                                             helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index)]?.message}
                                             InputLabelProps={{
@@ -352,7 +338,7 @@ const ConditionFields = (props) => {
                                             type="number"
                                             label="Số % giảm"
                                             placeholder=""
-                                            variant="outlined"
+                                            variant={"filled"}
                                             defaultValue={edit ? edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.percentValue, index), index) : "" : ""}
                                             size="small"
                                             helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.percentValue, index)]?.message}
@@ -399,7 +385,7 @@ const ConditionFields = (props) => {
                                             type="number"
                                             label="Số tiền giảm tối đa"
                                             placeholder=""
-                                            variant="outlined"
+                                            variant={"filled"}
                                             defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceMaxDiscountValue, index), index) : ""}
                                             size="small"
                                             helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMaxDiscountValue, index)]?.message}
