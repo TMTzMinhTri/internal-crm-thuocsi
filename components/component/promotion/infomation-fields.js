@@ -103,7 +103,7 @@ const InfomationFields = (props) => {
                         <TextField
                             id="totalCode"
                             name="totalCode"
-                            label="Số lần áp dụng"
+                            label="Số lượng mã giảm giá"
                             type="number"
                             variant="outlined"
                             defaultValue={dataRender.totalCode}
@@ -115,7 +115,7 @@ const InfomationFields = (props) => {
                             error={errors.totalCode ? true : false}
                             required
                             inputRef={register({
-                                required: "Số lần áp dụng không được để trống",
+                                required: "Số lượng mã giảm giá không được để trống",
                                 pattern: {
                                     value: /[0-9]/,
                                     message: "Chỉ chấp nhận kí tự là số",
@@ -127,7 +127,7 @@ const InfomationFields = (props) => {
                         <TextField
                             id="totalApply"
                             name="totalApply"
-                            label="Số lần áp dụng tối đa"
+                            label="Số lượt sử dụng cho mỗi khách"
                             type="number"
                             variant="outlined"
                             defaultValue={dataRender.applyPerUser}
@@ -139,7 +139,7 @@ const InfomationFields = (props) => {
                             error={errors.totalApply ? true : false}
                             required
                             inputRef={register({
-                                required: "Số lần áp dụng tối đa không được để trống",
+                                required: "Số lượt sử dụng cho mỗi khách tối thiểu là 1",
                                 pattern: {
                                     value: /[0-9]/,
                                     message: "Chỉ chấp nhận kí tự là số",
@@ -153,7 +153,7 @@ const InfomationFields = (props) => {
                                 <TextField
                                     id="totalUsed"
                                     name="totalUsed"
-                                    label="Số lượng user đã sử dụng"
+                                    label="Số lượng đơn hàng đã áp dụng"
                                     placeholder=""
                                     disabled={true}
                                     variant="outlined"
@@ -169,7 +169,7 @@ const InfomationFields = (props) => {
                                 <TextField
                                     id="totalCollect"
                                     name="totalCollect"
-                                    label="Số lần khuyến mãi đã được sử dụng"
+                                    label="Số lượng mã được thu thập"
                                     placeholder=""
                                     disabled={true}
                                     variant="outlined"

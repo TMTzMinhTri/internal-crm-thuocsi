@@ -731,15 +731,15 @@ function render(props) {
                         <CardContent>
                             <Grid spacing={3} container>
                                 <RadioGroup aria-label="quiz" name="promotionUseType" value={promotionUseType}
-                                            onChange={handleChange}>
+                                            onChange={handleChange} style={{width : "100%"}}>
                                     <Grid spacing={3} container justify="space-around" alignItems="center">
                                         <Grid item xs={12} sm={6} md={6}>
                                             <FormControlLabel value={defaultUseTypePromotion.MANY} control={<Radio color="primary"/>}
-                                                              label="Được áp dụng với khuyến mãi khác"/>
+                                                              label="Đồng thời với những khuyến mãi khác"/>
                                         </Grid>
                                         <Grid item xs={12} sm={6} md={6}>
                                             <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
-                                                              label="Không được áp dụng với khuyến mãi khác"/>
+                                                              label="Duy nhất cho 1 đơn hàng"/>
                                         </Grid>
                                     </Grid>
                                 </RadioGroup>
