@@ -16,7 +16,7 @@ import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
-import { formatNumber , orderStatus } from "components/global"
+import { formatNumber, orderStatus } from "components/global"
 import FormControl from "@material-ui/core/FormControl";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -40,6 +40,7 @@ import { NotFound } from "components/components-global";
 import { getOrderClient } from "client/order";
 import MuiSingleAuto from "components/muiauto/single.js"
 import zIndex from "@material-ui/core/styles/zIndex";
+import { getProductClient } from "client/product";
 
 export async function loadData(ctx) {
     let data = {
@@ -69,25 +70,23 @@ export async function loadData(ctx) {
         }
         let order = orderResp.data[0]
         data.props.order = order
-        let masterDataClient = getMasterDataClient(ctx, data)
-        let provinceResp = await masterDataClient.getProvinceByProvinceCode(order.provinceCode)
-        let districtResp = await masterDataClient.getDistrictByDistrictCode(order.districtCode)
-        let wardResp = await masterDataClient.getWardByWardCode(order.wardCode)
 
-        data.props.province = provinceResp.status === 'OK' ? provinceResp.data[0] : {}
-        data.props.district = districtResp.status === 'OK' ? districtResp.data[0] : {}
-        data.props.ward = wardResp.status === 'OK' ? wardResp.data[0] : {}
+        //Get Master Data Client
+        let masterDataClient = getMasterDataClient(ctx, data)
+
+        let provinceResp = await masterDataClient.getProvinceByProvinceCode(order.customerProvinceCode)
+        let districtResp = await masterDataClient.getDistrictByDistrictCode(order.customerDistrictCode)
+        let wardResp = await masterDataClient.getWardByWardCode(order.customerWardCode)
+      
+        data.props.order.customerProvinceCode = provinceResp.status === 'OK' ? provinceResp.data[0].name : {}
+        data.props.order.customerDistrictCode = districtResp.status === 'OK' ? districtResp.data[0].name : {}
+        data.props.order.customerWardCode = wardResp.status === 'OK' ? wardResp.data[0].name : {}
 
         let districtsResp = await masterDataClient.getDistrictByProvinceCodeFromNextJs(order.provinceCode)
         let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(order.districtCode)
 
         data.props.districts = districtsResp.status === 'OK' ? districtsResp.data : []
         data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []
-
-        //map to transform level -> value
-        data.props.provinces = data.props.provinces.map(province => ({ ...province, value: province.code, label: province.name }))
-        data.props.districts = data.props.districts.map(district => ({ ...district, value: districts.code, label: districts.name }))
-        data.props.wards = data.props.wards.map(ward => ({ ...ward, value: ward.code, label: ward.name }))
 
         //get list order-item 
         let orderItemResp = await orderClient.getOrderItemByOrderNo(order_no)
@@ -96,7 +95,33 @@ export async function loadData(ctx) {
             data.props.status = orderItemResp.status;
             return data
         }
+
+        let lstProductCode = []
+        orderItemResp.data=orderItemResp.data.map(orderItem => {
+            let productCode = orderItem.productSKU.split("").slice(orderItem.productSKU.split("").indexOf('.') + 1, orderItem.productSKU.split("").length).join("")
+            lstProductCode.push(productCode)
+            return {...orderItem,productCode}
+        })
+    
+        let _client = getProductClient(ctx,data)
+        let lstProductResp = await _client.postListProducstWithCodes(lstProductCode)
+        if (lstProductResp.status !== "OK") {
+          
+        } else {
+            orderItemResp.data = orderItemResp.data.map((orderItem) => {
+                let imgProduct,nameProduct
+                lstProductResp.data.map(product => {
+                    if(product.code === orderItem.productCode) {
+                        imgProduct=product.imageUrls[0]
+                        nameProduct= product.name
+                    }
+                })
+                return {...orderItem,image:imgProduct,name:nameProduct}
+            })
+                
+        }
         data.props.orderItem = orderItemResp.data
+
     }
     return data
 }
@@ -113,21 +138,12 @@ export default function renderForm(props, toast) {
     const checkWardData = props.isUpdate ? (props.order.wardCode === '' ? {} : props.ward) : {};
     const [loading, setLoading] = useState(false);
     const [idxChangedItem, setIdxChangedItem] = useState()
-    const [province, setProvince] = useState(props.province);
     const [orderItem, setOrderItem] = useState(props.orderItem)
-    const [quantityItem, setQuantityItem] = useState(0)
-    const [districts, setDistricts] = useState(props.districts || []);
-    const [district, setDistrict] = useState(props.district || {});
     const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
-    const [wards, setWards] = useState(props.wards || []);
-    const [ward, setWard] = useState(checkWardData);
-    const isWard = ((props.ward === undefined) || (Object.keys(checkWardData).length === 0 && checkWardData.constructor === Object)) ? true : false;
-    const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
-    const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
-    const [isDisabledWard, setDisabledWard] = useState(isWard);
     const router = useRouter();
+
     const { register, handleSubmit, errors, control, getValues } = useForm({
-        defaultValues:editObject,
+        defaultValues: editObject,
         mode: "onSubmit"
     });
 
@@ -138,9 +154,6 @@ export default function renderForm(props, toast) {
             errors.passwordConfirm.message = "Mật khẩu xác nhận không chính xác"
             return
         }
-        // formData.customerProvinceCode = formData.customerProvinceCode.value || ''
-        // formData.customerDistrictCode = formData.customerDistrictCode.value || ''
-        // formData.customerWardCode = formData.customerWardCode.value || ''
 
         if (props.isUpdate) {
             formData.orderNo = props.order.orderNo
@@ -183,8 +196,8 @@ export default function renderForm(props, toast) {
     const RenderRow = ({ data, index }) => {
         return (
             <TableRow key={index}>
-                 <TableCell align="center">{index+1}</TableCell>
-                <TableCell align="left">{data.image}</TableCell>
+                <TableCell align="center">{index + 1}</TableCell>
+                <TableCell align="left"><img width={100} height={100} src={data.image}></img></TableCell>
                 <TableCell align="left">{data.name}</TableCell>
                 <TableCell align="center">{formatNumber(data.price)}</TableCell>
                 <TableCell align="center">{formatNumber(data.quantity)}</TableCell>
@@ -242,7 +255,7 @@ export default function renderForm(props, toast) {
                             if (event.target.value < 1) {
                                 event.target.value = 1;
                             }
-                            if(event.target.value > orderItem[idxChangedItem].maxQuantity) {
+                            if (event.target.value > orderItem[idxChangedItem].maxQuantity) {
                                 event.target.value = orderItem[idxChangedItem].maxQuantity;
                             }
                         }}
@@ -376,7 +389,6 @@ export default function renderForm(props, toast) {
                                                         readOnly: true,
                                                         disabled: true,
                                                     }}
-                                                    onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                     placeholder=""
                                                     helperText={errors.customerShippingAddress?.message}
                                                     InputLabelProps={{
@@ -437,6 +449,16 @@ export default function renderForm(props, toast) {
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
+                                                    placeholder=""
+                                                  
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                    inputRef={
+                                                        register()
+                                                    }
+                                                    required
                                                     style={{ width: '100%' }}
                                                 />
                                                 {/* <MuiSingleAuto
@@ -468,6 +490,9 @@ export default function renderForm(props, toast) {
                                                         shrink: true,
                                                     }}
                                                     style={{ width: '100%' }}
+                                                    inputRef={
+                                                        register()
+                                                    }
                                                 />
                                                 {/* <MuiSingleAuto
                                                     id="customerWardCode"
@@ -498,6 +523,9 @@ export default function renderForm(props, toast) {
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
+                                                    inputRef={
+                                                        register()
+                                                    }
                                                     style={{ width: '100%' }}
                                                 />
                                             </Grid>
@@ -515,6 +543,9 @@ export default function renderForm(props, toast) {
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
+                                                    inputRef={
+                                                        register()
+                                                    }
                                                     style={{ width: '100%' }}
                                                 />
                                             </Grid>
@@ -543,8 +574,8 @@ export default function renderForm(props, toast) {
                                 <TableContainer component={Paper}>
                                     <Table size="small" aria-label="a dense table">
                                         <colgroup>
-                                            <col width="10%" />
-                                            <col width="15%" />
+                                            <col width="5%" />
+                                            <col width="20%" />
                                             <col width="15%" />
                                             <col width="15%" />
                                             <col width="10%" />
@@ -553,7 +584,7 @@ export default function renderForm(props, toast) {
                                         </colgroup>
                                         <TableHead>
                                             <TableRow>
-                                            <TableCell align="center">Số thứ tự</TableCell>
+                                                <TableCell align="center">Số thứ tự</TableCell>
                                                 <TableCell align="left">Hình ảnh</TableCell>
                                                 <TableCell align="left">Tên sản phẩm</TableCell>
                                                 <TableCell align="center">Giá</TableCell>
@@ -577,7 +608,7 @@ export default function renderForm(props, toast) {
                                             )}
                                         <TableFooter>
                                             <TableRow>
-                                            <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
@@ -586,7 +617,7 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="center">{props.order.shippingFee}</TableCell>
                                             </TableRow>
                                             <TableRow>
-                                            <TableCell align="left"></TableCell>
+                                                <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
@@ -595,13 +626,13 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="center">{props.order.totalDiscount}</TableCell>
                                             </TableRow>
                                             <TableRow>
-                                            <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
-                                                <TableCell align="left" style={{ fontWeight: 'bold', color: 'black',fontSize:'20px' }}>Tổng tiền</TableCell>
-                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black',fontSize:'20px' }} >{formatNumber(props.order.totalPrice)}</TableCell>
+                                                <TableCell align="left"></TableCell>
+                                                <TableCell align="left" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
+                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order.totalPrice)}</TableCell>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
