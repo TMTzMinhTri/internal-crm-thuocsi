@@ -18,6 +18,22 @@ class CategoryClient extends APIClient {
             })
     }
 
+    getListCategoryTemp() {
+        return this.callFromNextJS(
+            "GET",
+            `${prefix}/category/list`, {
+                getTotal: true
+            })
+    }
+
+    getListCategoryByCodes(codes) {
+        return this.callFromNextJS(
+            "POST",
+            `${prefix}/category/list`,
+            {codes}
+        )
+    }
+
     getListCategoryFromClient(offset, limit, q) {
         return this.callFromClient(
             "GET",
