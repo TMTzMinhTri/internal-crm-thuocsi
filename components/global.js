@@ -75,7 +75,7 @@ export const ProductTypes = [
 export const scopes = [
     {
         value: "PHARMACY",
-        label: "Tiệm thuốc"
+        label: "Quầy thuốc"
     },
     {
         value: "CLINIC",
