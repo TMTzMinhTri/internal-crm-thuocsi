@@ -177,6 +177,7 @@ function render(props) {
           [event.target?.name]: event.target?.value,
           listProductDefault: listProductDefault,
           listProductPromotion: [],
+
           listCategoryPromotion: listCategoryResponse.data,
         });
         setOpen({ ...open, openModalProductScopePromotion: true });

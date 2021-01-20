@@ -225,6 +225,16 @@ const ConditionFields = (props) => {
                             )
                           : ""
                       }
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {promotionOption ===
+                            defaultRulePromotion.MIN_ORDER_VALUE
+                              ? "đ"
+                              : ""}
+                          </InputAdornment>
+                        ),
+                      }}
                       helperText={
                         errors[
                           displayNameRule(
@@ -326,7 +336,7 @@ const ConditionFields = (props) => {
                         },
                         minLength: {
                           value: 4,
-                          message: "Giá trị sản phẩm phải lớn hơn 1000",
+                          message: "Số tiền giảm phải lớn hơn 1000",
                         },
                       })}
                     />
@@ -400,6 +410,16 @@ const ConditionFields = (props) => {
                           ? "Giá trị đơn hàng"
                           : "Số lượng sản phẩm"
                       }
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position="end">
+                            {promotionOption ===
+                            defaultRulePromotion.MIN_ORDER_VALUE
+                              ? "đ"
+                              : ""}
+                          </InputAdornment>
+                        ),
+                      }}
                       defaultValue={
                         edit
                           ? parseConditionValue(
@@ -498,10 +518,19 @@ const ConditionFields = (props) => {
                         ]
                       }
                       inputRef={register({
-                        required: "Không được để trống",
+                        required: "% giảm không được để trống",
                         maxLength: {
                           value: 3,
                           message: "Không quá 3 kí tự",
+                        },
+                        validate: (value) => {
+                          if (value > 100) {
+                            return "Không được vượt quá 100%";
+                          }
+
+                          if (value <= 0) {
+                            return "% Giảm không được nhỏ hơn 1%";
+                          }
                         },
                         minLength: {
                           value: 1,
