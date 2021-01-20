@@ -15,8 +15,9 @@ import {
   doWithLoggedInUser,
   renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
-import { defaultPromotionScope } from "../../../components/component/constant";
+import {defaultNameRulesValue, defaultPromotionScope} from "../../../components/component/constant";
 import {
+  displayNameRule,
   displayTime,
   parseRuleToObject,
   setRulesPromotion,
@@ -214,12 +215,21 @@ function render(props) {
     setState({ ...state, name: value });
   };
 
+
+  const resetPrice = () => {
+    for (const [key, value] of Object.entries(defaultNameRulesValue)) {
+      let priceMinValue = displayNameRule(promotionOption, value, 0);
+      setValue(priceMinValue, "");
+    }
+  };
+
   const handleChangeStatus = (event) => {
     setState({
       ...state,
       [event.target.name]: event.target.value,
       promotionRulesLine: [{ id: 0 }],
     });
+    resetPrice()
     reset();
   };
 
@@ -301,6 +311,7 @@ function render(props) {
       setState({
         ...state,
         listProductPromotion: defaultState.listProductPromotion,
+        listCategoryPromotion: defaultState.listCategoryPromotion,
         [event.target?.name]: event.target?.value,
       });
       setOpen({ ...open, openModalProductScopePromotion: true });

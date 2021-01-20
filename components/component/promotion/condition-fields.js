@@ -42,6 +42,8 @@ const ConditionFields = (props) => {
         conditions,
     } = state;
 
+    const [defaultValue, setDefaultValue] = useState("1")
+
     const [open, setOpen] = useState({
         openModalGift: false,
         openModalProductGift: false,
@@ -189,6 +191,11 @@ const ConditionFields = (props) => {
                                                 shrink: true,
                                             }}
                                             style={{width: "100%"}}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">{promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "đ" : ""}</InputAdornment>
+                                                ),
+                                            }}
                                             error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)]}
                                             required
                                             inputRef={register({
@@ -244,7 +251,7 @@ const ConditionFields = (props) => {
                                                 },
                                                 minLength: {
                                                     value: 4,
-                                                    message: "Giá trị sản phẩm phải lớn hơn 1000",
+                                                    message: "Số tiền giảm phải lớn hơn 1000",
                                                 },
                                             })}
                                         />
@@ -308,6 +315,11 @@ const ConditionFields = (props) => {
                                             InputLabelProps={{
                                                 shrink: true,
                                             }}
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">{promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "đ" : ""}</InputAdornment>
+                                                ),
+                                            }}
                                             style={{width: "100%"}}
                                             error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index)]}
                                             required
@@ -354,10 +366,18 @@ const ConditionFields = (props) => {
                                             error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.percentValue, index)]}
                                             required
                                             inputRef={register({
-                                                required: "Không được để trống",
+                                                required: "% giảm không được để trống",
                                                 maxLength: {
                                                     value: 3,
                                                     message: "Không quá 3 kí tự",
+                                                },
+                                                validate: (value) => {
+                                                    if (value > 100) {
+                                                        return "Không được vượt quá 100%"
+                                                    }
+                                                    if (value === 0) {
+                                                        return "% Giảm không được bằng 0"
+                                                    }
                                                 },
                                                 minLength: {
                                                     value: 1,
