@@ -40,26 +40,23 @@ const ApplyFields = (props) => {
         <Typography color="textSecondary" gutterBottom>
           Chọn cách sử dụng khuyến mãi
         </Typography>
-        <Grid
-          xs={12}
-          item
-          direction="row"
-          container>
+        <Grid spacing={3} container container>
           <RadioGroup
             aria-label="quiz"
             name="promotionUseType"
             value={promotionUseType}
             onChange={handleChange}
-            style={{width : '100%'}}
+            style={{ width: "100%" }}
           >
             <Grid
               xs={12}
               item
+              spacing={3}
               container
               direction="row"
               justify="space-around"
               alignItems="center"
-              style={{marginLeft : 30}}
+              style={{ marginLeft: 30 }}
             >
               <Grid item xs={4} direction="column" container>
                 <FormControlLabel
@@ -75,8 +72,7 @@ const ApplyFields = (props) => {
                   label="Áp dụng 1 mã trên 1 đơn hàng"
                 />
               </Grid>
-              <Grid item xs={4} direction="column" container>
-              </Grid>
+              <Grid item xs={4} direction="column" container></Grid>
             </Grid>
           </RadioGroup>
         </Grid>
@@ -85,17 +81,13 @@ const ApplyFields = (props) => {
         <Typography color="textSecondary" gutterBottom>
           Phạm vi áp dụng
         </Typography>
-        <Grid xs={12}
-          item
-          direction="row"
-          container              
-          style={{marginLeft : 30}}>
+        <Grid xs={12} item direction="row" container style={{ marginLeft: 30 }}>
           <RadioGroup
             aria-label="quiz"
             name="promotionScope"
             value={promotionScope}
             onChange={handleChangeScope}
-            style={{width : '100%'}}
+            style={{ width: "100%" }}
           >
             <Grid
               spacing={3}
