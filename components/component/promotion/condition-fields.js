@@ -375,8 +375,8 @@ const ConditionFields = (props) => {
                                                     if (value > 100) {
                                                         return "Không được vượt quá 100%"
                                                     }
-                                                    if (value === 0) {
-                                                        return "% Giảm không được bằng 0"
+                                                    if (value <= 0) {
+                                                        return "% Giảm không được nhỏ hơn 1%"
                                                     }
                                                 },
                                                 minLength: {
