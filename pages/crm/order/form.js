@@ -143,6 +143,7 @@ export default function renderForm(props, toast) {
     const [loading, setLoading] = useState(false);
     const [idxChangedItem, setIdxChangedItem] = useState()
     const [orderItem, setOrderItem] = useState(props.orderItem)
+    const [maxQuantity,setMaxQuantity] = useState()
     const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
     const router = useRouter();
 
@@ -207,7 +208,7 @@ export default function renderForm(props, toast) {
                 <TableCell align="center">{formatNumber(data.quantity)}</TableCell>
                 <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
                 <TableCell align="center">
-                    <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); }}>
+                    <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); setMaxQuantity(orderItem[index].maxQuantity)}}>
                         <EditIcon fontSize="small" />
                     </IconButton>
                 </TableCell>
@@ -269,9 +270,8 @@ export default function renderForm(props, toast) {
                             valueAsNumber: true,
                             min: 0
                         })}
-                        label="Số lượng"
+                        label={"Số lượng ( tối đa "+maxQuantity+" )"}
                     />
-
                     {errors.quantityItem && <p>This is required</p>}
                 </DialogContent>
                 <DialogActions>
