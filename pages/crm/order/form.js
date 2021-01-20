@@ -183,6 +183,7 @@ export default function renderForm(props, toast) {
     const RenderRow = ({ data, index }) => {
         return (
             <TableRow key={index}>
+                 <TableCell align="center">{index+1}</TableCell>
                 <TableCell align="left">{data.image}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
                 <TableCell align="center">{formatNumber(data.price)}</TableCell>
@@ -542,8 +543,9 @@ export default function renderForm(props, toast) {
                                 <TableContainer component={Paper}>
                                     <Table size="small" aria-label="a dense table">
                                         <colgroup>
-                                            <col width="20%" />
-                                            <col width="20%" />
+                                            <col width="10%" />
+                                            <col width="15%" />
+                                            <col width="15%" />
                                             <col width="15%" />
                                             <col width="10%" />
                                             <col width="15%" />
@@ -551,6 +553,7 @@ export default function renderForm(props, toast) {
                                         </colgroup>
                                         <TableHead>
                                             <TableRow>
+                                            <TableCell align="center">Số thứ tự</TableCell>
                                                 <TableCell align="left">Hình ảnh</TableCell>
                                                 <TableCell align="left">Tên sản phẩm</TableCell>
                                                 <TableCell align="center">Giá</TableCell>
@@ -574,6 +577,7 @@ export default function renderForm(props, toast) {
                                             )}
                                         <TableFooter>
                                             <TableRow>
+                                            <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
@@ -582,6 +586,7 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="center">{props.order.shippingFee}</TableCell>
                                             </TableRow>
                                             <TableRow>
+                                            <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
@@ -590,6 +595,7 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="center">{props.order.totalDiscount}</TableCell>
                                             </TableRow>
                                             <TableRow>
+                                            <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
