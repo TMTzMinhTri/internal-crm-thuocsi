@@ -96,7 +96,7 @@ export async function loadData(ctx) {
             data.props.status = orderItemResp.status;
             return data
         }
-        data.props.orderItem = orderItemResp.data.map(item => ({...item,maxQuantity:10}))
+        data.props.orderItem = orderItemResp.data
     }
     return data
 }
