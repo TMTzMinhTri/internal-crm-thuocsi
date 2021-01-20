@@ -147,7 +147,7 @@ function render(props) {
                     [event.target?.name]: event.target?.value,
                     listProductDefault: listProductDefault,
                     listProductPromotion: [],
-                    listCategoryPromotion: listCategoryResponse.data,
+                    listCategoryPromotion: [],
                 });
                 setOpen({...open, openModalProductScopePromotion: true});
             }
@@ -169,6 +169,7 @@ function render(props) {
                 [event.target?.name]: event.target?.value,
                 listCategoryDefault: listCategoryDefault,
                 listCategoryPromotion: [],
+                listProductPromotion: [],
             });
             setOpen({...open, openModalCategoryScopePromotion: true});
         } else {
