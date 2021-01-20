@@ -243,7 +243,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.name}
                                                             required
-                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Tên khách hàng không thể để trống",
@@ -279,7 +278,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.email}
                                                             required
-                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
@@ -309,7 +307,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.phone}
                                                             required
-                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             inputRef={
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
@@ -334,7 +331,6 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             label="Địa chỉ"
-                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                             placeholder=""
                                                             helperText={errors.address?.message}
                                                             InputLabelProps={{
@@ -378,35 +374,6 @@ export default function renderForm(props, toast) {
                                                             errors={errors}
                                                             message={'Vui lòng chọn tỉnh thành'}
                                                         />
-                                                        {/* <Autocomplete
-                                                            options={props.provinces}
-                                                            size="small"
-                                                            value={province}
-                                                            onChange={onProvinceChange}
-                                                            noOptionsText={noOptionsText}
-                                                            getOptionLabel={(option) => option.name}
-
-                                                            renderInput={(params) =>
-                                                                <TextField
-                                                                    id="provinceCode"
-                                                                    name="provinceCode"
-                                                                    variant="outlined"
-                                                                    label="Tỉnh/Thành phố"
-                                                                    helperText={errors.provinceCode?.message}
-                                                                    InputLabelProps={{
-                                                                        shrink: true,
-                                                                    }}
-                                                                    style={{ width: '100%' }}
-                                                                    error={!!errors.provinceCode}
-                                                                    required
-                                                                    inputRef={
-                                                                        register({
-                                                                            required: "Tỉnh/ Thành phố không thể để trống",
-                                                                        })
-                                                                    }
-                                                                    {...params} />}
-                                                        /> */}
-
                                                     </Grid>
                                                     <Grid item xs={12} sm={3} md={3}>
                                                         <Autocomplete
@@ -423,17 +390,12 @@ export default function renderForm(props, toast) {
                                                                     name="districtCode"
                                                                     variant="outlined"
                                                                     label="Quận/Huyện"
-                                                                    // helperText={errors.districtCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{ width: '100%' }}
-                                                                    // error={!!errors.districtCode}
-                                                                    // required
                                                                     inputRef={
-                                                                        register({
-                                                                            // required: "Quận/huyện thể để trống",
-                                                                        })
+                                                                        register
                                                                     }
                                                                     {...params} />}
                                                         />
@@ -454,17 +416,12 @@ export default function renderForm(props, toast) {
                                                                     name="wardCode"
                                                                     variant="outlined"
                                                                     label="Phường/Xã"
-                                                                    // helperText={errors.wardCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{ width: '100%' }}
-                                                                    // error={!!errors.wardCode}
-                                                                    // required
                                                                     inputRef={
-                                                                        register({
-                                                                            // required: "Phường xã không thể để trống",
-                                                                        })
+                                                                        register
                                                                     }
                                                                     {...params} />}
                                                         />
@@ -494,8 +451,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.legalRepresentative}
                                                             required
-                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-
                                                             inputRef={
                                                                 register({
                                                                     required: "Người đại diện không thể để trống",
@@ -530,8 +485,6 @@ export default function renderForm(props, toast) {
                                                             style={{ width: '100%' }}
                                                             error={!!errors.mst}
                                                             required
-                                                            // onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-
                                                             inputRef={
                                                                 register({
                                                                     required: "Mã số thuế không thể để trống",
