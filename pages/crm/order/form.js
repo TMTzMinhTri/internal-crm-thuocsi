@@ -78,9 +78,9 @@ export async function loadData(ctx) {
         let districtResp = await masterDataClient.getDistrictByDistrictCode(order.customerDistrictCode)
         let wardResp = await masterDataClient.getWardByWardCode(order.customerWardCode)
       
-        data.props.order.customerProvinceCode = provinceResp.status === 'OK' ? provinceResp.data[0].name : {}
-        data.props.order.customerDistrictCode = districtResp.status === 'OK' ? districtResp.data[0].name : {}
-        data.props.order.customerWardCode = wardResp.status === 'OK' ? wardResp.data[0].name : {}
+        data.props.order.customerProvinceCode = provinceResp.status === 'OK' ? provinceResp.data[0].name : ""
+        data.props.order.customerDistrictCode = districtResp.status === 'OK' ? districtResp.data[0].name : ""
+        data.props.order.customerWardCode = wardResp.status === 'OK' ? wardResp.data[0].name : ""
 
         let districtsResp = await masterDataClient.getDistrictByProvinceCodeFromNextJs(order.provinceCode)
         let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(order.districtCode)
@@ -112,7 +112,11 @@ export async function loadData(ctx) {
                 let imgProduct,nameProduct
                 lstProductResp.data.map(product => {
                     if(product.code === orderItem.productCode) {
-                        imgProduct=product.imageUrls[0] || "/default.png"
+                        if(product.imageUrls) {
+                            imgProduct=product.imageUrls[0] || "/default.png"
+                        } else {
+                            imgProduct= "/default.png"
+                        }
                         nameProduct= product.name
                     }
                 })
