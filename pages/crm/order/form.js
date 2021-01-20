@@ -112,7 +112,7 @@ export async function loadData(ctx) {
                 let imgProduct,nameProduct
                 lstProductResp.data.map(product => {
                     if(product.code === orderItem.productCode) {
-                        imgProduct=product.imageUrls[0]
+                        imgProduct=product.imageUrls[0] || "/default.png"
                         nameProduct= product.name
                     }
                 })
