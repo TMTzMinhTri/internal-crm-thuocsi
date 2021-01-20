@@ -74,7 +74,7 @@ function render(props) {
             multiply: 2,
             numAddition: 5000,
             numMultiply: 1,
-            customerType: condUserType[0]
+            // customerType: condUserType[0]
         }
     });
     const [searchCategory, setSearchCategory] = useState("");
@@ -122,6 +122,7 @@ function render(props) {
                                     options={condUserType}
                                     label="Loại khách hàng"
                                     control={control}
+                                    placeholder="Chọn"
                                     errors={errors}
                                     name="customerType"
                                     message="Vui lòng chọn"
