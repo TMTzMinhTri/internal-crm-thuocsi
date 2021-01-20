@@ -62,14 +62,12 @@ const RenderTableListCategory = (props) => {
     listCategoryAction.map((o, index) => {
       let bool = false;
       listCategoryPromotion.map((promotion) => {
-        console.log(promotion, "promo");
         if (o.category.categoryID == promotion.categoryID) {
           bool = true;
         }
       });
       o.active = bool;
     });
-    console.log(listCategoryAction, "listCategoryAction");
     setStateCategory({
       ...stateCategory,
       listCategoryAction: listCategoryAction,
@@ -87,13 +85,7 @@ const RenderTableListCategory = (props) => {
       >
         Chọn danh mục
       </Button>
-      <Modal
-        open={open}
-        onClose={() => {
-          handleClose();
-        }}
-        className={styles.modal}
-      >
+      <Modal open={open} onClose={handleCloseModal} className={styles.modal}>
         <div className={styles.modalBody}>
           <h1 className={styles.headerModal}>Danh mục sản phẩm</h1>
           <DialogContent className={styles.modalContent}>
@@ -101,12 +93,8 @@ const RenderTableListCategory = (props) => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell align="left">
-                      Chọn
-                    </TableCell>
-                    <TableCell align="left">
-                      Tên danh mục
-                    </TableCell>
+                    <TableCell align="left">Chọn</TableCell>
+                    <TableCell align="left">Tên danh mục</TableCell>
                   </TableRow>
                 </TableHead>
                 {stateCategory.listCategoryAction.length > 0 &&
