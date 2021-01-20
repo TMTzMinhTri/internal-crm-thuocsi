@@ -22,6 +22,10 @@ export default function App(props) {
     const [showBackdrop, setShowBackdrop] = React.useState(false)
 
     useEffect(() => {
+        const jssStyles = document.querySelector('#jss-server-side');
+        if (jssStyles && jssStyles.parentNode) {
+            jssStyles.parentNode.removeChild(jssStyles);
+        }
         let routeChangeStart = () => setShowBackdrop(true);
         let routeChangeComplete = () => setShowBackdrop(false);
     
