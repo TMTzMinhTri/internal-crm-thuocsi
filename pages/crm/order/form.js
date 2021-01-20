@@ -606,7 +606,7 @@ export default function renderForm(props, toast) {
                                         ) : (
                                                 <TableBody>
                                                     <TableRow>
-                                                        <TableCell colSpan={3} align="left">{props.orderItem.message}</TableCell>
+                                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
                                                     </TableRow>
                                                 </TableBody>
                                             )}
@@ -618,7 +618,7 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left">Phí vận chuyển</TableCell>
-                                                <TableCell align="center">{props.order.shippingFee}</TableCell>
+                                                <TableCell align="center">{props.order?.shippingFee}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell align="left"></TableCell>
@@ -627,7 +627,7 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left">Giảm giá</TableCell>
-                                                <TableCell align="center">{props.order.totalDiscount}</TableCell>
+                                                <TableCell align="center">{props.order?.totalDiscount}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell align="left"></TableCell>
@@ -636,7 +636,7 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
-                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order.totalPrice)}</TableCell>
+                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order?.totalPrice)}</TableCell>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
