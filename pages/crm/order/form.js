@@ -22,6 +22,7 @@ import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import EditIcon from "@material-ui/icons/Edit";
 import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getMasterDataClient } from "client/master-data";
@@ -95,7 +96,7 @@ export async function loadData(ctx) {
             data.props.status = orderItemResp.status;
             return data
         }
-        data.props.orderItem = orderItemResp.data
+        data.props.orderItem = orderItemResp.data.map(item => ({...item,maxQuantity:10}))
     }
     return data
 }
@@ -126,61 +127,9 @@ export default function renderForm(props, toast) {
     const [isDisabledWard, setDisabledWard] = useState(isWard);
     const router = useRouter();
     const { register, handleSubmit, errors, control, getValues } = useForm({
-        defaultValues: { ...editObject, quantityItem: 1 },
+        defaultValues:editObject,
         mode: "onSubmit"
     });
-
-    const noOptionsText = "Không có tùy chọn!";
-
-    const onProvinceChange = async (event, val) => {
-        setProvince()
-        setDistricts([])
-        setDistrict({})
-        setWards([])
-        setWard({})
-        setDisabledDistrict(true)
-        setDisabledWard(true)
-        let masterDataClient = getMasterDataClient()
-        if (val) {
-            setProvince(val)
-            let res = await masterDataClient.getDistrictByProvinceCode(val?.code)
-            if (res.status !== 'OK') {
-                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau');
-            } else {
-                res.data = res.data.map(district => ({ ...district, value: district.code, label: district.name }))
-                setDistricts(res.data)
-                setDisabledDistrict(false)
-            }
-        }
-    }
-
-    const onDistrictChange = async (event, val) => {
-        setDistrict('')
-        setWards([])
-        setWard('')
-        setDisabledWard(true)
-        let masterDataClient = getMasterDataClient()
-        if (val) {
-            setDistrict(val)
-            let res = await masterDataClient.getWardByDistrictCode(val.code)
-            if (res.status !== 'OK') {
-                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
-            } else {
-                res.data = res.data.map(ward => ({ ...ward, value: ward.code, label: ward.name }))
-                setWards(res.data)
-                setDisabledWard(false)
-            }
-        }
-    }
-
-    const onWardChange = async (event, val) => {
-        setWard()
-        if (val) {
-            setWard(val)
-        } else {
-            setWard({})
-        }
-    }
 
     const onSubmit = async (formData) => {
         if (formData.passwordConfirm !== formData.password) {
@@ -236,12 +185,12 @@ export default function renderForm(props, toast) {
             <TableRow key={index}>
                 <TableCell align="left">{data.image}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
-                <TableCell align="center">{data.price}</TableCell>
-                <TableCell align="center">{data.quantity}</TableCell>
+                <TableCell align="center">{formatNumber(data.price)}</TableCell>
+                <TableCell align="center">{formatNumber(data.quantity)}</TableCell>
                 <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
                 <TableCell align="center">
                     <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); }}>
-                        <TrendingUpIcon fontSize="small" />
+                        <EditIcon fontSize="small" />
                     </IconButton>
                 </TableCell>
             </TableRow>
@@ -251,7 +200,6 @@ export default function renderForm(props, toast) {
 
     const changeQuantityHandler = () => {
         let quantityItem = parseInt(getValues('quantityItem'), 10)
-        console.log(quantityItem)
         let tmpOrderItem = orderItem.map((item, idx) => {
             if (idx == idxChangedItem) {
                 return { ...item, quantity: quantityItem, totalPrice: quantityItem * item.price }
@@ -293,6 +241,9 @@ export default function renderForm(props, toast) {
                             if (event.target.value < 1) {
                                 event.target.value = 1;
                             }
+                            if(event.target.value > orderItem[idxChangedItem].maxQuantity) {
+                                event.target.value = orderItem[idxChangedItem].maxQuantity;
+                            }
                         }}
                         // error={!!errors.quantityItem}
                         // helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
@@ -331,7 +282,7 @@ export default function renderForm(props, toast) {
                                     <CardContent>
                                         <Typography variant="h6" component="h6"
                                             style={{ marginBottom: '10px', fontSize: 18 }}>
-                                            Thông tin cơ bản
+                                            Thông tin đơn hàng
                                                 </Typography>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={4} md={4}>
@@ -643,8 +594,8 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
-                                                <TableCell align="left" style={{ fontWeight: 'bold', color: 'black' }}>Tổng tiền</TableCell>
-                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black' }} >{props.order.totalPrice}</TableCell>
+                                                <TableCell align="left" style={{ fontWeight: 'bold', color: 'black',fontSize:'20px' }}>Tổng tiền</TableCell>
+                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black',fontSize:'20px' }} >{formatNumber(props.order.totalPrice)}</TableCell>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
