@@ -1,7 +1,6 @@
 import {
-    Box, Button, ButtonGroup,
-    Divider,
-    FormControl, Grid, InputAdornment, Paper,
+    Box, Button, Divider,
+    FormControl, Grid, Paper,
     TextField,
     Typography
 } from "@material-ui/core";
@@ -17,7 +16,6 @@ import { Brand, condUserType } from 'components/global';
 import MuiMultipleAuto from "components/muiauto/multiple";
 import MuiSingleAuto from "components/muiauto/single";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useState } from 'react';
@@ -31,12 +29,7 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadConfigPricingData(ctx) {
-    let data = { props: {} }
     let query = ctx.query
-    let q = typeof (query.q) === "undefined" ? '' : query.q
-    let page = query.page || 0
-    let limit = query.limit || 20
-    let offset = page * limit;
     let client = getPricingClient(ctx, {});
     let categoryResult = await client.getListCategory();
     let provinceResult = await client.getProvinceLists();
@@ -58,26 +51,20 @@ function render(props) {
 
     let router = useRouter()
     const { error, success } = useToast()
-    // const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
-    const [provinceLists, setProvinceLists] = useState(props.provinceLists);
-    const [categoryLists, setCategoryLists] = useState(props.categoryLists);
-    // const [total, setTotal] = useState(0);
-    // const [loading, setLoading] = useState(true);
+    const [provinceLists] = useState(props.provinceLists);
+    const [categoryLists] = useState(props.categoryLists);
     const { register, handleSubmit, errors, reset, control } = useForm({
         mode: 'onSubmit',
         defaultValues: {
-            addition: 5000,
             brand: "LOCAL",
             categoryCode: [],
             categoryCodes: [],
             locationCode: [],
-            multiply: 2,
-            numAddition: 5000,
-            numMultiply: 1,
-            // customerType: condUserType[0]
+            value: 0,
+            customerType: null
         }
     });
-    const [searchCategory, setSearchCategory] = useState("");
+    const [] = useState("");
 
     const onSubmit = async (formData) => {
         console.log(formData)
@@ -117,10 +104,15 @@ function render(props) {
                         <Grid container spacing={2} style={{ padding: '10px' }}>
                             <Grid item xs={12} md={12} sm={12} />
                             <Grid item xs={12} sm={12} md={2}>
+                                <Typography gutterBottom>
+                                    <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                        Loại khách hàng<span style={{color: 'red'}}>*</span>:
+                                    </FormLabel>
+                                </Typography>
                                 <MuiSingleAuto
                                     id="customerType"
                                     options={condUserType}
-                                    label="Loại khách hàng"
+                                    // label="Loại khách hàng"
                                     control={control}
                                     placeholder="Chọn"
                                     errors={errors}
@@ -132,12 +124,17 @@ function render(props) {
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} />
                             <Grid item xs={12} sm={12} md={6}>
+                                <Typography gutterBottom>
+                                    <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                        Loại sản phẩm<span style={{color: 'red'}}>*</span>:
+                                    </FormLabel> 
+                                </Typography>
                                 <MuiMultipleAuto
                                     id="categoryCodes"
                                     options={[...categoryLists.map(category => {
                                         return { label: category.name, value: category.code }
                                     })]}
-                                    label="Loại sản phẩm"
+                                    // label="Loại sản phẩm"
                                     name="categoryCodes"
                                     message="Vui lòng chọn"
                                     placeholder="Chọn"
@@ -150,12 +147,17 @@ function render(props) {
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} />
                             <Grid item xs={12} sm={12} md={6}>
+                                <Typography gutterBottom>
+                                    <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                        Tỉnh thành<span style={{color: 'red'}}>*</span>:
+                                    </FormLabel> 
+                                </Typography>
                                 <MuiMultipleAuto
                                     id="locationCode"
                                     options={[...provinceLists.map(category => {
                                         return { label: category.name, value: category.code }
                                     })]}
-                                    label="Tỉnh/thành"
+                                    // label="Tỉnh/thành"
                                     name="locationCode"
                                     placeholder="Chọn"
                                     control={control}
@@ -167,7 +169,7 @@ function render(props) {
                             </Grid>
                             <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
                                 <FormControl component="fieldset" className={styles.marginTopBottom}>
-                                    <FormLabel component="legend" style={{color: 'black !important'}}>Nơi bán</FormLabel>
+                                <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>Nơi bán</FormLabel>
                                     <Controller
                                         rules={{ required: true }}
                                         control={control}
@@ -193,77 +195,35 @@ function render(props) {
                                     />
                                 </FormControl>
                             </Grid>
-                            <Grid container item xs={12} sm={12} md={8} spacing={3}>
-                                <Grid item xs={12} sm={12} md={5}>
+                            <Grid container item xs={12} sm={12} md={12} spacing={3}>
+                                <Grid item xs={12} sm={12} md={4}>
                                     <Typography gutterBottom>
-                                        Hệ số nhân(*):
-                            </Typography>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                            Hệ số<span style={{color: 'red'}}>*</span>:
+                                        </FormLabel> 
+                                    </Typography>
                                     <TextField
-                                        id="multiply"
-                                        name="multiply"
+                                        id="value"
+                                        name="value"
+                                        variant="outlined"
                                         size="small"
                                         type="number"
                                         placeholder=""
-                                        defaultValue={2}
-                                        helperText={errors.name?.message}
+                                        helperText={errors.value?.message}
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
-                                        InputProps={{
-                                            endAdornment: <InputAdornment
-                                                position="end">x</InputAdornment>,
-                                        }}
                                         style={{ width: '100%' }}
-                                        error={!!errors.multiply}
-                                        helperText={errors.multiply?.message}
+                                        error={!!errors.value}
+                                        helperText={errors.value?.message}
                                         required
                                         inputRef={
                                             register({
                                                 required: "Vui lòng nhập",
-                                                valueAsNumber: true, // important
+                                                valueAsNumber: true,
                                                 max: {
                                                     value: 200,
                                                     message: "Hệ số tối đa là 200"
-                                                },
-                                                min: {
-                                                    value: 1,
-                                                    message: "Hệ số tối thiểu là 1"
-                                                }
-                                            })
-                                        }
-                                    />
-                                </Grid>
-                                <Grid item xs={12} sm={12} md={5}>
-                                    <Typography gutterBottom>
-                                        Hệ số cộng(*):
-                                    </Typography>
-                                    <TextField
-                                        id="addition"
-                                        name="addition"
-                                        size="small"
-                                        type="number"
-                                        placeholder=""
-                                        defaultValue={5000}
-                                        helperText={errors.name?.message}
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        InputProps={{
-                                            endAdornment: <InputAdornment
-                                                position="end">đ</InputAdornment>,
-                                        }}
-                                        // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
-                                        style={{ width: '100%' }}
-                                        error={!!errors.addition}
-                                        helperText={errors.addition?.message}
-                                        required
-                                        inputRef={
-                                            register({
-                                                required: "Vui lòng nhập",
-                                                valueAsNumber: true, // important
-                                                max: {
-                                                    value: 100000000,
-                                                    message: "Hệ số tối đa là 100,000,000"
                                                 },
                                                 min: {
                                                     value: 0,
@@ -274,7 +234,6 @@ function render(props) {
                                     />
                                 </Grid>
                             </Grid>
-
                         </Grid>
                         <Divider style={{ margin: '10px' }} />
                         <Grid item xs={12} sm={12} md={12}>
@@ -286,21 +245,15 @@ function render(props) {
                                     style={{ margin: 8 }}>
                                     Lưu
                                 </Button>
-                                {
-                                    typeof props.product === "undefined" ? (
-                                        <Button variant="contained" type="reset" style={{ margin: 8 }}
-                                        onClick={() => {
-                                            reset();
-                                        }}
-                                        >Làm mới</Button>
-                                    ) : (
-                                            <Link href="/crm/sku">
-                                                <ButtonGroup>
-                                                    <Button variant="contained">Quay lại</Button>
-                                                </ButtonGroup>
-                                            </Link>
-                                        )
-                                }
+                                <Button 
+                                    variant="contained" 
+                                    type="reset" 
+                                    style={{ margin: 8 }}
+                                    onClick={() => reset()}
+                                    >
+                                        Làm mới
+                                </Button>
+                                
                             </Box>
                         </Grid>
                     </Box>
