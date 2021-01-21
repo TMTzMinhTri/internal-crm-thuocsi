@@ -13,15 +13,13 @@ import EditIcon from "@material-ui/icons/Edit";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
+import { ErrorCode, formatNumber, ProductStatus, SellPrices } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, {useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
-import styles from "./pricing.module.css";
-import {ProductStatus, SellPrices, formatNumber, ErrorCode} from "components/global";
-import Chip from "@material-ui/core/Chip";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -89,7 +87,10 @@ function render(props) {
         let a = SellPrices.filter((item) => {
             return item.value === type;
         });
-        return a[0].label;
+        if(typeof a !== 'undefined' && a.length > 0 ) {
+            return a[0]?.label;
+        }
+        return "Chưa cập nhật";
     }
 
     return (

@@ -21,10 +21,8 @@ import { getPriceClient } from "client/price";
 import { NotFound } from "components/components-global";
 import { Brand, SellPrices } from "components/global";
 import MuiMultipleAuto from "components/muiauto/multiple";
-import MuiSingleAuto from "components/muiauto/single";
 import Head from "next/head";
 import Link from "next/link";
-import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -33,9 +31,6 @@ import styles from "./pricing.module.css";
 const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, index, getValues, limitQty, ids, defaultIds, idDeleteds }) => {
 
     let arrName = name + `[${index}]`
-    if (typeof hidden === 'undefined') {
-        hidden = false
-    }
     return (
         <div style={{ width: '100%' }}>
             {/* gia ban */}
@@ -49,7 +44,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                             <FormControl className={styles.formControl} size="small"
                                 style={{ width: '100%' }}>
                                 <Controller
-                                
+                                    disa
                                     rules={{ required: true }}
                                     control={control}
                                     size="small"
@@ -349,19 +344,14 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
 }
 
 export default function renderForm(props, toast) {
+    console.log(props)
     if (props.status && props.status !== "OK") {
         return (
             <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
         )
     }
-
-    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({
-        mode: 'onSubmit', defaultValues: props.price || {
-            productCode: [],
-            tagsName: [],
-            brand: "LOCAL"
-        }
-    });
+    
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm({ mode: 'onSubmit', defaultValues: props.price });
     const [loading, setLoading] = useState(false);
     const { error, warn, info, success } = toast;
     const [defaultIds, setDefaultIds] = useState(props.price?.wholesalePrice?.map((value, ind) => ind) || [])
@@ -372,33 +362,22 @@ export default function renderForm(props, toast) {
     const [listTag, setListTag] = useState(props.listTag);
     const [brand, setBrand] = useState(getValues('brand') || 'LOCAL');
     const [categoryCode, setCategoryCode] = useState(props.price?.categoryCodes || []);
-    const [limitQty, setLimitQty] = useState(2);
-    const [hidden, setHidden] = useState(true);
-    const router = useRouter();
+    const [limitQty, setLimitQty] = useState(2)
     let sellerCode = "MedX";
     // tamnt
     const [incrId, setIncrId] = useState(0);
-
+    
     // func onSubmit used because useForm not working with some fields
     async function createNewPricing(formData) {
-        let code = formData.productCode?.value.code
+        idDeleteds.sort(function (a, b) { return b - a });
+        idDeleteds.forEach((val, index) => formData.wholesalePrice?.splice(val - 1, 1))
         setLoading(true);
-        formData.sellerCode = props.sellerCode
-        formData.productCode = code
-        formData.tags = [];
-        formData.tagsName?.forEach((tag) => {
-            formData.tags.push(tag.value)
-        })
-        let wholesale = formData.wholesalePrice?.filter((item) => item && item.type !== "")
-        formData.wholesalePrice = wholesale
-
         let _client = getPriceClient()
-
+        formData.tags = [...formData.tagsName] || [];
         let result = await _client.createNewPricing(formData)
         setLoading(false);
         if (result.status === "OK") {
             success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định')
-            router.push(`/seller/sku`)
         } else {
             error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
         }
@@ -410,13 +389,14 @@ export default function renderForm(props, toast) {
         formData.productCode = props.product?.code
         formData.categoryCodes = categoryCode;
         formData.tags = [];
-        formData.tagsName?.forEach((tag) => {
+        formData.tagsName.forEach((tag) => {
             formData.tags.push(tag.value)
         })
 
         let wholesale = formData.wholesalePrice?.filter((item) => item && item.type !== "")
         formData.wholesalePrice = wholesale
-
+    
+        console.log("after:", formData.wholesalePrice)
         setLoading(true);
         let _client = getPriceClient()
         let result = await _client.updatePrice(formData)
@@ -444,20 +424,18 @@ export default function renderForm(props, toast) {
         }
     }
 
+    const handleChangeSetting = (event) => {
+        setValue("condSettingType", event.target.value);
+    };
+
+    const handleChange = (panel) => (event, isExpanded) => {
+        setExpanded(isExpanded ? panel : false);
+    };
 
     let lstOptions = props?.products
 
     const onSubmit2 = (data, e) => console.log(data, e);
     const onError2 = (errors, e) => console.log(errors, e);
-
-    function updateCategoryCode(data) {
-        if (data && data.value && data.value.categoryCodes) {
-            setCategoryCode(data.value.categoryCodes);
-            setHidden(false)
-            return
-        }
-        setHidden(true);
-    }
 
     return (
         <AppCRM select="/crm/sku">
@@ -467,37 +445,77 @@ export default function renderForm(props, toast) {
             <Box component={Paper} display="block">
                 <form noValidate>
                     <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 30, margin: 5 }}>
-                            Thông tin cài đặt giá
-                        </Box>
+                        <Box style={{ fontSize: 30, margin: 5 }}>Thông tin cài đặt giá</Box>
                         <Box style={{ margin: 10 }}>
                             <Grid container spacing={1}>
                                 <Grid item xs={12} sm={6} md={6}>
                                     {
-                                        props.isUpdate === true ? (
+                                        props.isUpdate === true?(
                                             // Case 1: Product can not change
                                             <Typography gutterBottom>
                                                 Sản phẩm: <b>{props.product?.name}</b>
                                             </Typography>
-                                        ) : (
-                                                // Case 2: Select product
-                                                <div>
-                                                    <MuiSingleAuto
-                                                        name="productCode"
-                                                        control={control}
-                                                        errors={errors}
-                                                        message="Vui lòng chọn sản phẩm"
-                                                        placeholder="Chọn sản phẩm"
-                                                        options={lstOptions}
-                                                        onValueChange={updateCategoryCode}
-                                                    />
-                                                </div>
-                                            )
+                                        ):(
+                                            // Case 2: Select product
+                                            <div>
+                                                <MuiMultipleAuto 
+                                                    name="productCode"
+                                                    control={control}
+                                                    errors={errors}
+                                                    message="Vui lòng chọn sản phẩm"
+                                                    placeholder="Chọn sản phẩm"
+                                                    options={lstOptions}
+                                                />
+                                            </div>
+                                        )
                                     }
+                                    
+                                    
+                                    {/* {
+                                        typeof lstOptions !== "undefined" ? (
+                                            <Controller
+                                                render={({ onChange, ...props }) => (
+                                                    <Autocomplete
+                                                        id="productCode"
+                                                        options={lstOptions}
+                                                        getOptionLabel={option => option.name}
+                                                        noOptionsText={'Không tìm thấy kết quả phù hợp'}
+                                                        renderInput={params => (
+                                                            <TextField
+                                                                {...params}
+                                                                error={!!errors.code}
+                                                                helperText={errors.code ? "Vui lòng chọn sản phẩm" : ""}
+                                                                placeholder="Chọn sản phẩm"
+
+                                                                size="small"
+                                                            // onChange={e => setSearchTerm(e.target.value)}
+                                                            />
+                                                        )}
+                                                        onChange={(e, data) => {
+                                                            onChange(data.code);
+                                                            setCategoryCode(data.categoryCodes)
+                                                        }}
+                                                        {...props}
+                                                    />
+                                                )}
+                                                noOptionsText={noOptionsText}
+                                                name="productCode"
+                                                control={control}
+                                                onChange={([, { id }]) => id}
+                                                rules={{
+                                                    validate: d => {
+                                                        return typeof (d) != 'undefined';
+                                                    }
+                                                }}
+                                            />
+                                        ) : (
+                                                <div />
+                                            )
+                                    } */}
                                 </Grid>
                                 <Grid item xs={12} md={12} sm={12} />
                                 <Grid item xs={12} sm={12} md={6}>
-                                    <MuiMultipleAuto
+                                    <MuiMultipleAuto 
                                         name="tagsName"
                                         control={control}
                                         errors={errors}
@@ -506,6 +524,45 @@ export default function renderForm(props, toast) {
                                         label="Chọn tag"
                                         options={listTag}
                                     />
+                                    {/* <Controller
+                                        render={({ onChange, ...props }) => (
+                                            <Autocomplete
+                                                id="tagsName"
+                                                multiple
+                                                size="small"
+                                                options={listTag?.map(tag => tag.name)}
+                                                // options={listSearchCategory.map(
+                                                // 	(category) => category.label
+                                                // )}
+                                                noOptionsText={noOptionsText}
+                                                InputLabelProps={{
+                                                    shrink: true
+                                                }}
+                                                filterSelectedOptions
+                                                renderInput={(params) => (
+                                                    <TextField
+                                                        {...params}
+                                                        label="Nhập tag"
+                                                        error={!!errors.tagsName}
+                                                        placeholder=""
+
+                                                        size="small"
+                                                    // onChange={(e) => setSearchCategory(e.target.value)}
+                                                    />
+                                                )}
+                                                onChange={(e, data) => onChange(data)}
+                                                {...props}
+                                            />
+                                        )}
+                                        name="tagsName"
+                                        control={control}
+                                    // onChange={([, { id }]) => id}
+                                    // rules={{
+                                    //     validate: (d) => {
+                                    //         return typeof d != "undefined";
+                                    //     },
+                                    // }}
+                                    /> */}
                                     <Grid item xs={12} md={12} sm={12} /></Grid>
 
                                 <Grid item xs={12} sm={12} md={12}>
@@ -547,7 +604,7 @@ export default function renderForm(props, toast) {
                                     </Typography>
                                     {/* Setup gia ban le */}
                                     <RenderPriceConfig name={'retailPrice'} control={control} register={register}
-                                        hidden={hidden===true && !props.isUpdate} errors={errors} index={0} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                        hidden={typeof props.product === "undefined" && !getValues().productCode} errors={errors} index={0} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} style={{ marginTop: '10px' }}>
                                     <Typography gutterBottom style={{ fontSize: '1.25rem' }}>
@@ -556,12 +613,12 @@ export default function renderForm(props, toast) {
                                             <HelpOutlinedIcon fontSize="small" />
                                         </Tooltip>
                                     </Typography>
-
+                                    
                                     {
                                         // case edit sku
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
-                                            <div key={num} style={{ marginTop: 10 }}>
-                                                <Accordion style={{ backgroundColor: '#f8faf8', paddingTop: '5px' }} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
+                                            <div key={num} style={{marginTop: 10}}>
+                                                <Accordion  style={{backgroundColor: '#f8faf8', paddingTop: '5px'}} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
                                                     {
                                                         let tmpExpandeds = [...expandeds]
                                                         tmpExpandeds[idx] = !tmpExpandeds[idx]
@@ -576,19 +633,19 @@ export default function renderForm(props, toast) {
                                                         id="panel1bh-header"
                                                     >
                                                         <Typography color="textSecondary">
-                                                            Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
+                                                            Cài đặt giá bán buôn (bán sỉ) thứ {idx+1}
                                                             {/* <pre>{JSON.stringify(expandeds)}</pre> */}
                                                         </Typography>
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <RenderPriceConfig name={`wholesalePrice`} control={control}
-                                                            register={register} errors={errors} index={num} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                                            register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                                     </AccordionDetails>
                                                     <AccordionActions>
                                                         <Button size="small" color="secondary" variant="contained"
                                                             startIcon={<DeleteIcon />}
                                                             onClick={() => {
-                                                                setIncrId(incrId + 1)
+                                                                setIncrId(incrId+1)
                                                                 setDefaultIds(defaultIds.filter((_id) => _id !== num))
                                                                 setExpandeds(expandeds.filter((val, index) => index !== idx))
                                                             }}>Xóa</Button>
@@ -596,17 +653,46 @@ export default function renderForm(props, toast) {
                                                 </Accordion>
                                             </div>
                                         )) :
-                                            <div />
+                                            // ids.map((num, idx) => (
+                                            //     <>
+                                            //         <Accordion classes={{root:classes.root}} key={`panel${num}`} expanded={expanded === `panel${num}`} onChange={handleChange(`panel${num}`)}>
+                                            //             <AccordionSummary
+                                            //                 expandIcon={<ExpandMoreIcon />}
+                                            //                 aria-controls="panel1bh-content"
+                                            //                 onClick={(e) => e.stopPropagation()}
+                                            //                 id="panel1bh-header"
+                                            //             >
+                                            //                 <Typography color="textSecondary">
+                                            //                     Cài đặt giá bán buôn (bán sỉ) thứ new {num - idDeleteds.filter(item => item < num).length}
+                                            //                 </Typography>
+                                            //             </AccordionSummary>
+                                            //             <AccordionDetails>
+                                            //                 <RenderPriceConfig name={`wholesalePrice`} control={control}
+                                            //                     register={register} errors={errors} index={idx} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                            //             </AccordionDetails>
+                                            //             <AccordionActions>
+                                            //                 <Button size="small" color="secondary" variant="contained"
+                                            //                     startIcon={<DeleteIcon />}
+                                            //                     // onClick={() => setIds(ids.filter(id => id !== num))}>Xóa</Button>
+                                            //                     onClick={() => setIdDeleteds([...idDeleteds, num])}>Xóa</Button>
+                                            //             </AccordionActions>
+                                            //         </Accordion>
+                                            //     </>
+                                            // ))
+                                            <div/>
+
                                     }
                                     {/* edit */}
                                     {props.isUpdate ? <Button
                                         color="primary"
-                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length === 5)}
+                                        disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length  === 5)}
                                         style={{ marginTop: '10px' }}
                                         onClick={() => {
-                                            let mId = defaultIds.length - 1 <= 0 ? incrId + defaultIds.length : defaultIds.length + incrId + 1
+                                            let mId = defaultIds.length-1<=0?incrId+defaultIds.length:defaultIds.length+incrId+1
+                                            console.log("mID:", mId)
                                             setDefaultIds([...defaultIds, mId + 1]);
-                                            setExpandeds([...expandeds, true])
+                                            setExpandeds([...expandeds,true])
+                                            // setExpandeds(prevState=>[...prevState,true])
                                         }}
                                         startIcon={<AddIcon />}
                                     >
@@ -614,18 +700,16 @@ export default function renderForm(props, toast) {
                                     </Button> :
                                         <Button
                                             color="primary"
-                                            disabled={(hidden === true) || (defaultIds.length === 5)}
+                                            disabled={(typeof props.product === "undefined" && !getValues().productCode) || (ids.length - idDeleteds.length === 5)}
                                             style={{ marginTop: '10px' }}
                                             onClick={() => {
-                                                let mId = defaultIds.length - 1 <= 0 ? incrId + defaultIds.length : defaultIds.length + incrId + 1
-                                                setDefaultIds([...defaultIds, mId + 1]);
-                                                setExpandeds([...expandeds, true])
+                                                setIds([...ids, ids.length + 1])
+                                                setExpanded(`panel${ids.length}`)
                                             }}
                                             startIcon={<AddIcon />}
                                         >
                                             Thêm giá bán buôn
-                                    </Button>
-                                    }
+                                    </Button>}
 
                                 </Grid>
                             </Grid>
@@ -636,15 +720,15 @@ export default function renderForm(props, toast) {
                                 variant="contained"
                                 color="primary"
                                 disabled={(typeof props.product === "undefined" && !getValues().productCode)}
-                                onClick={handleSubmit(onSubmit)}
+                                onClick={handleSubmit(onSubmit, onError2)}
                                 style={{ margin: 8 }}>
                                 Lưu
                             </Button>
                             {
                                 typeof props.product === "undefined" ? (
-                                    <Button variant="contained" type="reset" onClick={() => reset()} style={{ margin: 8 }}>Làm mới</Button>
+                                    <Button variant="contained" type="reset" style={{ margin: 8 }}>Làm mới</Button>
                                 ) : (
-                                        <Link href="/seller/sku">
+                                        <Link href="/crm/sku">
                                             <ButtonGroup>
                                                 <Button variant="contained">Quay lại</Button>
                                             </ButtonGroup>
