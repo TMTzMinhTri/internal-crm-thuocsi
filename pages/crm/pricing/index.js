@@ -11,16 +11,14 @@ import EditIcon from "@material-ui/icons/Edit";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { Brand, condUserType, formatEllipsisText, formatNumber, formatUrlSearch } from 'components/global';
+import { Brand, condUserType, formatEllipsisText } from 'components/global';
 import moment from "moment";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
-import { useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
-
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -38,7 +36,6 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadConfigPricingData(ctx) {
-    let data = { props: {} }
     let query = ctx.query
     let q = typeof (query.q) === "undefined" ? '' : query.q
     let page = query.page || 0
@@ -52,14 +49,10 @@ export async function loadConfigPricingData(ctx) {
 
     let configPriceClient = getPricingClient(ctx, {});
     const res = await configPriceClient.getListConfigPrice({ q, limit, offset })
-
     if (res.status === 'OK') {
         if (res.data.length > 0) {
-            let categoryCodes = res.data.map((item) => item.categoryCode);
-            categoryCodes = new Set(categoryCodes.flat());
-            categoryCodes = [...categoryCodes].filter(item => item !== null)
             let [categoryList, provinceList] = await Promise.all([
-                configPriceClient.getCategoryWithArrayID([...categoryCodes]),
+                configPriceClient.getCategoryFromCache(),
                 configPriceClient.getProvinceLists()
             ]);
             if (categoryList.status === "OK") {
@@ -95,7 +88,7 @@ function render(props) {
     let router = useRouter()
 
     let q = router.query.q || ''
-    let [search, setSearch] = useState(q)
+    let [] = useState(q)
     let page = parseInt(router.query.page) || 0
     let limit = parseInt(router.query.limit) || 20
 
@@ -103,19 +96,6 @@ function render(props) {
     const [provinceLists, setProvinceLists] = useState(props.provinceLists);
     const [categoryLists, setCategoryLists] = useState(props.categoryLists);
     const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const { register, handleSubmit, errors } = useForm();
-
-    async function handleChange(event) {
-        const target = event.target;
-        const value = target.value;
-        setSearch(value)
-    }
-
-    function onSearch() {
-        q = formatUrlSearch(search)
-        router.push(`?q=${q}`)
-    }
 
     useEffect(() => {
         setConfigPricingList(props.configPriceLists);
@@ -198,25 +178,23 @@ function render(props) {
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
-                        <col width="10%"/>
-                        <col width="10%"/>
-                        <col width="20%"/>
-                        <col width="20%"/>
-                        <col width="10%"/>
                         <col width="5%"/>
+                        <col width="10%"/>
+                        <col width="20%"/>
+                        <col width="20%"/>
+                        <col width="10%"/>
                         <col width="5%"/>
                         <col width="15%"/>
                         <col width="5%"/>
                     </colgroup>
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">Code</TableCell>
+                            <TableCell align="left">No</TableCell>
                             <TableCell align="left">Loại khách hàng</TableCell>
                             <TableCell align="left">Danh mục</TableCell>
                             <TableCell align="left">Tỉnh/thành</TableCell>
-                            <TableCell align="right">Hệ số nhân</TableCell>
-                            <TableCell align="right">Hệ số cộng</TableCell>
                             <TableCell align="left">Brand</TableCell>
+                            <TableCell align="right">Hệ số </TableCell>
                             <TableCell align="left">Cập nhật</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
@@ -225,13 +203,13 @@ function render(props) {
                         {
                             total ? configPricingList.map((row, i) => (
                                 <TableRow key={i}>
-                                    <TableCell align="left">{row.code || '---'}</TableCell>
+                                    <TableCell align="left">{page*limit + i + 1}</TableCell>
                                     <TableCell align="left">{condUserType.find(e => e.value === row.customerType)?.label}</TableCell>
                                     <TableCell align="left" className={classes.root}>{typeCategorys(row.categoryCode)}</TableCell>
                                     <TableCell align="left">{provices(row.locationCode)}</TableCell>
-                                    <TableCell align="right">{row.numMultiply}</TableCell>
-                                    <TableCell align="right">{formatNumber(row.numAddition)}</TableCell>
-                                    <TableCell align="left">{Brand[row.brand].value}</TableCell>
+                                    <TableCell align="left">{Brand[row.brand]?.value}</TableCell>
+                                    <TableCell align="right">{row.value}</TableCell>
+                                    
                                     <TableCell align="left">{moment(row.lastUpdatedTime).utcOffset('+0700').format("DD-MM-YYYY HH:mm:ss")}</TableCell>
                                     <TableCell align="center">
                                         <Link href={`/crm/pricing/edit?priceCode=${row.code}`}>
