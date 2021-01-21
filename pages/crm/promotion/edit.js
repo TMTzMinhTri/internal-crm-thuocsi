@@ -1,3 +1,7 @@
+import React, { useState } from "react";
+
+import Head from "next/head";
+import { useRouter } from "next/router";
 import {
   Box,
   Button,
@@ -6,17 +10,18 @@ import {
   Grid,
   Paper,
 } from "@material-ui/core";
-import Head from "next/head";
+
 import AppCRM from "pages/_layout";
-import React, { useState } from "react";
+
 import { useForm } from "react-hook-form";
 import styles from "./promotion.module.css";
 import {
   doWithLoggedInUser,
   renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
-import { defaultPromotionScope } from "../../../components/component/constant";
+import {defaultNameRulesValue, defaultPromotionScope} from "../../../components/component/constant";
 import {
+  displayNameRule,
   displayTime,
   parseRuleToObject,
   setRulesPromotion,
@@ -30,12 +35,10 @@ import { getProductClient } from "../../../client/product";
 import { getCategoryClient } from "../../../client/category";
 
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-import { useRouter } from "next/router";
+
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
 import ApplyFields from "components/component/promotion/apply-fields";
-import RenderTableListCategory from "../../../components/component/promotion/modal-list-category";
-import RenderTableListProduct from "../../../components/component/promotion/modal-list-product";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, () => {
@@ -214,12 +217,21 @@ function render(props) {
     setState({ ...state, name: value });
   };
 
+
+  const resetPrice = () => {
+    for (const [key, value] of Object.entries(defaultNameRulesValue)) {
+      let priceMinValue = displayNameRule(promotionOption, value, 0);
+      setValue(priceMinValue, "");
+    }
+  };
+
   const handleChangeStatus = (event) => {
     setState({
       ...state,
       [event.target.name]: event.target.value,
       promotionRulesLine: [{ id: 0 }],
     });
+    resetPrice()
     reset();
   };
 
@@ -301,6 +313,7 @@ function render(props) {
       setState({
         ...state,
         listProductPromotion: defaultState.listProductPromotion,
+        listCategoryPromotion: defaultState.listCategoryPromotion,
         [event.target?.name]: event.target?.value,
       });
       setOpen({ ...open, openModalProductScopePromotion: true });
@@ -334,12 +347,17 @@ function render(props) {
     let value = getValues();
     let listProductIDs = [];
     let listCategoryCodes = [];
-    listProductPromotion.forEach((product) =>
-      listProductIDs.push(product.productID)
-    );
-    listCategoryPromotion.forEach((category) =>
-      listCategoryCodes.push(category.code)
-    );
+    if (promotionScope == defaultPromotionScope.PRODUCT) {
+      listProductPromotion.forEach((product) =>
+        listProductIDs.push(product.productID)
+      );
+    }
+    if (promotionScope == defaultPromotionScope.CATEGORY) {
+      listCategoryPromotion.forEach((category) =>
+        listCategoryCodes.push(category.code)
+      );
+    }
+
     let rule = setRulesPromotion(
       promotionOption,
       promotionTypeRule,
@@ -437,7 +455,7 @@ function render(props) {
                   setOpen({ ...open, openModalProductScopePromotion: false })
                 }
                 handleOpenListCategory={() =>
-                  setOpen({ ...open, openModalCategoryScopePromotion: true})
+                  setOpen({ ...open, openModalCategoryScopePromotion: true })
                 }
                 handleCloseListCategory={() =>
                   setOpen({ ...open, openModalCategoryScopePromotion: false })

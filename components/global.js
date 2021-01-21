@@ -75,7 +75,7 @@ export const ProductTypes = [
 export const scopes = [
     {
         value: "PHARMACY",
-        label: "Tiệm thuốc"
+        label: "Quầy thuốc"
     },
     {
         value: "CLINIC",
@@ -85,6 +85,21 @@ export const scopes = [
         value: "DRUGSTORE",
         label: "Nhà thuốc"
     },
+]
+
+export const orderStatus = [
+    {
+        value: "Confirmed",
+        label: "Đã xác nhận",
+    },
+    {
+        value: "WaitConfirm",
+        label: "Chờ xác nhận",
+    },
+    {
+        value: "Canceled",
+        label: "Hủy bỏ",
+    }
 ]
 
 export const statuses = [
