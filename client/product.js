@@ -67,6 +67,12 @@ class ProductClient extends APIClient {
         })
     }
 
+    getProductListNone(limit) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/product/list`, {limit})
+    }
+
     searchProductCategoryListFromClient(productName,categoryCode) {
         let data = {}
         if (productName) {

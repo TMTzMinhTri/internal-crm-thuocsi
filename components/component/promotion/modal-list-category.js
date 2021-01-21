@@ -23,6 +23,7 @@ import styles from "./promotion.module.css";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
 import { defaultPromotionScope } from "../constant";
 import { limitText } from "../until";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 const RenderTableListCategory = (props) => {
   const {
@@ -44,11 +45,11 @@ const RenderTableListCategory = (props) => {
     listCategoryAction: listCategoryDefault,
   });
 
-  const handleActiveCategory = (category, active) => {
+  const handleActiveCategory = (category, event) => {
     let listCategoryAction = stateCategory.listCategoryAction;
     listCategoryAction.forEach((o) => {
       if (o.category.categoryID === category.categoryID) {
-        return (o.active = active);
+        return (o.active = event.target.checked);
       }
     });
     setStateCategory({
@@ -62,7 +63,7 @@ const RenderTableListCategory = (props) => {
     listCategoryAction.map((o, index) => {
       let bool = false;
       listCategoryPromotion.map((promotion) => {
-        if (o.category.categoryID == promotion.categoryID) {
+        if (o.category.categoryID === promotion.categoryID) {
           bool = true;
         }
       });
@@ -76,15 +77,20 @@ const RenderTableListCategory = (props) => {
   };
 
   return (
-    <div>
-      <Button
-        variant="contained"
-        color="primary"
-        style={{ margin: "1rem 0" }}
-        onClick={handleClickOpen}
-      >
-        Chọn danh mục
-      </Button>
+    <div style={{paddingLeft: "1rem"}}>
+      {
+        promotionScope === defaultPromotionScope.CATEGORY && (
+            <Button
+                variant="contained"
+                color="primary"
+                style={{ margin: "1rem 0" }}
+                onClick={handleClickOpen}
+            >
+              Chọn danh mục
+            </Button>
+        )
+      }
+
       <Modal open={open} onClose={handleCloseModal} className={styles.modal}>
         <div className={styles.modalBody}>
           <h1 className={styles.headerModal}>Danh mục sản phẩm</h1>
@@ -102,12 +108,13 @@ const RenderTableListCategory = (props) => {
                     ({ category, active }) => (
                       <TableRow key={category?.code}>
                         <TableCell align="left">
-                          <Checkbox
-                            checked={active}
-                            style={{ color: "green" }}
-                            onChange={(e, value) =>
-                              handleActiveCategory(category, value)
-                            }
+                          <input
+                              style={{transform: "scale(1.5)"}}
+                              checked={active}
+                              type="checkbox"
+                              name="listTicketChecked"
+                              color="primary"
+                              onChange={(e) => handleActiveCategory(category, event)}
                           />
                         </TableCell>
                         <TableCell align="left">

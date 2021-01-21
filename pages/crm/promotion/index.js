@@ -40,7 +40,11 @@ import {
 } from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
+import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons'
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -249,16 +253,35 @@ function render(props) {
                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
                                     <TableCell align="left">
                                         {
-                                            displayRule(row.rule).length > 0 ? (
-                                                displayRule(row.rule).map((rule, index) => (
-                                                    index % 2 === 0 ? (
-                                                        <div>{rule}</div>
-                                                    ) : (
-                                                        <div style={{fontStyle: "italic"}}>{rule}</div>
-                                                    )
-                                                ))
-                                            ) : (
-                                                <div></div>
+                                            displayRule(row.rule).length > 0 && (
+                                                <Grid container spacing={1} direction="row">
+                                                    <Grid item xs={12} sm={11} md={11} direction="column">
+                                                        {
+                                                            displayRule(row.rule).map((rule, index) => (
+                                                                index < 2 && (
+                                                                    <Grid item xs={12} sm={11} md={11} direction="column">
+                                                                        {
+                                                                            index % 2 === 0 ? (
+                                                                                <div>{rule}</div>
+                                                                            ) : (
+                                                                                <div style={{fontStyle: "italic"}}>{rule}</div>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                )
+                                                            ))
+                                                        }
+                                                    </Grid>
+                                                    {
+                                                        displayRule(row.rule).length > 3 && (
+                                                            <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"}>
+                                                                <IconButton>
+                                                                    <MoreHorizIcon/>
+                                                                </IconButton>
+                                                            </Grid>
+                                                        )
+                                                    }
+                                                </Grid>
                                             )
                                         }
                                     </TableCell>
@@ -314,13 +337,12 @@ function render(props) {
                     </h3>
                     <div style={{margin: "auto"}}>
                         <FormControl className={styles.select}>
-                            <InputLabel id="promotion-select-outlined-label" variant={"outlined"}>Loại khuyến mãi</InputLabel>
                             <Select
                                 autoWidth={false}
                                 style={{width: '100% !important'}}
                                 labelId="promotion-select-outlined-label"
                                 id="category-select-outlined"
-                                variant={"outlined"}
+                                variant={"filled"}
                                 onChange={handleChangeTypePromotion}
                                 name="selectTypePromontion"
                                 value={stateTypePromotion}

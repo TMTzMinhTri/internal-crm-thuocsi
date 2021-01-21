@@ -130,22 +130,24 @@ const RenderTableListProduct = (props) => {
   };
 
   return (
-    <div>
-      <Button
-        variant="contained"
-        color="primary"
-        style={{ margin: "1rem 0" }}
-        onClick={() => {
-          handleClickOpen();
-          setStateProduct({
-            ...stateProduct,
-            productNameSearch: "",
-            categorySearch: {},
-          });
-        }}
-      >
-        Chọn sản phẩm
-      </Button>
+    <div style={{paddingLeft: "1rem"}}>
+      {
+        promotionScope === defaultPromotionScope.PRODUCT && (    <Button
+            variant="contained"
+            color="primary"
+            style={{ margin: "1rem 0" }}
+            onClick={() => {
+              handleClickOpen();
+              setStateProduct({
+                ...stateProduct,
+                productNameSearch: "",
+                categorySearch: {},
+              });
+            }}
+        >
+          Chọn sản phẩm
+        </Button>)
+      }
       <Modal open={open} onClose={handleCloseModal} className={styles.modal}>
         <div className={styles.modalBody}>
           <h1 className={styles.headerModal}>Danh sách sản phẩm</h1>
@@ -156,7 +158,7 @@ const RenderTableListProduct = (props) => {
                   placeholder="Tên sản phẩm"
                   label="Tên sản phẩm"
                   name="searchProduct"
-                  variant="outlined"
+                  variant={"filled"}
                   onChange={handleChangeProductSearch}
                   fullWidth={true}
                   inputRef={register}
@@ -166,7 +168,7 @@ const RenderTableListProduct = (props) => {
                 <FormControl className={styles.select}>
                   <InputLabel
                     id="category-select-outlined-label"
-                    variant="outlined"
+                    variant={"filled"}
                   >
                     Chọn danh mục
                   </InputLabel>
@@ -175,7 +177,7 @@ const RenderTableListProduct = (props) => {
                     style={{ width: "100% !important" }}
                     labelId="category-select-outlined-label"
                     id="category-select-outlined"
-                    variant="outlined"
+                    variant={"filled"}
                     onChange={handleChangeCategory}
                     label="Chọn danh mục"
                     MenuProps={{ classes: { paper: classes.menuPaper } }}
@@ -214,12 +216,13 @@ const RenderTableListProduct = (props) => {
                 {stateProduct.listProductAction.map(({ product, active }) => (
                   <TableRow key={product?.productID}>
                     <TableCell align="left">
-                      <Checkbox
-                        checked={active}
-                        style={{ color: "green" }}
-                        onChange={(e, value) =>
-                          handleActiveProduct(product, value)
-                        }
+                      <input
+                          style={{transform: "scale(1.5)"}}
+                          checked={active}
+                          type="checkbox"
+                          name="listTicketChecked"
+                          color="primary"
+                          onChange={(e) => handleActiveProduct(product, e)}
                       />
                     </TableCell>
                     <TableCell align="left">
