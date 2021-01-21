@@ -31,6 +31,7 @@ const ApplyFields = (props) => {
         listProductDefault,
         listProductPromotion,
         listCategoryPromotion,
+        listCategoryProduct,
         promotionUseType,
         listCategoryDefault,
     } = state;
@@ -125,7 +126,7 @@ const ApplyFields = (props) => {
                         register={register}
                         listProductDefault={listProductDefault}
                         promotionScope={promotionScope}
-                        listCategoryPromotion={listCategoryPromotion}
+                        listCategoryDefault={listCategoryProduct}
                         listProductPromotion={listProductPromotion}
                         handleAddProductPromotion={handleAddProductPromotion}
                         handleRemoveProductPromotion={handleRemoveProductPromotion}

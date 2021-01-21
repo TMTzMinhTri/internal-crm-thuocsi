@@ -258,29 +258,29 @@ function render(props) {
                                                     <Grid item xs={12} sm={11} md={11} direction="column">
                                                         {
                                                             displayRule(row.rule).map((rule, index) => (
-                                                                index < 2 && (
-                                                                    <Grid item xs={12} sm={11} md={11} direction="column">
-                                                                        {
+                                                                //(index < 2) && (
+                                                                   // <Grid item xs={12} sm={11} md={11} direction="column">
+                                                                       // {
                                                                             index % 2 === 0 ? (
                                                                                 <div>{rule}</div>
                                                                             ) : (
                                                                                 <div style={{fontStyle: "italic"}}>{rule}</div>
                                                                             )
-                                                                        }
-                                                                    </Grid>
-                                                                )
+                                                                        //}
+                                                                   // </Grid>
+                                                                //)
                                                             ))
                                                         }
                                                     </Grid>
-                                                    {
-                                                        displayRule(row.rule).length > 3 && (
-                                                            <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"}>
-                                                                <IconButton>
-                                                                    <MoreHorizIcon/>
-                                                                </IconButton>
-                                                            </Grid>
-                                                        )
-                                                    }
+                                                    {/*{*/}
+                                                    {/*    displayRule(row.rule).length > 3  && (*/}
+                                                    {/*        <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"}>*/}
+                                                    {/*            <IconButton>*/}
+                                                    {/*                <MoreHorizIcon/>*/}
+                                                    {/*            </IconButton>*/}
+                                                    {/*        </Grid>*/}
+                                                    {/*    )*/}
+                                                    {/*}*/}
                                                 </Grid>
                                             )
                                         }

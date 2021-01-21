@@ -42,7 +42,7 @@ async function searchProductList(q, categoryCode) {
 const RenderTableListProduct = (props) => {
   const {
     listProductDefault,
-    listCategoryPromotion,
+    listCategoryDefault,
     register,
     open,
     listProductPromotion,
@@ -60,7 +60,7 @@ const RenderTableListProduct = (props) => {
 
   const [stateProduct, setStateProduct] = useState({
     listProductAction: listProductDefault,
-    listCategoryPromotion: listCategoryPromotion,
+    listCategoryDefault: listCategoryDefault,
     categorySearch: {},
     productNameSearch: "",
   });
@@ -182,7 +182,7 @@ const RenderTableListProduct = (props) => {
                     label="Chọn danh mục"
                     MenuProps={{ classes: { paper: classes.menuPaper } }}
                   >
-                    {stateProduct.listCategoryPromotion.map((category) => (
+                    {stateProduct.listCategoryDefault.map((category) => (
                       <MenuItem value={category} key={category.categoryID}>
                         {limitText(category.name, 20) || "...Không xác định"}
                       </MenuItem>

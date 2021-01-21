@@ -110,7 +110,7 @@ const RenderTableListCategory = (props) => {
                         <TableCell align="left">
                           <input
                               style={{transform: "scale(1.5)"}}
-                              checked={active}
+                              checked={open === true ? active : false}
                               type="checkbox"
                               name="listTicketChecked"
                               color="primary"

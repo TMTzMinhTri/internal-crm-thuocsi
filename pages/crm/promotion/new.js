@@ -86,6 +86,7 @@ export async function loadDataBefore(ctx) {
                 active: false,
             });
         });
+        returnObject.props.defaultState.listCategoryProduct = listCategoryResponse.data
     }
 
     return returnObject
@@ -165,10 +166,6 @@ function render(props) {
     const handleChangeScope = async (event) => {
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
-            let listCategoryResponse = await getListCategory();
-            if (!listCategoryResponse || listCategoryResponse.status !== "OK") {
-                return toast.warn("Không tìm thấy danh sách danh mục");
-            }
             let productDefaultResponse = await getProduct();
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = [];
@@ -185,8 +182,6 @@ function render(props) {
                     [event.target?.name]: event.target?.value,
                     listProductDefault: listProductDefault,
                     listProductPromotion: [],
-
-                    listCategoryPromotion: listCategoryResponse.data,
                 });
                 setOpen({...open, openModalProductScopePromotion: true});
             }
