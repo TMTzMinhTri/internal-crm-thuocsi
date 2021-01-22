@@ -130,3 +130,11 @@
 .buttonSearch {
     margin-left: auto !important;
 }
+
+.hoverSpan :hover{
+    font-weight: bold;
+}
+
+.hoverIcon :hover{
+    font-weight: bold;
+}

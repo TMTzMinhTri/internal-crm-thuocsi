@@ -39,6 +39,9 @@ import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
 import ApplyFields from "components/component/promotion/apply-fields";
+import Link from "@material-ui/core/Link";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faAngleRight} from "@fortawesome/free-solid-svg-icons";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, () => {
@@ -370,6 +373,9 @@ function render(props) {
 
         if (promotionResponse.status === "OK") {
             toast.success("Cập nhật khuyến mãi thành công");
+            return router.push({
+                pathname: '/crm/promotion'
+            })
         } else {
             toast.error(promotionResponse.message);
         }
@@ -380,10 +386,23 @@ function render(props) {
             <Head>
                 <title>Chỉnh sửa khuyến mãi</title>
             </Head>
-            <Box component={Paper} style={{width: "100%"}}>
+            <Box component={Paper}  style={{padding: "0 3rem", height: "100%"}}>
                 <form>
                     <FormGroup>
-                        <Box className={styles.contentPadding}>
+                        <Grid  className={styles.hoverSpan} style={{marginTop: "1rem"}}>
+                            <Link href={'/crm/promotion'} >
+                                <span>Trang chủ</span>
+                                <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
+                            </Link>
+                            <Link href={'/crm/promotion'}>
+                                <span>Khuyến mãi</span>
+                                <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
+                            </Link>
+                            <Link href={`/crm/promotion/new?type=${router.query.type}`}>
+                                <span style={{fontWeight: "bold"}}>Chi tiết</span>
+                            </Link>
+                        </Grid>
+                        <Box >
                             <Grid container justify="center" alignItems="center">
                                 <Box style={{fontSize: 24}}>
                                     <h3>Chỉnh sửa khuyến mãi</h3>
@@ -440,8 +459,10 @@ function render(props) {
                                 handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
                             />
 
-                            <ButtonGroup>
-                                <Box>
+                            <Divider/>
+
+                            <ButtonGroup fullWidth  style={{marginTop: "1rem"}}>
+                                <Box  style={{marginLeft: "auto"}}>
                                     <Button
                                         variant="contained"
                                         color="primary"

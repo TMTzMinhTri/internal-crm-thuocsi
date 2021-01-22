@@ -187,14 +187,8 @@ const ConditionFields = (props) => {
                     <List component="nav" aria-label="mailbox folders">
                         {promotionRulesLine.map((code, index) => (
                             <ListItem
-                                key={
-                                    defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE +
-                                    "_" +
-                                    code.id +
-                                    promotionOption
-                                }
-                                button
-                            >
+                                key={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id + promotionOption}
+                                button>
                                 <Grid spacing={1} container alignItems="center">
                                     <Grid item xs={5} sm={5} md={5}>
                                         <TextField
@@ -210,7 +204,7 @@ const ConditionFields = (props) => {
                                                     conditions,
                                                     promotionOption,
                                                     promotionTypeRule,
-                                                    displayNameRule(  defaultNameRulesValue.priceMinValue, index), index)
+                                                    displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue, index), index)
                                                     : ""
                                             }
                                             InputProps={{

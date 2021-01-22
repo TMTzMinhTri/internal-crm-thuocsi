@@ -39,6 +39,9 @@ import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
 import ApplyFields from "components/component/promotion/apply-fields";
 import dynamic from "next";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons'
+import Link from "@material-ui/core/Link";
 
 const defaultState = {
     promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
@@ -380,13 +383,24 @@ function render(props) {
             </Head>
             <Box component={Paper} style={{padding: "0 3rem", height: "100%"}}>
                 <FormGroup style={{width: "100%"}}>
+                    <Grid  className={styles.hoverSpan} style={{marginTop: "1rem"}}>
+                        <Link href={'/crm/promotion'} >
+                            <span>Trang chủ</span>
+                            <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
+                        </Link>
+                        <Link href={'/crm/promotion'}>
+                            <span>Khuyến mãi</span>
+                            <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
+                        </Link>
+                        <Link href={`/crm/promotion/new?type=${router.query.type}`}>
+                            <span style={{fontWeight: "bold"}}>Tạo mới</span>
+                        </Link>
+                    </Grid>
                     <Box>
                         <Grid container justify="center" alignItems="center">
                             <Box style={{fontSize: 24}}>
                                 <h3>
-                                    {router.query?.type === defaultPromotionType.COMBO
-                                        ? "Tạo combo linh hoạt"
-                                        : "Tạo mã khuyến mãi"}
+                                    {router.query?.type === defaultPromotionType.COMBO ? "Tạo combo linh hoạt" : "Tạo mã khuyến mãi"}
                                 </h3>
                             </Box>
                         </Grid>

@@ -173,12 +173,8 @@ export function parseRuleToObject(promotion) {
 export function parseConditionValue(conditions, typePromotion, promotionTypeCondition, conditionInfo, index) {
     switch (typePromotion) {
         case defaultRulePromotion.MIN_ORDER_VALUE:
-            console.log('1234',conditions)
-            console.log('con',conditionInfo)
             if (promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
                 if (conditionInfo === defaultNameRulesValue.priceMinValue + index) {
-                    console.log('conditions[index]',conditions[index])
-                    console.log('conditions',conditions[index][defaultConditionInfo.minOrderValue])
                     return conditions[index] ? conditions[index][defaultConditionInfo.minOrderValue] : "";
                 }
                 if (conditionInfo === defaultNameRulesValue.priceDiscountValue + index) {
