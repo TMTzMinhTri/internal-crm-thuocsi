@@ -29,7 +29,7 @@ class FeeClient extends APIClient {
     }
 
     createFee(feeData) {
-        return this.callFromNextJS(
+        return this.callFromClient(
             "POST",
             `${PREFIX}/fee`,
             feeData
@@ -37,7 +37,7 @@ class FeeClient extends APIClient {
     }
 
     updateFee(feeData) {
-        return this.callFromNextJS(
+        return this.callFromClient(
             "PUT",
             `${PREFIX}/fee`,
             feeData

@@ -72,7 +72,7 @@ function render({data}) {
     return (
         <AppCMS select="/cms/fee">
             <Head>
-                <title>Phí dịch vụ và giá bán</title>
+                <title>Phí dịch vụ</title>
             </Head>
             <div className={styles.grid}>
                 <Grid
@@ -103,7 +103,7 @@ function render({data}) {
                         </Paper>
                     </Grid>
                     <Grid item xs={6} sm={3} md={3}>
-                        <Link href="/cms/fee/new">
+                        <Link href="/crm/fee/new">
                             <ButtonGroup
                                 color="primary"
                                 aria-label="contained primary button group"
@@ -111,7 +111,7 @@ function render({data}) {
                             >
                                 <Button variant="contained" color="primary">
                                     Thêm phí dịch vụ
-                </Button>
+                                </Button>
                             </ButtonGroup>
                         </Link>
                     </Grid>
@@ -148,9 +148,9 @@ function render({data}) {
                                         <TableCell>{row.code}</TableCell>
                                         <TableCell>{row.name}</TableCell>
                                         <TableCell>{feeLabels[row.type]}</TableCell>
-                                        <TableCell>{row.fomula}</TableCell>
+                                        <TableCell>{row.formula}</TableCell>
                                         <TableCell align="center">
-                                            <Link href={`/cms/fee/edit?feeCode=${row.code}`}>
+                                            <Link href={`/crm/fee/edit?feeCode=${row.code}`}>
                                                 <a>
                                                     <Tooltip title="Cập nhật thông tin">
                                                         <IconButton>

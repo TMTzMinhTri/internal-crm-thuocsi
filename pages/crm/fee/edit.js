@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
+import Link from "next/link";
 import { Box, Button, CircularProgress, Grid, MenuItem, Paper, TextField, Typography } from "@material-ui/core";
 import { useForm } from "react-hook-form";
 
@@ -11,23 +12,73 @@ import styles from "./fee.module.css";
 import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 
+import globalStyles from "components/css-global.module.css";
+
 const defaultFeeType = FeeType.FIXED_REVENUE;
 
-export async function getServerSideProps(ctx) {
-    return await doWithLoggedInUser(ctx, (ctx) => {
-        return {}
-    })
+async function loadFeeData(ctx) {
+    const query = ctx.query;
+    const { feeCode } = query;
+    const feeClient = getFeeClient(ctx);
+    const res = await feeClient.getFeeByCode(feeCode);
+    if (res.status !== 'OK') {
+        return {
+            status: res.status,
+            message: (() => {
+                switch (res.status) {
+                    case 'NOT_FOUND':
+                        return "Không tìm thấy phí dịch vụ";
+                    default:
+                        return res.message;
+                }
+            })()
+        }
+    }
+    return { data: res.data[0] }
+
 }
 
-function render({ }) {
-    const { error, warn, info, success } = useToast();
+export async function getServerSideProps(ctx) {
+    return await doWithLoggedInUser(ctx, async () => {
+        return {
+            props: {
+                data: await loadFeeData(ctx),
+            },
+        };
+    });
+}
+
+function FeeNotFound({ message = "Không tìm thấy kết quả phù hợp" }) {
+    return (<AppCMS select="/crm/fee">
+        <Head>
+            <title>Phí dịch vụ và giá bán</title>
+        </Head>
+        <div className={globalStyles.height404}>
+            <div>
+                <span>{message} | </span>
+                <Link href={`/crm/fee`}>
+                    Quay lại trang danh sách phí dịch vụ.
+            </Link>
+            </div>
+        </div>
+    </AppCMS>)
+}
+
+const defaultFormValues = {
+    code: '',
+    name: '',
+    type: defaultFeeType,
+    formula: '',
+}
+
+function render({ data: { data, status, message } }) {
+    if (status === 'NOT_FOUND') return <FeeNotFound message={message} />
+
+    const { error, success } = useToast();
     const [loading, setLoading] = useState(false);
+    console.log(data);
     const { register, errors, handleSubmit, setValue } = useForm({
-        defaultValues: {
-            name: '',
-            type: defaultFeeType,
-            formula: '',
-        },
+        defaultValues: data ?? defaultFormValues,
         mode: "onChange",
     })
     /**
@@ -37,11 +88,12 @@ function render({ }) {
         register({ name: "type" })
     }, [])
 
-    async function createFee(feeCreatorData) {
+    async function updateFee(feeUpdateData) {
         const feeClient = getFeeClient();
-        const res = await feeClient.createFee(feeCreatorData);
+        feeUpdateData.code = data.code;
+        const res = await feeClient.updateFee(feeUpdateData);
         if (res.status === "OK") {
-            success("Tạo phí dịch vụ thành công");
+            success("Cập nhật phí dịch vụ thành công");
         } else {
             error(
                 res.message || "Thao tác không thành công, vui lòng thử lại sau"
@@ -51,7 +103,7 @@ function render({ }) {
 
     function onSubmit(formData) {
         setLoading(true);
-        createFee(formData);
+        updateFee(formData);
         setLoading(false);
     }
 
@@ -66,8 +118,24 @@ function render({ }) {
                 </Box>
                 <Box padding={3} pt={0}>
                     <form noValidate>
-                        <Grid container spacing={6}>
+                        <Grid container spacing={6} md={6}>
+                            <Grid item xs={12}>
+                                <TextField
+                                    id="code"
+                                    name="code"
+                                    variant="outlined"
+                                    label="Mã phí"
+                                    size="small"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    required
+                                    disabled
+                                    inputRef={register(feeValidation.name)}
+                                />
+                            </Grid>
                             <Grid item xs={12} md={6}>
+
                                 <TextField
                                     id="name"
                                     name="name"
@@ -100,13 +168,13 @@ function render({ }) {
                                     fullWidth
                                     inputRef={register}
                                     select
-                                    defaultValue={defaultFeeType}
-                                    onChange={e => setValue('type', e.target.value)}
+                                    defaultValue={data.type}
+                                    onChange={e => setValue("type", e.target.value)}
                                 >
                                     {feeTypeOptions.map(({ value, label }) => (<MenuItem value={value}>{label}</MenuItem>))}
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12}>
                                 <TextField
                                     id="formula"
                                     name="formula"
