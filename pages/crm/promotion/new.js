@@ -125,7 +125,6 @@ async function getListCategory() {
 }
 
 function render(props) {
-    console.log('props',props)
     const toast = useToast();
     const router = useRouter();
     const [state, setState] = useState(props.defaultState);
@@ -164,13 +163,14 @@ function render(props) {
     };
 
     const handleChangeScope = async (event) => {
+        console.log('event.target.value',event.target.value)
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
             let productDefaultResponse = await getProduct();
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = [];
                 productDefaultResponse.data.forEach((productResponse, index) => {
-                    if (index < 5) {
+                    if (index < 5 && !listProductDefault?.find(p => p.product.productID !== productResponse.productID)) {
                         listProductDefault.push({
                             product: productResponse,
                             active: false,
@@ -181,6 +181,7 @@ function render(props) {
                     ...state,
                     [event.target?.name]: event.target?.value,
                     listProductDefault: listProductDefault,
+                    listCategoryDefault:[],
                     listProductPromotion: [],
                 });
                 setOpen({...open, openModalProductScopePromotion: true});
@@ -202,6 +203,7 @@ function render(props) {
                 ...state,
                 [event.target?.name]: event.target?.value,
                 listCategoryDefault: listCategoryDefault,
+                listProductDefault: [],
                 listCategoryPromotion: [],
             });
             setOpen({...open, openModalCategoryScopePromotion: true});
@@ -209,6 +211,7 @@ function render(props) {
             setState({
                 ...state,
                 [event.target?.name]: event.target?.value,
+                listProductDefault: [],
                 listCategoryPromotion: [],
                 listProductPromotion: [],
             });
@@ -247,7 +250,7 @@ function render(props) {
         setOpen({...open, openModalCategoryScopePromotion: false});
         let listCategory = [];
         categoryList.forEach((category) => {
-            if (category.active) {
+            if (category.active && !listCategory?.find(c => c.categoryID === category.category.categoryID)) {
                 listCategory.push(category.category);
             }
         });
@@ -352,7 +355,6 @@ function render(props) {
             listProductIDs,
             listCategoryCodes
         );
-        console.log(promotionUseType, "promotionUseType");
         let promotionResponse = await createPromontion(
             promotionCode,
             parseInt(totalCode),
@@ -438,14 +440,13 @@ function render(props) {
 
                         <Divider/>
 
-                        <ButtonGroup style={{width: "100%", marginTop: "1rem"}}>
+                        <ButtonGroup fullWidth style={{marginTop: "1rem"}}>
                             <Box style={{marginLeft: "auto"}}>
                                 <Button
                                     variant="contained"
                                     color="primary"
                                     onClick={handleSubmit(onSubmit)}
-                                    style={{margin: 8}}
-                                >
+                                    style={{margin: 8}}>
                                     Lưu
                                 </Button>
                                 <Button variant="contained" style={{margin: 8}}>

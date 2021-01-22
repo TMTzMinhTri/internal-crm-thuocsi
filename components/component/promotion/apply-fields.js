@@ -86,34 +86,29 @@ const ApplyFields = (props) => {
                             name="promotionScope"
                             value={promotionScope}
                             onChange={handleChangeScope}
-                            style={{width: "100%"}}
-                        >
+                            style={{width: "100%"}}>
                             <Grid
                                 spacing={3}
                                 container
                                 justify="space-around"
-                                alignItems="center"
-                            >
+                                alignItems="center">
                                 <Grid item xs={12} sm={4} md={4}>
                                     <FormControlLabel
                                         value={defaultPromotionScope.GLOBAL}
                                         control={<Radio color="primary"/>}
-                                        label="Toàn sàn"
-                                    />
+                                        label="Toàn sàn"/>
                                 </Grid>
                                 <Grid item xs={12} sm={4} md={4}>
                                     <FormControlLabel
                                         value={defaultPromotionScope.PRODUCT}
                                         control={<Radio color="primary"/>}
-                                        label="Sản phẩm được chọn"
-                                    />
+                                        label="Sản phẩm được chọn"/>
                                 </Grid>
                                 <Grid item xs={12} sm={4} md={4}>
                                     <FormControlLabel
                                         value={defaultPromotionScope.CATEGORY}
                                         control={<Radio color="primary"/>}
-                                        label="Danh mục sản phẩm"
-                                    />
+                                        label="Danh mục sản phẩm"/>
                                 </Grid>
                             </Grid>
                         </RadioGroup>

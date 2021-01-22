@@ -125,7 +125,7 @@ const ConditionFields = (props) => {
             <Typography color="textSecondary" gutterBottom>
                 Điều kiện
             </Typography>
-            <Grid spacing={3} xs={12} container  direction="row" style={{marginLeft: "1rem"}}>
+            <Grid spacing={3} container  direction="row" style={{marginLeft: "1rem"}}>
                 <RadioGroup
                     aria-label="quiz"
                     name="promotionOption"

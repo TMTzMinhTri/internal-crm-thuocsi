@@ -27,6 +27,7 @@ import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
 import { getProductClient } from "client/product";
 import { defaultPromotionScope } from "../constant";
 import { limitText } from "../until";
+import Image from "next/image";
 
 const useStyles = makeStyles((theme) => ({
   menuPaper: {
@@ -65,6 +66,9 @@ const RenderTableListProduct = (props) => {
     productNameSearch: "",
   });
 
+  console.log('listProduct',stateProduct)
+  console.log('listProductDefault',listProductDefault)
+
   const handleChangeProductSearch = (event) => {
     setStateProduct({ ...stateProduct, productNameSearch: event.target.value });
   };
@@ -82,6 +86,13 @@ const RenderTableListProduct = (props) => {
     });
     setStateProduct({ ...stateProduct, listProductAction: listProductAction });
   };
+
+
+  const resetItem = () => {
+    let {listProductAction} = stateProduct
+    listProductAction?.forEach(item => item.active = false)
+    setStateProduct({...stateProduct,listProductAction: listProductAction})
+  }
 
   const handleOnSearchProductCategory = async () => {
     let seachProductResponse = await searchProductList(
@@ -111,12 +122,18 @@ const RenderTableListProduct = (props) => {
     }
   };
 
+  const handleClickButton = () => {
+    let {listProductAction} = stateProduct
+    listProductAction?.forEach(item => item.active = listProductPromotion.find(p => p.productID === item.product.productID))
+    setStateProduct({...stateProduct,listProductAction: listProductAction,productNameSearch: "",categorySearch: {}})
+  }
+
   const handleCloseModal = () => {
     let listProductAction = stateProduct.listProductAction;
-    listProductAction.map((o, index) => {
+    listProductAction?.map((o, index) => {
       let bool = false;
-      listProductPromotion.map((product) => {
-        if (o.product.productID == product.productID) {
+      listProductPromotion?.map((product) => {
+        if (o.product.productID === product.productID) {
           bool = true;
         }
       });
@@ -138,13 +155,8 @@ const RenderTableListProduct = (props) => {
             style={{ margin: "1rem 0" }}
             onClick={() => {
               handleClickOpen();
-              setStateProduct({
-                ...stateProduct,
-                productNameSearch: "",
-                categorySearch: {},
-              });
-            }}
-        >
+              handleClickButton();
+            }}>
           Chọn sản phẩm
         </Button>)
       }
@@ -196,8 +208,7 @@ const RenderTableListProduct = (props) => {
                   color="primary"
                   onClick={handleOnSearchProductCategory}
                   className={styles.buttonSearch}
-                  startIcon={<SearchIcon />}
-                >
+                  startIcon={<SearchIcon />}>
                   Tìm kiếm
                 </Button>
               </Grid>
@@ -213,7 +224,7 @@ const RenderTableListProduct = (props) => {
                     <TableCell align="left">Tên sản phẩm</TableCell>
                   </TableRow>
                 </TableHead>
-                {stateProduct.listProductAction.map(({ product, active }) => (
+                {stateProduct.listProductAction?.map(({ product, active }) => (
                   <TableRow key={product?.productID}>
                     <TableCell align="left">
                       <input
@@ -227,7 +238,7 @@ const RenderTableListProduct = (props) => {
                     </TableCell>
                     <TableCell align="left">
                       {product.imageUrls ? (
-                        <image src={product.imageUrls[0]}></image>
+                        <Image src={product.imageUrls[0]} width={50} height={50}/>
                       ) : (
                         <div></div>
                       )}
@@ -243,8 +254,9 @@ const RenderTableListProduct = (props) => {
               Hủy
             </Button>
             <Button
-              onClick={() =>
+              onClick={() => {
                 handleAddProductPromotion(stateProduct.listProductAction)
+                resetItem()}
               }
               color="primary"
               variant="contained"
@@ -270,7 +282,7 @@ const RenderTableListProduct = (props) => {
                 <TableRow key={product?.productID}>
                   <TableCell align="left">
                     {product.imageUrls ? (
-                      <image src={product.imageUrls[0]}></image>
+                      <Image src={product.imageUrls[0]} width={50} height={50}/>
                     ) : (
                       <div></div>
                     )}
