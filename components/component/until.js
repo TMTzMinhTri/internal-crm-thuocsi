@@ -386,3 +386,10 @@ export function displayNameRule(promotionOption, nameValue, index) {
             return defaultNameRulesQuantity[nameValue] + index;
     }
 }
+
+export function removeElement(array, elem) {
+    let index = array.indexOf(elem);
+    if (index > -1) {
+        array.splice(index, 1);
+    }
+}

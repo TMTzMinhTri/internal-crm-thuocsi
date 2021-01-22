@@ -36,7 +36,7 @@ import {
     displayRule,
     displayStatus,
     formatTime,
-    getPromotionScope,
+    getPromotionScope, removeElement,
 } from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
@@ -260,16 +260,16 @@ function render(props) {
                                                     <Grid item xs={12} sm={11} md={11} direction="column">
                                                         {
                                                             displayRule(row.rule).map((rule, index) => (
-                                                                //(index < 2) && (
-                                                                   // <Grid item xs={12} sm={11} md={11} direction="column">
-                                                                       // {
+                                                                //(index < 2 || stateDisplay.find(d => d === row.promotionId)) && (
+                                                                   <Grid item xs={12} sm={11} md={11} direction="column">
+                                                                        {
                                                                             index % 2 === 0 ? (
                                                                                 <div>{rule}</div>
                                                                             ) : (
                                                                                 <div style={{fontStyle: "italic"}}>{rule}</div>
                                                                             )
-                                                                        //}
-                                                                   // </Grid>
+                                                                        }
+                                                                    </Grid>
                                                                 //)
                                                             ))
                                                         }
@@ -277,7 +277,7 @@ function render(props) {
                                                     {/*{*/}
                                                     {/*    displayRule(row.rule).length > 3  && (*/}
                                                     {/*        <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"}>*/}
-                                                    {/*            <IconButton>*/}
+                                                    {/*            <IconButton onClick={() => }>*/}
                                                     {/*                <MoreHorizIcon/>*/}
                                                     {/*            </IconButton>*/}
                                                     {/*        </Grid>*/}

@@ -33,7 +33,7 @@ const InfomationFields = (props) => {
         <>
             <CardHeader subheader="Thông tin khuyến mãi"/>
             <CardContent>
-                <Grid spacing={3} container>
+                <Grid spacing={2} container>
                     <Grid item xs={12} sm={6} md={6}>
                         <TextField
                             id="promotionName"
@@ -84,7 +84,22 @@ const InfomationFields = (props) => {
                                 inputRef={register}
                             />
                         </Grid>
-                    ) :(<Grid item xs={12} sm={6} md={6}/>)}
+                        ) :(
+                            <Grid item xs={12} sm={6} md={6}>
+                                <TextField
+                                    id="promotionCode"
+                                    name="promotionCode"
+                                    label="Mã khuyến mãi"
+                                    disabled
+                                    placeholder=""
+                                    variant="outlined"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    style={{width: "100%"}}
+                                />
+                            </Grid>
+                        )}
                     <Grid item xs={12} sm={3} md={3}>
                         <TextField
                             id="totalCode"

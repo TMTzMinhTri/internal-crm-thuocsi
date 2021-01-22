@@ -127,7 +127,7 @@ async function updatePromotion(promotionCode, applyPerUser, totalCode, promotion
         data.startTime = startTime
     }
     if (endTime !== "") {
-        data.endTime = endTime
+        data.endTime = endTime + ":00Z";
     }
     return getPromoClient().updatePromotion(data);
 }
@@ -348,7 +348,6 @@ function render(props) {
 
         let rule = setRulesPromotion(promotionOption, promotionTypeRule, value, promotionRulesLine.length, listProductIDs);
         startTime = startTime + ":00Z";
-        endTime = endTime + ":00Z";
         if (startTime === dataRender.startTime) {
             startTime = ""
         }
