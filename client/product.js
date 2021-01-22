@@ -131,6 +131,12 @@ class ProductClient extends APIClient {
         })
     }
 
+    getListProductNoneFromClient(limit) {
+        return this.callFromClient(
+            "GET",
+            `${PREFIX}/product/list`, {limit})
+    }
+
     getProductNoPrice(offset, limit, q) {
         return this.callFromNextJS(
             "GET",

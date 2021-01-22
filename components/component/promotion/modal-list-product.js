@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
   Button,
   Modal,
@@ -66,8 +66,9 @@ const RenderTableListProduct = (props) => {
     productNameSearch: "",
   });
 
-  console.log('listProduct',stateProduct)
-  console.log('listProductDefault',listProductDefault)
+  useEffect(() => {
+      setStateProduct({...stateProduct,listProductAction: listProductDefault})
+  },[promotionScope])
 
   const handleChangeProductSearch = (event) => {
     setStateProduct({ ...stateProduct, productNameSearch: event.target.value });
@@ -194,7 +195,7 @@ const RenderTableListProduct = (props) => {
                     label="Chọn danh mục"
                     MenuProps={{ classes: { paper: classes.menuPaper } }}
                   >
-                    {stateProduct.listCategoryDefault.map((category) => (
+                    {stateProduct.listCategoryDefault?.map((category) => (
                       <MenuItem value={category} key={category.categoryID}>
                         {limitText(category.name, 20) || "...Không xác định"}
                       </MenuItem>
@@ -238,7 +239,7 @@ const RenderTableListProduct = (props) => {
                     </TableCell>
                     <TableCell align="left">
                       {product.imageUrls ? (
-                        <Image src={product.imageUrls[0]} width={50} height={50}/>
+                        <Image src={product.imageUrls[0] || ""} height={50} width={50} />
                       ) : (
                         <div></div>
                       )}
@@ -282,7 +283,7 @@ const RenderTableListProduct = (props) => {
                 <TableRow key={product?.productID}>
                   <TableCell align="left">
                     {product.imageUrls ? (
-                      <Image src={product.imageUrls[0]} width={50} height={50}/>
+                      <Image src={product.imageUrls[0] || ""} height={50} width={50}/>
                     ) : (
                       <div></div>
                     )}

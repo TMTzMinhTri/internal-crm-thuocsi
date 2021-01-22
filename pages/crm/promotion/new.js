@@ -54,6 +54,8 @@ const defaultState = {
     listProductGiftPromotion: [],
     listProductPromotion: [],
     listCategoryDefault: [],
+    listProductAction: [],
+    listCategoryAction:[],
     listProductDefault: [],
     listCategoryPromotion: [],
 };
@@ -98,18 +100,18 @@ export default function NewPage(props) {
 }
 
 async function createPromontion(promotionCode, totalCode, promotionName, promotionType, startTime, endTime, objects, applyPerUser, rule, useType) {
-    let data = {totalCode, promotionName, promotionType, startTime, endTime, objects, applyPerUser, rule, useType,};
+    let data = {totalCode, promotionName, promotionType, startTime, objects, applyPerUser, rule, useType,};
     if (promotionCode !== "") {
         data.promotionCode = promotionCode;
+    }
+    if (endTime !== "") {
+        data.endTime = endTime
     }
     return getPromoClient().createPromotion(data);
 }
 
-async function getProduct(productName, categoryCode) {
-    return getProductClient().searchProductCategoryListFromClient(
-        productName,
-        categoryCode
-    );
+async function getProduct() {
+    return getProductClient().getListProductNoneFromClient(5)
 }
 
 async function getListProductGift(productName) {
@@ -141,6 +143,7 @@ function render(props) {
         listGiftPromotion,
         listProductGiftPromotion,
         promotionUseType,
+        listProductAction,
     } = state;
     const {
         register,
@@ -151,31 +154,29 @@ function render(props) {
         reset,
         errors,
     } = useForm();
-    const [stateTest, setStateTest] = useState(0);
     const [open, setOpen] = useState({
         openModalGift: false,
         openModalProductGift: false,
         openModalProductScopePromotion: false,
         openModalCategoryScopePromotion: false,
     });
+
+
     const handleChange = (event) => {
         setState({...state, [event.target.name]: event.target.value});
     };
 
     const handleChangeScope = async (event) => {
-        console.log('event.target.value',event.target.value)
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
             let productDefaultResponse = await getProduct();
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = [];
-                productDefaultResponse.data.forEach((productResponse, index) => {
-                    if (index < 5 && !listProductDefault?.find(p => p.product.productID !== productResponse.productID)) {
-                        listProductDefault.push({
-                            product: productResponse,
-                            active: false,
-                        });
-                    }
+                productDefaultResponse.data.forEach(productResponse=> {
+                    listProductDefault.push({
+                        product: productResponse,
+                        active: false,
+                    });
                 });
                 setState({
                     ...state,
@@ -211,7 +212,6 @@ function render(props) {
             setState({
                 ...state,
                 [event.target?.name]: event.target?.value,
-                listProductDefault: [],
                 listCategoryPromotion: [],
                 listProductPromotion: [],
             });
@@ -317,6 +317,7 @@ function render(props) {
         setState({...state, listGiftPromotion: listGiftAction});
     };
 
+
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
         let {
@@ -349,26 +350,24 @@ function render(props) {
             listProductGiftPromotion
         );
         startTime = startTime + ":00Z";
-        endTime = endTime + ":00Z";
+        if (endTime !== "") {
+            endTime = endTime + ":00Z";
+        }
         let objects = setScopeObjectPromontion(
             promotionScope,
             listProductIDs,
             listCategoryCodes
         );
-        let promotionResponse = await createPromontion(
-            promotionCode,
-            parseInt(totalCode),
-            promotionName,
-            router.query?.type,
-            startTime,
-            endTime,
-            objects,
-            parseInt(totalApply),
-            rule,
-            promotionUseType
-        );
+        let promotionResponse = await createPromontion(promotionCode, parseInt(totalCode), promotionName, router.query?.type, startTime, endTime, objects, parseInt(totalApply), rule, promotionUseType);
         if (promotionResponse.status === "OK") {
+            console.lo
             toast.success("Tạo khuyến mãi thành công");
+            return router.push({
+                pathname: '/crm/promotion/edit',
+                query: {
+                    promotionId: promotionResponse.data[0]?.promotionId
+                }
+            })
         } else {
             toast.error(`${promotionResponse.message}`);
         }
@@ -449,7 +448,7 @@ function render(props) {
                                     style={{margin: 8}}>
                                     Lưu
                                 </Button>
-                                <Button variant="contained" style={{margin: 8}}>
+                                <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>
                                     Làm mới
                                 </Button>
                             </Box>

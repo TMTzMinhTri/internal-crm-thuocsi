@@ -248,7 +248,9 @@ function render(props) {
                         <TableBody>
                             {props.data.map((row, index) => (
                                 <TableRow key={index}>
-                                    <TableCell align="left">{row.promotionName}</TableCell>
+                                    <TableCell align="left">
+                                        <div style={{fontWeight: "bold"}}>{row.promotionName}</div>
+                                    </TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
                                     <TableCell align="left">
@@ -285,7 +287,9 @@ function render(props) {
                                             )
                                         }
                                     </TableCell>
-                                    <TableCell align="left">{displayStatus(row.status)}</TableCell>
+                                    <TableCell align="left">
+                                        <div style={{fontWeight: "bold" }}>{displayStatus(row.status)}</div>
+                                    </TableCell>
                                     <TableCell align="left">
                                         <Switch
                                             onChange={event => {

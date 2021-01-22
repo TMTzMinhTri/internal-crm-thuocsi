@@ -115,33 +115,16 @@ export async function loadPromotionData(ctx) {
     return returnObject;
 }
 
-async function updatePromotion(
-    promotionCode,
-    applyPerUser,
-    totalCode,
-    promotionName,
-    promotionType,
-    startTime,
-    endTime,
-    objects,
-    useType,
-    rule,
-    promotionId
-) {
-    let data = {
-        applyPerUser,
-        totalCode,
-        promotionName,
-        promotionType,
-        startTime,
-        endTime,
-        objects,
-        useType,
-        rule,
-        promotionId,
-    };
+async function updatePromotion(promotionCode, applyPerUser, totalCode, promotionName, promotionType, startTime, endTime, objects, useType, rule, promotionId) {
+    let data = {applyPerUser, totalCode, promotionName, promotionType, objects, useType, rule, promotionId};
     if (promotionCode !== "") {
         data.promotionCode = promotionCode;
+    }
+    if (startTime !== "") {
+        data.startTime = startTime
+    }
+    if (endTime !== "") {
+        data.endTime = endTime
     }
     return getPromoClient().updatePromotion(data);
 }
@@ -177,7 +160,9 @@ function render(props) {
     let startTime = dataRender.startTime;
     let endTime = dataRender.endTime;
     startTime = displayTime(startTime);
-    endTime = displayTime(endTime);
+    if (endTime !== "" || !endTime) {
+        endTime = displayTime(endTime);
+    }
     const [state, setState] = useState(defaultState);
     const [updateDateProps, setUpdateDataProps] = useState({});
     const {
@@ -343,14 +328,7 @@ function render(props) {
 
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {
-            promotionName,
-            totalCode,
-            startTime,
-            endTime,
-            totalApply,
-            promotionCode,
-        } = getValues();
+        let {promotionName, totalCode, startTime, endTime, totalApply, promotionCode,} = getValues();
         let value = getValues();
         let listProductIDs = [];
         let listCategoryCodes = [];
@@ -365,15 +343,12 @@ function render(props) {
             );
         }
 
-        let rule = setRulesPromotion(
-            promotionOption,
-            promotionTypeRule,
-            value,
-            promotionRulesLine.length,
-            listProductIDs
-        );
+        let rule = setRulesPromotion(promotionOption, promotionTypeRule, value, promotionRulesLine.length, listProductIDs);
         startTime = startTime + ":00Z";
         endTime = endTime + ":00Z";
+        if (startTime === dataRender.startTime) {
+            startTime = ""
+        }
         let objects = setScopeObjectPromontion(
             promotionScope,
             listProductIDs,
@@ -405,7 +380,7 @@ function render(props) {
             <Head>
                 <title>Chỉnh sửa khuyến mãi</title>
             </Head>
-            <Box component={Paper} style={{width: "100%", padding: "0 3rem"}}>
+            <Box component={Paper} style={{width: "100%"}}>
                 <form>
                     <FormGroup>
                         <Box className={styles.contentPadding}>

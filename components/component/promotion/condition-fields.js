@@ -68,12 +68,10 @@ const ConditionFields = (props) => {
         }
     };
 
-    const isExistValue = (order, arr) => {
+    const   isExistValue = (order, arr) => {
         let bool = false;
         arr.forEach((o, index) => {
-            if (
-                order !== index &&
-                getValues(
+            if (order !== index && getValues(
                     displayNameRule(
                         promotionOption,
                         defaultNameRulesValue.priceMinValue,
@@ -201,34 +199,18 @@ const ConditionFields = (props) => {
                                     <Grid item xs={5} sm={5} md={5}>
                                         <TextField
                                             {...textFieldProps}
-                                            id={displayNameRule(
-                                                promotionOption,
-                                                defaultNameRulesValue.priceMinValue,
-                                                index
-                                            )}
-                                            name={displayNameRule(
-                                                promotionOption,
-                                                defaultNameRulesValue.priceMinValue,
-                                                index
-                                            )}
-                                            label={
-                                                promotionOption === defaultRulePromotion.MIN_ORDER_VALUE
+                                            id={displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)}
+                                            name={displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)}
+                                            label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE
                                                     ? "Giá trị đơn hàng"
                                                     : "Số lượng sản phẩm"
                                             }
-                                            defaultValue={
-                                                edit && promotionOptionDefault === promotionOption && promotionTypeRulesDefault === promotionTypeRule
+                                            defaultValue={edit && promotionOptionDefault === promotionOption && promotionTypeRulesDefault === promotionTypeRule
                                                     ? parseConditionValue(
                                                     conditions,
                                                     promotionOption,
                                                     promotionTypeRule,
-                                                    displayNameRule(
-                                                        promotionOption,
-                                                        defaultNameRulesValue.priceMinValue,
-                                                        index
-                                                    ),
-                                                    index
-                                                    )
+                                                    displayNameRule(  defaultNameRulesValue.priceMinValue, index), index)
                                                     : ""
                                             }
                                             InputProps={{
@@ -243,20 +225,10 @@ const ConditionFields = (props) => {
                                             }}
                                             helperText={
                                                 errors[
-                                                    displayNameRule(
-                                                        promotionOption,
-                                                        defaultNameRulesValue.priceMinValue,
-                                                        index
-                                                    )
+                                                    displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)
                                                     ]?.type === "validate"
                                                     ? "Giá trị đã tồn tại"
-                                                    : errors[
-                                                        displayNameRule(
-                                                            promotionOption,
-                                                            defaultNameRulesValue.priceMinValue,
-                                                            index
-                                                        )
-                                                        ]?.message
+                                                    : errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)]?.message
                                             }
                                             error={
                                                 !!errors[
@@ -524,10 +496,6 @@ const ConditionFields = (props) => {
                                             }
                                             inputRef={register({
                                                 required: "% giảm không được để trống",
-                                                maxLength: {
-                                                    value: 3,
-                                                    message: "Không quá 3 kí tự",
-                                                },
                                                 validate: (value) => {
                                                     if (value > 100) {
                                                         return "Không được vượt quá 100%";

@@ -45,6 +45,10 @@ const RenderTableListCategory = (props) => {
         listCategoryAction: listCategoryDefault,
     });
 
+    useEffect(() => {
+        setStateCategory({...stateCategory,listCategoryAction: listCategoryDefault})
+    },[promotionScope])
+
     const handleActiveCategory = (category, event) => {
         let listCategoryAction = stateCategory.listCategoryAction;
         listCategoryAction.forEach((o) => {
@@ -62,6 +66,13 @@ const RenderTableListCategory = (props) => {
         let {listCategoryAction} = stateCategory
         listCategoryAction?.forEach(item => item.active = false)
         setStateCategory({...stateCategory,listCategoryAction: listCategoryAction})
+    }
+
+    const handleClickButton = () => {
+        let {listCategoryAction} = stateCategory
+        listCategoryAction?.forEach(item => item.active = listCategoryPromotion.find(p => p.categoryID === item.category.categoryID))
+        setStateCategory({...stateCategory,listCategoryAction: listCategoryAction})
+        handleClickOpen()
     }
 
     const handleCloseModal = () => {
@@ -86,7 +97,7 @@ const RenderTableListCategory = (props) => {
         <div style={{paddingLeft: "1rem"}}>
             {
                 promotionScope === defaultPromotionScope.CATEGORY && (
-                    <Button variant="contained" color="primary" style={{margin: "1rem 0"}} onClick={handleClickOpen}>Chọn danh mục</Button>
+                    <Button variant="contained" color="primary" style={{margin: "1rem 0"}} onClick={handleClickButton}>Chọn danh mục</Button>
                 )
             }
             <Modal open={open} onClose={handleClose} className={styles.modal}>

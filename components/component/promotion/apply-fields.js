@@ -35,6 +35,7 @@ const ApplyFields = (props) => {
         promotionUseType,
         listCategoryDefault,
     } = state;
+
     return (
         <>
             <div style={{paddingBottom: "32px"}}>
