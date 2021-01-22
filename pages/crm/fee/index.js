@@ -18,19 +18,18 @@ import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import Head from "next/head";
 import Link from "next/link";
-import Router from "next/router";
+import Router, { useRouter } from "next/router";
 
 import AppCMS from "pages/_layout";
 import {
     doWithLoggedInUser,
     renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { ErrorCode, formatUrlSearch } from "components/global";
 
 import styles from "./fee.module.css";
-import { feeLabels, FeeType } from "view-models/fee";
+import { feeLabels } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 
 async function loadFeeData(ctx) {
@@ -61,14 +60,12 @@ export async function getServerSideProps(ctx) {
     });
 }
 
-function render(props) {
-    const { error, warn, info, success } = useToast();
-    const [loading, setLoading] = useState(false);
+function render({data}) {
+    const router = useRouter();
     const [searchText, setSearchText] = useState("");
-    const [data] = useState(props.data);
 
     async function onSearch() {
-        q = formatUrlSearch(searchText);
+        const q = formatUrlSearch(searchText);
         router.push(`?q=${q}`);
     }
 
