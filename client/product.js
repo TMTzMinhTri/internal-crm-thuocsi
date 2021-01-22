@@ -67,10 +67,15 @@ class ProductClient extends APIClient {
         })
     }
 
-    getProductListNone(limit) {
-        return this.callFromNextJS(
+    getProductListFromClient(offset, limit, q) {
+        return this.callFromClient(
             "GET",
-            `${PREFIX}/product/list`, {limit})
+            `${PREFIX}/product/list`, {
+                q: q,
+                offset: offset,
+                limit: limit,
+                getTotal: true
+            })
     }
 
     searchProductCategoryListFromClient(productName,categoryCode) {
@@ -111,7 +116,7 @@ class ProductClient extends APIClient {
             `${PREFIX}/product/list`, data)
     }
 
-    async getProductListFromClient(q) {
+    async getProductListWithCategoryFromClient(q) {
         return this.callFromClient(
             "GET",
             `${PREFIX}/product/category/list`, {
@@ -131,11 +136,6 @@ class ProductClient extends APIClient {
         })
     }
 
-    getListProductNoneFromClient(limit) {
-        return this.callFromClient(
-            "GET",
-            `${PREFIX}/product/list`, {limit})
-    }
 
     getProductNoPrice(offset, limit, q) {
         return this.callFromNextJS(

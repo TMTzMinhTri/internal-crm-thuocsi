@@ -29,6 +29,7 @@ const ApplyFields = (props) => {
     const {
         promotionScope,
         listProductDefault,
+        listCategoryDefaultProduct,
         listProductPromotion,
         listCategoryPromotion,
         listCategoryProduct,
@@ -121,6 +122,7 @@ const ApplyFields = (props) => {
                         open={open.openModalProductScopePromotion}
                         register={register}
                         listProductDefault={listProductDefault}
+                        listCategoryDefaultProduct={listCategoryDefaultProduct}
                         promotionScope={promotionScope}
                         listCategoryDefault={listCategoryProduct}
                         listProductPromotion={listProductPromotion}

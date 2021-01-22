@@ -72,7 +72,7 @@ export async function getServerSideProps(ctx) {
 export async function loadDataBefore(ctx) {
     let returnObject = {props: {defaultState : defaultState}};
     let _categoryClient = getCategoryClient(ctx, {});
-    let listCategoryResponse = await _categoryClient.getListCategoryTemp();
+    let listCategoryResponse = await _categoryClient.getListCategory();
     if (listCategoryResponse && listCategoryResponse.status === "OK") {
         listCategoryResponse.data.forEach((category, index) => {
             returnObject.props.defaultState.listCategoryDefault.push({
@@ -83,7 +83,8 @@ export async function loadDataBefore(ctx) {
     }
 
     let _productClient = getProductClient(ctx, {})
-    let listProductResponse = await _productClient.getProductListNone(5)
+    let listProductResponse = await _productClient.getProductList(0,5,"")
+    console.log('list',listProductResponse)
     if (listProductResponse && listProductResponse.status === "OK") {
         listProductResponse.data.forEach((product, index) => {
             returnObject.props.defaultState.listProductDefault.push({
@@ -113,8 +114,8 @@ async function createPromontion(promotionCode, totalCode, promotionName, promoti
     return getPromoClient().createPromotion(data);
 }
 
-async function getProduct() {
-    return getProductClient().getListProductNoneFromClient(5)
+async function getProduct(offset,limit,q) {
+    return getProductClient().getProductListFromClient(offset,limit,q)
 }
 
 async function getListProductGift(productName) {
@@ -126,7 +127,7 @@ async function searchProductList(q, categoryCode) {
 }
 
 async function getListCategory() {
-    return await getCategoryClient().getListCategoryFromClient();
+    return await getCategoryClient().getListCategoryFromClient("","","");
 }
 
 function render(props) {
@@ -172,7 +173,8 @@ function render(props) {
     const handleChangeScope = async (event) => {
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
-            let productDefaultResponse = await getProduct();
+            let productDefaultResponse = await getProduct(0,5,"");
+            console.log('123124',productDefaultResponse)
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = [];
                 productDefaultResponse.data.forEach(productResponse=> {

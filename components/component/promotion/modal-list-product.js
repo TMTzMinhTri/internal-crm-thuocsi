@@ -45,6 +45,7 @@ const RenderTableListProduct = (props) => {
     listProductDefault,
     listCategoryDefault,
     register,
+    listCategoryDefaultProduct,
     open,
     listProductPromotion,
     promotionScope,
@@ -59,9 +60,10 @@ const RenderTableListProduct = (props) => {
 
   const classes = useStyles();
 
+
   const [stateProduct, setStateProduct] = useState({
     listProductAction: listProductDefault,
-    listCategoryDefault: listCategoryDefault,
+    listCategoryDefault: listCategoryDefault || listCategoryDefaultProduct,
     categorySearch: {},
     productNameSearch: "",
   });
@@ -238,7 +240,7 @@ const RenderTableListProduct = (props) => {
                       />
                     </TableCell>
                     <TableCell align="left">
-                      {product.imageUrls ? (
+                      {product.imageUrls?.length > 0 ? (
                         <Image src={product.imageUrls[0] || ""} height={50} width={50} />
                       ) : (
                         <div></div>
@@ -282,7 +284,7 @@ const RenderTableListProduct = (props) => {
               {listProductPromotion.map((product) => (
                 <TableRow key={product?.productID}>
                   <TableCell align="left">
-                    {product.imageUrls ? (
+                    {product.imageUrls?.length > 0 ? (
                       <Image src={product.imageUrls[0] || ""} height={50} width={50}/>
                     ) : (
                       <div></div>

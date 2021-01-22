@@ -33,9 +33,7 @@ import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 import {getPromoClient} from "../../../client/promo";
 import {getProductClient} from "../../../client/product";
 import {getCategoryClient} from "../../../client/category";
-
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
-
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
 import ApplyFields from "components/component/promotion/apply-fields";
@@ -91,8 +89,9 @@ export async function loadPromotionData(ctx) {
 
     defaultState.listCategoryDefault = [];
     let _categoryClient = getCategoryClient(ctx, {});
-    let listCategoryResponse = await _categoryClient.getListCategoryTemp();
+    let listCategoryResponse = await _categoryClient.getListCategory();
     if (listCategoryResponse && listCategoryResponse.status === "OK") {
+        defaultState.listCategoryDefaultProduct = listCategoryResponse.data
         listCategoryResponse.data.forEach((category, index) => {
             defaultState.listCategoryDefault.push({
                 category: category,
@@ -105,12 +104,8 @@ export async function loadPromotionData(ctx) {
     }
 
     let listCategoryPromotionResponse = await _categoryClient.getListCategoryByCodes(
-        defaultState.listCategoryCodes
-    );
-    if (
-        listCategoryPromotionResponse &&
-        listCategoryPromotionResponse.status === "OK"
-    ) {
+        defaultState.listCategoryCodes);
+    if (listCategoryPromotionResponse && listCategoryPromotionResponse.status === "OK") {
         defaultState.listCategoryPromotion = listCategoryPromotionResponse.data;
     }
 
@@ -130,25 +125,6 @@ async function updatePromotion(promotionCode, applyPerUser, totalCode, promotion
         data.endTime = endTime + ":00Z";
     }
     return getPromoClient().updatePromotion(data);
-}
-
-async function getProduct(productName, categoryCode) {
-    return getProductClient().searchProductCategoryListFromClient(
-        productName,
-        categoryCode
-    );
-}
-
-async function getListProductGift(productName) {
-    return await getProductClient().getProductListFromClient(productName);
-}
-
-async function searchProductList(q, categoryCode) {
-    return await getProductClient().searchProductListFromClient(q, categoryCode);
-}
-
-async function getListCategory() {
-    return await getCategoryClient().getListCategoryFromClient();
 }
 
 export default function NewPage(props) {
@@ -178,6 +154,7 @@ function render(props) {
         listProductPromotion,
         listCategoryPromotion,
         listGiftPromotion,
+        listCategoryDefaultProduct,
         promotionUseType,
         listCategoryDefault,
     } = state;
@@ -307,6 +284,7 @@ function render(props) {
             event.persist();
             setState({
                 ...state,
+                listCategoryDefault: listCategoryDefault,
                 listProductPromotion: defaultState.listProductPromotion,
                 listCategoryPromotion: defaultState.listCategoryPromotion,
                 [event.target?.name]: event.target?.value,
