@@ -28,6 +28,6 @@ export const feeValidation = {
         },
     },
     formula: {
-        required: "Vui lòng nhập tên phí dịch vụ",
+        required: "Vui lòng nhập công thức",
     },
 }

@@ -70,7 +70,7 @@ function render({data}) {
     }
 
     return (
-        <AppCMS select="/cms/fee">
+        <AppCMS select="/crm/fee">
             <Head>
                 <title>Phí dịch vụ</title>
             </Head>
@@ -166,7 +166,7 @@ function render({data}) {
                         )}
                     {data.count > 0 ?? (
                         <MyTablePagination
-                            labelUnit="sản phẩm"
+                            labelUnit="phí dịch vụ"
                             count={data.count}
                             rowsPerPage={limit}
                             page={page}

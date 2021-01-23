@@ -74,9 +74,8 @@ const defaultFormValues = {
 function render({ data: { data, status, message } }) {
     if (status === 'NOT_FOUND') return <FeeNotFound message={message} />
 
-    const { error, success } = useToast();
+    const toast = useToast();
     const [loading, setLoading] = useState(false);
-    console.log(data);
     const { register, errors, handleSubmit, setValue } = useForm({
         defaultValues: data ?? defaultFormValues,
         mode: "onChange",
@@ -93,9 +92,9 @@ function render({ data: { data, status, message } }) {
         feeUpdateData.code = data.code;
         const res = await feeClient.updateFee(feeUpdateData);
         if (res.status === "OK") {
-            success("Cập nhật phí dịch vụ thành công");
+            toast.success("Cập nhật phí dịch vụ thành công");
         } else {
-            error(
+            toast.error(
                 res.message || "Thao tác không thành công, vui lòng thử lại sau"
             );
         }
@@ -108,7 +107,7 @@ function render({ data: { data, status, message } }) {
     }
 
     return (
-        <AppCMS select="/cms/fee">
+        <AppCMS select="/crm/fee">
             <Head>
                 <title>Phí dịch vụ và giá bán</title>
             </Head>
@@ -191,6 +190,7 @@ function render({ data: { data, status, message } }) {
                                     inputRef={register(feeValidation.formula)}
                                     multiline
                                     rows={3}
+                                    onBlur={e => setValue('formula', e.target.value?.trim?.())}
                                 />
                             </Grid>
                         </Grid>

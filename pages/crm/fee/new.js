@@ -10,6 +10,8 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import styles from "./fee.module.css";
 import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
 import { getFeeClient } from "client/fee";
+import { actionErrorText, unknownErrorText } from "components/commonErrors";
+import { useRouter } from "next/router";
 
 const defaultFeeType = FeeType.FIXED_REVENUE;
 
@@ -20,6 +22,7 @@ export async function getServerSideProps(ctx) {
 }
 
 function render({ }) {
+    const router = useRouter();
     const { error, warn, info, success } = useToast();
     const [loading, setLoading] = useState(false);
     const { register, errors, handleSubmit, setValue } = useForm({
@@ -38,14 +41,17 @@ function render({ }) {
     }, [])
 
     async function createFee(feeCreatorData) {
-        const feeClient = getFeeClient();
-        const res = await feeClient.createFee(feeCreatorData);
-        if (res.status === "OK") {
-            success("Tạo phí dịch vụ thành công");
-        } else {
-            error(
-                res.message || "Thao tác không thành công, vui lòng thử lại sau"
-            );
+        try {
+            const feeClient = getFeeClient();
+            const res = await feeClient.createFee(feeCreatorData);
+            if (res.status === "OK") {
+                success("Tạo phí dịch vụ thành công");
+                router.push(`/crm/fee/edit?feeCode=${res.data[0].code}`);
+            } else {
+                error(res.message ?? actionErrorText);
+            }
+        } catch (error) {
+            error(error.message ?? unknownErrorText)
         }
     }
 
@@ -56,7 +62,7 @@ function render({ }) {
     }
 
     return (
-        <AppCMS select="/cms/fee">
+        <AppCMS select="/crm/fee">
             <Head>
                 <title>Phí dịch vụ và giá bán</title>
             </Head>
@@ -66,7 +72,7 @@ function render({ }) {
                 </Box>
                 <Box padding={3} pt={0}>
                     <form noValidate>
-                        <Grid container spacing={6}>
+                        <Grid container spacing={6} md={6}>
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     id="name"
@@ -106,7 +112,7 @@ function render({ }) {
                                     {feeTypeOptions.map(({ value, label }) => (<MenuItem value={value}>{label}</MenuItem>))}
                                 </TextField>
                             </Grid>
-                            <Grid item xs={12} md={6}>
+                            <Grid item xs={12}>
                                 <TextField
                                     id="formula"
                                     name="formula"
@@ -123,6 +129,7 @@ function render({ }) {
                                     inputRef={register(feeValidation.formula)}
                                     multiline
                                     rows={3}
+                                    onBlur={e => setValue('formula', e.target.value?.trim?.())}
                                 />
                             </Grid>
                         </Grid>
