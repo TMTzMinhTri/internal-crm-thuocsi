@@ -134,3 +134,8 @@
 .buttonSearch {
     margin-left: auto !important;
 }
+
+.radioButton {
+    width: 100%;
+    margin: 1rem 0;
+}

@@ -11,17 +11,9 @@ class CategoryClient extends APIClient {
         return this.callFromNextJS(
             "GET",
             `${prefix}/category/list`, {
-                q: q,
+                q: q?q: "",
                 offset: offset,
                 limit: limit,
-                getTotal: true
-            })
-    }
-
-    getListCategoryTemp() {
-        return this.callFromNextJS(
-            "GET",
-            `${prefix}/category/list`, {
                 getTotal: true
             })
     }
@@ -41,14 +33,6 @@ class CategoryClient extends APIClient {
                 q: q,
                 offset: offset,
                 limit: limit,
-                getTotal: true
-            })
-    }
-
-    getListCategoryFromClient() {
-        return this.callFromClient(
-            "GET",
-            `${prefix}/category/list`, {
                 getTotal: true
             })
     }
