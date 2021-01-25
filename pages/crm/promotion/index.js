@@ -45,6 +45,8 @@ import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import { faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons'
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import {faAngleUp,faAngleDown} from "@fortawesome/free-solid-svg-icons";
+
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -138,6 +140,26 @@ function render(props) {
 
     const handleChangeTypePromotion = (event) => {
         setStateTypePromotion(event.target.value)
+    }
+
+    const handleClickShowItem = (promotionId) => {
+        let listItem = document.getElementsByName("hideItem" + promotionId)
+        let buttonDown = document.getElementById("buttonDown" + promotionId)
+        let buttonUp = document.getElementById("buttonUp" + promotionId)
+        if (buttonDown.style.display === '') {
+            buttonDown.style.display = "none"
+            buttonUp.style.display = ''
+        }else {
+            buttonDown.style.display = ''
+            buttonUp.style.display = 'none'
+        }
+        listItem.forEach(item => {
+            if (item.style.display === "none") {
+                item.style.display = ''
+            }else {
+                item.style.display = "none"
+            }
+        })
     }
 
     const handleActivePromotion = async (event, promotionID) => {
@@ -260,8 +282,8 @@ function render(props) {
                                                     <Grid item xs={12} sm={11} md={11} direction="column">
                                                         {
                                                             displayRule(row.rule).map((rule, index) => (
-                                                                //(index < 2 || stateDisplay.find(d => d === row.promotionId)) && (
-                                                                   <Grid item xs={12} sm={11} md={11} direction="column">
+                                                                index < 2 ? (
+                                                                   <Grid  item xs={12} sm={11} md={11} direction="column">
                                                                         {
                                                                             index % 2 === 0 ? (
                                                                                 <div>{rule}</div>
@@ -270,19 +292,30 @@ function render(props) {
                                                                             )
                                                                         }
                                                                     </Grid>
-                                                                //)
+                                                                ): (
+                                                                    <Grid name={"hideItem" + row.promotionId} style={{display: "none"}} item xs={12} sm={11} md={11} direction="column">
+                                                                        {
+                                                                            index % 2 === 0 ? (
+                                                                                <div>{rule}</div>
+                                                                            ) : (
+                                                                                <div  style={{fontStyle: "italic"}}>{rule}</div>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                )
                                                             ))
                                                         }
                                                     </Grid>
-                                                    {/*{*/}
-                                                    {/*    displayRule(row.rule).length > 3  && (*/}
-                                                    {/*        <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"}>*/}
-                                                    {/*            <IconButton onClick={() => }>*/}
-                                                    {/*                <MoreHorizIcon/>*/}
-                                                    {/*            </IconButton>*/}
-                                                    {/*        </Grid>*/}
-                                                    {/*    )*/}
-                                                    {/*}*/}
+                                                    {
+                                                        displayRule(row.rule).length > 3  && (
+                                                            <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"} onClick={() => handleClickShowItem(row.promotionId)}>
+                                                                <IconButton>
+                                                                    <FontAwesomeIcon id={"buttonDown" + row.promotionId} icon={faAngleDown}/>
+                                                                    <FontAwesomeIcon id={"buttonUp" + row.promotionId} icon={faAngleUp} style={{display:"none"}}/>
+                                                                </IconButton>
+                                                            </Grid>
+                                                        )
+                                                    }
                                                 </Grid>
                                             )
                                         }
