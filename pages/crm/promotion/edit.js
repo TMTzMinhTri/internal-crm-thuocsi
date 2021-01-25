@@ -40,6 +40,7 @@ import ApplyFields from "components/component/promotion/apply-fields";
 import Link from "@material-ui/core/Link";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAngleRight} from "@fortawesome/free-solid-svg-icons";
+import TitleLink from "../../../components/component/promotion/title";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, () => {
@@ -134,6 +135,20 @@ export default function NewPage(props) {
 function render(props) {
     const toast = useToast();
     const router = useRouter();
+    const urls = [
+        {
+            title: "Trang chủ",
+            url: '/crm/promotion',
+        },
+        {
+            title: "Khuyến mãi",
+            url: '/crm/promotion',
+        },
+        {
+            title: "Chỉnh sửa",
+            url: `/crm/promotion/edit?promotionId=${router.query.promotionId}`
+        }
+    ]
     let dataRender = props.data;
     let defaultState = props.defaultState;
     let startTime = dataRender.startTime;
@@ -366,18 +381,8 @@ function render(props) {
             <Box component={Paper}  style={{padding: "0 3rem", height: "100%"}}>
                 <form>
                     <FormGroup>
-                        <Grid  className={styles.hoverSpan} style={{marginTop: "1rem"}}>
-                            <Link href={'/crm/promotion'} >
-                                <span>Trang chủ</span>
-                                <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
-                            </Link>
-                            <Link href={'/crm/promotion'}>
-                                <span>Khuyến mãi</span>
-                                <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
-                            </Link>
-                            <Link href={`/crm/promotion/new?type=${router.query.type}`}>
-                                <span style={{fontWeight: "bold"}}>Chi tiết</span>
-                            </Link>
+                        <Grid style={{marginTop: "1rem"}}>
+                            <TitleLink urls={urls}/>
                         </Grid>
                         <Box >
                             <Grid container justify="center" alignItems="center">

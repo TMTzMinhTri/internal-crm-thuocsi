@@ -42,6 +42,7 @@ import dynamic from "next";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons'
 import Link from "@material-ui/core/Link";
+import TitleLink from "../../../components/component/promotion/title";
 
 const defaultState = {
     promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
@@ -133,6 +134,21 @@ async function getListCategory() {
 function render(props) {
     const toast = useToast();
     const router = useRouter();
+
+    const urls = [
+        {
+            title: "Trang chủ",
+            url: '/crm/promotion',
+        },
+        {
+            title: "Khuyến mãi",
+            url: '/crm/promotion',
+        },
+        {
+            title: "Tạo mới",
+            url: `/crm/promotion/new?type=${router.query.type}`
+        }
+    ]
     const [state, setState] = useState(props.defaultState);
     const {
         promotionOption,
@@ -174,7 +190,6 @@ function render(props) {
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
             let productDefaultResponse = await getProduct(0,5,"");
-            console.log('123124',productDefaultResponse)
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = [];
                 productDefaultResponse.data.forEach(productResponse=> {
@@ -385,18 +400,8 @@ function render(props) {
             </Head>
             <Box component={Paper} style={{padding: "0 3rem", height: "100%"}}>
                 <FormGroup style={{width: "100%"}}>
-                    <Grid  className={styles.hoverSpan} style={{marginTop: "1rem"}}>
-                        <Link href={'/crm/promotion'} >
-                            <span>Trang chủ</span>
-                            <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
-                        </Link>
-                        <Link href={'/crm/promotion'}>
-                            <span>Khuyến mãi</span>
-                            <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
-                        </Link>
-                        <Link href={`/crm/promotion/new?type=${router.query.type}`}>
-                            <span style={{fontWeight: "bold"}}>Tạo mới</span>
-                        </Link>
+                    <Grid style={{marginTop: "1rem"}}>
+                        <TitleLink urls={urls}/>
                     </Grid>
                     <Box>
                         <Grid container justify="center" alignItems="center">
