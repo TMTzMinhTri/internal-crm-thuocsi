@@ -133,7 +133,6 @@ export async function loadData(ctx) {
             orderItemResp.data[idx] = { ...orderItemResp.data[idx], sellerName: result.status === "OK" ? result.data[0].name : "-" }
         }
 
-
         data.props.orderItem = orderItemResp.data
 
     }
@@ -227,7 +226,6 @@ export default function renderForm(props, toast) {
             </TableRow>
         );
     }
-
 
     const changeQuantityHandler = () => {
         let quantityItem = parseInt(getValues('quantityItem'), 10)
