@@ -652,8 +652,8 @@ export default function renderForm(props, toast) {
                                                                             register({
                                                                                 required: "Mật khẩu không thể để trống",
                                                                                 pattern: {
-                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,12}$/,
-                                                                                    message: "Mật khẩu có độ dài từ 6 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
+                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
+                                                                                    message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
                                                                                 }
                                                                             })
                                                                         }
@@ -682,8 +682,8 @@ export default function renderForm(props, toast) {
                                                                             register({
                                                                                 required: "Mật khẩu không thể để trống",
                                                                                 pattern: {
-                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,12}$/,
-                                                                                    message: "Mật khẩu có độ dài từ 6 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
+                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
+                                                                                    message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
                                                                                 }
                                                                             })
                                                                         }
