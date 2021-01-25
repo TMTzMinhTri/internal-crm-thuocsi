@@ -443,7 +443,7 @@ function render(props) {
 
                             <Divider/>
 
-                            <ButtonGroup fullWidth  style={{marginTop: "1rem"}}>
+                            <ButtonGroup fullWidth style={{marginTop: "1rem"}}>
                                 <Box  style={{marginLeft: "auto"}}>
                                     <Button
                                         variant="contained"

@@ -8,15 +8,15 @@ import styles from "../../../pages/crm/promotion/promotion.module.css";
 export default function  TitleLink(props) {
     const {urls} = props
     return (
-        <Grid direction={"row"}  className={styles.hoverSpan}>
+        <Grid direction={"row"}  container className={styles.hoverSpan}>
             {urls.map(({url,title},index) => (
                 index < urls.length - 1 ? (
-                    <Link href={url}>
+                    <Link href={url} key={index}>
                         <span>{title}</span>
                         <FontAwesomeIcon icon={faAngleRight} style={{margin: "0 0.5rem"}}/>
                     </Link>
                 ): (
-                    <Link href={url}>
+                    <Link href={url} key={index}>
                         <span style={{fontWeight: "bold"}}>{title}</span>
                     </Link>
                 )
