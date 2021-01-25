@@ -41,6 +41,7 @@ import { getOrderClient } from "client/order";
 import MuiSingleAuto from "components/muiauto/single.js"
 import zIndex from "@material-ui/core/styles/zIndex";
 import { getProductClient } from "client/product";
+import { getSellerClient } from "client/seller";
 
 export async function loadData(ctx) {
     let data = {
@@ -77,7 +78,7 @@ export async function loadData(ctx) {
         let provinceResp = await masterDataClient.getProvinceByProvinceCode(order.customerProvinceCode)
         let districtResp = await masterDataClient.getDistrictByDistrictCode(order.customerDistrictCode)
         let wardResp = await masterDataClient.getWardByWardCode(order.customerWardCode)
-      
+
         data.props.order.customerProvinceCode = provinceResp.status === 'OK' ? provinceResp.data[0].name : ""
         data.props.order.customerDistrictCode = districtResp.status === 'OK' ? districtResp.data[0].name : ""
         data.props.order.customerWardCode = wardResp.status === 'OK' ? wardResp.data[0].name : ""
@@ -97,33 +98,42 @@ export async function loadData(ctx) {
         }
 
         let lstProductCode = []
-        orderItemResp.data=orderItemResp.data.map(orderItem => {
-            let productCode = orderItem.productSKU.split("").slice(orderItem.productSKU.split("").indexOf('.') + 1, orderItem.productSKU.split("").length).join("")
+        orderItemResp.data = orderItemResp.data.map(orderItem => {
+            let productCode = orderItem.productSku.split("").slice(orderItem.productSku.split("").indexOf('.') + 1, orderItem.productSku.split("").length).join("")
             lstProductCode.push(productCode)
-            return {...orderItem,productCode}
+            return { ...orderItem, productCode }
         })
-    
-        let _client = getProductClient(ctx,data)
+
+        let _client = getProductClient(ctx, data)
         let lstProductResp = await _client.postListProducstWithCodes(lstProductCode)
         if (lstProductResp.status !== "OK") {
-          
+
         } else {
             orderItemResp.data = orderItemResp.data.map((orderItem) => {
-                let imgProduct,nameProduct
+                let imgProduct, nameProduct
                 lstProductResp.data.map(product => {
-                    if(product.code === orderItem.productCode) {
-                        if(product.imageUrls) {
-                            imgProduct=product.imageUrls[0] || "/default.png"
+                    if (product.code === orderItem.productCode) {
+                        if (product.imageUrls) {
+                            imgProduct = product.imageUrls[0] || "/default.png"
                         } else {
-                            imgProduct= "/default.png"
+                            imgProduct = "/default.png"
                         }
-                        nameProduct= product.name
+                        nameProduct = product.name
                     }
                 })
-                return {...orderItem,image:imgProduct,name:nameProduct}
+                return { ...orderItem, image: imgProduct, name: nameProduct }
             })
-                
+
         }
+
+        for (let idx = 0; idx < orderItemResp.data?.length; idx++) {
+            let sellerCode = orderItemResp.data[idx].productSku.split("").slice(0, orderItemResp.data[idx].productSku.split("").indexOf(".")).join("")
+            let _sellerClient = getSellerClient(ctx, data)
+            let result = await _sellerClient.getSellerBySellerCode(sellerCode)
+            orderItemResp.data[idx] = { ...orderItemResp.data[idx], sellerName: result.status === "OK" ? result.data[0].name : "-" }
+        }
+
+
         data.props.orderItem = orderItemResp.data
 
     }
@@ -143,7 +153,7 @@ export default function renderForm(props, toast) {
     const [loading, setLoading] = useState(false);
     const [idxChangedItem, setIdxChangedItem] = useState()
     const [orderItem, setOrderItem] = useState(props.orderItem)
-    const [maxQuantity,setMaxQuantity] = useState()
+    const [maxQuantity, setMaxQuantity] = useState()
     const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
     const router = useRouter();
 
@@ -202,13 +212,15 @@ export default function renderForm(props, toast) {
         return (
             <TableRow key={index}>
                 <TableCell align="center">{index + 1}</TableCell>
-                <TableCell align="left"><img width={100} height={100} src={data.image}></img></TableCell>
+                {/* <TableCell align="left"><img width={100} height={100} src={data.image}></img></TableCell> */}
+                <TableCell align="left">{data.productSku}</TableCell>
+                <TableCell align="left">{data.sellerName}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
                 <TableCell align="center">{formatNumber(data.price)}</TableCell>
                 <TableCell align="center">{formatNumber(data.quantity)}</TableCell>
                 <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
                 <TableCell align="center">
-                    <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); setMaxQuantity(orderItem[index].maxQuantity)}}>
+                    <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); setMaxQuantity(orderItem[index].maxQuantity) }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
                 </TableCell>
@@ -270,7 +282,7 @@ export default function renderForm(props, toast) {
                             valueAsNumber: true,
                             min: 0
                         })}
-                        label={"Số lượng ( tối đa "+maxQuantity+" )"}
+                        label={"Số lượng ( tối đa " + maxQuantity + " )"}
                     />
                     {errors.quantityItem && <p>This is required</p>}
                 </DialogContent>
@@ -454,7 +466,7 @@ export default function renderForm(props, toast) {
                                                         shrink: true,
                                                     }}
                                                     placeholder=""
-                                                  
+
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
@@ -578,10 +590,11 @@ export default function renderForm(props, toast) {
                                 <TableContainer component={Paper}>
                                     <Table size="small" aria-label="a dense table">
                                         <colgroup>
-                                            <col width="5%" />
-                                            <col width="20%" />
+                                            <col width="10%" />
+                                            <col width="10%" />
+                                            <col width="10%" />
                                             <col width="15%" />
-                                            <col width="15%" />
+                                            <col width="10%" />
                                             <col width="10%" />
                                             <col width="15%" />
                                             <col width="20%" />
@@ -589,7 +602,8 @@ export default function renderForm(props, toast) {
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell align="center">Số thứ tự</TableCell>
-                                                <TableCell align="left">Hình ảnh</TableCell>
+                                                <TableCell align="left">SKU</TableCell>
+                                                <TableCell align="left">Tên người bán</TableCell>
                                                 <TableCell align="left">Tên sản phẩm</TableCell>
                                                 <TableCell align="center">Giá</TableCell>
                                                 <TableCell align="center">Số lượng</TableCell>
