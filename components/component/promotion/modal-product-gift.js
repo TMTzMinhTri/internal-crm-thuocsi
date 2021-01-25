@@ -117,7 +117,7 @@ const RenderTableProductGift = (props) => {
   };
 
   return (
-    <Card variant="outlined" style={{ marginTop: "10px" }}>
+    <Card  style={{ marginTop: "10px" }}>
       <div>
         <ButtonGroup
           color="primary"
@@ -207,7 +207,6 @@ const RenderTableProductGift = (props) => {
                     <TableCell align="left">{gift.name}</TableCell>
                     <TableCell align="left">
                       <TextField
-                        variant="outlined"
                         size="small"
                         style={{
                           height: "40%",
@@ -223,7 +222,6 @@ const RenderTableProductGift = (props) => {
                     </TableCell>
                     <TableCell align="left">
                       <TextField
-                        variant="outlined"
                         size="small"
                         style={{
                           height: "40%",

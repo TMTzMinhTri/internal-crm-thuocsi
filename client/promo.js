@@ -9,7 +9,6 @@ class PromoClient extends APIClient{
     }
 
     createPromotion(data) {
-        console.log('data',data)
         return this.callFromClient(
             "POST",
             `${constURL.PREFIX_PROMOTION}/promotion`,data
@@ -17,7 +16,6 @@ class PromoClient extends APIClient{
     }
 
     updatePromotion(data) {
-        console.log('data',data)
         return this.callFromClient(
             "PUT",
             `${constURL.PREFIX_PROMOTION}/promotion`,data
