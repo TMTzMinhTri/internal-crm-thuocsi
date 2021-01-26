@@ -5,16 +5,16 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 import Head from "next/head";
 
 import { ViewType } from "containers/crm/pricing";
-import ProvinceTable from "containers/crm/pricing/ProvinceTable";
-import RegionTable from 'containers/crm/pricing/RegionTable';
 import AppCRM from "pages/_layout";
-import DistrictTable from 'containers/crm/pricing/DistrictTable';
-import WardTable from 'containers/crm/pricing/WardTable';
-import CustomerLevelTable from 'containers/crm/pricing/CustomerLevelTable';
 import { useRouter } from 'next/router';
 import { getFeeClient } from 'client/fee';
 import { unknownErrorText } from 'components/commonErrors';
 import { formatUrlSearch } from 'components/global';
+import { RegionTable } from 'containers/crm/pricing/RegionTable';
+import { ProvinceTable } from 'containers/crm/pricing/ProvinceTable';
+import { DistrictTable } from 'containers/crm/pricing/DistrictTable';
+import { CustomerLevelTable } from 'containers/crm/pricing/CustomerLevelTable';
+import { WardTable } from 'containers/crm/pricing/WardTable';
 
 export async function loadPricingData(ctx, type, offset, limit, q) {
     const feeClient = getFeeClient(ctx);
@@ -154,7 +154,7 @@ function render(props) {
     useEffect(() => {
         setSearchText(props.q);
     }, [props.q]);
-    
+
     const handleEnterPress = (e) => {
         if (e.key !== 'Enter') return;
         e.preventDefault();
@@ -166,13 +166,16 @@ function render(props) {
             <Head>
                 <title>Danh sách cấu hình giá</title>
             </Head>
-            <Box component={Paper} padding={2}>
+            <Box
+                component={Paper}
+                style={{ padding: "16px" }}
+                display="block"
+            >
                 <Grid container spacing={3}>
                     <Grid item container xs={12} spacing={3}>
                         <Grid item md={3}>
                             <TextField
                                 label="Tìm kiếm theo"
-                                variant="outlined"
                                 size="small"
                                 fullWidth
                                 select
@@ -194,7 +197,6 @@ function render(props) {
                                 <TextField
                                     label="Tìm kiếm"
                                     placeholder="Nhập tên tỉnh thành, quận huyện,..."
-                                    variant="outlined"
                                     size="small"
                                     fullWidth
                                     InputLabelProps={{
@@ -213,7 +215,7 @@ function render(props) {
                                     onChange={e => setSearchText(e.target.value)}
                                     onKeyPress={handleEnterPress}
                                     value={searchText}
-                                    
+
                                 />
                             </Grid>
                         )}
