@@ -13,7 +13,7 @@ class MasterDataClient extends APIClient {
             "GET",
             `${URI}/province/list`,
             {
-                q:JSON.stringify(q),
+                q:q,
                 offset: offset,
                 limit: limit,
                 getTotal: true
