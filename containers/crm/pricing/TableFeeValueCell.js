@@ -31,7 +31,7 @@ export function TableFeeValueCell({ code, initialFee, onUpdate }) {
                 }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                onChange={e => setFee(e.target.value)}
+                onChange={e => setFee(+e.target.value)}
                 value={fee}
             />
         </TableCell>
