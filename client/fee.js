@@ -53,6 +53,7 @@ class FeeClient extends APIClient {
                 offset,
                 limit,
                 q,
+                getTotal: true,
             }
         )
     }
@@ -65,6 +66,7 @@ class FeeClient extends APIClient {
                 offset,
                 limit,
                 q,
+                getTotal: true,
             }
         )
     }
@@ -77,6 +79,7 @@ class FeeClient extends APIClient {
                 offset,
                 limit,
                 q,
+                getTotal: true,
             }
         )
     }
@@ -89,6 +92,7 @@ class FeeClient extends APIClient {
                 offset,
                 limit,
                 q,
+                getTotal: true,
             }
         )
     }
