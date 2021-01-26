@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core"
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useRouter } from "next/router";
@@ -13,10 +13,11 @@ import { getFeeClient } from "client/fee";
  * @param {string} props.data[].code
  * @param {string} props.data[].name
  * @param {string} props.data[].level
- * @param {string} props.data[].regionCode
- * @param {string} props.data[].regionName
  * @param {string} props.data[].feeValue
- * @param {string} q
+ * @param {string} props.q
+ * @param {number} props.page
+ * @param {number} props.limit
+ * @param {number} props.total
  */
 export default function ProvinceTable({
     data = [],
@@ -28,13 +29,22 @@ export default function ProvinceTable({
 }) {
     const router = useRouter();
     const toast = useToast();
+    const [tableData, setTableData] = useState(data);
 
     const updateFee = async ({ code, fee }) => {
         try {
             const feeClient = getFeeClient();
-            const res = await feeClient.updateCustomerLevelFee(code, fee);
+            const res = await feeClient.updateProvinceFee(code, fee);
             if (res.status === 'OK') {
-                toast.success(res.message ?? 'Cập nhật giá trị tính phí thành công.');
+                toast.success('Cập nhật giá trị tính phí thành công.');
+                const data = [...tableData];
+                data.find((v, i) => {
+                    const found = v.code === code;
+                    if (found) {
+                        data[i].feeValue = fee;
+                    }
+                })
+                setTableData(data);
             } else {
                 toast.error(res.message ?? unknownErrorText);
             }
@@ -47,35 +57,29 @@ export default function ProvinceTable({
         <TableContainer>
             <Table>
                 <colgroup>
-                    <col width="10%"></col>
                     <col width="25%"></col>
-                    <col width="15%"></col>
-                    <col width="10%"></col>
                     <col width="25%"></col>
-                    <col width="15%"></col>
+                    <col width="25%"></col>
+                    <col width="20%"></col>
                 </colgroup>
                 <TableHead>
                     <TableCell>Mã tỉnh thành</TableCell>
                     <TableCell>Tên</TableCell>
                     <TableCell>Cấp</TableCell>
-                    <TableCell>Mã vùng</TableCell>
-                    <TableCell>Tên vùng</TableCell>
                     <TableCell>Giá trị tính phí</TableCell>
                 </TableHead>
                 <TableBody>
-                    {!data.length && (
+                    {!tableData.length && (
                         <TableRow>
                             <TableCell colSpan={3} align="left">{message}</TableCell>
                         </TableRow>
                     )}
-                    {data.map(row => (
-                        <TableRow>
+                    {tableData.map((row, i) => (
+                        <TableRow key={`row_id_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
                             <TableCell>{row.level}</TableCell>
-                            <TableCell>{row.regionCode}</TableCell>
-                            <TableCell>{row.regionName}</TableCell>
-                            <TableFeeValueCell initialFee={row.feeValue} onUpdate={updateFee} />
+                            <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={updateFee} />
                         </TableRow>
                     ))}
                 </TableBody>

@@ -19,7 +19,10 @@ export function TableFeeValueCell({ code, initialFee, onUpdate }) {
                                 size="small"
                                 color="primary"
                                 disabled={fee == initialFee}
-                                onClick={() => onUpdate?.({ code, fee })}
+                                onClick={() => {
+                                    onUpdate?.({ code, fee });
+                                    setFocused(false);
+                                }}
                             >
                                 <Done />
                             </IconButton>

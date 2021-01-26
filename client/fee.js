@@ -1,6 +1,6 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 import { constURL } from "./constrant";
-const { PREFIX_MASTER } = constURL;
+const { PREFIX_MASTER, PREFIX_CUSTOMER } = constURL;
 const PREFIX = constURL.PREFIX_PRICING;
 
 class FeeClient extends APIClient {
@@ -96,15 +96,15 @@ class FeeClient extends APIClient {
     getCustomerLevelFeeList() {
         return this.callFromNextJS(
             'GET',
-            `${PREFIX_MASTER}/level/list`,
+            `${PREFIX_CUSTOMER}/level/list`,
             {}
-        )   
+        )
     }
 
     updateRegionFee(code, fee) {
         return this.callFromClient(
             'PUT',
-            `${PREFIX_MASTER}/region`,
+            `${PREFIX_MASTER}/region/fee`,
             {
                 code,
                 fee,
@@ -115,7 +115,7 @@ class FeeClient extends APIClient {
     updateProvinceFee(code, fee) {
         return this.callFromClient(
             'PUT',
-            `${PREFIX_MASTER}/province`,
+            `${PREFIX_MASTER}/province/fee`,
             {
                 code,
                 fee,
@@ -126,7 +126,7 @@ class FeeClient extends APIClient {
     updateDistrictFee(code, fee) {
         return this.callFromClient(
             'PUT',
-            `${PREFIX_MASTER}/district`,
+            `${PREFIX_MASTER}/district/fee`,
             {
                 code,
                 fee,
@@ -137,7 +137,7 @@ class FeeClient extends APIClient {
     updateWardFee(code, fee) {
         return this.callFromClient(
             'PUT',
-            `${PREFIX_MASTER}/ward`,
+            `${PREFIX_MASTER}/ward/fee`,
             {
                 code,
                 fee,
@@ -145,11 +145,15 @@ class FeeClient extends APIClient {
         )
     }
 
-    updateCustomerLevelFee() {
+    updateCustomerLevelFee(code, fee) {
         return this.callFromClient(
             'PUT',
-            `${PREFIX_MASTER}/level`,
-        )   
+            `${PREFIX_CUSTOMER}/level/fee`,
+            {
+                code,
+                fee,
+            }
+        )
     }
 }
 

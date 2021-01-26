@@ -13,45 +13,7 @@ import WardTable from 'containers/crm/pricing/WardTable';
 import CustomerLevelTable from 'containers/crm/pricing/CustomerLevelTable';
 import { useRouter } from 'next/router';
 import { getFeeClient } from 'client/fee';
-
-const mockCustomerResData = {
-    "status": "OK",
-    "data": [
-        {
-            "code": "LEVEL_SLIVER",
-            "createdTime": "2021-01-24T16:15:29.684Z",
-            "description": "Hạng bạc",
-            "feeValue": 0,
-            "levelId": 4,
-            "name": "Bạc"
-        },
-        {
-            "code": "LEVEL_GOLD",
-            "createdTime": "2021-01-24T16:15:29.606Z",
-            "description": "Hạng vàng",
-            "feeValue": 0,
-            "levelId": 3,
-            "name": "Vàng"
-        },
-        {
-            "code": "LEVEL_PLATINUM",
-            "createdTime": "2021-01-24T16:15:29.528Z",
-            "description": "Hạng bạch kim",
-            "feeValue": 0,
-            "levelId": 2,
-            "name": "Bạch kim"
-        },
-        {
-            "code": "LEVEL_DIAMOND",
-            "createdTime": "2021-01-24T16:15:29.452Z",
-            "description": "Hạng kim cương",
-            "feeValue": 0,
-            "levelId": 1,
-            "name": "Kim cương"
-        }
-    ],
-    "message": "Query level successfully."
-}
+import { unknownErrorText } from 'components/commonErrors';
 
 export async function loadPricingData(ctx, type, offset, limit) {
     const feeClient = getFeeClient(ctx);
@@ -59,45 +21,62 @@ export async function loadPricingData(ctx, type, offset, limit) {
         const res = await feeClient.getRegionFeeList(offset, limit);
         if (res.status === 'OK') {
             return {
-                total: res.data.length,
+                total: res.total ?? null,
                 data: res.data,
             }
-        } else {
-            return { message: res.message, }
         }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy vùng phù hợp.'
+            }
+        }
+        return { message: res.message, }
     }
     if (type === ViewType.PROVINCE) {
         const res = await feeClient.getProvinceFeeList(offset, limit);
         if (res.status === 'OK') {
             return {
-                total: res.data.length,
+                total: res.total ?? null,
                 data: res.data,
             }
-        } else {
-            return { message: res.message, }
         }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy tỉnh thành phù hợp.'
+            }
+        }
+        return { message: res.message, }
+
     }
     if (type === ViewType.DISTRICT) {
         const res = await feeClient.getDistrictFeeList(offset, limit);
         if (res.status === 'OK') {
             return {
-                total: res.data.length,
+                total: res.total ?? null,
                 data: res.data,
             }
-        } else {
-            return { message: res.message, }
         }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy quận huyện phù hợp.'
+            }
+        }
+        return { message: res.message, }
     }
     if (type === ViewType.WARD) {
         const res = await feeClient.getWardFeeList(offset, limit);
         if (res.status === 'OK') {
             return {
-                total: res.data.length,
+                total: res.total ?? null,
                 data: res.data,
             }
-        } else {
-            return { message: res.message, }
         }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy phường/xã phù hợp.'
+            }
+        }
+        return { message: res.message, }
     }
     if (type === ViewType.CUSTOMER) {
         const res = await feeClient.getCustomerLevelFeeList();
@@ -105,9 +84,13 @@ export async function loadPricingData(ctx, type, offset, limit) {
             return {
                 data: res.data,
             }
-        } else {
-            return { message: res.message, }
         }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy hạng khách hàng phù hợp.'
+            }
+        }
+        return { message: res.message, }
     }
 }
 
@@ -120,21 +103,26 @@ export async function getServerSideProps(ctx) {
             page = 0,
             limit = 20,
         } = query;
-
-        const data = await loadPricingData(ctx, v, page * limit, limit);
-
-        return {
-            props: {
-                viewType: v,
-                q,
-                page,
-                limit,
-                regionData: v === ViewType.REGION ? data : null,
-                provinceData: v === ViewType.PROVINCE ? data : null,
-                districtData: v === ViewType.DISTRICT ? data : null,
-                wardData: v === ViewType.WARD ? data : null,
-                customerData: v === ViewType.CUSTOMER ? data : null,
-                message: data.message ?? null,
+        try {
+            const data = await loadPricingData(ctx, v, page * limit, limit);
+            return {
+                props: {
+                    viewType: v,
+                    q,
+                    page,
+                    limit,
+                    regionData: v === ViewType.REGION ? data : null,
+                    provinceData: v === ViewType.PROVINCE ? data : null,
+                    districtData: v === ViewType.DISTRICT ? data : null,
+                    wardData: v === ViewType.WARD ? data : null,
+                    customerData: v === ViewType.CUSTOMER ? data : null,
+                }
+            }
+        } catch (err) {
+            return {
+                props: {
+                    message: err.message ?? unknownErrorText,
+                }
             }
         }
     })
@@ -143,6 +131,9 @@ export async function getServerSideProps(ctx) {
 /**
  * @param {object} props
  * @param {string} props.viewType
+ * @param {string} props.q
+ * @param {number} props.page
+ * @param {number} props.limit
  * @param {object[]} props.regionData
  * @param {object[]} props.provinceData
  * @param {object[]} props.districtData
@@ -211,6 +202,9 @@ function render(props) {
                                 data={props.regionData?.data}
                                 q={searchText}
                                 message={props.regionData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.regionData?.total}
                             />
                         )}
                         {props.viewType === ViewType.PROVINCE && (
@@ -218,6 +212,9 @@ function render(props) {
                                 data={props.provinceData?.data}
                                 q={searchText}
                                 message={props.provinceData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.provinceData?.total}
                             />
                         )}
                         {props.viewType === ViewType.DISTRICT && (
@@ -225,6 +222,9 @@ function render(props) {
                                 data={props.districtData?.data}
                                 q={searchText}
                                 message={props.districtData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.districtData?.total}
                             />
                         )}
                         {props.viewType === ViewType.WARD && (
@@ -232,6 +232,9 @@ function render(props) {
                                 data={props.wardData?.data}
                                 q={searchText}
                                 message={props.wardData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.wardData?.total}
                             />
                         )}
                         {props.viewType === ViewType.CUSTOMER && (
@@ -239,6 +242,9 @@ function render(props) {
                                 data={props.customerData?.data}
                                 q={searchText}
                                 message={props.customerData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.customerData?.total}
                             />
                         )}
                     </Grid>

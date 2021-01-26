@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core"
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
@@ -19,7 +19,10 @@ import { getFeeClient } from "client/fee";
  * @param {string} props.data[].regionCode
  * @param {string} props.data[].regionName
  * @param {string} props.data[].feeValue
- * @param {string} q
+ * @param {string} props.q
+ * @param {number} props.page
+ * @param {number} props.limit
+ * @param {number} props.total
  */
 export default function DistrictTable({
     data = [],
@@ -31,13 +34,22 @@ export default function DistrictTable({
 }) {
     const router = useRouter();
     const toast = useToast();
+    const [tableData, setTableData] = useState(data);
 
     const updateFee = async ({ code, fee }) => {
         try {
             const feeClient = getFeeClient();
-            const res = await feeClient.updateCustomerLevelFee(code, fee);
+            const res = await feeClient.updateDistrictFee(code, fee);
             if (res.status === 'OK') {
-                toast.success(res.message ?? 'Cập nhật giá trị tính phí thành công.');
+                toast.success('Cập nhật giá trị tính phí thành công.');
+                const data = [...tableData];
+                data.find((v, i) => {
+                    const found = v.code === code;
+                    if (found) {
+                        data[i].feeValue = fee;
+                    }
+                })
+                setTableData(data);
             } else {
                 toast.error(res.message ?? unknownErrorText);
             }
@@ -64,18 +76,18 @@ export default function DistrictTable({
                     <TableCell>Giá trị tính phí</TableCell>
                 </TableHead>
                 <TableBody>
-                    {!data.length && (
+                    {!tableData.length && (
                         <TableRow>
                             <TableCell colSpan={3} align="left">{message}</TableCell>
                         </TableRow>
                     )}
-                    {data.map(row => (
+                    {tableData.map(row => (
                         <TableRow>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
                             <TableCell>{row.level}</TableCell>
                             <TableCell>{row.provinceCode}</TableCell>
-                            <TableFeeValueCell initialFee={row.feeValue} onUpdate={updateFee} />
+                            <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={updateFee} />
                         </TableRow>
                     ))}
                 </TableBody>

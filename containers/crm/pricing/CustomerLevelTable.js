@@ -1,137 +1,48 @@
 import React, { useState } from "react";
-import { Button, Grid, makeStyles, TextField } from "@material-ui/core";
+import { useRouter } from "next/router";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core"
+import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
+import { ViewType } from ".";
+import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
-import { unknownErrorText } from "components/commonErrors";
-
-const useStyles = makeStyles(theme => ({
-    container: {
-        marginTop: "12px"
-    }
-}));
-
-/**
- * @param {object} props
- * @param {object} props.row
- * @param {string} props.row.code
- * @param {string} props.row.name
- * @param {string} props.row.description
- * @param {string} props.row.levelId
- * @param {string} props.row.feeValue
- */
-const CustomerLevelRow = ({ row, updateFee }) => {
-    const [fee, setFee] = useState(row.feeValue);
-    return (
-        <Grid container item xs={12} spacing={3}>
-            <Grid item xs={12} md={6}>
-                <TextField
-                    label="Mã hạng"
-                    variant="outlined"
-                    InputLabelProps={{
-                        shrink: true
-                    }}
-                    size="small"
-                    disabled
-                    fullWidth
-                    value={row.code}
-                />
-            </Grid>
-            <Grid item xs={12} md={6}>
-                <TextField
-                    label="Tên hạng"
-                    variant="outlined"
-                    InputLabelProps={{
-                        shrink: true
-                    }}
-                    size="small"
-                    disabled
-                    fullWidth
-                    value={row.name}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <TextField
-                    label="Mô tả"
-                    variant="outlined"
-                    InputLabelProps={{
-                        shrink: true
-                    }}
-                    size="small"
-                    disabled
-                    fullWidth
-                    value={row.description}
-                />
-            </Grid>
-            <Grid item xs={12} md={6}>
-                <TextField
-                    label="ID cấp"
-                    variant="outlined"
-                    InputLabelProps={{
-                        shrink: true
-                    }}
-                    size="small"
-                    disabled
-                    fullWidth
-                    value={row.levelId}
-                />
-            </Grid>
-            <Grid item xs={12}>
-                <TextField
-                    label="Giá trị tính phí"
-                    variant="outlined"
-                    InputLabelProps={{
-                        shrink: true
-                    }}
-                    InputProps={{
-                        inputProps: {
-                            min: 0
-                        }
-                    }}
-                    size="small"
-                    type="number"
-                    fullWidth
-                    value={fee}
-                    onChange={e => setFee(e.target.value)}
-                />
-            </Grid>
-            <Grid item>
-                <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
-                    disabled={fee == row.feeValue}
-                    onClick={() => updateFee?.({
-                        code: row.code,
-                        fee,
-                    })}
-                >
-                    Lưu
-                    </Button>
-            </Grid>
-        </Grid>
-    )
-}
 
 /**
  * @param {object} props
  * @param {object[]} props.data
  * @param {string} props.data[].code
  * @param {string} props.data[].name
- * @param {string} props.data[].description
+ * @param {string} props.data[].decription
  * @param {string} props.data[].levelId
  * @param {string} props.data[].feeValue
  */
-export default function CustomerLevelTable({ data = [] }) {
-    const styles = useStyles();
+export default function DistrictTable({
+    data = [],
+    total = 0,
+    page = 0,
+    limit = 10,
+    q,
+    message,
+}) {
+    const router = useRouter();
     const toast = useToast();
+    const [tableData, setTableData] = useState(data);
 
     const updateFee = async ({ code, fee }) => {
         try {
             const feeClient = getFeeClient();
             const res = await feeClient.updateCustomerLevelFee(code, fee);
             if (res.status === 'OK') {
-                toast.success(res.message ?? 'Cập nhật giá trị tính phí thành công.');
+                toast.success('Cập nhật giá trị tính phí thành công.');
+                const data = [...tableData];
+                data.find((v, i) => {
+                    const found = v.code === code;
+                    if (found) {
+                        data[i].feeValue = fee;
+                    }
+                })
+                setTableData(data);
             } else {
                 toast.error(res.message ?? unknownErrorText);
             }
@@ -141,8 +52,40 @@ export default function CustomerLevelTable({ data = [] }) {
     }
 
     return (
-        <Grid container item xs={12} md={6} spacing={3} className={styles.container} >
-            {data.map((row) => (<CustomerLevelRow row={row} />))}
-        </Grid>
+        <TableContainer>
+            <Table>
+                <colgroup>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                </colgroup>
+                <TableHead>
+                    <TableCell>Mã hạng</TableCell>
+                    <TableCell>Tên hạng</TableCell>
+                    <TableCell>Mô tả</TableCell>
+                    <TableCell>ID cấp</TableCell>
+                    <TableCell>Giá trị tính phí</TableCell>
+                </TableHead>
+                <TableBody>
+                    {!tableData.length && (
+                        <TableRow>
+                            <TableCell colSpan={3} align="left">{message}</TableCell>
+                        </TableRow>
+                    )}
+                    {tableData.map(row => (
+                        <TableRow>
+                            <TableCell>{row.code}</TableCell>
+                            <TableCell>{row.name}</TableCell>
+                            <TableCell>{row.decription}</TableCell>
+                            <TableCell>{row.levelId}</TableCell>
+                            <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={updateFee} />
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+
+        </TableContainer>
     )
 }
