@@ -111,7 +111,7 @@ class FeeClient extends APIClient {
             `${PREFIX_MASTER}/region/fee`,
             {
                 code,
-                fee,
+                feeValue: fee,
             }
         )
     }
@@ -122,7 +122,7 @@ class FeeClient extends APIClient {
             `${PREFIX_MASTER}/province/fee`,
             {
                 code,
-                fee,
+                feeValue: fee,
             }
         )
     }
@@ -133,7 +133,7 @@ class FeeClient extends APIClient {
             `${PREFIX_MASTER}/district/fee`,
             {
                 code,
-                fee,
+                feeValue: fee,
             }
         )
     }
@@ -144,7 +144,7 @@ class FeeClient extends APIClient {
             `${PREFIX_MASTER}/ward/fee`,
             {
                 code,
-                fee,
+                feeValue: fee,
             }
         )
     }
@@ -155,7 +155,7 @@ class FeeClient extends APIClient {
             `${PREFIX_CUSTOMER}/level/fee`,
             {
                 code,
-                fee,
+                feeValue: fee,
             }
         )
     }
