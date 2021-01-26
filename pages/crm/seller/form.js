@@ -34,7 +34,7 @@ import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import styles from "./order.module.css";
+import styles from "./seller.module.css";
 import { condUserType, statuses, scopes } from "components/global"
 import { NotFound } from "components/components-global";
 import { getOrderClient } from "client/order";
