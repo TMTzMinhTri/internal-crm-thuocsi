@@ -10,6 +10,7 @@ export const TableFeeValueCell = ({ code, initialFee, onUpdate }) => {
             <TextField
                 size="small"
                 type="number"
+                placeholder="..."
                 fullWidth
                 InputProps={{
                     endAdornment: (
