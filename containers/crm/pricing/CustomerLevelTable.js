@@ -1,12 +1,43 @@
-import React, { useState } from "react";
-import { useRouter } from "next/router";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core"
-import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import React, { useEffect, useState } from "react";
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+} from "@material-ui/core";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
-import { ViewType } from ".";
 import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
+
+const ConfirmDialog = ({ open, onConfirm, onClose }) => {
+    const handleOk = () => {
+        onConfirm();
+        onClose();
+    }
+    return (
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>Cập nhật giá trị tính phí</DialogTitle>
+            <DialogContent>
+                <DialogContentText>Bạn có chắc muốn cập nhật giá trị tính phí?</DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button color="primary" onClick={handleOk}>OK</Button>
+                <Button color="secondary" onClick={() => onClose()}>
+                    Hủy
+                </Button>
+            </DialogActions>
+        </Dialog>
+    );
+};
 
 /**
  * @param {object} props
@@ -17,75 +48,90 @@ import { getFeeClient } from "client/fee";
  * @param {string} props.data[].levelId
  * @param {string} props.data[].feeValue
  */
-export default function DistrictTable({
-    data = [],
-    total = 0,
-    page = 0,
-    limit = 10,
-    q,
-    message,
-}) {
-    const router = useRouter();
+export const CustomerLevelTable = (props) => {
     const toast = useToast();
-    const [tableData, setTableData] = useState(data);
+    const [tableData, setTableData] = useState(props.data);
+    const [openModal, setOpenModal] = useState(false);
+    const [currentEditValue, setCurrentEditValue] = useState(null);
 
-    const updateFee = async ({ code, fee }) => {
+    useEffect(() => {
+        setTableData(props.data);
+    }, [props.data]);
+
+    const updateFee = async () => {
         try {
+            const { code, fee } = currentEditValue;
             const feeClient = getFeeClient();
             const res = await feeClient.updateCustomerLevelFee(code, fee);
-            if (res.status === 'OK') {
-                toast.success('Cập nhật giá trị tính phí thành công.');
+            if (res.status === "OK") {
+                toast.success("Cập nhật giá trị tính phí thành công.");
                 const data = [...tableData];
                 data.find((v, i) => {
                     const found = v.code === code;
                     if (found) {
                         data[i].feeValue = fee;
                     }
-                })
+                });
                 setTableData(data);
+                setCurrentEditValue(null);
             } else {
                 toast.error(res.message ?? unknownErrorText);
             }
         } catch (err) {
             toast.error(err.message ?? unknownErrorText);
         }
-    }
+    };
 
     return (
-        <TableContainer>
-            <Table>
-                <colgroup>
-                    <col width="20%"></col>
-                    <col width="20%"></col>
-                    <col width="20%"></col>
-                    <col width="20%"></col>
-                    <col width="20%"></col>
-                </colgroup>
-                <TableHead>
-                    <TableCell>Mã hạng</TableCell>
-                    <TableCell>Tên hạng</TableCell>
-                    <TableCell>Mô tả</TableCell>
-                    <TableCell>ID cấp</TableCell>
-                    <TableCell>Giá trị tính phí</TableCell>
-                </TableHead>
-                <TableBody>
-                    {!tableData.length && (
-                        <TableRow>
-                            <TableCell colSpan={3} align="left">{message}</TableCell>
-                        </TableRow>
-                    )}
-                    {tableData.map(row => (
-                        <TableRow>
-                            <TableCell>{row.code}</TableCell>
-                            <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.decription}</TableCell>
-                            <TableCell>{row.levelId}</TableCell>
-                            <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={updateFee} />
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
-
-        </TableContainer>
-    )
+        <>
+            <TableContainer>
+                <Table>
+                    <colgroup>
+                        <col width="20%"></col>
+                        <col width="20%"></col>
+                        <col width="20%"></col>
+                        <col width="20%"></col>
+                        <col width="20%"></col>
+                    </colgroup>
+                    <TableHead>
+                        <TableCell>Mã hạng</TableCell>
+                        <TableCell>Tên hạng</TableCell>
+                        <TableCell>Mô tả</TableCell>
+                        <TableCell>ID cấp</TableCell>
+                        <TableCell>Giá trị tính phí</TableCell>
+                    </TableHead>
+                    <TableBody>
+                        {!tableData?.length && (
+                            <TableRow>
+                                <TableCell colSpan={3} align="left">
+                                    {props.message}
+                                </TableCell>
+                            </TableRow>
+                        )}
+                        {tableData?.map((row) => (
+                            <TableRow>
+                                <TableCell>{row.code}</TableCell>
+                                <TableCell>{row.name}</TableCell>
+                                <TableCell>{row.decription}</TableCell>
+                                <TableCell>{row.levelId}</TableCell>
+                                <TableFeeValueCell
+                                    code={row.code}
+                                    initialFee={row.feeValue}
+                                    onUpdate={(values) => {
+                                        setCurrentEditValue(values);
+                                        setOpenModal(true);
+                                    }}
+                                />
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <ConfirmDialog
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                onConfirm={() => updateFee()}
+            />
+        </>
+    );
 }
