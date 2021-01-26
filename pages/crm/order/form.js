@@ -75,12 +75,6 @@ export async function loadData(ctx) {
         //Get Master Data Client
         let masterDataClient = getMasterDataClient(ctx, data)
 
-        let provinceResp = await masterDataClient.getProvinceByProvinceCode(order.customerProvinceCode)
-        let districtResp = await masterDataClient.getDistrictByDistrictCode(order.customerDistrictCode)
-
-        data.props.order.customerProvinceCode = provinceResp.status === 'OK' ? provinceResp.data[0].name : ""
-        data.props.order.customerDistrictCode = districtResp.status === 'OK' ? districtResp.data[0].name : ""
-
         let wardResp = await masterDataClient.getWardByWardCode(order.customerWardCode)
         if (wardResp.status === 'OK') {
             data.props.order.customerProvinceCode = wardResp.data[0].provinceName
