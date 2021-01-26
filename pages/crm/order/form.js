@@ -50,13 +50,6 @@ export async function loadData(ctx) {
         }
     }
 
-    let masterDataClient = getMasterDataClient(ctx, data)
-    let resp = await masterDataClient.getProvince(0, 100, '')
-    if (resp.status !== 'OK') {
-        return data
-    }
-    data.props.provinces = resp.data
-
     let query = ctx.query
     let order_no = typeof (query.order_no) === "undefined" ? '' : query.order_no
     data.props.isUpdate = false
