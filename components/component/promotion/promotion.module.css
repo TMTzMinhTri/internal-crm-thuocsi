@@ -139,3 +139,7 @@
     width: 100%;
     margin: 1rem 0;
 }
+
+.hoverSpan :hover{
+    font-weight: bold;
+}

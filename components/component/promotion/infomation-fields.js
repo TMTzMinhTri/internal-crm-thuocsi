@@ -85,26 +85,13 @@ const InfomationFields = (props) => {
                             />
                         </Grid>
                         ) :(
-                            <Grid item xs={12} sm={6} md={6}>
-                                <TextField
-                                    id="promotionCode"
-                                    name="promotionCode"
-                                    label="Mã khuyến mãi"
-                                    disabled
-                                    placeholder=""
-                                    variant="outlined"
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    style={{width: "100%"}}
-                                />
-                            </Grid>
+                            <Grid item xs={12} sm={6} md={6}/>
                         )}
                     <Grid item xs={12} sm={3} md={3}>
                         <TextField
                             id="totalCode"
                             name="totalCode"
-                            label="Số lượng mã giảm giá"
+                            label="Số lượng khuyến mãi"
                             type="number"
                             variant="outlined"
                             defaultValue={dataRender.totalCode}
@@ -116,7 +103,7 @@ const InfomationFields = (props) => {
                             error={!!errors.totalCode}
                             required
                             inputRef={register({
-                                required: "Số lượng mã giảm giá không được để trống",
+                                required: "Số lượng khuyến mãi không được để trống",
                                 pattern: {
                                     value: /[0-9]/,
                                     message: "Chỉ chấp nhận kí tự là số",
