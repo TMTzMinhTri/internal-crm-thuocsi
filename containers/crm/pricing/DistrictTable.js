@@ -24,7 +24,7 @@ import { getFeeClient } from "client/fee";
  * @param {number} props.limit
  * @param {number} props.total
  */
-export default function DistrictTable(props) {
+export const DistrictTable = (props) => {
     const router = useRouter();
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);

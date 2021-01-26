@@ -48,7 +48,7 @@ const ConfirmDialog = ({ open, onConfirm, onClose }) => {
  * @param {string} props.data[].levelId
  * @param {string} props.data[].feeValue
  */
-export default function DistrictTable(props) {
+export const CustomerLevelTable = (props) => {
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);
     const [openModal, setOpenModal] = useState(false);

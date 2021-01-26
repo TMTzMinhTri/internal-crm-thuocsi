@@ -19,7 +19,7 @@ import { getFeeClient } from "client/fee";
  * @param {number} props.limit
  * @param {number} props.total
  */
-export default function ProvinceTable(props) {
+export const ProvinceTable = (props) => {
     const router = useRouter();
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);

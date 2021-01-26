@@ -2,13 +2,12 @@ import React, { useState } from "react";
 import { IconButton, TableCell, TextField } from "@material-ui/core";
 import { Done } from "@material-ui/icons";
 
-export function TableFeeValueCell({ code, initialFee, onUpdate }) {
+export const TableFeeValueCell = ({ code, initialFee, onUpdate }) => {
     const [fee, setFee] = useState(initialFee);
     const [focused, setFocused] = useState(false);
     return (
         <TableCell>
             <TextField
-                variant="outlined"
                 size="small"
                 type="number"
                 fullWidth
