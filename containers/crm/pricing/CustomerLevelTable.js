@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
     Button,
     Dialog,
@@ -11,12 +10,13 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow,
+    TableRow
 } from "@material-ui/core";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-
-import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
+import React, { useEffect, useState } from "react";
+import { TableFeeValueCell } from "./TableFeeValueCell";
+
 
 const ConfirmDialog = ({ open, onConfirm, onClose }) => {
     const handleOk = () => {
@@ -97,7 +97,7 @@ export const CustomerLevelTable = (props) => {
                         <TableCell>Mã hạng</TableCell>
                         <TableCell>Tên hạng</TableCell>
                         <TableCell>Mô tả</TableCell>
-                        <TableCell>ID cấp</TableCell>
+                        <TableCell>Level</TableCell>
                         <TableCell>Giá trị tính phí</TableCell>
                     </TableHead>
                     <TableBody>
