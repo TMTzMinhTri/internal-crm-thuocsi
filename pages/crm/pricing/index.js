@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, IconButton, makeStyles, MenuItem, Paper, Select, TextField } from "@material-ui/core";
+import { Box, Grid, IconButton, Paper, Tab, Tabs, TextField } from "@material-ui/core";
 import { Search } from "@material-ui/icons";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import Head from "next/head";
@@ -173,30 +173,30 @@ function render(props) {
             >
                 <Grid container spacing={3}>
                     <Grid item container xs={12} spacing={3}>
-                        <Grid item md={3}>
-                            <TextField
-                                label="Tìm kiếm theo"
-                                size="small"
-                                fullWidth
-                                select
-                                value={viewType}
-                                onChange={(e) => {
-                                    setViewType(e.target.value);
-                                    router.push(`/crm/pricing?v=${e.target.value}&q=${searchText}`);
+                        <Grid item xs={12}>
+                            <Tabs
+                                indicatorColor="primary"
+                                textColor="primary"
+                                variant="fullWidth"
+                                onChange={(_, value) => {
+                                    setViewType(value);
+                                    router.push(`/crm/pricing?v=${value}&q=${searchText}`);
                                 }}
+                                value={viewType}
                             >
-                                <MenuItem value={ViewType.REGION}>Theo vùng</MenuItem>
-                                <MenuItem value={ViewType.PROVINCE}>Theo tỉnh thành</MenuItem>
-                                <MenuItem value={ViewType.DISTRICT}>Theo quận huyện</MenuItem>
-                                <MenuItem value={ViewType.WARD}>Theo phường/xã</MenuItem>
-                                <MenuItem value={ViewType.CUSTOMER}>Theo khách hàng</MenuItem>
-                            </TextField>
+                                <Tab value={ViewType.CUSTOMER} label="Theo khách hàng" />
+                                <Tab value={ViewType.REGION} label="Theo vùng" />
+                                <Tab value={ViewType.PROVINCE} label="Theo tỉnh thành" />
+                                <Tab value={ViewType.DISTRICT} label="Theo quận huyện" />
+                                <Tab value={ViewType.WARD} label="Theo phường/xã" />
+                            </Tabs>
                         </Grid>
                         {viewType != ViewType.CUSTOMER && (
                             <Grid item md={4}>
                                 <TextField
                                     label="Tìm kiếm"
                                     placeholder="Nhập tên tỉnh thành, quận huyện,..."
+                                    variant="outlined"
                                     size="small"
                                     fullWidth
                                     InputLabelProps={{

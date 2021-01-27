@@ -14,6 +14,7 @@ export const TableFeeValueCell = ({ code, initialFee, onUpdate }) => {
                 size="small"
                 type="number"
                 placeholder="..."
+                variant="outlined"
                 fullWidth
                 InputProps={{
                     endAdornment: (
@@ -30,8 +31,7 @@ export const TableFeeValueCell = ({ code, initialFee, onUpdate }) => {
                                 <Done />
                             </IconButton>
                         )
-                    ),
-                    disableUnderline: true      
+                    ), 
                 }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
