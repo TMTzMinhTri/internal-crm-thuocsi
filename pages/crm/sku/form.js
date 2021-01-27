@@ -76,6 +76,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 name={`${name}.price`}
                                 size="small"
                                 type="number"
+                                variant="outlined" // import check css
                                 disabled={hidden}
                                 placeholder=""
                                 defaultValue={1000}
@@ -87,7 +88,6 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     endAdornment: <InputAdornment
                                         position="end">đ</InputAdornment>,
                                 }}
-                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                 style={{ width: '100%' }}
                                 error={!!errors[name]?.price}
                                 required
@@ -106,11 +106,10 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                             <TextField
                                 id={`${name}.maxQuantity`}
                                 name={`${name}.maxQuantity`}
-
+                                variant="outlined" // import check css
                                 size="small"
                                 type="number"
                                 disabled={hidden}
-                                // label=""
                                 placeholder=""
                                 defaultValue={10}
                                 helperText={errors[name]?.maxQuantity.type === 'required' ? "Vui lòng nhập" : errors[name]?.maxQuantity.type === 'max' ?
@@ -118,11 +117,6 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
-                                // InputProps={{
-                                //     endAdornment: <InputAdornment
-                                //         position="end">đ</InputAdornment>,
-                                // }}
-                                // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                 style={{ width: '100%' }}
                                 error={!!errors[name]?.maxQuantity}
                                 required
@@ -146,7 +140,6 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     style={{ width: '100%' }}>
                                     {/* <InputLabel id="department-select-label">Loại sản phẩm</InputLabel> */}
                                     <Controller
-                                        disa
                                         rules={{ required: true }}
                                         control={control}
                                         size="small"
@@ -169,15 +162,14 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     Giá bán:
-                            </Typography>
+                                </Typography>
                                 <TextField
                                     id={`${arrName}.price`}
                                     name={`${arrName}.price`}
-
+                                    variant="outlined" // important
                                     size="small"
                                     type="number"
                                     disabled={hidden}
-                                    // label=""
                                     placeholder=""
                                     defaultValue={1000}
                                     error={errors[name] ? !!errors[name][index]?.price : false}
@@ -189,9 +181,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                         endAdornment: <InputAdornment
                                             position="end">đ</InputAdornment>,
                                     }}
-                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                     style={{ width: '100%' }}
-                                    // error={errors.name ? true : false}
                                     required
                                     inputRef={
                                         register({
@@ -205,15 +195,14 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     Số lượng tối thiểu áp dụng:
-                            </Typography>
+                                </Typography>
                                 <TextField
                                     id={`${arrName}.minNumber`}
                                     name={`${arrName}.minNumber`}
-
+                                    variant="outlined" // important
                                     size="small"
                                     type="number"
                                     disabled={hidden}
-                                    // label=""
                                     placeholder=""
                                     defaultValue={5}
                                     error={errors[name] ? !!errors[name][index]?.minNumber : false}
@@ -221,9 +210,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
-                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                     style={{ width: '100%' }}
-                                    // error={errors.name ? true : false}
                                     required
                                     inputRef={
                                         register({
@@ -236,15 +223,14 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     Số lượng tối đa áp dụng:
-                            </Typography>
+                                </Typography>
                                 <TextField
                                     id={`${arrName}.maxQuantity`}
                                     name={`${arrName}.maxQuantity`}
-
+                                    variant="outlined" // important
                                     size="small"
                                     type="number"
                                     disabled={hidden}
-                                    // label=""
                                     placeholder=""
                                     defaultValue={10}
                                     error={errors[name] ? !!errors[name][index]?.maxQuantity : false}
@@ -255,9 +241,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
-                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                     style={{ width: '100%' }}
-                                    // error={errors.name ? true : false}
                                     required
                                     inputRef={
                                         register({
@@ -274,20 +258,18 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     Tỉ lệ phần trăm giảm giá:
-                            </Typography>
+                                </Typography>
                                 <TextField
                                     id={`${arrName}.percentageDiscount`}
                                     name={`${arrName}.percentageDiscount`}
-
+                                    variant="outlined" // important
                                     size="small"
                                     type="number"
                                     disabled={hidden}
-                                    // label=""
                                     placeholder=""
                                     error={errors[name] ? !!errors[name][index]?.percentageDiscount : false}
                                     helperText={errors[name] ? errors[name][index]?.percentageDiscount?.message : ''}
                                     defaultValue={5}
-                                    // helperText={errors.name?.message}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
@@ -295,9 +277,7 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                         endAdornment: <InputAdornment
                                             position="end">%</InputAdornment>,
                                     }}
-                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                     style={{ width: '100%' }}
-                                    // error={errors.name ? true : false}
                                     required
                                     inputRef={
                                         register({
@@ -310,14 +290,14 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     Giảm giá tuyệt đối:
-                            </Typography>
+                                </Typography>
                                 <TextField
                                     id={`${arrName}.absoluteDiscount`}
                                     name={`${arrName}.absoluteDiscount`}
                                     size="small"
                                     type="number"
                                     disabled={hidden}
-                                    // label=""
+                                    variant="outlined" // important
                                     placeholder=""
                                     defaultValue={5000}
                                     helperText={errors.name?.message}
@@ -328,7 +308,6 @@ const RenderPriceConfig = ({ name, control, register, setValue, hidden, errors, 
                                         endAdornment: <InputAdornment
                                             position="end">đ</InputAdornment>,
                                     }}
-                                    // onChange={(e) => setValue(tag, parseInt(e.target.value,10))}
                                     style={{ width: '100%' }}
                                     error={errors[name] ? !!errors[name][index]?.absoluteDiscount : false}
                                     helperText={errors[name] ? errors[name][index]?.absoluteDiscount?.message : ''}
