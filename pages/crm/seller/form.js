@@ -139,7 +139,7 @@ export default function renderForm(props, toast) {
         defaultValues: editObject,
         mode: "onChange"
     });
-
+    props.isUpdate ? props.seller.provinceCode = { value: props.province?.code, label: props.province?.name, code: props.province?.code } : ''
     const onProvinceChange = async (event, val) => {
         setProvince()
         setDistricts([])
@@ -215,7 +215,7 @@ export default function renderForm(props, toast) {
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success('Thêm khách hàng thành công')
+            success('Thêm nhà bán hàng thành công')
             router.push(`/crm/seller`)
         }
     }
@@ -226,14 +226,14 @@ export default function renderForm(props, toast) {
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success('Cập nhật khách hàng thành công')
+            success('Cập nhật nhà bán hàng thành công')
         }
     }
 
     return (
         <AppCRM select="/crm/seller">
             <Head>
-                <title>{props.isUpdate ? 'Cập nhật bán hàng' : 'Thêm khách hàng'}</title>
+                <title>{props.isUpdate ? 'Cập nhật bán hàng' : 'Thêm nhà bán hàng'}</title>
             </Head>
             {
                 props.isUpdate && typeof props.seller === 'undefined' ? (
@@ -245,7 +245,7 @@ export default function renderForm(props, toast) {
                                         justify="space-between"
                                         alignItems="flex-start" className={styles.contentPadding}>
                                         <Grid item xs={12} md={12} sm={12}>
-                                            <Box style={{ fontSize: 24 }}>Cập nhật khách hàng</Box>
+                                            <Box style={{ fontSize: 24 }}>Cập nhật nhà bán hàng</Box>
                                         </Grid>
                                         <Grid item xs={12} md={12} sm={12}>
                                             <span>{props.message}</span>
@@ -261,7 +261,7 @@ export default function renderForm(props, toast) {
                             <FormGroup>
                                 <form>
                                     <Box className={styles.contentPadding}>
-                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? 'Cập nhật khách hàng' : 'Thêm khách hàng'}</Box>
+                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? 'Cập nhật nhà bán hàng' : 'Thêm nhà bán hàng'}</Box>
                                         <Card variant="outlined">
                                             <CardContent>
                                                 <Typography variant="h6" component="h6"
@@ -279,7 +279,7 @@ export default function renderForm(props, toast) {
                                                                 readOnly: props.isUpdate ? true : false,
                                                                 disabled: props.isUpdate ? true : false,
                                                             }}
-                                                            label="Tên khách hàng"
+                                                            label="Tên nhà bán hàng"
                                                             placeholder=""
                                                             helperText={errors.name?.message}
                                                             InputLabelProps={{
@@ -290,18 +290,18 @@ export default function renderForm(props, toast) {
                                                             required
                                                             inputRef={
                                                                 register({
-                                                                    required: "Tên khách hàng không thể để trống",
+                                                                    required: "Tên nhà bán hàng không thể để trống",
                                                                     maxLength: {
                                                                         value: 250,
-                                                                        message: "Tên khách hàng có độ dài tối đa 250 kí tự"
+                                                                        message: "Tên nhà bán hàng có độ dài tối đa 250 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 6,
-                                                                        message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
+                                                                        message: "Tên nhà bán hàng có độ dài tối thiểu 6 kí tự"
                                                                     },
                                                                     pattern: {
                                                                         value: /[A-Za-z]/,
-                                                                        message: "Tên khách hàng phải có kí tự chữ"
+                                                                        message: "Tên nhà bán hàng phải có kí tự chữ"
                                                                     }
                                                                 })
                                                             }
@@ -329,7 +329,7 @@ export default function renderForm(props, toast) {
                                                             required
                                                             inputRef={
                                                                 register({
-                                                                    required: "Email khách hàng không thể để trống",
+                                                                    required: "Email nhà bán hàng không thể để trống",
                                                                     pattern: {
                                                                         value: /.+@.+[.].+/,
                                                                         message: "Email không hợp lệ"
@@ -627,7 +627,7 @@ export default function renderForm(props, toast) {
                                                 variant="contained"
                                                 color="primary"
                                                 onClick={handleSubmit(onSubmit)}
-                                                disabled={loading}
+                                                disabled={props.isUpdate ? true : loading === true ? true : false}
                                                 style={{ margin: 8 }}>
                                                 {loading && <CircularProgress size={20} />}
                                                 Lưu

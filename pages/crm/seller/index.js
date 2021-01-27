@@ -44,7 +44,7 @@ export async function loadSellerData(ctx) {
     let sellerClient = getSellerClient(ctx, data)
     let resp = await sellerClient.getSeller(offset, limit, q)
     if (resp.status !== 'OK') {
-        return {props: {data: [], count: 0, message: 'Không tìm thấy nhà bán hàng nào'}}
+        return { props: { data: [], count: 0, message: 'Không tìm thấy nhà bán hàng nào' } }
     }
     // Pass data to the page via props
     return { props: { data: resp.data, count: resp.total } }
@@ -119,13 +119,21 @@ function render(props) {
                                 onChange={handleChange}
                                 inputRef={register}
                                 placeholder="Tìm kiếm nhà bán hàng"
-                                inputProps={{'aria-label': 'Tìm kiếm nhà bán hàng'}}
+                                inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
                                 onClick={handleSubmit(onSearch)}>
                                 <SearchIcon />
                             </IconButton>
                         </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Link href="/crm/seller/new">
+                            <ButtonGroup color="primary" aria-label="contained primary button group"
+                                className={styles.rightGroup}>
+                                <Button variant="contained" color="primary">Thêm nhà bán hàng</Button>
+                            </ButtonGroup>
+                        </Link>
                     </Grid>
                 </Grid>
             </div>
