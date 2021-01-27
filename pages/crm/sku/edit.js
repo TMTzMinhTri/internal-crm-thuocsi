@@ -38,7 +38,7 @@ export async function loadProduct(ctx) {
 
         // []string
         res.data[0].tagsName = [];
-        res.data[0].tagsName = data.props.listTag.filter((tag) => res.data[0].tags.indexOf(tag.value) >= 0)
+        res.data[0].tagsName = data.props.listTag.filter((tag) => res.data[0].tags?.indexOf(tag.value) >= 0)
         data.props.price = res?.data[0];
 
         // whosale price
