@@ -28,7 +28,7 @@ import {
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCustomerClient } from "client/customer";
-import { condUserType, formatUrlSearch, statuses } from 'components/global';
+import { formatUrlSearch, statuses } from 'components/global';
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -36,6 +36,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./customer.module.css";
+import { getCommonAPI } from 'client/common';
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -52,6 +53,7 @@ export async function loadCustomerData(ctx) {
     let offset = page * limit
 
     let customerClient = getCustomerClient(ctx, data)
+    
     let resp = await customerClient.getCustomer(offset, limit, q)
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
@@ -59,8 +61,15 @@ export async function loadCustomerData(ctx) {
         }
         return { props: { data: [], count: 0, message: resp.message } }
     }
+
+    const customerCommon = getCommonAPI(ctx, {})
+    const resLevel = await customerCommon.getListLevelCustomers()
+    let condUserType = []
+    if(resLevel.status === 'OK'){
+        condUserType = resLevel.data.map(item =>{ return {value: item.code, label: item.name } })
+    }
     // Pass data to the page via props
-    return { props: { data: resp.data, count: resp.total } }
+    return { props: { data: resp.data, count: resp.total, condUserType } }
 }
 
 export default function CustomerPage(props) {
@@ -127,7 +136,7 @@ function render(props) {
             </TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email || '-'}</TableCell>
-            <TableCell align="left">{condUserType.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
+            <TableCell align="left">{props.condUserType.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
             <TableCell align="left">{row.data.point}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
             <TableCell align="left">

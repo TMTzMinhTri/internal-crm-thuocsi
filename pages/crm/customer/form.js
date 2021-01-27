@@ -12,7 +12,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
 import { NotFound } from "components/components-global";
-import { condUserType, scopes, statuses } from "components/global";
+import { scopes, statuses } from "components/global";
 import MuiSingleAuto from "components/muiauto/single";
 import Head from "next/head";
 import Link from "next/link";
@@ -21,6 +21,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
+import { getCommonAPI } from 'client/common';
 
 export async function loadData(ctx) {
     let data = {
@@ -63,7 +64,15 @@ export async function loadData(ctx) {
         let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(customer.districtCode)
 
         data.props.districts = districtsResp.status === 'OK' ? districtsResp.data : []
-        data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []
+        data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []      
+    }
+
+    // get list customer level
+    const customerCommon = getCommonAPI(ctx, {})
+    const resLevel = await customerCommon.getListLevelCustomers()
+    data.props.condUserType = []
+    if (resLevel.status === 'OK') {
+        data.props.condUserType = resLevel.data.map(item => { return { value: item.code, label: item.name } })
     }
     return data
 }
@@ -78,7 +87,7 @@ export default function renderForm(props, toast) {
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.customer : {}
 
-    props.isUpdate ? props.customer.provinceCode = {value: props.province?.code, label: props.province?.name, code: props.province?.code} : ''
+    props.isUpdate ? props.customer.provinceCode = { value: props.province?.code, label: props.province?.name, code: props.province?.code } : ''
 
     const checkWardData = props.isUpdate ? (props.customer.wardCode === '' ? {} : props.ward) : {};
     const [loading, setLoading] = useState(false);
@@ -365,8 +374,8 @@ export default function renderForm(props, toast) {
                                                             id="provinceCode"
                                                             name="provinceCode"
                                                             noOptionsText={noOptionsText}
-                                                            options={typeof props.provinces !== 'undefined'?[...props.provinces.map(province => { return { value: province.code, label: province.name, code: province.code } }
-                                                                )]:[]}
+                                                            options={typeof props.provinces !== 'undefined' ? [...props.provinces.map(province => { return { value: province.code, label: province.name, code: province.code } }
+                                                            )] : []}
                                                             onNotSearchFieldChange={onProvinceChange}
                                                             required={true}
                                                             label="Tỉnh/Thành phố"
@@ -505,49 +514,6 @@ export default function renderForm(props, toast) {
                                                         />
                                                     </Grid>
                                                 </Grid>
-                                                <Grid spacing={3} container>
-                                                    <Grid item xs={12} sm={6} md={6}>
-                                                        {/* <Grid container spacing={1} alignItems="center">
-                                                <Grid item xs={8} sm={8} md={10}>
-                                                    <TextField
-                                                        id="licenses"
-                                                        name="licenses"
-                                                        variant="outlined"
-                                                        size="small"
-                                                        label="Tài liệu giấy phép"
-                                                        defaultValue="abc.doc"
-                                                        disabled
-                                                        placeholder=""
-                                                        helperText={errors.licenses?.message}
-                                                        InputLabelProps={{
-                                                            shrink: true,
-                                                        }}
-                                                        style={{width: '100%'}}
-                                                        error={!!errors.licenses}
-                                                        required
-                                                        inputRef={
-                                                            register({
-                                                                required: "Mã số thuế không thể để trống",
-                                                            })
-                                                        }
-                                                    />
-                                                </Grid>
-                                                <Grid item xs={2} sm={2} md={2}>
-                                                    <label htmlFor="upload-photo" style={{marginBottom: 5}}>
-                                                        <input style={{display: 'none'}}
-                                                               id="upload-photo"
-                                                            // onChange={handleFile}
-                                                               name="upload-photo"
-                                                               type="file"/>
-                                                        <Button color="secondary" variant="contained"
-                                                                component="span">
-                                                            <span>Chọn</span>
-                                                        </Button>
-                                                    </label>
-                                                </Grid>
-                                            </Grid> */}
-                                                    </Grid>
-                                                </Grid>
                                             </CardContent>
                                         </Card>
                                         <Card variant="outlined" style={{ marginTop: '10px' }}>
@@ -585,12 +551,12 @@ export default function renderForm(props, toast) {
                                                                 name="level"
                                                                 control={control}
                                                                 lable="Cấp độ"
-                                                                defaultValue={condUserType ? condUserType[0].value : ''}
+                                                                defaultValue={props.condUserType ? props.condUserType[0].value : ''}
                                                                 rules={{ required: true }}
                                                                 error={!!errors.level}
                                                                 as={
                                                                     <Select label="Cấp độ">
-                                                                        {condUserType?.map(({ value, label }) => (
+                                                                        {props.condUserType?.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
                                                                     </Select>
