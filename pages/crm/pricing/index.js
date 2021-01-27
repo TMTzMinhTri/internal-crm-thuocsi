@@ -1,154 +1,164 @@
-import {
-    Button, ButtonGroup,
-    Grid, Paper, Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow
-} from "@material-ui/core";
-import Chip from '@material-ui/core/Chip';
-import IconButton from "@material-ui/core/IconButton";
-import { makeStyles } from '@material-ui/core/styles';
-import Tooltip from "@material-ui/core/Tooltip";
-import EditIcon from "@material-ui/icons/Edit";
-import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
-import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import { getPricingClient } from 'client/pricing';
-import { Brand, condUserType, formatEllipsisText, formatNumber, formatUrlSearch } from 'components/global';
-import moment from "moment";
-import Head from "next/head";
-import Link from "next/link";
-import Router, { useRouter } from "next/router";
-import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from 'react';
-import { useForm } from "react-hook-form";
-import styles from "./pricing.module.css";
+import { Box, Grid, IconButton, makeStyles, MenuItem, Paper, Select, TextField } from "@material-ui/core";
+import { Search } from "@material-ui/icons";
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import Head from "next/head";
 
+import { ViewType } from "containers/crm/pricing";
+import AppCRM from "pages/_layout";
+import { useRouter } from 'next/router';
+import { getFeeClient } from 'client/fee';
+import { unknownErrorText } from 'components/commonErrors';
+import { formatUrlSearch } from 'components/global';
+import { RegionTable } from 'containers/crm/pricing/RegionTable';
+import { ProvinceTable } from 'containers/crm/pricing/ProvinceTable';
+import { DistrictTable } from 'containers/crm/pricing/DistrictTable';
+import { CustomerLevelTable } from 'containers/crm/pricing/CustomerLevelTable';
+import { WardTable } from 'containers/crm/pricing/WardTable';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexWrap: 'wrap',
-        '& > *': {
-            margin: theme.spacing(0.5),
-        },
-    },
-}));
+export async function loadPricingData(ctx, type, offset, limit, q) {
+    const feeClient = getFeeClient(ctx);
+    if (type === ViewType.REGION) {
+        const res = await feeClient.getRegionFeeList(offset, limit, q);
+        if (res.status === 'OK') {
+            return {
+                total: res.total ?? null,
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy vùng phù hợp.'
+            }
+        }
+        return { message: res.message, }
+    }
+    if (type === ViewType.PROVINCE) {
+        const res = await feeClient.getProvinceFeeList(offset, limit, q);
+        if (res.status === 'OK') {
+            return {
+                total: res.total ?? null,
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy tỉnh thành phù hợp.'
+            }
+        }
+        return { message: res.message, }
+
+    }
+    if (type === ViewType.DISTRICT) {
+        const res = await feeClient.getDistrictFeeList(offset, limit, q);
+        if (res.status === 'OK') {
+            return {
+                total: res.total ?? null,
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy quận huyện phù hợp.'
+            }
+        }
+        return { message: res.message, }
+    }
+    if (type === ViewType.WARD) {
+        const res = await feeClient.getWardFeeList(offset, limit, q);
+        if (res.status === 'OK') {
+            return {
+                total: res.total ?? null,
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy phường/xã phù hợp.'
+            }
+        }
+        return { message: res.message, }
+    }
+    if (type === ViewType.CUSTOMER) {
+        const res = await feeClient.getCustomerLevelFeeList();
+        if (res.status === 'OK') {
+            return {
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy hạng khách hàng phù hợp.'
+            }
+        }
+        return { message: res.message, }
+    }
+}
 
 export async function getServerSideProps(ctx) {
-    return await doWithLoggedInUser(ctx, (ctx) => {
-        return loadConfigPricingData(ctx)
+    return await doWithLoggedInUser(ctx, async (ctx) => {
+        const query = ctx.query;
+        const {
+            v = ViewType.CUSTOMER,
+            q = '',
+        } = query;
+        const page = parseInt(query.page ?? 0, 10);
+        const limit = parseInt(query.limit ?? 20, 10);
+
+        try {
+            const data = await loadPricingData(ctx, v, page * limit, limit, q);
+            return {
+                props: {
+                    viewType: v,
+                    q,
+                    page,
+                    limit,
+                    regionData: v === ViewType.REGION ? data : null,
+                    provinceData: v === ViewType.PROVINCE ? data : null,
+                    districtData: v === ViewType.DISTRICT ? data : null,
+                    wardData: v === ViewType.WARD ? data : null,
+                    customerData: v === ViewType.CUSTOMER ? data : null,
+                }
+            }
+        } catch (err) {
+            return {
+                props: {
+                    message: err.message ?? unknownErrorText,
+                }
+            }
+        }
     })
 }
 
-export async function loadConfigPricingData(ctx) {
-    let data = { props: {} }
-    let query = ctx.query
-    let q = typeof (query.q) === "undefined" ? '' : query.q
-    let page = query.page || 0
-    let limit = query.limit || 20
-    let offset = page * limit;
-
-    let categoryLists = {};
-    let provinceLists = {};
-    let configPriceLists = [];
-    let total = 0;
-
-    let configPriceClient = getPricingClient(ctx, {});
-    const res = await configPriceClient.getListConfigPrice({ q, limit, offset })
-
-    if (res.status === 'OK') {
-        if (res.data.length > 0) {
-            let categoryCodes = res.data.map((item) => item.categoryCode);
-            categoryCodes = new Set(categoryCodes.flat());
-            categoryCodes = [...categoryCodes].filter(item => item !== null)
-            let [categoryList, provinceList] = await Promise.all([
-                configPriceClient.getCategoryWithArrayID([...categoryCodes]),
-                configPriceClient.getProvinceLists()
-            ]);
-            if (categoryList.status === "OK") {
-                
-                if (categoryList.data.length > 0) {
-                    categoryList.data.map((item) => { categoryLists[item.code] = { ...item } });
-                }
-            }
-            provinceList.data.map((item) => { provinceLists[item.code] = { ...item } });
-            total = res.total;
-            configPriceLists = res.data;
-        }
-    }
-    return {
-        props: {
-            configPriceLists,
-            provinceLists,
-            categoryLists,
-            total,
-            // message: res.message,
-            message: "Không tìm thấy kết quả phù hợp"
-        }
-    };
-}
-
-export default function ConfigPricingPage(props) {
-    return renderWithLoggedInUser(props, render)
-}
-
+/**
+ * @param {object} props
+ * @param {string} props.viewType
+ * @param {string} props.q
+ * @param {number} props.page
+ * @param {number} props.limit
+ * @param {object[]} props.regionData
+ * @param {object[]} props.provinceData
+ * @param {object[]} props.districtData
+ * @param {object[]} props.wardData
+ * @param {object[]} props.customerData
+ */
 function render(props) {
-
-    const classes = useStyles();
-    let router = useRouter()
-
-    let q = router.query.q || ''
-    let [search, setSearch] = useState(q)
-    let page = parseInt(router.query.page) || 0
-    let limit = parseInt(router.query.limit) || 20
-
-    const [configPricingList, setConfigPricingList] = useState(props.configPriceLists);
-    const [provinceLists, setProvinceLists] = useState(props.provinceLists);
-    const [categoryLists, setCategoryLists] = useState(props.categoryLists);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
-    const { register, handleSubmit, errors } = useForm();
-
-    async function handleChange(event) {
-        const target = event.target;
-        const value = target.value;
-        setSearch(value)
-    }
-
-    function onSearch() {
-        q = formatUrlSearch(search)
-        router.push(`?q=${q}`)
-    }
+    const router = useRouter();
+    const [viewType, setViewType] = useState(props.viewType);
+    const [searchText, setSearchText] = useState(props.q);
 
     useEffect(() => {
-        setConfigPricingList(props.configPriceLists);
-        setProvinceLists(props.provinceLists);
-        setCategoryLists(props.categoryLists);
-        setTotal(props.total);
-    }, [props]);
+        setViewType(props.viewType);
+    }, [props.viewType]);
 
-    function typeCategorys(catagory) {
-        if (catagory?.length > 0) {
-            const chips = catagory.map((item, i) => {
-                if (categoryLists[item]?.name) {
-                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={ formatEllipsisText(categoryLists[item]?.name, 30) } variant="outlined" />;
-                }
-            });
-            return chips;
-        }
-        return 'Không có danh mục.';
-    }
+    useEffect(() => {
+        setSearchText(props.q);
+    }, [props.q]);
 
-    function provices(provi) {
-        if (provi?.length > 0) {
-            if (provi[0] === 'ALL') {
-                return <Chip size="small" label="Tất cả" variant="outlined" />;
-            }
-            const chips = provi.map((item, i) => {
-                if (provinceLists[item]?.name) {
-                    return <Chip className={styles.chipCaterogy} key={i} size="small" label={provinceLists[item]?.name} variant="outlined" />;
-                }
-            });
-            return chips;
-        }
-        return 'Không có tỉnh thành.';
+    const handleEnterPress = (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        router.push(`/crm/pricing?v=${viewType}&q=${formatUrlSearch(searchText)}`)
     }
 
     return (
@@ -156,111 +166,118 @@ function render(props) {
             <Head>
                 <title>Danh sách cấu hình giá</title>
             </Head>
-            <div className={styles.grid}>
-                <Grid container spacing={3} direction="row"
-                    justify="space-evenly"
-                    alignItems="center"
-                >
-                    <Grid item xs={12} sm={6} md={6}>
-                        {/* <Paper className={styles.search}>
-                            <InputBase
-                                id="q"
-                                name="q"
-                                className={styles.input}
-                                value={search}
-                                onChange={handleChange}
-                                onKeyPress={event => {
-                                    if (event.key === 'Enter' || event.keyCode === 13) {
-                                        onSearch()
-                                    }
+            <Box
+                component={Paper}
+                style={{ padding: "16px" }}
+                display="block"
+            >
+                <Grid container spacing={3}>
+                    <Grid item container xs={12} spacing={3}>
+                        <Grid item md={3}>
+                            <TextField
+                                label="Tìm kiếm theo"
+                                size="small"
+                                fullWidth
+                                select
+                                value={viewType}
+                                onChange={(e) => {
+                                    setViewType(e.target.value);
+                                    router.push(`/crm/pricing?v=${e.target.value}&q=${searchText}`);
                                 }}
-                                inputRef={register}
-                                placeholder="Tìm kiếm giá"
-                                inputProps={{ 'aria-label': 'Tìm kiếm giá' }}
-                            />
-                            <IconButton className={styles.iconButton} aria-label="search"
-                                onClick={handleSubmit(onSearch)}>
-                                <SearchIcon />
-                            </IconButton>
-                        </Paper> */}
+                            >
+                                <MenuItem value={ViewType.REGION}>Theo vùng</MenuItem>
+                                <MenuItem value={ViewType.PROVINCE}>Theo tỉnh thành</MenuItem>
+                                <MenuItem value={ViewType.DISTRICT}>Theo quận huyện</MenuItem>
+                                <MenuItem value={ViewType.WARD}>Theo phường/xã</MenuItem>
+                                <MenuItem value={ViewType.CUSTOMER}>Theo khách hàng</MenuItem>
+                            </TextField>
+                        </Grid>
+                        {viewType != ViewType.CUSTOMER && (
+                            <Grid item md={4}>
+                                <TextField
+                                    label="Tìm kiếm"
+                                    placeholder="Nhập tên tỉnh thành, quận huyện,..."
+                                    size="small"
+                                    fullWidth
+                                    InputLabelProps={{
+                                        shrink: true
+                                    }}
+                                    InputProps={{
+                                        endAdornment: (
+                                            < IconButton
+                                                size="small"
+                                                onClick={() => router.push(`/crm/pricing?v=${viewType}&q=${searchText}`)}
+                                            >
+                                                <Search />
+                                            </IconButton>
+                                        ),
+                                    }}
+                                    onChange={e => setSearchText(e.target.value)}
+                                    onKeyPress={handleEnterPress}
+                                    value={searchText}
+
+                                />
+                            </Grid>
+                        )}
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/pricing/new">
-                            <ButtonGroup color="primary" aria-label="contained primary button group"
-                                className={styles.rightGroup}>
-                                <Button variant="contained" color="primary">Thêm giá mới</Button>
-                            </ButtonGroup>
-                        </Link>
+                    <Grid item container xs={12} >
+                        {viewType === ViewType.REGION && (
+                            <RegionTable
+                                data={props.regionData?.data}
+                                q={searchText}
+                                message={props.regionData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.regionData?.total}
+                            />
+                        )}
+                        {viewType === ViewType.PROVINCE && (
+                            <ProvinceTable
+                                data={props.provinceData?.data}
+                                q={searchText}
+                                message={props.provinceData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.provinceData?.total}
+                            />
+                        )}
+                        {viewType === ViewType.DISTRICT && (
+                            <DistrictTable
+                                data={props.districtData?.data}
+                                q={searchText}
+                                message={props.districtData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.districtData?.total}
+                            />
+                        )}
+                        {viewType === ViewType.WARD && (
+                            <WardTable
+                                data={props.wardData?.data}
+                                q={searchText}
+                                message={props.wardData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.wardData?.total}
+                            />
+                        )}
+                        {viewType === ViewType.CUSTOMER && (
+                            <CustomerLevelTable
+                                data={props.customerData?.data}
+                                q={searchText}
+                                message={props.customerData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.customerData?.total}
+                            />
+                        )}
                     </Grid>
                 </Grid>
-            </div>
-
-            <TableContainer component={Paper}>
-                <Table size="small" aria-label="a dense table">
-                    <colgroup>
-                        <col width="10%"/>
-                        <col width="10%"/>
-                        <col width="20%"/>
-                        <col width="20%"/>
-                        <col width="10%"/>
-                        <col width="5%"/>
-                        <col width="5%"/>
-                        <col width="15%"/>
-                        <col width="5%"/>
-                    </colgroup>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="left">Code</TableCell>
-                            <TableCell align="left">Loại khách hàng</TableCell>
-                            <TableCell align="left">Danh mục</TableCell>
-                            <TableCell align="left">Tỉnh/thành</TableCell>
-                            <TableCell align="right">Hệ số nhân</TableCell>
-                            <TableCell align="right">Hệ số cộng</TableCell>
-                            <TableCell align="left">Brand</TableCell>
-                            <TableCell align="left">Cập nhật</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {
-                            total ? configPricingList.map((row, i) => (
-                                <TableRow key={i}>
-                                    <TableCell align="left">{row.code || '---'}</TableCell>
-                                    <TableCell align="left">{condUserType.find(e => e.value === row.customerType)?.label}</TableCell>
-                                    <TableCell align="left" className={classes.root}>{typeCategorys(row.categoryCode)}</TableCell>
-                                    <TableCell align="left">{provices(row.locationCode)}</TableCell>
-                                    <TableCell align="right">{row.numMultiply}</TableCell>
-                                    <TableCell align="right">{formatNumber(row.numAddition)}</TableCell>
-                                    <TableCell align="left">{Brand[row.brand].value}</TableCell>
-                                    <TableCell align="left">{moment(row.lastUpdatedTime).utcOffset('+0700').format("DD-MM-YYYY HH:mm:ss")}</TableCell>
-                                    <TableCell align="center">
-                                        <Link href={`/crm/pricing/edit?priceCode=${row.code}`}>
-                                            <Tooltip title="Cập nhật thông tin">
-                                                <IconButton>
-                                                    <EditIcon fontSize="small" />
-                                                </IconButton>
-                                            </Tooltip>
-                                        </Link>
-                                    </TableCell>
-                                </TableRow>
-                            )) : (
-                                    <TableRow>
-                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                    </TableRow>
-                                )
-                        }
-                    </TableBody>
-                    <MyTablePagination
-                        labelUnit="Cấu hình giá"
-                        count={total}
-                        rowsPerPage={limit}
-                        page={page}
-                        onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/crm/pricing?page=${page}&limit=${rowsPerPage}&q=${q}`)
-                        }}
-                    />
-                </Table>
-            </TableContainer>
+            </Box>
         </AppCRM>
     )
+}
+
+export default function ConfigPricingPage(props) {
+    return renderWithLoggedInUser(props, render)
 }

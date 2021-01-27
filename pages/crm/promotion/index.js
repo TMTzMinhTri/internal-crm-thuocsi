@@ -36,11 +36,17 @@ import {
     displayRule,
     displayStatus,
     formatTime,
-    getPromotionScope,
+    getPromotionScope, removeElement,
 } from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
+import UnfoldLessIcon from '@material-ui/icons/UnfoldLess';
 import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import { faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons'
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import {faAngleUp,faAngleDown} from "@fortawesome/free-solid-svg-icons";
+
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -134,6 +140,26 @@ function render(props) {
 
     const handleChangeTypePromotion = (event) => {
         setStateTypePromotion(event.target.value)
+    }
+
+    const handleClickShowItem = (promotionId) => {
+        let listItem = document.getElementsByName("hideItem" + promotionId)
+        let buttonDown = document.getElementById("buttonDown" + promotionId)
+        let buttonUp = document.getElementById("buttonUp" + promotionId)
+        if (buttonDown.style.display === '') {
+            buttonDown.style.display = "none"
+            buttonUp.style.display = ''
+        }else {
+            buttonDown.style.display = ''
+            buttonUp.style.display = 'none'
+        }
+        listItem.forEach(item => {
+            if (item.style.display === "none") {
+                item.style.display = ''
+            }else {
+                item.style.display = "none"
+            }
+        })
     }
 
     const handleActivePromotion = async (event, promotionID) => {
@@ -244,25 +270,59 @@ function render(props) {
                         <TableBody>
                             {props.data.map((row, index) => (
                                 <TableRow key={index}>
-                                    <TableCell align="left">{row.promotionName}</TableCell>
+                                    <TableCell align="left">
+                                        <div style={{fontWeight: "bold"}}>{row.promotionName}</div>
+                                    </TableCell>
                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
                                     <TableCell align="left">
                                         {
-                                            displayRule(row.rule).length > 0 ? (
-                                                displayRule(row.rule).map((rule, index) => (
-                                                    index % 2 === 0 ? (
-                                                        <div>{rule}</div>
-                                                    ) : (
-                                                        <div style={{fontStyle: "italic"}}>{rule}</div>
-                                                    )
-                                                ))
-                                            ) : (
-                                                <div></div>
+                                            displayRule(row.rule).length > 0 && (
+                                                <Grid container spacing={1} direction="row">
+                                                    <Grid item xs={12} sm={11} md={11} direction="column">
+                                                        {
+                                                            displayRule(row.rule).map((rule, index) => (
+                                                                index < 2 ? (
+                                                                   <Grid  item xs={12} sm={11} md={11} direction="column">
+                                                                        {
+                                                                            index % 2 === 0 ? (
+                                                                                <div>{rule}</div>
+                                                                            ) : (
+                                                                                <div style={{fontStyle: "italic"}}>{rule}</div>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                ): (
+                                                                    <Grid name={"hideItem" + row.promotionId} style={{display: "none"}} item xs={12} sm={11} md={11} direction="column">
+                                                                        {
+                                                                            index % 2 === 0 ? (
+                                                                                <div>{rule}</div>
+                                                                            ) : (
+                                                                                <div  style={{fontStyle: "italic"}}>{rule}</div>
+                                                                            )
+                                                                        }
+                                                                    </Grid>
+                                                                )
+                                                            ))
+                                                        }
+                                                    </Grid>
+                                                    {
+                                                        displayRule(row.rule).length > 3  && (
+                                                            <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"} onClick={() => handleClickShowItem(row.promotionId)}>
+                                                                <IconButton>
+                                                                    <FontAwesomeIcon id={"buttonDown" + row.promotionId} icon={faAngleDown}/>
+                                                                    <FontAwesomeIcon id={"buttonUp" + row.promotionId} icon={faAngleUp} style={{display:"none"}}/>
+                                                                </IconButton>
+                                                            </Grid>
+                                                        )
+                                                    }
+                                                </Grid>
                                             )
                                         }
                                     </TableCell>
-                                    <TableCell align="left">{displayStatus(row.status)}</TableCell>
+                                    <TableCell align="left">
+                                        <div style={{fontWeight: "bold" }}>{displayStatus(row.status)}</div>
+                                    </TableCell>
                                     <TableCell align="left">
                                         <Switch
                                             onChange={event => {
@@ -314,13 +374,12 @@ function render(props) {
                     </h3>
                     <div style={{margin: "auto"}}>
                         <FormControl className={styles.select}>
-                            <InputLabel id="promotion-select-outlined-label" variant={"outlined"}>Loại khuyến mãi</InputLabel>
                             <Select
                                 autoWidth={false}
                                 style={{width: '100% !important'}}
                                 labelId="promotion-select-outlined-label"
                                 id="category-select-outlined"
-                                variant={"outlined"}
+                                variant={"filled"}
                                 onChange={handleChangeTypePromotion}
                                 name="selectTypePromontion"
                                 value={stateTypePromotion}

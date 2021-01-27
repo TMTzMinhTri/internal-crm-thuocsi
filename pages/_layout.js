@@ -33,6 +33,12 @@ export default class AppCRM extends Component {
                     icon: faDollarSign
                 },
                 {
+                    key: "FEE",
+                    name: "Phí dịch vụ",
+                    link: "/crm/fee",
+                    icon: faDollarSign
+                },
+                {
                     key: "CONFIGPRICING",
                     name: "Bảng giá",
                     link: "/crm/pricing",
@@ -44,6 +50,18 @@ export default class AppCRM extends Component {
                     link:"/crm/seller",
                     icon:faUsers,
                 },
+                {
+                    key:"ORDER",
+                    name:"Đơn hàng",
+                    link:"/crm/order",
+                    icon:faDollarSign,
+                },
+                // {
+                //     key: "DISCOUNT",
+                //     name: "Khuyến mãi",
+                //     link: "/crm/promotion",
+                //     icon: faPercentage
+                // },
                 {
                     key: "DISCOUNT",
                     name: "Khuyến mãi",
@@ -67,7 +85,7 @@ export default class AppCRM extends Component {
     }
 
     render() {
-        let {children} = this.props
+        let { children } = this.props
         return (
             <App menu={this.state.menu} select={this.props.select}>
                 {children}

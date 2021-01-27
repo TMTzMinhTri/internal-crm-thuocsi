@@ -106,18 +106,27 @@ export function setRulesPromotion(
     return result;
 }
 
-export function setScopeObjectPromontion(promotionScope, listProducts, categoryCodes) {
-    let result = [{
-        scope: promotionScope,
-        type: listProducts?.length > 0 || categoryCodes?.length > 0 ? defaultTypeProduct.MANY : defaultTypeProduct.ALL,
-    }]
+export function setScopeObjectPromontion(
+    promotionScope,
+    listProducts,
+    categoryCodes
+) {
+    let result = [
+        {
+            scope: promotionScope,
+            type:
+                listProducts?.length > 0 || categoryCodes?.length > 0
+                    ? defaultTypeProduct.MANY
+                    : defaultTypeProduct.ALL,
+        },
+    ];
     if (listProducts?.length > 0) {
-        result[0].products = listProducts
+        result[0].products = listProducts;
     }
     if (categoryCodes?.length > 0) {
-        result[0].categoryCodes = categoryCodes
+        result[0].categoryCodes = categoryCodes;
     }
-    return result
+    return result;
 }
 
 export function parseRuleToObject(promotion) {
@@ -125,10 +134,12 @@ export function parseRuleToObject(promotion) {
         promotionOption: "",
         promotionTypeRule: "",
         promotionScope: promotion.objects[0].scope,
-        listGiftPromotion: [{
-            gift: {},
-            quantity: 0,
-        }],
+        listGiftPromotion: [
+            {
+                gift: {},
+                quantity: 0,
+            },
+        ],
         promotionRulesLine: [],
         listProductPromotion: [],
         listProductIDs: [],
@@ -137,26 +148,26 @@ export function parseRuleToObject(promotion) {
         promotionUseType: promotion.useType,
         listCategoryPromotion: [],
         conditions: [],
-    }
-    let rule = promotion.rule
+    };
+    let rule = promotion.rule;
     if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
-        result.promotionOption = defaultRulePromotion.MIN_QUANTITY
-        result.promotionTypeRule = rule.type
+        result.promotionOption = defaultRulePromotion.MIN_QUANTITY;
+        result.promotionTypeRule = rule.type;
     } else {
-        result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE
-        result.promotionTypeRule = rule.type
+        result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE;
+        result.promotionTypeRule = rule.type;
     }
-    let {conditions} = rule
+    let {conditions} = rule;
     conditions?.forEach((condition, index) => {
-        result.promotionRulesLine.push({id: index})
-    })
+        result.promotionRulesLine.push({id: index});
+    });
     result = {
         ...result,
         conditions: conditions,
         listProductIDs: promotion.objects[0].products || [],
-        listCategoryCodes: promotion.objects[0].categoryCodes || []
-    }
-    return result
+        listCategoryCodes: promotion.objects[0].categoryCodes || [],
+    };
+    return result;
 }
 
 export function parseConditionValue(conditions, typePromotion, promotionTypeCondition, conditionInfo, index) {
@@ -198,7 +209,8 @@ export function parseConditionValue(conditions, typePromotion, promotionTypeCond
                 if (conditionInfo === defaultNameRulesQuantity.percentValue + index) {
                     return conditions[index] ? conditions[index][defaultConditionInfo.percent] : "";
                 }
-                if (conditionInfo === defaultNameRulesQuantity.priceMaxDiscountValue + index) {
+                if (conditionInfo === defaultNameRulesQuantity.priceMaxDiscountValue + index
+                ) {
                     return conditions[index] ? conditions[index][defaultConditionInfo.maxDiscountValue] : "";
                 }
             }
@@ -268,6 +280,9 @@ export function displayRule(rule) {
 }
 
 export function formatTime(time) {
+    if (!time || time === "") {
+        return "Chưa cài đặt"
+    }
     time = time.substring(0, time.length - 4);
     if (Number.isInteger(time)) {
         return new Intl.DateTimeFormat("vi", {
@@ -340,7 +355,7 @@ export function displayStatus(status) {
 }
 
 export function displayTime(time) {
-    return time.substring(0, time.length - 4);
+    return time?.substring(0, time.length - 4) || "";
 }
 
 export function displayPromotionType(type) {
@@ -369,5 +384,12 @@ export function displayNameRule(promotionOption, nameValue, index) {
             return defaultNameRulesValue[nameValue] + index;
         case defaultRulePromotion.MIN_QUANTITY:
             return defaultNameRulesQuantity[nameValue] + index;
+    }
+}
+
+export function removeElement(array, elem) {
+    let index = array.indexOf(elem);
+    if (index > -1) {
+        array.splice(index, 1);
     }
 }

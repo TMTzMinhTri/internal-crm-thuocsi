@@ -1,21 +1,16 @@
 import {
     Box,
     Button,
-    CardContent,
-    CardHeader,
-    FormControlLabel,
     FormGroup,
     Paper,
-    Radio,
-    RadioGroup,
+    Grid,
+    Divider, ButtonGroup,
 } from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, {useState} from "react";
 import {useForm} from "react-hook-form";
 import styles from "./promotion.module.css";
-import Grid from "@material-ui/core/Grid";
-import Divider from "@material-ui/core/Divider";
 import {
     doWithLoggedInUser,
     renderWithLoggedInUser,
@@ -40,16 +35,14 @@ import {
     setScopeObjectPromontion,
 } from "../../../components/component/until";
 import {useRouter} from "next/router";
-import RenderTableListProduct from "components/component/promotion/modal-list-product";
-import RenderTableListCategory from "components/component/promotion/modal-list-category";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
-
-export async function getServerSideProps(ctx) {
-    return await doWithLoggedInUser(ctx, (ctx) => {
-        return {props: {}};
-    });
-}
+import ApplyFields from "components/component/promotion/apply-fields";
+import dynamic from "next";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons'
+import Link from "@material-ui/core/Link";
+import TitleLink from "../../../components/component/promotion/title";
 
 const defaultState = {
     promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
@@ -65,27 +58,65 @@ const defaultState = {
     listProductGiftPromotion: [],
     listProductPromotion: [],
     listCategoryDefault: [],
+    listProductAction: [],
+    listCategoryAction:[],
     listProductDefault: [],
     listCategoryPromotion: [],
 };
+
+export async function getServerSideProps(ctx) {
+    return await doWithLoggedInUser(ctx, (ctx) => {
+        return loadDataBefore(ctx);
+    });
+}
+
+export async function loadDataBefore(ctx) {
+    let returnObject = {props: {defaultState : defaultState}};
+    let _categoryClient = getCategoryClient(ctx, {});
+    let listCategoryResponse = await _categoryClient.getListCategory();
+    if (listCategoryResponse && listCategoryResponse.status === "OK") {
+        listCategoryResponse.data.forEach((category, index) => {
+            returnObject.props.defaultState.listCategoryDefault.push({
+                category: category,
+                active: false,
+            });
+        });
+    }
+
+    let _productClient = getProductClient(ctx, {})
+    let listProductResponse = await _productClient.getProductList(0,5,"")
+    console.log('list',listProductResponse)
+    if (listProductResponse && listProductResponse.status === "OK") {
+        listProductResponse.data.forEach((product, index) => {
+            returnObject.props.defaultState.listProductDefault.push({
+                product: product,
+                active: false,
+            });
+        });
+        returnObject.props.defaultState.listCategoryProduct = listCategoryResponse.data
+    }
+
+    return returnObject
+}
+
 
 export default function NewPage(props) {
     return renderWithLoggedInUser(props, render);
 }
 
 async function createPromontion(promotionCode, totalCode, promotionName, promotionType, startTime, endTime, objects, applyPerUser, rule, useType) {
-    let data = {totalCode, promotionName, promotionType, startTime, endTime, objects, applyPerUser, rule, useType,};
+    let data = {totalCode, promotionName, promotionType, startTime, objects, applyPerUser, rule, useType,};
     if (promotionCode !== "") {
-        data.promotionCode = promotionCode
+        data.promotionCode = promotionCode;
+    }
+    if (endTime !== "") {
+        data.endTime = endTime
     }
     return getPromoClient().createPromotion(data);
 }
 
-async function getProduct(productName, categoryCode) {
-    return getProductClient().searchProductCategoryListFromClient(
-        productName,
-        categoryCode
-    );
+async function getProduct(offset,limit,q) {
+    return getProductClient().getProductListFromClient(offset,limit,q)
 }
 
 async function getListProductGift(productName) {
@@ -97,28 +128,59 @@ async function searchProductList(q, categoryCode) {
 }
 
 async function getListCategory() {
-    return await getCategoryClient().getListCategoryFromClient();
+    return await getCategoryClient().getListCategoryFromClient("","","");
 }
 
 function render(props) {
     const toast = useToast();
     const router = useRouter();
-    const [state, setState] = useState(defaultState);
+
+    const urls = [
+        {
+            title: "Trang chủ",
+            url: '/crm/promotion',
+        },
+        {
+            title: "Khuyến mãi",
+            url: '/crm/promotion',
+        },
+        {
+            title: "Tạo mới",
+            url: `/crm/promotion/new?type=${router.query.type}`
+        }
+    ]
+    const [state, setState] = useState(props.defaultState);
     const {
-        promotionOption, promotionTypeRule, promotionScope,
-        listProductPromotion, listCategoryPromotion, listProductDefault,
-        listCategoryDefault, listCategoryFull, promotionRulesLine,
-        listGiftPromotion, listProductGiftPromotion, promotionUseType,
+        promotionOption,
+        promotionTypeRule,
+        promotionScope,
+        listProductPromotion,
+        listCategoryPromotion,
+        listProductDefault,
+        listCategoryDefault,
+        listCategoryFull,
+        promotionRulesLine,
+        listGiftPromotion,
+        listProductGiftPromotion,
+        promotionUseType,
+        listProductAction,
     } = state;
     const {
-        register, getValues, handleSubmit, setError, setValue, reset, errors,} = useForm();
-    const [stateTest, setStateTest] = useState(0);
+        register,
+        getValues,
+        handleSubmit,
+        setError,
+        setValue,
+        reset,
+        errors,
+    } = useForm();
     const [open, setOpen] = useState({
         openModalGift: false,
         openModalProductGift: false,
         openModalProductScopePromotion: false,
         openModalCategoryScopePromotion: false,
     });
+
 
     const handleChange = (event) => {
         setState({...state, [event.target.name]: event.target.value});
@@ -127,27 +189,21 @@ function render(props) {
     const handleChangeScope = async (event) => {
         if (event.target.value === defaultPromotionScope.PRODUCT) {
             event.persist();
-            let listCategoryResponse = await getListCategory();
-            if (!listCategoryResponse || listCategoryResponse.status !== "OK") {
-                return toast.warn("Không tìm thấy danh sách danh mục");
-            }
-            let productDefaultResponse = await getProduct();
+            let productDefaultResponse = await getProduct(0,5,"");
             if (productDefaultResponse && productDefaultResponse.status === "OK") {
                 let listProductDefault = [];
-                productDefaultResponse.data.forEach((productResponse, index) => {
-                    if (index < 5) {
-                        listProductDefault.push({
-                            product: productResponse,
-                            active: false,
-                        });
-                    }
+                productDefaultResponse.data.forEach(productResponse=> {
+                    listProductDefault.push({
+                        product: productResponse,
+                        active: false,
+                    });
                 });
                 setState({
                     ...state,
                     [event.target?.name]: event.target?.value,
                     listProductDefault: listProductDefault,
+                    listCategoryDefault:[],
                     listProductPromotion: [],
-                    listCategoryPromotion: listCategoryResponse.data,
                 });
                 setOpen({...open, openModalProductScopePromotion: true});
             }
@@ -168,6 +224,7 @@ function render(props) {
                 ...state,
                 [event.target?.name]: event.target?.value,
                 listCategoryDefault: listCategoryDefault,
+                listProductDefault: [],
                 listCategoryPromotion: [],
             });
             setOpen({...open, openModalCategoryScopePromotion: true});
@@ -195,7 +252,6 @@ function render(props) {
             promotionRulesLine: [{id: 0}],
         });
         resetPrice();
-        setState({...state, [event.target.name]: event.target.value});
         reset();
     };
 
@@ -214,7 +270,7 @@ function render(props) {
         setOpen({...open, openModalCategoryScopePromotion: false});
         let listCategory = [];
         categoryList.forEach((category) => {
-            if (category.active) {
+            if (category.active && !listCategory?.find(c => c.categoryID === category.category.categoryID)) {
                 listCategory.push(category.category);
             }
         });
@@ -281,18 +337,30 @@ function render(props) {
         setState({...state, listGiftPromotion: listGiftAction});
     };
 
+
     // func onSubmit used because useForm not working with some fields
     async function onSubmit() {
-        let {promotionName, totalCode, startTime, endTime, totalApply,promotionCode} = getValues();
+        let {
+            promotionName,
+            totalCode,
+            startTime,
+            endTime,
+            totalApply,
+            promotionCode,
+        } = getValues();
         let value = getValues();
         let listProductIDs = [];
         let listCategoryCodes = [];
-        listProductPromotion.forEach((product) =>
-            listProductIDs.push(product.productID)
-        );
-        listCategoryPromotion.forEach((category) =>
-            listCategoryCodes.push(category.code)
-        );
+        if (promotionScope == defaultPromotionScope.PRODUCT) {
+            listProductPromotion.forEach((product) =>
+                listProductIDs.push(product.productID)
+            );
+        }
+        if (promotionScope == defaultPromotionScope.CATEGORY) {
+            listCategoryPromotion.forEach((category) =>
+                listCategoryCodes.push(category.code)
+            );
+        }
         let rule = setRulesPromotion(
             promotionOption,
             promotionTypeRule,
@@ -302,26 +370,24 @@ function render(props) {
             listProductGiftPromotion
         );
         startTime = startTime + ":00Z";
-        endTime = endTime + ":00Z";
+        if (endTime !== "") {
+            endTime = endTime + ":00Z";
+        }
         let objects = setScopeObjectPromontion(
             promotionScope,
             listProductIDs,
             listCategoryCodes
         );
-        let promotionResponse = await createPromontion(
-            promotionCode,
-            parseInt(totalCode),
-            promotionName,
-            router.query?.type,
-            startTime,
-            endTime,
-            objects,
-            parseInt(totalApply),
-            rule,
-            promotionUseType
-        );
+        let promotionResponse = await createPromontion(promotionCode, parseInt(totalCode), promotionName, router.query?.type, startTime, endTime, objects, parseInt(totalApply), rule, promotionUseType);
         if (promotionResponse.status === "OK") {
+            console.lo
             toast.success("Tạo khuyến mãi thành công");
+            return router.push({
+                pathname: '/crm/promotion/edit',
+                query: {
+                    promotionId: promotionResponse.data[0]?.promotionId
+                }
+            })
         } else {
             toast.error(`${promotionResponse.message}`);
         }
@@ -332,21 +398,18 @@ function render(props) {
             <Head>
                 <title>Tạo khuyến mãi</title>
             </Head>
-            <Box component={Paper} style={{width: "100%"}}>
+            <Box component={Paper} style={{padding: "0 3rem", height: "100%"}}>
                 <FormGroup style={{width: "100%"}}>
-                    <Box className={styles.contentPadding}>
-                        <Grid container>
-                            <Grid xs={4}>
-                                <ArrowBackIcon
-                                    style={{fontSize: 30}}
-                                    onClick={() => router.back()}
-                                />
-                            </Grid>
-                            <Grid>
-                                <Box style={{fontSize: 24}}>
-                                    <h3>{router.query?.type === defaultPromotionType.COMBO? "Tạo combo linh hoạt": "Tạo mã khuyến mãi"}</h3>
-                                </Box>
-                            </Grid>
+                    <Grid style={{marginTop: "1rem"}}>
+                        <TitleLink urls={urls}/>
+                    </Grid>
+                    <Box>
+                        <Grid container justify="center" alignItems="center">
+                            <Box style={{fontSize: 24}}>
+                                <h3>
+                                    {router.query?.type === defaultPromotionType.COMBO ? "Tạo combo linh hoạt" : "Tạo mã khuyến mãi"}
+                                </h3>
+                            </Box>
                         </Grid>
                         <InfomationFields
                             errors={errors}
@@ -370,108 +433,47 @@ function render(props) {
                         />
 
                         <Divider/>
-                        <CardHeader subheader="Cách áp dụng khuyến mãi"/>
-                        <CardContent>
-                            <Grid spacing={3} container>
-                                <RadioGroup aria-label="quiz" name="promotionUseType" value={promotionUseType}
-                                            onChange={handleChange} style={{width : "100%"}}>
-                                    <Grid spacing={3} container justify="space-around" alignItems="center" style={{marginLeft : 30}}>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <FormControlLabel value={defaultUseTypePromotion.MANY} control={<Radio color="primary"/>}
-                                                              label="Đồng thời với những khuyến mãi khác"/>
-                                        </Grid>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <FormControlLabel value={defaultUseTypePromotion.ALONE} control={<Radio color="primary"/>}
-                                                              label="Duy nhất cho 1 đơn hàng"/>
-                                        </Grid>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                        </Grid>
-                                    </Grid>
-                                </RadioGroup>
-                            </Grid>
-                        </CardContent>
-                        <CardHeader subheader="Phạm vi áp dụng khuyến mãi"/>
-                        <CardContent>
-                            <Grid spacing={3} container>
-                                <RadioGroup aria-label="quiz" name="promotionScope" value={promotionScope} onChange={handleChangeScope} style={{width : "100%"}}>
-                                    <Grid spacing={3} container justify="space-around" alignItems="center" style={{marginLeft : 30}}>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <FormControlLabel
-                                                value={defaultPromotionScope.GLOBAL}
-                                                control={<Radio color="primary"/>}
-                                                label="Toàn sàn"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <FormControlLabel
-                                                value={defaultPromotionScope.PRODUCT}
-                                                control={<Radio color="primary"/>}
-                                                label="Sản phẩm được chọn"
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} sm={4} md={4}>
-                                            <FormControlLabel
-                                                value={defaultPromotionScope.CATEGORY}
-                                                control={<Radio color="primary"/>}
-                                                label="Danh mục sản phẩm"
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </RadioGroup>
-                            </Grid>
-                        </CardContent>
-                        {promotionScope === defaultPromotionScope.PRODUCT && (
-                            <RenderTableListProduct
-                                handleClickOpen={() =>
-                                    setOpen({...open, openModalProductScopePromotion: true})
-                                }
-                                handleClose={() =>
-                                    setOpen({...open, openModalProductScopePromotion: false})
-                                }
-                                open={open.openModalProductScopePromotion}
-                                register={register}
-                                getValue={getValues()}
-                                listProductDefault={listProductDefault}
-                                promotionScope={promotionScope}
-                                listCategoryPromotion={listCategoryPromotion}
-                                listProductPromotion={listProductPromotion}
-                                handleAddProductPromotion={handleAddProductPromotion}
-                                handleRemoveProductPromotion={handleRemoveProductPromotion}
-                            />
-                        )}
-                        {promotionScope === defaultPromotionScope.CATEGORY && (
-                            <RenderTableListCategory
-                                handleClickOpen={() =>
-                                    setOpen({...open, openModalCategoryScopePromotion: true})
-                                }
-                                handleClose={() =>
-                                    setOpen({...open, openModalCategoryScopePromotion: false})
-                                }
-                                open={open.openModalCategoryScopePromotion}
-                                register={register}
-                                getValue={getValues()}
-                                promotionScope={promotionScope}
-                                listCategoryDefault={listCategoryDefault}
-                                listCategoryPromotion={listCategoryPromotion}
-                                handleAddCategoryPromotion={handleAddCategoryPromotion}
-                                handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
-                            />
-                        )}
-                        <Grid item container direction="row" xs={12} sm={4} md={4}>   
-                            <Box>
+
+                        <ApplyFields
+                            open={open}
+                            state={state}
+                            register={register}
+                            handleChange={handleChange}
+                            handleChangeScope={handleChangeScope}
+                            handleOpenListProduct={() =>
+                                setOpen({...open, openModalProductScopePromotion: true})
+                            }
+                            handleCloseListProduct={() =>
+                                setOpen({...open, openModalProductScopePromotion: false})
+                            }
+                            handleOpenListCategory={() =>
+                                setOpen({...open, openModalCategoryScopePromotion: true})
+                            }
+                            handleCloseListCategory={() =>
+                                setOpen({...open, openModalCategoryScopePromotion: false})
+                            }
+                            handleAddProductPromotion={handleAddProductPromotion}
+                            handleRemoveProductPromotion={handleRemoveProductPromotion}
+                            handleAddCategoryPromotion={handleAddCategoryPromotion}
+                            handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
+                        />
+
+                        <Divider/>
+
+                        <ButtonGroup fullWidth style={{marginTop: "1rem"}}>
+                            <Box style={{marginLeft: "auto"}}>
                                 <Button
                                     variant="contained"
                                     color="primary"
                                     onClick={handleSubmit(onSubmit)}
-                                    style={{margin: 8}}
-                                >
+                                    style={{margin: 8}}>
                                     Lưu
                                 </Button>
-                                <Button variant="contained" style={{margin: 8}}>
+                                <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>
                                     Làm mới
                                 </Button>
                             </Box>
-                        </Grid>
+                        </ButtonGroup>
                     </Box>
                 </FormGroup>
             </Box>

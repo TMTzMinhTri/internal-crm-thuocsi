@@ -100,6 +100,13 @@ class PricingClient extends APIClient {
         });
     }
 
+    getCategoryFromCache() {
+        return this.callFromNextJS(
+            "GET",
+            `${prefixProduct}/categories/list`,
+        );
+    }
+
     getConfigPriceByID(priceCode) {
         return this.callFromNextJS(
             "GET",

@@ -1,28 +1,22 @@
 import {
-    IconButton,
-    Paper,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Tooltip
+    IconButton,Button,Paper,Table,TableBody,
+    TableCell,TableContainer,TableHead,TableRow,
+    Tooltip,Dialog,FormControl,FormLabel,DialogContent,DialogActions,
+    TextField,DialogTitle,Typography,Select,MenuItem,Divider,Grid,
 } from "@material-ui/core";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import EditIcon from "@material-ui/icons/Edit";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
+import { ErrorCode, formatNumber, ProductStatus,SkuStatuses, SellPrices } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, {useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
-import styles from "./pricing.module.css";
-import {ProductStatus, SellPrices, formatNumber, ErrorCode} from "components/global";
-import Chip from "@material-ui/core/Chip";
-
+import React, { useEffect, useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { getPriceClient } from "client/price";
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
         return loadPricingData(ctx)
@@ -48,12 +42,19 @@ export async function loadPricingData(ctx) {
             const listProducts = await _client.getListProductByProductCode(productCodes);
             if (listProducts.status === 'OK') {
                 mixData = result.data.map(t1 => ({...t1, ...listProducts.data.find(t2 => t2.code === t1.productCode)}))
-                return {props: {data: mixData, count: result.total}}
+                let statuses = {}
+                result.data?.forEach(e => {
+                    statuses[e.sellPriceCode] = e.status
+                });
+                return {props: {data: mixData, statuses: statuses, count: result.total}}
             }
+           
+
             return {
                 props: {
                     data: result.data,
-                    count: result.total
+                    count: result.total,
+                    statuses: {}
                 }
             }
         }
@@ -68,8 +69,8 @@ export default function PricingPage(props) {
 
 function render(props) {
     console.log(props)
+    const { error, warn, info, success } = useToast();
     let router = useRouter();
-    const {register, handleSubmit, errors, control} = useForm();
 
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
@@ -78,7 +79,44 @@ function render(props) {
     let [sellingData, setSellingData] = useState([]);
     let [countSelling, setCountSelling] = useState(0);
     let [search, setSearch] = useState(router.query.q || '');
-    let [open, setOpen] = useState(false);
+    let [loading, setLoading] = useState(false);
+
+    const { register, handleSubmit, errors, reset, watch, control, getValues, setValue } = useForm()
+    const [open, setOpen] = useState(false);
+    const [selectedSku, setSelectedSku] = useState({
+        code: "",
+        status: ""
+    });
+    const [statuses, setStatuses] = useState(props.statuses)
+    const handleClickOpen = (code, status) => {
+      setOpen(true);
+      setSelectedSku({
+          code: code,
+          status: SkuStatuses.filter(e => e.value === status)[0]
+      })
+    };
+  
+    const handleClose = () => {
+      setOpen(false);
+    };
+
+    async function onUpdateStatus(formData) {
+        setLoading(true);
+        let newStatuses = statuses
+        newStatuses[selectedSku.code] = formData.status
+        setStatuses(newStatuses)
+        formData.sellPriceCode = selectedSku.code
+        let _client = getPriceClient()
+        let result = await _client.updateStatusPrice(formData)
+        setLoading(false);
+        if (result.status === "OK") {
+            success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định')
+        } else {
+            error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        }
+        setOpen(false);
+
+    }
 
     useEffect(() => {
         setSellingData(props.data);
@@ -89,7 +127,10 @@ function render(props) {
         let a = SellPrices.filter((item) => {
             return item.value === type;
         });
-        return a[0].label;
+        if(typeof a !== 'undefined' && a.length > 0 ) {
+            return a[0]?.label;
+        }
+        return "Chưa cập nhật";
     }
 
     return (
@@ -106,7 +147,7 @@ function render(props) {
                             <TableCell align="left">Loại</TableCell>
                             <TableCell align="right">Giá bán lẻ</TableCell>
                             {/* <TableCell align="left">Giá bán buôn</TableCell> */}
-                            <TableCell align="left">Trạng thái</TableCell>
+                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -121,22 +162,11 @@ function render(props) {
                                             showType(row.retailPrice.type)
                                         }</TableCell>
                                         <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
-                                        {/* <TableCell align="left">
-                                            {
-                                                row.wholesalePrice?.map((price) => (
-                                                    <div>
-                                                        <Chip variant="outlined" size="small"
-                                                              label={'Giá bán: ' + formatNumber(price.price || 0) + 'đ' +
-                                                              ' - Giảm: ' + (price.percentageDiscount*100 || 0) + '%' +
-                                                              (formatNumber(price.absoluteDiscount || 0) !== 0 ?
-                                                                  (' - Giảm giá: ' + formatNumber(price.absoluteDiscount || 0)) : ('')) + 'đ' +
-                                                              ' - Số lượng: ' + price.minNumber}/>
-                                                        <br/>
-                                                    </div>
-                                                ))
-                                            }
-                                        </TableCell> */}
-                                        <TableCell align="left">{ProductStatus[row.status]}</TableCell>
+                                        <TableCell align="center">
+                                        <Button variant="outlined" size="small" onClick={() => handleClickOpen(row.sellPriceCode, row.status)}>
+                                            {typeof(row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : ''}
+                                        </Button>
+                                        </TableCell>
                                         <TableCell align="center">
                                             <Link href={`/crm/sku/edit?sellPriceCode=${row.sellPriceCode}`}>
                                                 <Tooltip title="Cập nhật thông tin">
@@ -158,6 +188,76 @@ function render(props) {
                         </TableBody>
                     )}
 
+                    <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth={"sm"} fullWidth={true}>
+                        <DialogTitle id="form-dialog-title">Cập nhật trạng thái</DialogTitle>
+                        <Divider></Divider>
+                        <DialogContent>
+                        <Grid container spacing={2}>
+                                <Grid item xs={12} sm={12} md={12}>
+                                    <FormControl style={{width: '100%'}} size="small">
+                                        <Typography gutterBottom>
+                                            <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                                Trạng thái <span style={{color: 'red'}}>*</span>
+                                            </FormLabel>
+                                        </Typography>
+                                        <Controller
+                                            id="status"
+                                            name="status"
+                                            variant="outlined"
+                                            size="small"
+                                            value={selectedSku.status}
+                                            control={control}
+                                            style={{width: '50%'}}
+                                            defaultValue={SkuStatuses ? SkuStatuses[0].value : ''}
+                                            rules={{ required: true }}
+                                            error={!!errors.status}
+                                            as={
+                                                <Select size="small">
+                                                    {SkuStatuses?.map(({ value, label }) => (
+                                                        <MenuItem size="small" value={value} key={value}>{label}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            }
+                                        />
+                                    </FormControl>
+                                </Grid>
+                                <Grid item xs={12} sm={12} md={12}>
+                                <FormControl style={{width: '100%'}}>
+                                    <Typography gutterBottom>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>Ghi chú</FormLabel>
+                                    </Typography>
+                                    <TextField
+                                        id="description"
+                                        name="description"
+                                        disabled={true}
+                                        multiline
+                                        rows={4}
+                                        variant="outlined"
+                                        size="small"
+                                        placeholder=""
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{ width: '100%' }}
+                                        required
+                                        inputRef={
+                                            register()
+                                        }
+                                    />
+                                    </FormControl>
+                                </Grid>
+                            </Grid>
+                        </DialogContent>
+                        <Divider></Divider>
+                        <DialogActions>
+                            <Button onClick={handleClose} color="secondary">
+                                Hủy
+                            </Button>
+                            <Button onClick={handleSubmit(onUpdateStatus)} color="primary">
+                                Lưu
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                     <MyTablePagination
                         labelUnit="chỉ số"
                         count={props.count}

@@ -15,6 +15,7 @@ import {
 } from "@material-ui/core";
 
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
+import styles from "./promotion.module.css"
 import AddCircleOutlineOutlinedIcon from "@material-ui/icons/AddCircleOutlineOutlined";
 
 import {
@@ -42,6 +43,14 @@ const ConditionFields = (props) => {
         conditions,
     } = state;
 
+    const [promotionOptionDefault, setPromotionOptionDefault] = useState(
+        promotionOption
+    );
+
+    const [promotionTypeRulesDefault, setPromotionTypeRulesDefault] = useState(
+        promotionTypeRule
+    );
+
     const [open, setOpen] = useState({
         openModalGift: false,
         openModalProductGift: false,
@@ -59,12 +68,10 @@ const ConditionFields = (props) => {
         }
     };
 
-    const isExistValue = (order, arr) => {
+    const   isExistValue = (order, arr) => {
         let bool = false;
         arr.forEach((o, index) => {
-            if (
-                order !== index &&
-                getValues(
+            if (order !== index && getValues(
                     displayNameRule(
                         promotionOption,
                         defaultNameRulesValue.priceMinValue,
@@ -99,35 +106,49 @@ const ConditionFields = (props) => {
         return bool;
     };
 
+    const textFieldProps = {
+        placeholder: "",
+        type: "number",
+        variant: "filled",
+        size: "small",
+        fullWidth: true,
+        required: true,
+        InputLabelProps: {
+            shrink: true,
+        },
+    };
+
     return (
         <CardContent>
             <Typography color="textSecondary" gutterBottom>
                 Điều kiện
             </Typography>
-            <RadioGroup
-                aria-label="quiz"
-                name="promotionOption"
-                value={promotionOption}
-                onChange={handleChangeStatus}
-            >
-                <Grid spacing={3} container justify="space-around" alignItems="center">
-                    <Grid item xs={12} sm={6} md={6}>
-                        <FormControlLabel
-                            value={defaultRulePromotion.MIN_ORDER_VALUE}
-                            control={<Radio color="primary"/>}
-                            label="Giảm giá theo giá trị đơn hàng"
-                        />
+            <Grid spacing={3} container  direction="row" style={{marginLeft: "1rem"}}>
+                <RadioGroup
+                    aria-label="quiz"
+                    name="promotionOption"
+                    className={styles.radioButton}
+                    value={promotionOption}
+                    onChange={handleChangeStatus}>
+                    <Grid spacing={3} xs={12} item container justify="space-around" alignItems="center">
+                        <Grid item xs={12} sm={6} md={6}>
+                            <FormControlLabel
+                                value={defaultRulePromotion.MIN_ORDER_VALUE}
+                                control={<Radio color="primary"/>}
+                                label="Giảm giá theo giá trị đơn hàng"
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={6} md={6}>
+                            <FormControlLabel
+                                value={defaultRulePromotion.MIN_QUANTITY}
+                                control={<Radio color="primary"/>}
+                                label="Giảm giá theo số lượng sản phẩm"
+                            />
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
-                        <FormControlLabel
-                            value={defaultRulePromotion.MIN_QUANTITY}
-                            control={<Radio color="primary"/>}
-                            label="Giảm giá theo số lượng sản phẩm"
-                        />
-                    </Grid>
-                </Grid>
-            </RadioGroup>
-            <Card>
+                </RadioGroup>
+            </Grid>
+            <Card style={{marginTop: "1rem"}}>
                 <CardContent>
                     <Typography color="textSecondary" gutterBottom>
                         Loại
@@ -136,8 +157,7 @@ const ConditionFields = (props) => {
                         aria-label="quiz"
                         name="promotionTypeRule"
                         value={promotionTypeRule}
-                        onChange={handleChangeStatus}
-                    >
+                        onChange={handleChangeStatus}>
                         <Grid
                             spacing={1}
                             container
@@ -167,36 +187,58 @@ const ConditionFields = (props) => {
                     <List component="nav" aria-label="mailbox folders">
                         {promotionRulesLine.map((code, index) => (
                             <ListItem
-                                key={
-                                    defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id
-                                }
-                                button
-                            >
+                                key={defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE + "_" + code.id + promotionOption}
+                                button>
                                 <Grid spacing={1} container alignItems="center">
                                     <Grid item xs={5} sm={5} md={5}>
                                         <TextField
+                                            {...textFieldProps}
                                             id={displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)}
                                             name={displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)}
-                                            label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "Giá trị đơn hàng" : "Số lượng sản phẩm"}
-                                            placeholder=""
-                                            type="number"
-                                            variant={"filled"}
-                                            defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index), index) : ""}
-                                            size="small"
-                                            helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)]?.type === "validate" ? "Giá trị đã tồn tại"
-                                                : errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)]?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
+                                            label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE
+                                                    ? "Giá trị đơn hàng"
+                                                    : "Số lượng sản phẩm"
+                                            }
+                                            defaultValue={edit && promotionOptionDefault === promotionOption && promotionTypeRulesDefault === promotionTypeRule
+                                                    ? parseConditionValue(
+                                                    conditions,
+                                                    promotionOption,
+                                                    promotionTypeRule,
+                                                    displayNameRule(promotionOption,defaultNameRulesValue.priceMinValue, index), index)
+                                                    : ""
+                                            }
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        {promotionOption ===
+                                                        defaultRulePromotion.MIN_ORDER_VALUE
+                                                            ? "VND"
+                                                            : ""}
+                                                    </InputAdornment>
+                                                ),
                                             }}
-                                            style={{width: "100%"}}
-                                            error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)]}
-                                            required
+                                            helperText={
+                                                errors[
+                                                    displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)
+                                                    ]?.type === "validate"
+                                                    ? "Giá trị đã tồn tại"
+                                                    : errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValue, index)]?.message
+                                            }
+                                            error={
+                                                !!errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceMinValue,
+                                                        index
+                                                    )
+                                                    ]
+                                            }
                                             inputRef={register({
                                                 validate: (value) =>
                                                     !isExistValue(index, promotionRulesLine),
                                                 required:
                                                     textError(promotionOption) +
-                                                    " đơn hàng không được bỏ trống",
+                                                    " đơn hàng không được đế trống",
                                                 maxLength: {
                                                     value: 10,
                                                     message:
@@ -208,6 +250,7 @@ const ConditionFields = (props) => {
                                     </Grid>
                                     <Grid item xs={5} sm={5} md={5}>
                                         <TextField
+                                            {...textFieldProps}
                                             id={displayNameRule(
                                                 promotionOption,
                                                 defaultNameRulesValue.priceDiscountValue,
@@ -218,39 +261,60 @@ const ConditionFields = (props) => {
                                                 defaultNameRulesValue.priceDiscountValue,
                                                 index
                                             )}
-                                            type="number"
                                             label="Số tiền giảm"
-                                            placeholder=""
-                                            variant={"filled"}
-                                            defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceDiscountValue, index), index) : ""}
-                                            size="small"
-                                            helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceDiscountValue, index)]?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
+                                            defaultValue={
+                                                edit && promotionOptionDefault === promotionOption
+                                                    ? parseConditionValue(
+                                                    conditions,
+                                                    promotionOption,
+                                                    promotionTypeRule,
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceDiscountValue,
+                                                        index
+                                                    ),
+                                                    index
+                                                    )
+                                                    : ""
+                                            }
+                                            helperText={
+                                                errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceDiscountValue,
+                                                        index
+                                                    )
+                                                    ]?.message
+                                            }
                                             InputProps={{
                                                 endAdornment: (
-                                                    <InputAdornment position="end">đ</InputAdornment>
+                                                    <InputAdornment position="end">VND</InputAdornment>
                                                 ),
                                             }}
-                                            style={{width: "100%"}}
-                                            error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.priceDiscountValue, index)]}
-                                            required
+                                            error={
+                                                !!errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceDiscountValue,
+                                                        index
+                                                    )
+                                                    ]
+                                            }
                                             inputRef={register({
-                                                required: "Số tiền giảm không được bỏ trống",
+                                                required: "Số tiền giảm không được để trống",
                                                 maxLength: {
                                                     value: 250,
                                                     message: "Số tiền giảm không được vượt quá 250 kí tự",
                                                 },
                                                 minLength: {
                                                     value: 4,
-                                                    message: "Giá trị sản phẩm phải lớn hơn 1000",
+                                                    message: "Số tiền giảm phải lớn hơn 1000",
                                                 },
                                             })}
                                         />
                                     </Grid>
                                     <Grid item xs={2} sm={2} md={2}>
-                                        <Grid spacing={1} container alignItems="center">
+                                        <Grid spacing={2} container alignItems="center">
                                             <Grid item xs={6} sm={4} md={2}>
                                                 {promotionRulesLine.length !== 1 ? (
                                                     <IconButton
@@ -290,30 +354,79 @@ const ConditionFields = (props) => {
                     <List component="nav" aria-label="mailbox folders">
                         {promotionRulesLine.map((code, index) => (
                             <ListItem
-                                key={defaultTypeConditionsRule.DISCOUNT_PERCENT + "_" + code.id}
+                                key={
+                                    defaultTypeConditionsRule.DISCOUNT_PERCENT +
+                                    "_" +
+                                    code.id +
+                                    promotionOption
+                                }
                                 button
                             >
                                 <Grid spacing={1} container alignItems="center">
                                     <Grid item xs={4} sm={4} md={4}>
                                         <TextField
-                                            id={displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index)}
-                                            name={displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index)}
-                                            label={promotionOption === defaultRulePromotion.MIN_ORDER_VALUE ? "Giá trị đơn hàng" : "Số lượng sản phẩm"}
-                                            placeholder=""
-                                            type="number"
-                                            variant={"filled"}
-                                            defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index), index) : ""}
-                                            size="small"
-                                            helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index)]?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
+                                            {...textFieldProps}
+                                            id={displayNameRule(
+                                                promotionOption,
+                                                defaultNameRulesValue.priceMinValuePercent,
+                                                index
+                                            )}
+                                            name={displayNameRule(
+                                                promotionOption,
+                                                defaultNameRulesValue.priceMinValuePercent,
+                                                index
+                                            )}
+                                            label={
+                                                promotionOption === defaultRulePromotion.MIN_ORDER_VALUE
+                                                    ? "Giá trị đơn hàng"
+                                                    : "Số lượng sản phẩm"
+                                            }
+                                            InputProps={{
+                                                endAdornment: (
+                                                    <InputAdornment position="end">
+                                                        {promotionOption ===
+                                                        defaultRulePromotion.MIN_ORDER_VALUE
+                                                            ? "VND"
+                                                            : ""}
+                                                    </InputAdornment>
+                                                ),
                                             }}
-                                            style={{width: "100%"}}
-                                            error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMinValuePercent, index)]}
-                                            required
+                                            defaultValue={
+                                                edit
+                                                    ? parseConditionValue(
+                                                    conditions,
+                                                    promotionOption,
+                                                    promotionTypeRule,
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceMinValuePercent,
+                                                        index
+                                                    ),
+                                                    index
+                                                    )
+                                                    : ""
+                                            }
+                                            helperText={
+                                                errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceMinValuePercent,
+                                                        index
+                                                    )
+                                                    ]?.message
+                                            }
+                                            error={
+                                                !!errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceMinValuePercent,
+                                                        index
+                                                    )
+                                                    ]
+                                            }
                                             inputRef={register({
                                                 required:
-                                                    textError(promotionOption) + " không được bỏ trống",
+                                                    textError(promotionOption) + " không được để trống",
                                                 maxLength: {
                                                     value: 10,
                                                     message:
@@ -325,6 +438,7 @@ const ConditionFields = (props) => {
                                     </Grid>
                                     <Grid item xs={2} sm={2} md={2}>
                                         <TextField
+                                            {...textFieldProps}
                                             id={displayNameRule(
                                                 promotionOption,
                                                 defaultNameRulesValue.percentValue,
@@ -335,29 +449,55 @@ const ConditionFields = (props) => {
                                                 defaultNameRulesValue.percentValue,
                                                 index
                                             )}
-                                            type="number"
                                             label="Số % giảm"
-                                            placeholder=""
-                                            variant={"filled"}
-                                            defaultValue={edit ? edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.percentValue, index), index) : "" : ""}
-                                            size="small"
-                                            helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.percentValue, index)]?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
+                                            defaultValue={
+                                                edit && promotionOptionDefault == promotionOption
+                                                    ? parseConditionValue(
+                                                    conditions,
+                                                    promotionOption,
+                                                    promotionTypeRule,
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.percentValue,
+                                                        index
+                                                    ),
+                                                    index
+                                                    )
+                                                    : ""
+                                            }
+                                            helperText={
+                                                errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.percentValue,
+                                                        index
+                                                    )
+                                                    ]?.message
+                                            }
                                             InputProps={{
                                                 endAdornment: (
                                                     <InputAdornment position="end">%</InputAdornment>
                                                 ),
                                             }}
-                                            style={{width: "100%"}}
-                                            error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.percentValue, index)]}
-                                            required
+                                            error={
+                                                !!errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.percentValue,
+                                                        index
+                                                    )
+                                                    ]
+                                            }
                                             inputRef={register({
-                                                required: "Không được để trống",
-                                                maxLength: {
-                                                    value: 3,
-                                                    message: "Không quá 3 kí tự",
+                                                required: "% giảm không được để trống",
+                                                validate: (value) => {
+                                                    if (value > 100) {
+                                                        return "Không được vượt quá 100%";
+                                                    }
+
+                                                    if (value <= 0) {
+                                                        return "% Giảm không được nhỏ hơn 1%";
+                                                    }
                                                 },
                                                 minLength: {
                                                     value: 1,
@@ -372,6 +512,7 @@ const ConditionFields = (props) => {
                                     </Grid>
                                     <Grid item xs={4} sm={4} md={4}>
                                         <TextField
+                                            {...textFieldProps}
                                             id={displayNameRule(
                                                 promotionOption,
                                                 defaultNameRulesValue.priceMaxDiscountValue,
@@ -382,24 +523,45 @@ const ConditionFields = (props) => {
                                                 defaultNameRulesValue.priceMaxDiscountValue,
                                                 index
                                             )}
-                                            type="number"
                                             label="Số tiền giảm tối đa"
-                                            placeholder=""
-                                            variant={"filled"}
-                                            defaultValue={edit ? parseConditionValue(conditions, promotionOption, promotionTypeRule, displayNameRule(promotionOption, defaultNameRulesValue.priceMaxDiscountValue, index), index) : ""}
-                                            size="small"
-                                            helperText={errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMaxDiscountValue, index)]?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
+                                            defaultValue={
+                                                edit && promotionOptionDefault == promotionOption
+                                                    ? parseConditionValue(
+                                                    conditions,
+                                                    promotionOption,
+                                                    promotionTypeRule,
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceMaxDiscountValue,
+                                                        index
+                                                    ),
+                                                    index
+                                                    )
+                                                    : ""
+                                            }
+                                            helperText={
+                                                errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceMaxDiscountValue,
+                                                        index
+                                                    )
+                                                    ]?.message
+                                            }
                                             InputProps={{
                                                 endAdornment: (
-                                                    <InputAdornment position="end">đ</InputAdornment>
+                                                    <InputAdornment position="end">VND</InputAdornment>
                                                 ),
                                             }}
-                                            style={{width: "100%"}}
-                                            error={!!errors[displayNameRule(promotionOption, defaultNameRulesValue.priceMaxDiscountValue, index)]}
-                                            required
+                                            error={
+                                                !!errors[
+                                                    displayNameRule(
+                                                        promotionOption,
+                                                        defaultNameRulesValue.priceMaxDiscountValue,
+                                                        index
+                                                    )
+                                                    ]
+                                            }
                                             inputRef={register({
                                                 required: "Số tiền giảm tối đa không được để trống",
                                                 maxLength: {
@@ -420,7 +582,7 @@ const ConditionFields = (props) => {
                                         />
                                     </Grid>
                                     <Grid item xs={2} sm={2} md={2}>
-                                        <Grid spacing={1} container alignItems="center">
+                                        <Grid spacing={2} container alignItems="center">
                                             <Grid item xs={6} sm={4} md={2}>
                                                 {promotionRulesLine.length !== 1 ? (
                                                     <IconButton

@@ -34,13 +34,14 @@ import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import styles from "./seller.module.css";
+import styles from "./order.module.css";
 import { condUserType, statuses, scopes } from "components/global"
 import { NotFound } from "components/components-global";
 import { getOrderClient } from "client/order";
 import MuiSingleAuto from "components/muiauto/single.js"
 import zIndex from "@material-ui/core/styles/zIndex";
 import { getProductClient } from "client/product";
+import { getSellerClient } from "client/seller";
 
 export async function loadData(ctx) {
     let data = {
@@ -48,13 +49,6 @@ export async function loadData(ctx) {
             status: "OK"
         }
     }
-
-    let masterDataClient = getMasterDataClient(ctx, data)
-    let resp = await masterDataClient.getProvince(0, 100, '')
-    if (resp.status !== 'OK') {
-        return data
-    }
-    data.props.provinces = resp.data
 
     let query = ctx.query
     let order_no = typeof (query.order_no) === "undefined" ? '' : query.order_no
@@ -74,19 +68,12 @@ export async function loadData(ctx) {
         //Get Master Data Client
         let masterDataClient = getMasterDataClient(ctx, data)
 
-        let provinceResp = await masterDataClient.getProvinceByProvinceCode(order.customerProvinceCode)
-        let districtResp = await masterDataClient.getDistrictByDistrictCode(order.customerDistrictCode)
         let wardResp = await masterDataClient.getWardByWardCode(order.customerWardCode)
-
-        data.props.order.customerProvinceCode = provinceResp.status === 'OK' ? provinceResp.data[0].name : ""
-        data.props.order.customerDistrictCode = districtResp.status === 'OK' ? districtResp.data[0].name : ""
-        data.props.order.customerWardCode = wardResp.status === 'OK' ? wardResp.data[0].name : ""
-
-        let districtsResp = await masterDataClient.getDistrictByProvinceCodeFromNextJs(order.provinceCode)
-        let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(order.districtCode)
-
-        data.props.districts = districtsResp.status === 'OK' ? districtsResp.data : []
-        data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []
+        if (wardResp.status === 'OK') {
+            data.props.order.customerProvinceCode = wardResp.data[0].provinceName
+            data.props.order.customerDistrictCode = wardResp.data[0].districtName
+            data.props.order.customerWardCode = wardResp.data[0].name
+        }
 
         //get list order-item 
         let orderItemResp = await orderClient.getOrderItemByOrderNo(order_no)
@@ -98,7 +85,7 @@ export async function loadData(ctx) {
 
         let lstProductCode = []
         orderItemResp.data = orderItemResp.data.map(orderItem => {
-            let productCode = orderItem.productSKU.split("").slice(orderItem.productSKU.split("").indexOf('.') + 1, orderItem.productSKU.split("").length).join("")
+            let productCode = orderItem.productSku.split("").slice(orderItem.productSku.split("").indexOf('.') + 1, orderItem.productSku.split("").length).join("")
             lstProductCode.push(productCode)
             return { ...orderItem, productCode }
         })
@@ -124,6 +111,14 @@ export async function loadData(ctx) {
             })
 
         }
+
+        for (let idx = 0; idx < orderItemResp.data?.length; idx++) {
+            let sellerCode = orderItemResp.data[idx].productSku.split("").slice(0, orderItemResp.data[idx].productSku.split("").indexOf(".")).join("")
+            let _sellerClient = getSellerClient(ctx, data)
+            let result = await _sellerClient.getSellerBySellerCode(sellerCode)
+            orderItemResp.data[idx] = { ...orderItemResp.data[idx], sellerName: result.status === "OK" ? result.data[0].name : "-" }
+        }
+
         data.props.orderItem = orderItemResp.data
 
     }
@@ -131,15 +126,15 @@ export async function loadData(ctx) {
 }
 
 export default function renderForm(props, toast) {
-    const titlePage = "Cập nhật hóa đơn"
+    const titlePage = "Cập nhật đơn hàng"
     if (props.status && props.status !== "OK") {
         return (
-            <NotFound link='/crm/order' titlePage={titlePage} labelLink="hóa đơn" />
+            <NotFound link='/crm/order' titlePage={titlePage} labelLink="đơn hàng" />
         )
     }
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.order : {}
-    const checkWardData = props.isUpdate ? (props.order.wardCode === '' ? {} : props.ward) : {};
+
     const [loading, setLoading] = useState(false);
     const [idxChangedItem, setIdxChangedItem] = useState()
     const [orderItem, setOrderItem] = useState(props.orderItem)
@@ -153,19 +148,9 @@ export default function renderForm(props, toast) {
     });
 
     const onSubmit = async (formData) => {
-        if (formData.passwordConfirm !== formData.password) {
-            error("Xác nhận mật khẩu không chính xác")
-            errors.passwordConfirm = {}
-            errors.passwordConfirm.message = "Mật khẩu xác nhận không chính xác"
-            return
-        }
-
         if (props.isUpdate) {
             formData.orderNo = props.order.orderNo
             await updateOrder(formData)
-            await updateOrderItem(orderItem)
-        } else {
-
         }
     }
 
@@ -179,22 +164,18 @@ export default function renderForm(props, toast) {
         }
     }
 
-    async function updateOrderItem(orderItem) {
+    async function updateOrderItem(orderItem, i) {
         let orderClient = getOrderClient()
-        let resp
-        for (let i = 0; i < orderItem.length; i++) {
-            resp = await orderClient.updateOrderItem({
-                totalPrice: parseInt(orderItem[i].price * orderItem[i].quantity), orderNo: orderItem[i].orderNo, orderItemNo: orderItem[i].orderItemNo
-                , quantity: parseInt(orderItem[i].quantity, 10)
-            })
-            if (resp.status !== 'OK') {
-                error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
-            }
-        }
+        let resp = await orderClient.updateOrderItem({
+            totalPrice: parseInt(orderItem[i].price * orderItem[i].quantity), orderNo: orderItem[i].orderNo, orderItemNo: orderItem[i].orderItemNo
+            , quantity: parseInt(orderItem[i].quantity)
+        })
+
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
             success(titlePage + ' thành công')
+            window.location.reload()
         }
     }
 
@@ -202,22 +183,21 @@ export default function renderForm(props, toast) {
         return (
             <TableRow key={index}>
                 <TableCell align="center">{index + 1}</TableCell>
-                <TableCell align="left"><img width={100} height={100} src={data.image}></img></TableCell>
+                <TableCell align="left">{data.productSku}</TableCell>
+                <TableCell align="left">{data.sellerName}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
-                <TableCell align="center">{formatNumber(data.price)}</TableCell>
-                <TableCell align="center">{formatNumber(data.quantity)}</TableCell>
-                <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
-                <TableCell align="center">
+                <TableCell align="right">{formatNumber(data.quantity)}
                     <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); setMaxQuantity(orderItem[index].maxQuantity) }}>
                         <EditIcon fontSize="small" />
                     </IconButton>
                 </TableCell>
+                <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
             </TableRow>
         );
     }
 
 
-    const changeQuantityHandler = () => {
+    const changeQuantityHandler = async () => {
         let quantityItem = parseInt(getValues('quantityItem'), 10)
         let tmpOrderItem = orderItem.map((item, idx) => {
             if (idx == idxChangedItem) {
@@ -229,6 +209,8 @@ export default function renderForm(props, toast) {
         props.order.totalPrice = props.order.totalPrice - orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
         setOrderItem(tmpOrderItem)
         setOpenChangeQuantityDialog(false)
+        await updateOrderItem(tmpOrderItem, idxChangedItem)
+
     }
 
 
@@ -272,13 +254,11 @@ export default function renderForm(props, toast) {
                         })}
                         label={"Số lượng ( tối đa " + maxQuantity + " )"}
                     />
-                    {errors.quantityItem && <p>This is required</p>}
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setOpenChangeQuantityDialog(false)} color="primary">
                         Hủy bỏ
                     </Button>
-                    {/* <Button onClick={(event) => changeQuantityHandler(event)} color="primary"  autoFocus> */}
                     <Button onClick={() => changeQuantityHandler()} color="primary" autoFocus>
                         Đồng ý
                      </Button>
@@ -293,7 +273,6 @@ export default function renderForm(props, toast) {
                 <Box component={Paper} display="block">
                     <FormGroup>
                         <form>
-                            {/* {openChangeQuantityDialog ? : null} */}
                             <ChangeQuantityDialog />
                             <Box className={styles.contentPadding}>
                                 <Card variant="outlined">
@@ -322,23 +301,8 @@ export default function renderForm(props, toast) {
                                                     style={{ width: '100%' }}
                                                     error={!!errors.customerName}
                                                     required
-                                                    onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                     inputRef={
-                                                        register({
-                                                            required: "Tên khách hàng không thể để trống",
-                                                            maxLength: {
-                                                                value: 50,
-                                                                message: "Tên khách hàng có độ dài tối đa 50 kí tự"
-                                                            },
-                                                            minLength: {
-                                                                value: 6,
-                                                                message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
-                                                            },
-                                                            pattern: {
-                                                                value: /^(?!.*[ ]{2})/,
-                                                                message: "Tên không hợp lệ (không được dư khoảng trắng)."
-                                                            }
-                                                        })
+                                                        register()
                                                     }
                                                 />
                                             </Grid>
@@ -364,19 +328,8 @@ export default function renderForm(props, toast) {
                                                     style={{ width: '100%' }}
                                                     error={!!errors.customerPhone}
                                                     required
-                                                    onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
                                                     inputRef={
-                                                        register({
-                                                            required: "Số điện thoại không thể để trống",
-                                                            maxLength: {
-                                                                value: 12,
-                                                                message: "Số điện thoại không hợp lệ"
-                                                            },
-                                                            pattern: {
-                                                                value: /[0-9]{9,12}/,
-                                                                message: "Số điện thoại không hợp lệ"
-                                                            },
-                                                        })
+                                                        register()
                                                     }
                                                 />
                                             </Grid>
@@ -402,9 +355,7 @@ export default function renderForm(props, toast) {
                                                     error={!!errors.customerShippingAddress}
                                                     required
                                                     inputRef={
-                                                        register({
-                                                            required: "Địa chỉ không thể để trống",
-                                                        })
+                                                        register()
                                                     }
                                                 />
                                             </Grid>
@@ -424,20 +375,11 @@ export default function renderForm(props, toast) {
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
+                                                    inputRef={
+                                                        register()
+                                                    }
                                                     style={{ width: '100%' }}
                                                 />
-                                                {/* <MuiSingleAuto
-                                                    id="customerProvinceCode"
-                                                    name="customerProvinceCode" // NAME INPUT
-                                                    options={props.provinces}  // DATA OPTIONS label-value
-                                                    label="Tỉnh/Thành phố"  // LABEL
-                                                    placeholder="Chọn"
-                                                    required={true} // boolean
-                                                    message="Tỉnh/ Thành phố không thể để trống" // CUSTOM MESSAGE ERROR
-                                                    onNotSearchFieldChange={onProvinceChange} // HANDLE EVENT CHANGE
-                                                    control={control} // REACT HOOK FORM CONTROL
-                                                    readOnly={true}
-                                                    errors={errors} /> */}
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
                                                 <TextField
@@ -465,19 +407,6 @@ export default function renderForm(props, toast) {
                                                     required
                                                     style={{ width: '100%' }}
                                                 />
-                                                {/* <MuiSingleAuto
-                                                    id="customerDistrictCode"
-                                                    name="customerDistrictCode" // NAME INPUT
-                                                    options={districts}  // DATA OPTIONS label-value
-                                                    label="Quận/Huyện"  // LABEL
-                                                    placeholder="Chọn"
-                                                    
-                                                    required={true} // boolean
-                                                    message="Quận/huyện thể để trống" // CUSTOM MESSAGE ERROR
-                                                    onNotSearchFieldChange={onDistrictChange} // HANDLE EVENT CHANGE
-                                                    control={control} // REACT HOOK FORM CONTROL
-                                                    errors={errors} /> */}
-
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
                                                 <TextField
@@ -498,17 +427,6 @@ export default function renderForm(props, toast) {
                                                         register()
                                                     }
                                                 />
-                                                {/* <MuiSingleAuto
-                                                    id="customerWardCode"
-                                                    name="customerWardCode" // NAME INPUT
-                                                    options={wards}  // DATA OPTIONS label-value
-                                                    label="Phường/Xã"
-                                                    placeholder="Chon"
-                                                    required={true} // boolean
-                                                    message="Phường xã không thể để trống" // CUSTOM MESSAGE ERROR
-                                                    onNotSearchFieldChange={onWardChange} // HANDLE EVENT CHANGE
-                                                    control={control} // REACT HOOK FORM CONTROL
-                                                    errors={errors} /> */}
                                             </Grid>
                                         </Grid>
                                         <Grid spacing={3} container>
@@ -575,26 +493,24 @@ export default function renderForm(props, toast) {
                                         </Grid>
                                     </CardContent>
                                 </Card>
-                                <TableContainer component={Paper}>
+                                <TableContainer component={Paper} style={{ marginTop: '20px' }}>
                                     <Table size="small" aria-label="a dense table">
                                         <colgroup>
-                                            <col width="5%" />
+                                            <col width="10%" />
+                                            <col width="20%" />
                                             <col width="20%" />
                                             <col width="15%" />
-                                            <col width="15%" />
-                                            <col width="10%" />
                                             <col width="15%" />
                                             <col width="20%" />
                                         </colgroup>
                                         <TableHead>
                                             <TableRow>
                                                 <TableCell align="center">Số thứ tự</TableCell>
-                                                <TableCell align="left">Hình ảnh</TableCell>
+                                                <TableCell align="left">SKU</TableCell>
+                                                <TableCell align="left">Tên người bán</TableCell>
                                                 <TableCell align="left">Tên sản phẩm</TableCell>
-                                                <TableCell align="center">Giá</TableCell>
-                                                <TableCell align="center">Số lượng</TableCell>
+                                                <TableCell align="right">Số lượng</TableCell>
                                                 <TableCell align="right">Thành tiền</TableCell>
-                                                <TableCell align="center">Thay đổi số lượng</TableCell>
                                             </TableRow>
                                         </TableHead>
                                         {orderItem && orderItem.length > 0 ? (
@@ -616,35 +532,29 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left">Phí vận chuyển</TableCell>
-                                                <TableCell align="center">{props.order?.shippingFee}</TableCell>
+                                                <TableCell align="right">Phí vận chuyển</TableCell>
+                                                <TableCell align="right">{props.order?.shippingFee}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left">Giảm giá</TableCell>
-                                                <TableCell align="center">{props.order?.totalDiscount}</TableCell>
+                                                <TableCell align="right">Giảm giá</TableCell>
+                                                <TableCell align="right">{props.order?.totalDiscount}</TableCell>
                                             </TableRow>
                                             <TableRow>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
                                                 <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
-                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order?.totalPrice)}</TableCell>
+                                                <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
+                                                <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order?.totalPrice)}</TableCell>
                                             </TableRow>
                                         </TableFooter>
                                     </Table>
                                 </TableContainer>
-
-
                                 <Divider />
-
                                 <Box>
                                     <Button
                                         variant="contained"
@@ -661,13 +571,11 @@ export default function renderForm(props, toast) {
                                         </ButtonGroup>
                                     </Link>
                                 </Box>
-
                             </Box>
                         </form>
                     </FormGroup>
                 </Box>
             }
-
         </AppCRM >
     )
 }
