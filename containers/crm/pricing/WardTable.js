@@ -7,6 +7,8 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { ViewType } from ".";
 import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { unknownErrorText } from "components/commonErrors";
 
 /**
  * @param {object} props
@@ -30,13 +32,16 @@ export const WardTable = (props) => {
     const router = useRouter();
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);
+    const [openModal, setOpenModal] = useState(false);
+    const [currentEditValue, setCurrentEditValue] = useState(null);
 
     useEffect(() => {
         setTableData(props.data);
     }, [props.data])
 
-    const updateFee = async ({ code, fee }) => {
+    const updateFee = async () => {
         try {
+            const { code, fee } = currentEditValue;
             const feeClient = getFeeClient();
             const res = await feeClient.updateWardFee(code, fee);
             if (res.status === 'OK') {
@@ -82,14 +87,17 @@ export const WardTable = (props) => {
                             <TableCell colSpan={3} align="left">{props.message}</TableCell>
                         </TableRow>
                     )}
-                    {tableData?.map(row => (
-                        <TableRow>
+                    {tableData?.map((row, i) => (
+                        <TableRow key={`tr_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
                             <TableCell>{row.level}</TableCell>
                             <TableCell>{row.districtCode}</TableCell>
                             <TableCell>{row.districtName}</TableCell>
-                            <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={updateFee} />
+                            <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={(values) => {
+                                        setCurrentEditValue(values);
+                                        setOpenModal(true);
+                                    }} />
                         </TableRow>
                     ))}
                 </TableBody>
@@ -103,7 +111,11 @@ export const WardTable = (props) => {
                     }}
                 />
             </Table>
-
+            <ConfirmDialog
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                onConfirm={() => updateFee()}
+            />
         </TableContainer>
     )
 }

@@ -1,43 +1,17 @@
 import {
-    Button,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
-    TableRow
+    TableRow,
 } from "@material-ui/core";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getFeeClient } from "client/fee";
+import { unknownErrorText } from "components/commonErrors";
 import React, { useEffect, useState } from "react";
+import { ConfirmDialog } from "./ConfirmDialog";
 import { TableFeeValueCell } from "./TableFeeValueCell";
-
-
-const ConfirmDialog = ({ open, onConfirm, onClose }) => {
-    const handleOk = () => {
-        onConfirm();
-        onClose();
-    }
-    return (
-        <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Cập nhật giá trị tính phí</DialogTitle>
-            <DialogContent>
-                <DialogContentText>Bạn có chắc muốn cập nhật giá trị tính phí?</DialogContentText>
-            </DialogContent>
-            <DialogActions>
-                <Button color="primary" onClick={handleOk}>OK</Button>
-                <Button color="secondary" onClick={() => onClose()}>
-                    Hủy
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
-};
 
 /**
  * @param {object} props
@@ -108,8 +82,8 @@ export const CustomerLevelTable = (props) => {
                                 </TableCell>
                             </TableRow>
                         )}
-                        {tableData?.map((row) => (
-                            <TableRow>
+                        {tableData?.map((row, i) => (
+                            <TableRow key={`tr_${i}`}>
                                 <TableCell>{row.code}</TableCell>
                                 <TableCell>{row.name}</TableCell>
                                 <TableCell>{row.decription}</TableCell>
@@ -134,4 +108,4 @@ export const CustomerLevelTable = (props) => {
             />
         </>
     );
-}
+};
