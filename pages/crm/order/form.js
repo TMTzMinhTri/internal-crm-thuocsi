@@ -70,6 +70,9 @@ export async function loadData(ctx) {
 
         //get list order-item 
         let orderItemResp = await orderClient.getOrderItemByOrderNo(order_no)
+        if (orderItemResp.status === 'NOT_FOUND') {
+            return data;
+        }
         if (orderItemResp.status !== 'OK') {
             data.props.message = orderItemResp.message
             data.props.status = orderItemResp.status;
@@ -133,6 +136,7 @@ export default function renderForm(props, toast) {
     const [orderItem, setOrderItem] = useState(props.orderItem)
     const [maxQuantity, setMaxQuantity] = useState()
     const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
+    const [deletedOrderItem, setDeletedOrderItem] = useState(null);
     const router = useRouter();
 
     const { register, handleSubmit, errors, control, getValues } = useForm({
@@ -175,10 +179,11 @@ export default function renderForm(props, toast) {
     async function removeOrderItem(data) {
         try {
             const orderClient = getOrderClient();
-            const res = orderClient.removeOrderItem(data.orderItemNo);
+            const res = await orderClient.removeOrderItem(data.orderItemNo);
             if (res.status === 'OK') {
-                toast.success(res.message);
+                toast.success("Xóa mặt hàng thành công");
                 setOrderItem(orderItem.filter(v => v.id !== data.id));
+                setDeletedOrderItem(null);
             } else {
                 toast.error(res.message);
             }
@@ -211,7 +216,7 @@ export default function renderForm(props, toast) {
                     <Box marginLeft={1} clone>
                         <IconButton
                             size="small"
-                            onClick={() => removeOrderItem(data)}
+                            onClick={() => setDeletedOrderItem(data)}
                         >
                             <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -293,6 +298,35 @@ export default function renderForm(props, toast) {
         </div>
     );
 
+    const ConfirmDeleteOrderItemDialog = () => {
+        const handleClose = () => setDeletedOrderItem(null);
+        return (
+        <Dialog open={!!deletedOrderItem} onClose={handleClose}>
+            <DialogTitle>Xác nhận</DialogTitle>
+            <DialogContent dividers>
+                Bạn có chắc muốn xóa mặt hàng?
+            </DialogContent>
+            <DialogActions>
+                <Button
+                    color="default"
+                    onClick={handleClose}
+                >
+                    Hủy bỏ
+                </Button>
+                <Button
+                    color="secondary"
+                    autoFocus
+                    onClick={() => {
+                        removeOrderItem(deletedOrderItem);
+                        handleClose();
+                    }}
+                >
+                    Xóa
+                </Button>
+            </DialogActions>
+        </Dialog>)
+    }
+
     return (
         <AppCRM select="/crm/order">
             {
@@ -300,6 +334,7 @@ export default function renderForm(props, toast) {
                     <FormGroup>
                         <form>
                             <ChangeQuantityDialog />
+                            <ConfirmDeleteOrderItemDialog />
                             <Box className={styles.contentPadding}>
                                 <Card variant="outlined">
                                     <CardContent>
