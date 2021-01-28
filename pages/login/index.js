@@ -13,7 +13,7 @@ This file have 2 ways to use:
 + POST method: receive submitted login data (username/password)
 */
 export async function getServerSideProps(ctx) {
-    let returnObject = {props: {}}
+    let returnObject = { props: {} }
     if (ctx.req && ctx.req.method === "POST") {
 
         // read form data
@@ -71,7 +71,7 @@ export default function LoginPage(props) {
         <Paper className={styles.loginForm}>
             <h1>Đăng nhập</h1>
             <form method="POST" action="/login">
-                <input type="hidden" name="url" value={props.url}/>
+                <input type="hidden" name="url" value={props.url} />
                 <Box>
                     <TextField
                         id="username"
@@ -80,7 +80,7 @@ export default function LoginPage(props) {
                         InputLabelProps={{
                             shrink: true,
                         }}
-                        style={{margin: 12, width: 280}}
+                        style={{ margin: 12, width: 280 }}
                         autoFocus={true}
                         name="username"
                     />
@@ -93,13 +93,13 @@ export default function LoginPage(props) {
                         InputLabelProps={{
                             shrink: true,
                         }}
-                        style={{margin: 12, width: 280}}
+                        style={{ margin: 12, width: 280 }}
                         name="password"
                         type="password"
                     />
                 </Box>
                 <Box>
-                    <Button type="submit" variant="contained" color="primary" style={{margin: 8}}>Đăng nhập</Button>
+                    <Button type="submit" variant="contained" color="primary" style={{ margin: 8 }}>Đăng nhập</Button>
                 </Box>
             </form>
         </Paper>

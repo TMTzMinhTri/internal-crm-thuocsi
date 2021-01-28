@@ -42,21 +42,6 @@ const statuses = [
     },
 ]
 
-const scopes = [
-    {
-        value: "PHARMACY",
-        label: "Tiệm thuốc"
-    },
-    {
-        value: "CLINIC",
-        label: "Phòng khám"
-    },
-    {
-        value: "DRUGSTORE",
-        label: "Nhà thuốc"
-    },
-]
-
 export async function loadData(ctx) {
     let data = { props: {} }
 
@@ -195,7 +180,7 @@ export default function renderForm(props, toast) {
                 error(resp.message ?? actionErrorText)
             } else {
                 success('Thêm nhà bán hàng thành công')
-                // router.push(`/crm/seller`)
+                router.push(`/crm/seller`)
             }
         } catch (error) {
             error(error.message ?? unknownErrorText)
@@ -498,7 +483,7 @@ export default function renderForm(props, toast) {
                                         <Card variant="outlined" style={{ marginTop: '10px' }}>
                                             <CardContent>
                                                 <Typography variant="h6" component="h6"
-                                                    style={{ marginBottom: '10px', fontSize: 18 }}>
+                                                    style={{ marginBottom: '20px', fontSize: 18 }}>
                                                     Thông tin tài khoản
                                                  </Typography>
                                                 <Grid spacing={3} container>
@@ -520,27 +505,6 @@ export default function renderForm(props, toast) {
                                                                 }
                                                             />
                                                         </FormControl>
-                                                    </Grid>
-                                                    <Grid item xs={12} sm={3} md={3}>
-                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
-                                                            <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
-                                                            <Controller
-                                                                name="scope"
-                                                                control={control}
-                                                                lable="Vai trò"
-                                                                defaultValue={scopes ? scopes[0].value : ''}
-                                                                rules={{ required: true }}
-                                                                error={!!errors.scope}
-                                                                as={
-                                                                    <Select label="Vai trò" disabled={props.isUpdate ? true : false}>
-                                                                        {scopes?.map(({ value, label }) => (
-                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                                        ))}
-                                                                    </Select>
-                                                                }
-                                                            />
-                                                        </FormControl>
-
                                                     </Grid>
                                                 </Grid>
                                                 {
