@@ -195,7 +195,7 @@ export default function renderForm(props, toast) {
                 error(resp.message ?? actionErrorText)
             } else {
                 success('Thêm nhà bán hàng thành công')
-                router.push(`/crm/seller`)
+                // router.push(`/crm/seller`)
             }
         } catch (error) {
             error(error.message ?? unknownErrorText)
