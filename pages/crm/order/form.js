@@ -70,9 +70,6 @@ export async function loadData(ctx) {
 
         //get list order-item 
         let orderItemResp = await orderClient.getOrderItemByOrderNo(order_no)
-        if (orderItemResp.status === 'NOT_FOUND') {
-            return data;
-        }
         if (orderItemResp.status !== 'OK') {
             data.props.message = orderItemResp.message
             data.props.status = orderItemResp.status;
@@ -182,6 +179,7 @@ export default function renderForm(props, toast) {
             const res = await orderClient.removeOrderItem(data.orderItemNo);
             if (res.status === 'OK') {
                 toast.success("Xóa mặt hàng thành công");
+                props.order.totalPrice = props.order.totalPrice - data.totalPrice;
                 setOrderItem(orderItem.filter(v => v.id !== data.id));
                 setDeletedOrderItem(null);
             } else {
