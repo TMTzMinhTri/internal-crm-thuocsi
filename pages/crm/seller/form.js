@@ -1,53 +1,64 @@
-import {
-    Box, Button, ButtonGroup, CardContent, FormGroup, Paper, TextField, Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
-    TableFooter
-} from "@material-ui/core";
-import TrendingUpIcon from '@material-ui/icons/TrendingUp';
+import { Box, Button, ButtonGroup, CardContent, FormGroup, Paper, TextField } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
-import { formatNumber, orderStatus } from "components/global"
 import FormControl from "@material-ui/core/FormControl";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
+import MuiSingleAuto from "components/muiauto/single";
 import Select from "@material-ui/core/Select";
-import EditIcon from "@material-ui/icons/Edit";
 import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { getSellerClient } from "client/seller";
+import { actionErrorText, unknownErrorText } from "components/commonErrors";
 import { getMasterDataClient } from "client/master-data";
 import Head from "next/head";
 import Link from "next/link";
-import IconButton from "@material-ui/core/IconButton";
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-import { condUserType, statuses, scopes } from "components/global"
-import { NotFound } from "components/components-global";
-import { getOrderClient } from "client/order";
-import MuiSingleAuto from "components/muiauto/single.js"
-import zIndex from "@material-ui/core/styles/zIndex";
-import { getProductClient } from "client/product";
+
+const noOptionsText = "Không có tùy chọn";
+
+const statuses = [
+    {
+        value: "ACTIVE",
+        label: "Đang hoạt động",
+    },
+    {
+        value: "DRAFT",
+        label: "Nháp",
+    },
+    {
+        value: "NEW",
+        label: "Mới",
+    },
+    {
+        value: "GUEST",
+        label: "Khách",
+    },
+]
+
+const scopes = [
+    {
+        value: "PHARMACY",
+        label: "Tiệm thuốc"
+    },
+    {
+        value: "CLINIC",
+        label: "Phòng khám"
+    },
+    {
+        value: "DRUGSTORE",
+        label: "Nhà thuốc"
+    },
+]
 
 export async function loadData(ctx) {
-    let data = {
-        props: {
-            status: "OK"
-        }
-    }
+    let data = { props: {} }
 
     let masterDataClient = getMasterDataClient(ctx, data)
     let resp = await masterDataClient.getProvince(0, 100, '')
@@ -57,100 +68,103 @@ export async function loadData(ctx) {
     data.props.provinces = resp.data
 
     let query = ctx.query
-    let order_no = typeof (query.order_no) === "undefined" ? '' : query.order_no
+    let sellerCode = typeof (query.sellerCode) === "undefined" ? '' : query.sellerCode
     data.props.isUpdate = false
-    if (order_no !== '') {
+    if (sellerCode !== '') {
         data.props.isUpdate = true
-        let orderClient = getOrderClient(ctx, data)
-        let orderResp = await orderClient.getOrderByOrderNo(order_no)
-        if (orderResp.status !== 'OK') {
-            data.props.message = orderResp.message
-            data.props.status = orderResp.status;
+        let sellerClient = getSellerClient(ctx, data)
+        let sellerResp = await sellerClient.getSellerBySellerCode(sellerCode)
+        if (sellerResp.status !== 'OK') {
+            data.props.message = sellerResp.message
             return data
         }
-        let order = orderResp.data[0]
-        data.props.order = order
-
-        //Get Master Data Client
+        let seller = sellerResp.data[0]
+        data.props.seller = seller
         let masterDataClient = getMasterDataClient(ctx, data)
+        let provinceResp = await masterDataClient.getProvinceByProvinceCode(seller.provinceCode)
+        let districtResp = await masterDataClient.getDistrictByDistrictCode(seller.districtCode)
+        let wardResp = await masterDataClient.getWardByWardCode(seller.wardCode)
 
-        let provinceResp = await masterDataClient.getProvinceByProvinceCode(order.customerProvinceCode)
-        let districtResp = await masterDataClient.getDistrictByDistrictCode(order.customerDistrictCode)
-        let wardResp = await masterDataClient.getWardByWardCode(order.customerWardCode)
+        data.props.province = provinceResp.status === 'OK' ? provinceResp.data[0] : {}
+        data.props.district = districtResp.status === 'OK' ? districtResp.data[0] : {}
+        data.props.ward = wardResp.status === 'OK' ? wardResp.data[0] : {}
 
-        data.props.order.customerProvinceCode = provinceResp.status === 'OK' ? provinceResp.data[0].name : ""
-        data.props.order.customerDistrictCode = districtResp.status === 'OK' ? districtResp.data[0].name : ""
-        data.props.order.customerWardCode = wardResp.status === 'OK' ? wardResp.data[0].name : ""
-
-        let districtsResp = await masterDataClient.getDistrictByProvinceCodeFromNextJs(order.provinceCode)
-        let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(order.districtCode)
+        let districtsResp = await masterDataClient.getDistrictByProvinceCodeFromNextJs(seller.provinceCode)
+        let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(seller.districtCode)
 
         data.props.districts = districtsResp.status === 'OK' ? districtsResp.data : []
         data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []
-
-        //get list order-item 
-        let orderItemResp = await orderClient.getOrderItemByOrderNo(order_no)
-        if (orderItemResp.status !== 'OK') {
-            data.props.message = orderItemResp.message
-            data.props.status = orderItemResp.status;
-            return data
-        }
-
-        let lstProductCode = []
-        orderItemResp.data = orderItemResp.data.map(orderItem => {
-            let productCode = orderItem.productSKU.split("").slice(orderItem.productSKU.split("").indexOf('.') + 1, orderItem.productSKU.split("").length).join("")
-            lstProductCode.push(productCode)
-            return { ...orderItem, productCode }
-        })
-
-        let _client = getProductClient(ctx, data)
-        let lstProductResp = await _client.postListProducstWithCodes(lstProductCode)
-        if (lstProductResp.status !== "OK") {
-
-        } else {
-            orderItemResp.data = orderItemResp.data.map((orderItem) => {
-                let imgProduct, nameProduct
-                lstProductResp.data.map(product => {
-                    if (product.code === orderItem.productCode) {
-                        if (product.imageUrls) {
-                            imgProduct = product.imageUrls[0] || "/default.png"
-                        } else {
-                            imgProduct = "/default.png"
-                        }
-                        nameProduct = product.name
-                    }
-                })
-                return { ...orderItem, image: imgProduct, name: nameProduct }
-            })
-
-        }
-        data.props.orderItem = orderItemResp.data
-
     }
     return data
 }
 
 export default function renderForm(props, toast) {
-    const titlePage = "Cập nhật hóa đơn"
-    if (props.status && props.status !== "OK") {
-        return (
-            <NotFound link='/crm/order' titlePage={titlePage} labelLink="hóa đơn" />
-        )
-    }
     let { error, success } = toast;
-    let editObject = props.isUpdate ? props.order : {}
-    const checkWardData = props.isUpdate ? (props.order.wardCode === '' ? {} : props.ward) : {};
+    let editObject = props.isUpdate ? props.seller : {}
+    const checkWardData = props.isUpdate ? (props.seller.wardCode === '' ? {} : props.ward) : {};
     const [loading, setLoading] = useState(false);
-    const [idxChangedItem, setIdxChangedItem] = useState()
-    const [orderItem, setOrderItem] = useState(props.orderItem)
-    const [maxQuantity, setMaxQuantity] = useState()
-    const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
+    const [province, setProvince] = useState(props.province);
+    const [districts, setDistricts] = useState(props.districts || []);
+    const [district, setDistrict] = useState(props.district || {});
+    const [wards, setWards] = useState(props.wards || []);
+    const [ward, setWard] = useState(checkWardData);
+    const isWard = ((props.ward === undefined) || (Object.keys(checkWardData).length === 0 && checkWardData.constructor === Object)) ? true : false;
+    const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
+    const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
+    const [isDisabledWard, setDisabledWard] = useState(isWard);
     const router = useRouter();
-
-    const { register, handleSubmit, errors, control, getValues } = useForm({
+    const { register, handleSubmit, errors, control, watch } = useForm({
         defaultValues: editObject,
         mode: "onSubmit"
     });
+    props.isUpdate ? props.seller.provinceCode = { value: props.province?.code, label: props.province?.name, code: props.province?.code } : ''
+    const onProvinceChange = async (event, val) => {
+        setProvince()
+        setDistricts([])
+        setDistrict({})
+        setWards([])
+        setWard({})
+        setDisabledDistrict(true)
+        setDisabledWard(true)
+        let masterDataClient = getMasterDataClient()
+        if (val) {
+            setProvince(val)
+            let res = await masterDataClient.getDistrictByProvinceCode(val?.code)
+            if (res.status !== 'OK') {
+                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau');
+            } else {
+                setDistricts(res.data)
+                setDisabledDistrict(false)
+            }
+        }
+    }
+
+    const onDistrictChange = async (event, val) => {
+        setDistrict('')
+        setWards([])
+        setWard('')
+        setDisabledWard(true)
+        let masterDataClient = getMasterDataClient()
+        if (val) {
+            setDistrict(val)
+            let res = await masterDataClient.getWardByDistrictCode(val.code)
+            if (res.status !== 'OK') {
+                error(res.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            } else {
+                setWards(res.data)
+                setDisabledWard(false)
+            }
+        }
+    }
+
+    const onWardChange = async (event, val) => {
+        setWard()
+        if (val) {
+            setWard(val)
+        } else {
+            setWard({})
+        }
+    }
 
     const onSubmit = async (formData) => {
         if (formData.passwordConfirm !== formData.password) {
@@ -159,515 +173,482 @@ export default function renderForm(props, toast) {
             errors.passwordConfirm.message = "Mật khẩu xác nhận không chính xác"
             return
         }
+        formData.provinceCode = province.code || ''
+        formData.districtCode = district.code || ''
+        formData.wardCode = ward.code || ''
 
         if (props.isUpdate) {
-            formData.orderNo = props.order.orderNo
-            await updateOrder(formData)
-            await updateOrderItem(orderItem)
+            formData.sellerID = props.seller.sellerID
+            formData.id = props.seller.id
+            formData.code = props.seller.code
+            await updateSeller(formData)
         } else {
-
+            await createSeller(formData)
         }
     }
 
-    async function updateOrder(formData) {
-        let orderClient = getOrderClient()
-        let resp = await orderClient.updateOrder(formData)
-        if (resp.status !== 'OK') {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
-        } else {
-            success(titlePage + ' thành công')
-        }
-    }
-
-    async function updateOrderItem(orderItem) {
-        let orderClient = getOrderClient()
-        let resp
-        for (let i = 0; i < orderItem.length; i++) {
-            resp = await orderClient.updateOrderItem({
-                totalPrice: parseInt(orderItem[i].price * orderItem[i].quantity), orderNo: orderItem[i].orderNo, orderItemNo: orderItem[i].orderItemNo
-                , quantity: parseInt(orderItem[i].quantity, 10)
-            })
+    async function createSeller(formData) {
+        try {
+            let sellerClient = getSellerClient()
+            let resp = await sellerClient.createNewSeller(formData)
             if (resp.status !== 'OK') {
-                error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+                error(resp.message ?? actionErrorText)
+            } else {
+                success('Thêm nhà bán hàng thành công')
+                // router.push(`/crm/seller`)
             }
-        }
-        if (resp.status !== 'OK') {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
-        } else {
-            success(titlePage + ' thành công')
+        } catch (error) {
+            error(error.message ?? unknownErrorText)
         }
     }
 
-    const RenderRow = ({ data, index }) => {
-        return (
-            <TableRow key={index}>
-                <TableCell align="center">{index + 1}</TableCell>
-                <TableCell align="left"><img width={100} height={100} src={data.image}></img></TableCell>
-                <TableCell align="left">{data.name}</TableCell>
-                <TableCell align="center">{formatNumber(data.price)}</TableCell>
-                <TableCell align="center">{formatNumber(data.quantity)}</TableCell>
-                <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
-                <TableCell align="center">
-                    <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); setMaxQuantity(orderItem[index].maxQuantity) }}>
-                        <EditIcon fontSize="small" />
-                    </IconButton>
-                </TableCell>
-            </TableRow>
-        );
-    }
-
-
-    const changeQuantityHandler = () => {
-        let quantityItem = parseInt(getValues('quantityItem'), 10)
-        let tmpOrderItem = orderItem.map((item, idx) => {
-            if (idx == idxChangedItem) {
-                return { ...item, quantity: quantityItem, totalPrice: quantityItem * item.price }
+    async function updateSeller(formData) {
+        try {
+            let sellerClient = getSellerClient()
+            let resp = await sellerClient.updateSeller(formData)
+            if (resp.status !== 'OK') {
+                error(resp.message ?? actionErrorText)
+            } else {
+                success('Cập nhật nhà bán hàng thành công')
             }
-            return item
-        })
-        // better performance
-        props.order.totalPrice = props.order.totalPrice - orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
-        setOrderItem(tmpOrderItem)
-        setOpenChangeQuantityDialog(false)
+        } catch (error) {
+            error(error.message ?? unknownErrorText)
+        }
     }
-
-
-    const ChangeQuantityDialog = () => (
-        <div>
-            <Dialog
-                open={openChangeQuantityDialog}
-                onClose={() => setOpenChangeQuantityDialog(false)}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {"Thay đổi số lượng sản phẩm"}
-                </DialogTitle>
-                <DialogContent>
-                    <TextField
-                        defaultValue={1}
-                        style={{ margin: '0 auto', width: '100%' }}
-                        // variant="outlined"
-                        id="quantityItem"
-                        name="quantityItem"
-                        size="small"
-                        type="number"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        placeholder=""
-                        onChange={event => {
-                            if (event.target.value < 1) {
-                                event.target.value = 1;
-                            }
-                            if (event.target.value > orderItem[idxChangedItem].maxQuantity) {
-                                event.target.value = orderItem[idxChangedItem].maxQuantity;
-                            }
-                        }}
-                        // error={!!errors.quantityItem}
-                        // helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
-                        inputRef={register({
-                            valueAsNumber: true,
-                            min: 0
-                        })}
-                        label={"Số lượng ( tối đa " + maxQuantity + " )"}
-                    />
-                    {errors.quantityItem && <p>This is required</p>}
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenChangeQuantityDialog(false)} color="primary">
-                        Hủy bỏ
-                    </Button>
-                    {/* <Button onClick={(event) => changeQuantityHandler(event)} color="primary"  autoFocus> */}
-                    <Button onClick={() => changeQuantityHandler()} color="primary" autoFocus>
-                        Đồng ý
-                     </Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    );
 
     return (
-        <AppCRM select="/crm/order">
+        <AppCRM select="/crm/seller">
+            <Head>
+                <title>{props.isUpdate ? 'Cập nhật bán hàng' : 'Thêm nhà bán hàng'}</title>
+            </Head>
             {
-                <Box component={Paper} display="block">
-                    <FormGroup>
-                        <form>
-                            {/* {openChangeQuantityDialog ? : null} */}
-                            <ChangeQuantityDialog />
-                            <Box className={styles.contentPadding}>
-                                <Card variant="outlined">
-                                    <CardContent>
-                                        <Typography variant="h6" component="h6"
-                                            style={{ marginBottom: '10px', fontSize: 18 }}>
-                                            Thông tin đơn hàng
+                props.isUpdate && typeof props.seller === 'undefined' ? (
+                    <div>
+                        <Box component={Paper} display="block">
+                            <FormGroup>
+                                <form>
+                                    <Grid container spacing={3} direction="row"
+                                        justify="space-between"
+                                        alignItems="flex-start" className={styles.contentPadding}>
+                                        <Grid item xs={12} md={12} sm={12}>
+                                            <Box style={{ fontSize: 24 }}>Cập nhật nhà bán hàng</Box>
+                                        </Grid>
+                                        <Grid item xs={12} md={12} sm={12}>
+                                            <span>{props.message}</span>
+                                        </Grid>
+                                    </Grid>
+                                </form>
+                            </FormGroup>
+                        </Box>
+                    </div>
+                )
+                    : (
+                        <Box component={Paper} display="block">
+                            <FormGroup>
+                                <form>
+                                    <Box className={styles.contentPadding}>
+                                        <Box style={{ fontSize: 24, marginBottom: '10px' }}>{props.isUpdate ? 'Cập nhật nhà bán hàng' : 'Thêm nhà bán hàng'}</Box>
+                                        <Card variant="outlined">
+                                            <CardContent>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 18 }}>
+                                                    Thông tin cơ bản
                                                 </Typography>
-                                        <Grid spacing={3} container>
-                                            <Grid item xs={12} sm={4} md={4}>
-                                                <TextField
-                                                    id="customerName"
-                                                    name="customerName"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    label="Tên khách hàng"
-                                                    placeholder=""
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    helperText={errors.name?.message}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    style={{ width: '100%' }}
-                                                    error={!!errors.customerName}
-                                                    required
-                                                    onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-                                                    inputRef={
-                                                        register({
-                                                            required: "Tên khách hàng không thể để trống",
-                                                            maxLength: {
-                                                                value: 50,
-                                                                message: "Tên khách hàng có độ dài tối đa 50 kí tự"
-                                                            },
-                                                            minLength: {
-                                                                value: 6,
-                                                                message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
-                                                            },
-                                                            pattern: {
-                                                                value: /^(?!.*[ ]{2})/,
-                                                                message: "Tên không hợp lệ (không được dư khoảng trắng)."
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={4} md={4}>
+                                                        <TextField
+                                                            id="name"
+                                                            name="name"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            inputProps={{
+                                                                readOnly: props.isUpdate ? true : false,
+                                                                disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
+                                                            }}
+                                                            label="Tên nhà bán hàng"
+                                                            placeholder=""
+                                                            helperText={errors.name?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.name}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Tên nhà bán hàng không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 250,
+                                                                        message: "Tên nhà bán hàng có độ dài tối đa 250 kí tự"
+                                                                    },
+                                                                    minLength: {
+                                                                        value: 6,
+                                                                        message: "Tên nhà bán hàng có độ dài tối thiểu 6 kí tự"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /[A-Za-z]/,
+                                                                        message: "Tên nhà bán hàng phải có kí tự chữ"
+                                                                    }
+                                                                })
                                                             }
-                                                        })
-                                                    }
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                        <Grid spacing={3} container>
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <TextField
-                                                    id="customerPhone"
-                                                    name="customerPhone"
-                                                    label="Số điện thoại"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    placeholder=""
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    type="number"
-                                                    helperText={errors.customerPhone?.message}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    style={{ width: '100%' }}
-                                                    error={!!errors.customerPhone}
-                                                    required
-                                                    onChange={(e) => e.target.value = (e.target.value).replace(/\s\s+/g, ' ')}
-                                                    inputRef={
-                                                        register({
-                                                            required: "Số điện thoại không thể để trống",
-                                                            maxLength: {
-                                                                value: 12,
-                                                                message: "Số điện thoại không hợp lệ"
-                                                            },
-                                                            pattern: {
-                                                                value: /[0-9]{9,12}/,
-                                                                message: "Số điện thoại không hợp lệ"
-                                                            },
-                                                        })
-                                                    }
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                        <Grid spacing={3} container>
-                                            <Grid item xs={12} sm={6} md={6}>
-                                                <TextField
-                                                    id="customerShippingAddress"
-                                                    name="customerShippingAddress"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    label="Địa chỉ"
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    placeholder=""
-                                                    helperText={errors.customerShippingAddress?.message}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    style={{ width: '100%' }}
-                                                    error={!!errors.customerShippingAddress}
-                                                    required
-                                                    inputRef={
-                                                        register({
-                                                            required: "Địa chỉ không thể để trống",
-                                                        })
-                                                    }
-                                                />
-                                            </Grid>
-                                        </Grid>
-                                        <Grid spacing={3} container>
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <TextField
-                                                    id="customerProvinceCode"
-                                                    name="customerProvinceCode"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    label="Tỉnh/Thành Phố"
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    style={{ width: '100%' }}
-                                                />
-                                                {/* <MuiSingleAuto
-                                                    id="customerProvinceCode"
-                                                    name="customerProvinceCode" // NAME INPUT
-                                                    options={props.provinces}  // DATA OPTIONS label-value
-                                                    label="Tỉnh/Thành phố"  // LABEL
-                                                    placeholder="Chọn"
-                                                    required={true} // boolean
-                                                    message="Tỉnh/ Thành phố không thể để trống" // CUSTOM MESSAGE ERROR
-                                                    onNotSearchFieldChange={onProvinceChange} // HANDLE EVENT CHANGE
-                                                    control={control} // REACT HOOK FORM CONTROL
-                                                    readOnly={true}
-                                                    errors={errors} /> */}
-                                            </Grid>
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <TextField
-                                                    id="customerDistrictCode"
-                                                    name="customerDistrictCode"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    label="Quận/Huyện"
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    placeholder=""
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={4} md={4}>
+                                                        <TextField
+                                                            id="email"
+                                                            name="email"
+                                                            label="Email"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            inputProps={{
+                                                                readOnly: props.isUpdate ? true : false,
+                                                                disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
+                                                            }}
+                                                            placeholder=""
+                                                            type="email"
+                                                            helperText={errors.email?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.email}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Email nhà bán hàng không thể để trống",
+                                                                    pattern: {
+                                                                        value: /.+@.+[.].+/,
+                                                                        message: "Email không hợp lệ"
+                                                                    }
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <TextField
+                                                            id="phone"
+                                                            name="phone"
+                                                            label="Số điện thoại"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            inputProps={{
+                                                                readOnly: props.isUpdate ? true : false,
+                                                                disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
+                                                            }}
+                                                            placeholder=""
+                                                            type="number"
+                                                            helperText={errors.phone?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.phone}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Số điện thoại không thể để trống",
+                                                                    maxLength: {
+                                                                        value: 12,
+                                                                        message: "Số điện thoại không hợp lệ"
+                                                                    },
+                                                                    pattern: {
+                                                                        value: /[0-9]{9,12}/,
+                                                                        message: "Số điện thoại không hợp lệ"
+                                                                    },
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={6} md={6}>
+                                                        <TextField
+                                                            id="address"
+                                                            name="address"
+                                                            variant="outlined"
+                                                            size="small"
+                                                            label="Địa chỉ"
+                                                            placeholder=""
+                                                            inputProps={{
+                                                                readOnly: props.isUpdate ? true : false,
+                                                                disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
+                                                            }}
+                                                            helperText={errors.address?.message}
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            style={{ width: '100%' }}
+                                                            error={!!errors.address}
+                                                            required
+                                                            inputRef={
+                                                                register({
+                                                                    required: "Địa chỉ không thể để trống",
+                                                                })
+                                                            }
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <MuiSingleAuto
+                                                            id="provinceCode"
+                                                            name="provinceCode"
+                                                            noOptionsText={noOptionsText}
+                                                            options={typeof props.provinces !== 'undefined' ? [...props.provinces.map(province => { return { value: province.code, label: province.name, code: province.code } }
+                                                            )] : []}
+                                                            onNotSearchFieldChange={onProvinceChange}
+                                                            required={true}
+                                                            label="Tỉnh/Thành phố"
+                                                            control={control}
+                                                            disabled={props.isUpdate ? true : false}
+                                                            errors={errors}
+                                                            message={'Vui lòng chọn tỉnh thành'}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <Autocomplete
+                                                            options={districts}
+                                                            size="small"
+                                                            getOptionLabel={(option) => option.name}
+                                                            value={district}
+                                                            onChange={onDistrictChange}
+                                                            disabled={props.isUpdate ? true : false}
+                                                            renderInput={(params) =>
+                                                                <TextField
+                                                                    id="districtCode"
+                                                                    name="districtCode"
+                                                                    variant="outlined"
+                                                                    inputProps={{
+                                                                        readOnly: props.isUpdate ? true : false,
+                                                                        disabled: props.isUpdate ? true : false,
+                                                                        form: {
+                                                                            autocomplete: 'off',
+                                                                        },
+                                                                    }}
+                                                                    label="Quận/Huyện"
+                                                                    // helperText={errors.districtCode?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{ width: '100%' }}
+                                                                    // error={!!errors.districtCode}
+                                                                    // required
+                                                                    inputRef={
+                                                                        register({
+                                                                            // required: "Quận/huyện thể để trống",
+                                                                        })
+                                                                    }
+                                                                    {...params} />}
+                                                        />
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <Autocomplete
+                                                            size="small"
+                                                            options={wards}
+                                                            name={"ward"}
+                                                            value={ward}
+                                                            disabled={isDisabledWard ? true : props.isUpdate ? true : false}
+                                                            onChange={onWardChange}
+                                                            getOptionLabel={(option) => option.name}
+                                                            renderInput={(params) =>
+                                                                <TextField
+                                                                    id="wardCode"
+                                                                    name="wardCode"
+                                                                    variant="outlined"
+                                                                    label="Phường/Xã"
+                                                                    inputProps={{
+                                                                        readOnly: props.isUpdate ? true : false,
+                                                                        disabled: props.isUpdate ? true : false,
+                                                                        form: {
+                                                                            autocomplete: 'off',
+                                                                        },
+                                                                    }}
+                                                                    // helperText={errors.wardCode?.message}
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{ width: '100%' }}
+                                                                    // error={!!errors.wardCode}
+                                                                    // required
+                                                                    inputRef={
+                                                                        register({
+                                                                            // required: "Phường xã không thể để trống",
+                                                                        })
+                                                                    }
+                                                                    {...params} />}
+                                                        />
+                                                    </Grid>
+                                                </Grid>
+                                            </CardContent>
+                                        </Card>
+                                        <Card variant="outlined" style={{ marginTop: '10px' }}>
+                                            <CardContent>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 18 }}>
+                                                    Thông tin tài khoản
+                                                 </Typography>
+                                                <Grid spacing={3} container>
+                                                    <Grid item xs={12} sm={3} md={3} hidden={!props.isUpdate}>
+                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
+                                                            <InputLabel id="department-select-label">Trạng thái</InputLabel>
+                                                            <Controller
+                                                                name="status"
+                                                                control={control}
+                                                                defaultValue={statuses ? statuses[0].value : ''}
+                                                                rules={{ required: true }}
+                                                                error={!!errors.status}
+                                                                as={
+                                                                    <Select label="Trạng thái" disabled={props.isUpdate ? true : false}>
+                                                                        {statuses.map(({ value, label }) => (
+                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                }
+                                                            />
+                                                        </FormControl>
+                                                    </Grid>
+                                                    <Grid item xs={12} sm={3} md={3}>
+                                                        <FormControl style={{ width: '100%' }} size="small" variant="outlined">
+                                                            <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
+                                                            <Controller
+                                                                name="scope"
+                                                                control={control}
+                                                                lable="Vai trò"
+                                                                defaultValue={scopes ? scopes[0].value : ''}
+                                                                rules={{ required: true }}
+                                                                error={!!errors.scope}
+                                                                as={
+                                                                    <Select label="Vai trò" disabled={props.isUpdate ? true : false}>
+                                                                        {scopes?.map(({ value, label }) => (
+                                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                                        ))}
+                                                                    </Select>
+                                                                }
+                                                            />
+                                                        </FormControl>
 
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    style={{ width: '100%' }}
-                                                    inputRef={
-                                                        register()
-                                                    }
-                                                    required
-                                                    style={{ width: '100%' }}
-                                                />
-                                                {/* <MuiSingleAuto
-                                                    id="customerDistrictCode"
-                                                    name="customerDistrictCode" // NAME INPUT
-                                                    options={districts}  // DATA OPTIONS label-value
-                                                    label="Quận/Huyện"  // LABEL
-                                                    placeholder="Chọn"
-                                                    
-                                                    required={true} // boolean
-                                                    message="Quận/huyện thể để trống" // CUSTOM MESSAGE ERROR
-                                                    onNotSearchFieldChange={onDistrictChange} // HANDLE EVENT CHANGE
-                                                    control={control} // REACT HOOK FORM CONTROL
-                                                    errors={errors} /> */}
+                                                    </Grid>
+                                                </Grid>
+                                                {
+                                                    props.isUpdate ? (
+                                                        <div />
+                                                    ) : (
+                                                            <Grid spacing={3} container>
+                                                                <Grid item xs={12} sm={3} md={3}>
+                                                                    <TextField
+                                                                        id="password"
+                                                                        name="password"
+                                                                        label="Mật khẩu đăng nhập"
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        placeholder=""
+                                                                        type="password"
+                                                                        helperText={errors.password?.message}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                        }}
+                                                                        style={{ width: '100%' }}
+                                                                        error={!!errors.password}
+                                                                        required
+                                                                        inputRef={
+                                                                            register({
+                                                                                required: "Mật khẩu không thể để trống",
+                                                                                pattern: {
+                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
+                                                                                    message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
+                                                                                }
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                                <Grid item xs={12} sm={3} md={3}>
+                                                                    <TextField
+                                                                        id="passwordConfirm"
+                                                                        name="passwordConfirm"
+                                                                        label="Xác nhận mật khẩu"
+                                                                        variant="outlined"
+                                                                        size="small"
+                                                                        type="password"
+                                                                        placeholder=""
+                                                                        helperText={errors.passwordConfirm && errors.passwordConfirm.type === "validate" ?
+                                                                            "Xác nhận mật khẩu không hợp lệ" : errors.passwordConfirm ? errors.passwordConfirm.message : null}
+                                                                        InputLabelProps={{
+                                                                            shrink: true,
+                                                                        }}
+                                                                        style={{ width: '100%' }}
+                                                                        error={!!errors.passwordConfirm}
+                                                                        required
+                                                                        inputRef={
+                                                                            register({
+                                                                                required: "Mật khẩu không thể để trống",
+                                                                                pattern: {
+                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
+                                                                                    message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
+                                                                                },
+                                                                                validate: (value) => value === watch('password')
+                                                                            })
+                                                                        }
+                                                                    />
+                                                                </Grid>
+                                                            </Grid>
+                                                        )
+                                                }
 
-                                            </Grid>
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <TextField
-                                                    id="customerWardCode"
-                                                    name="customerWardCode"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    label="Phường/Xã"
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    style={{ width: '100%' }}
-                                                    inputRef={
-                                                        register()
-                                                    }
-                                                />
-                                                {/* <MuiSingleAuto
-                                                    id="customerWardCode"
-                                                    name="customerWardCode" // NAME INPUT
-                                                    options={wards}  // DATA OPTIONS label-value
-                                                    label="Phường/Xã"
-                                                    placeholder="Chon"
-                                                    required={true} // boolean
-                                                    message="Phường xã không thể để trống" // CUSTOM MESSAGE ERROR
-                                                    onNotSearchFieldChange={onWardChange} // HANDLE EVENT CHANGE
-                                                    control={control} // REACT HOOK FORM CONTROL
-                                                    errors={errors} /> */}
-                                            </Grid>
-                                        </Grid>
-                                        <Grid spacing={3} container>
+                                            </CardContent>
+                                        </Card>
+                                        <Divider />
+                                        <Divider />
+                                        <Box>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleSubmit(onSubmit)}
+                                                disabled={props.isUpdate ? true : loading === true ? true : false}
+                                                style={{ margin: 8 }}>
+                                                {loading && <CircularProgress size={20} />}
+                                                Lưu
+                                             </Button>
+                                            {
+                                                props.isUpdate ? (
+                                                    <Link href={`/crm/seller`}>
+                                                        <ButtonGroup color="primary" aria-label="contained primary button group">
+                                                            <Button variant="contained" color="default">Quay lại</Button>
+                                                        </ButtonGroup>
+                                                    </Link>
+                                                ) : (
+                                                        <Button
+                                                            variant="contained"
+                                                            type="reset"
+                                                            style={{ margin: 8 }}
+                                                            disabled={loading}>
+                                                            {loading && <CircularProgress size={20} />}
+                                                   Làm mới
+                                                        </Button>
+                                                    )
+                                            }
 
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <TextField
-                                                    id="deliveryPlatform"
-                                                    name="deliveryPlatform"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    label="Hình thức vận chuyển"
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    inputRef={
-                                                        register()
-                                                    }
-                                                    style={{ width: '100%' }}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <TextField
-                                                    id="paymentMethod"
-                                                    name="paymentMethod"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    label="Phương thức thanh toán"
-                                                    inputProps={{
-                                                        readOnly: true,
-                                                        disabled: true,
-                                                    }}
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    inputRef={
-                                                        register()
-                                                    }
-                                                    style={{ width: '100%' }}
-                                                />
-                                            </Grid>
-                                            <Grid item xs={12} sm={3} md={3}>
-                                                <FormControl style={{ width: '100%' }} size="small" variant="outlined">
-                                                    <InputLabel id="department-select-label">Trạng thái</InputLabel>
-                                                    <Controller
-                                                        name="status"
-                                                        control={control}
-                                                        defaultValue={orderStatus ? orderStatus[0].value : ''}
-                                                        rules={{ required: true }}
-                                                        error={!!errors.status}
-                                                        as={
-                                                            <Select label="Trạng thái">
-                                                                {orderStatus?.map(({ value, label }) => (
-                                                                    <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                                ))}
-                                                            </Select>
-                                                        }
-                                                    />
-                                                </FormControl>
-                                            </Grid>
-                                        </Grid>
-                                    </CardContent>
-                                </Card>
-                                <TableContainer component={Paper}>
-                                    <Table size="small" aria-label="a dense table">
-                                        <colgroup>
-                                            <col width="5%" />
-                                            <col width="20%" />
-                                            <col width="15%" />
-                                            <col width="15%" />
-                                            <col width="10%" />
-                                            <col width="15%" />
-                                            <col width="20%" />
-                                        </colgroup>
-                                        <TableHead>
-                                            <TableRow>
-                                                <TableCell align="center">Số thứ tự</TableCell>
-                                                <TableCell align="left">Hình ảnh</TableCell>
-                                                <TableCell align="left">Tên sản phẩm</TableCell>
-                                                <TableCell align="center">Giá</TableCell>
-                                                <TableCell align="center">Số lượng</TableCell>
-                                                <TableCell align="right">Thành tiền</TableCell>
-                                                <TableCell align="center">Thay đổi số lượng</TableCell>
-                                            </TableRow>
-                                        </TableHead>
-                                        {orderItem && orderItem.length > 0 ? (
-                                            <TableBody>
-                                                {orderItem.map((row, i) => (
-                                                    <RenderRow data={row} key={i} index={i} />
-                                                ))}
-                                            </TableBody>
-                                        ) : (
-                                                <TableBody>
-                                                    <TableRow>
-                                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                                    </TableRow>
-                                                </TableBody>
-                                            )}
-                                        <TableFooter>
-                                            <TableRow>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left">Phí vận chuyển</TableCell>
-                                                <TableCell align="center">{props.order?.shippingFee}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left">Giảm giá</TableCell>
-                                                <TableCell align="center">{props.order?.totalDiscount}</TableCell>
-                                            </TableRow>
-                                            <TableRow>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
-                                                <TableCell align="center" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order?.totalPrice)}</TableCell>
-                                            </TableRow>
-                                        </TableFooter>
-                                    </Table>
-                                </TableContainer>
-
-
-                                <Divider />
-
-                                <Box>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleSubmit(onSubmit)}
-                                        disabled={loading}
-                                        style={{ margin: 8 }}>
-                                        {loading && <CircularProgress size={20} />}
-                                    Lưu
-                                    </Button>
-                                    <Link href={`/crm/order`}>
-                                        <ButtonGroup color="primary" aria-label="contained primary button group">
-                                            <Button variant="contained" color="default">Quay lại</Button>
-                                        </ButtonGroup>
-                                    </Link>
-                                </Box>
-
-                            </Box>
-                        </form>
-                    </FormGroup>
-                </Box>
+                                        </Box>
+                                    </Box>
+                                </form>
+                            </FormGroup>
+                        </Box>
+                    )
             }
 
-        </AppCRM >
+        </AppCRM>
     )
 }
