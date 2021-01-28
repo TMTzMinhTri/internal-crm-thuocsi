@@ -11,6 +11,7 @@ import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getSellerClient } from "client/seller";
+import { actionErrorText, unknownErrorText } from "components/commonErrors";
 import { getMasterDataClient } from "client/master-data";
 import Head from "next/head";
 import Link from "next/link";
@@ -21,29 +22,6 @@ import { Controller, useForm } from "react-hook-form";
 import styles from "./seller.module.css";
 
 const noOptionsText = "Không có tùy chọn";
-
-const levels = [
-    {
-        value: "Infinity",
-        label: "Không giới hạn"
-    },
-    {
-        value: "Diamond",
-        label: "Kim cương",
-    },
-    {
-        value: "Platinum",
-        label: "Bạch kim",
-    },
-    {
-        value: "Gold",
-        label: "Vàng",
-    },
-    {
-        value: "Sliver",
-        label: "Bạc",
-    },
-];
 
 const statuses = [
     {
@@ -135,9 +113,9 @@ export default function renderForm(props, toast) {
     const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
     const [isDisabledWard, setDisabledWard] = useState(isWard);
     const router = useRouter();
-    const { register, handleSubmit, errors, control } = useForm({
+    const { register, handleSubmit, errors, control, watch } = useForm({
         defaultValues: editObject,
-        mode: "onChange"
+        mode: "onSubmit"
     });
     props.isUpdate ? props.seller.provinceCode = { value: props.province?.code, label: props.province?.name, code: props.province?.code } : ''
     const onProvinceChange = async (event, val) => {
@@ -210,23 +188,31 @@ export default function renderForm(props, toast) {
     }
 
     async function createSeller(formData) {
-        let sellerClient = getSellerClient()
-        let resp = await sellerClient.createNewSeller(formData)
-        if (resp.status !== 'OK') {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
-        } else {
-            success('Thêm nhà bán hàng thành công')
-            router.push(`/crm/seller`)
+        try {
+            let sellerClient = getSellerClient()
+            let resp = await sellerClient.createNewSeller(formData)
+            if (resp.status !== 'OK') {
+                error(resp.message ?? actionErrorText)
+            } else {
+                success('Thêm nhà bán hàng thành công')
+                router.push(`/crm/seller`)
+            }
+        } catch (error) {
+            error(error.message ?? unknownErrorText)
         }
     }
 
     async function updateSeller(formData) {
-        let sellerClient = getSellerClient()
-        let resp = await sellerClient.updateSeller(formData)
-        if (resp.status !== 'OK') {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
-        } else {
-            success('Cập nhật nhà bán hàng thành công')
+        try {
+            let sellerClient = getSellerClient()
+            let resp = await sellerClient.updateSeller(formData)
+            if (resp.status !== 'OK') {
+                error(resp.message ?? actionErrorText)
+            } else {
+                success('Cập nhật nhà bán hàng thành công')
+            }
+        } catch (error) {
+            error(error.message ?? unknownErrorText)
         }
     }
 
@@ -278,6 +264,9 @@ export default function renderForm(props, toast) {
                                                             inputProps={{
                                                                 readOnly: props.isUpdate ? true : false,
                                                                 disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
                                                             }}
                                                             label="Tên nhà bán hàng"
                                                             placeholder=""
@@ -317,6 +306,9 @@ export default function renderForm(props, toast) {
                                                             inputProps={{
                                                                 readOnly: props.isUpdate ? true : false,
                                                                 disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
                                                             }}
                                                             placeholder=""
                                                             type="email"
@@ -350,6 +342,9 @@ export default function renderForm(props, toast) {
                                                             inputProps={{
                                                                 readOnly: props.isUpdate ? true : false,
                                                                 disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
                                                             }}
                                                             placeholder=""
                                                             type="number"
@@ -388,6 +383,9 @@ export default function renderForm(props, toast) {
                                                             inputProps={{
                                                                 readOnly: props.isUpdate ? true : false,
                                                                 disabled: props.isUpdate ? true : false,
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
                                                             }}
                                                             helperText={errors.address?.message}
                                                             InputLabelProps={{
@@ -437,6 +435,9 @@ export default function renderForm(props, toast) {
                                                                     inputProps={{
                                                                         readOnly: props.isUpdate ? true : false,
                                                                         disabled: props.isUpdate ? true : false,
+                                                                        form: {
+                                                                            autocomplete: 'off',
+                                                                        },
                                                                     }}
                                                                     label="Quận/Huyện"
                                                                     // helperText={errors.districtCode?.message}
@@ -472,6 +473,9 @@ export default function renderForm(props, toast) {
                                                                     inputProps={{
                                                                         readOnly: props.isUpdate ? true : false,
                                                                         disabled: props.isUpdate ? true : false,
+                                                                        form: {
+                                                                            autocomplete: 'off',
+                                                                        },
                                                                     }}
                                                                     // helperText={errors.wardCode?.message}
                                                                     InputLabelProps={{
@@ -498,7 +502,7 @@ export default function renderForm(props, toast) {
                                                     Thông tin tài khoản
                                                  </Typography>
                                                 <Grid spacing={3} container>
-                                                    <Grid item xs={12} sm={3} md={3}>
+                                                    <Grid item xs={12} sm={3} md={3} hidden={!props.isUpdate}>
                                                         <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                                             <InputLabel id="department-select-label">Trạng thái</InputLabel>
                                                             <Controller
@@ -563,18 +567,10 @@ export default function renderForm(props, toast) {
                                                                         inputRef={
                                                                             register({
                                                                                 required: "Mật khẩu không thể để trống",
-                                                                                maxLength: {
-                                                                                    value: 12,
-                                                                                    message: "Mật khẩu có độ dài tối đa 12 kí tự"
-                                                                                },
-                                                                                minLength: {
-                                                                                    value: 6,
-                                                                                    message: "Mật khẩu có độ dài tối thiểu 6 kí tự"
-                                                                                },
                                                                                 pattern: {
-                                                                                    value: /[A-Za-z]/,
-                                                                                    message: "Mật khẩu phải có kí tự chữ"
-                                                                                },
+                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
+                                                                                    message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
+                                                                                }
                                                                             })
                                                                         }
                                                                     />
@@ -588,7 +584,8 @@ export default function renderForm(props, toast) {
                                                                         size="small"
                                                                         type="password"
                                                                         placeholder=""
-                                                                        helperText={errors.passwordConfirm?.message}
+                                                                        helperText={errors.passwordConfirm && errors.passwordConfirm.type === "validate" ?
+                                                                            "Xác nhận mật khẩu không hợp lệ" : errors.passwordConfirm ? errors.passwordConfirm.message : null}
                                                                         InputLabelProps={{
                                                                             shrink: true,
                                                                         }}
@@ -598,18 +595,11 @@ export default function renderForm(props, toast) {
                                                                         inputRef={
                                                                             register({
                                                                                 required: "Mật khẩu không thể để trống",
-                                                                                maxLength: {
-                                                                                    value: 12,
-                                                                                    message: "Mật khẩu có độ dài tối đa 12 kí tự"
-                                                                                },
-                                                                                minLength: {
-                                                                                    value: 6,
-                                                                                    message: "Mật khẩu có độ dài tối thiểu 6 kí tự"
-                                                                                },
                                                                                 pattern: {
-                                                                                    value: /[A-Za-z]/,
-                                                                                    message: "Mật khẩu phải có kí tự chữ"
+                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
+                                                                                    message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
                                                                                 },
+                                                                                validate: (value) => value === watch('password')
                                                                             })
                                                                         }
                                                                     />
