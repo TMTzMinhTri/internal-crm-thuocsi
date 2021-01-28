@@ -1,5 +1,5 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
-const URI = `/seller/sellercenter/v1`
+const URI = `/seller/profiler/v1`
 // const URI = ``
 
 class SellerClient extends APIClient {
