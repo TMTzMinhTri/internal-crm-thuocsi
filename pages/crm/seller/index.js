@@ -44,7 +44,7 @@ export async function loadSellerData(ctx) {
     let sellerClient = getSellerClient(ctx, data)
     let resp = await sellerClient.getSeller(offset, limit, q)
     if (resp.status !== 'OK') {
-        return {props: {data: [], count: 0, message: 'Không tìm thấy nhà bán hàng nào'}}
+        return { props: { data: [], count: 0, message: 'Không tìm thấy nhà bán hàng nào' } }
     }
     // Pass data to the page via props
     return { props: { data: resp.data, count: resp.total } }
@@ -97,7 +97,7 @@ function render(props) {
     return (
         <AppCRM select="/crm/seller">
             <Head>
-                <title>Danh sách người bán hàng</title>
+                <title>Danh sách nhà bán hàng</title>
             </Head>
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
@@ -119,13 +119,21 @@ function render(props) {
                                 onChange={handleChange}
                                 inputRef={register}
                                 placeholder="Tìm kiếm nhà bán hàng"
-                                inputProps={{'aria-label': 'Tìm kiếm nhà bán hàng'}}
+                                inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
                             />
                             <IconButton className={styles.iconButton} aria-label="search"
                                 onClick={handleSubmit(onSearch)}>
                                 <SearchIcon />
                             </IconButton>
                         </Paper>
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <Link href="/crm/seller/new">
+                            <ButtonGroup color="primary" aria-label="contained primary button group"
+                                className={styles.rightGroup}>
+                                <Button variant="contained" color="primary">Thêm nhà bán hàng</Button>
+                            </ButtonGroup>
+                        </Link>
                     </Grid>
                 </Grid>
             </div>
@@ -134,8 +142,8 @@ function render(props) {
                 <Table size="small" aria-label="a dense table">
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">Mã người bán hàng</TableCell>
-                            <TableCell align="left">Tên người bán hàng</TableCell>
+                            <TableCell align="left">Mã nhà bán hàng</TableCell>
+                            <TableCell align="left">Tên nhà bán hàng</TableCell>
                             <TableCell align="left">Email</TableCell>
                             <TableCell align="left">Số điện thoại</TableCell>
                             <TableCell align="left">Trạng thái</TableCell>
@@ -157,7 +165,7 @@ function render(props) {
                         )}
 
                     <MyTablePagination
-                        labelUnit="Người bán hàng"
+                        labelUnit="nhà bán hàng"
                         count={props.count}
                         rowsPerPage={limit}
                         page={page}

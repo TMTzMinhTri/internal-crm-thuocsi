@@ -64,7 +64,7 @@ export async function loadData(ctx) {
         let wardsResp = await masterDataClient.getWardByDistrictCodeFromNextJS(customer.districtCode)
 
         data.props.districts = districtsResp.status === 'OK' ? districtsResp.data : []
-        data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []      
+        data.props.wards = wardsResp.status === 'OK' ? wardsResp.data : []
     }
 
     // get list customer level
