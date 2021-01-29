@@ -37,12 +37,12 @@ import {
 import {useRouter} from "next/router";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
-import ApplyFields from "components/component/promotion/apply-fields";
 import dynamic from "next";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faAngleRight } from '@fortawesome/free-solid-svg-icons'
+import {faAngleRight, faPlus} from '@fortawesome/free-solid-svg-icons'
 import Link from "@material-ui/core/Link";
 import TitleLink from "../../../components/component/promotion/title";
+import {MyCard, MyCardActions, MyCardContent, MyCardHeader} from "@thuocsi/nextjs-components/my-card/my-card";
 
 const defaultState = {
     promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
@@ -351,12 +351,12 @@ function render(props) {
         let value = getValues();
         let listProductIDs = [];
         let listCategoryCodes = [];
-        if (promotionScope == defaultPromotionScope.PRODUCT) {
+        if (promotionScope === defaultPromotionScope.PRODUCT) {
             listProductPromotion.forEach((product) =>
                 listProductIDs.push(product.productID)
             );
         }
-        if (promotionScope == defaultPromotionScope.CATEGORY) {
+        if (promotionScope === defaultPromotionScope.CATEGORY) {
             listCategoryPromotion.forEach((category) =>
                 listCategoryCodes.push(category.code)
             );
@@ -398,85 +398,40 @@ function render(props) {
             <Head>
                 <title>Tạo khuyến mãi</title>
             </Head>
-            <Box component={Paper} style={{padding: "0 3rem", height: "100%"}}>
+            <MyCard component={Paper} style={{padding: "0 3rem", height: "100%"}}>
                 <FormGroup style={{width: "100%"}}>
-                    <Grid style={{marginTop: "1rem"}}>
-                        <TitleLink urls={urls}/>
-                    </Grid>
-                    <Box>
-                        <Grid container justify="center" alignItems="center">
-                            <Box style={{fontSize: 24}}>
-                                <h3>
-                                    {router.query?.type === defaultPromotionType.COMBO ? "Tạo combo linh hoạt" : "Tạo mã khuyến mãi"}
-                                </h3>
-                            </Box>
-                        </Grid>
+                    <MyCardHeader title="TẠO CHƯƠNG TRÌNH KHUYẾN MÃI">
+                    </MyCardHeader>
+                    <MyCardContent>
                         <InfomationFields
                             errors={errors}
                             promotionType={router.query?.type}
                             handleChange={handleChange}
                             register={register}
                         />
-
-                        <Divider/>
-
                         <ConditionFields
-                            state={state}
                             errors={errors}
-                            handleAddCodePercent={handleAddCodePercent}
-                            handleChangeStatus={handleChangeStatus}
-                            handleRemoveCodePercent={handleRemoveCodePercent}
+                            promotionType={router.query?.type}
                             handleChange={handleChange}
                             register={register}
-                            getValues={getValues}
-                            setError={setError}
                         />
-
-                        <Divider/>
-
-                        <ApplyFields
-                            open={open}
-                            state={state}
-                            register={register}
-                            handleChange={handleChange}
-                            handleChangeScope={handleChangeScope}
-                            handleOpenListProduct={() =>
-                                setOpen({...open, openModalProductScopePromotion: true})
-                            }
-                            handleCloseListProduct={() =>
-                                setOpen({...open, openModalProductScopePromotion: false})
-                            }
-                            handleOpenListCategory={() =>
-                                setOpen({...open, openModalCategoryScopePromotion: true})
-                            }
-                            handleCloseListCategory={() =>
-                                setOpen({...open, openModalCategoryScopePromotion: false})
-                            }
-                            handleAddProductPromotion={handleAddProductPromotion}
-                            handleRemoveProductPromotion={handleRemoveProductPromotion}
-                            handleAddCategoryPromotion={handleAddCategoryPromotion}
-                            handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
-                        />
-
-                        <Divider/>
-
-                        <ButtonGroup fullWidth style={{marginTop: "1rem"}}>
-                            <Box style={{marginLeft: "auto"}}>
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    onClick={handleSubmit(onSubmit)}
-                                    style={{margin: 8}}>
-                                    Lưu
-                                </Button>
-                                <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>
-                                    Làm mới
-                                </Button>
-                            </Box>
+                    </MyCardContent>
+                    <MyCardActions>
+                        <ButtonGroup>
+                            <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={handleSubmit(onSubmit)}
+                                style={{margin: 8}}>
+                                Lưu
+                            </Button>
+                            <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>
+                                Làm mới
+                            </Button>
                         </ButtonGroup>
-                    </Box>
+                    </MyCardActions>
                 </FormGroup>
-            </Box>
+            </MyCard>
         </AppCRM>
     );
 }

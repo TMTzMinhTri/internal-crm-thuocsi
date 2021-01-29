@@ -143,3 +143,7 @@
 .hoverSpan :hover{
     font-weight: bold;
 }
+
+.marginLine {
+    margin-top: 2rem;
+}

@@ -31,7 +31,6 @@ const InfomationFields = (props) => {
 
     return (
         <>
-            <CardHeader subheader="Thông tin khuyến mãi"/>
             <CardContent>
                 <Grid spacing={2} container>
                     <Grid item xs={12} sm={6} md={6}>
@@ -40,7 +39,6 @@ const InfomationFields = (props) => {
                             name="promotionName"
                             label="Tên khuyến mãi"
                             placeholder=""
-                            variant="outlined"
                             defaultValue={dataRender.promotionName}
                             helperText={errors.promotionName?.message}
                             InputLabelProps={{
@@ -66,34 +64,26 @@ const InfomationFields = (props) => {
                             })}
                         />
                     </Grid>
-                    {
-                        (edit && dataRender.promotionType === defaultPromotionType.VOUCHER_CODE)
-                        || (promotionType === defaultPromotionType.VOUCHER_CODE) ? (
-                        <Grid item xs={12} sm={6} md={6}>
-                            <TextField
-                                id="promotionCode"
-                                name="promotionCode"
-                                label="Mã khuyến mãi"
-                                placeholder=""
-                                variant="outlined"
-                                defaultValue={dataRender.promotionCode}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{width: "100%"}}
-                                inputRef={register}
-                            />
-                        </Grid>
-                        ) :(
-                            <Grid item xs={12} sm={6} md={6}/>
-                        )}
-                    <Grid item xs={12} sm={3} md={3}>
+                    <Grid item xs={12} sm={6} md={6}>
+                        <TextField
+                            id="promotionCode"
+                            name="promotionCode"
+                            label="Hình thức áp dụng"
+                            placeholder=""
+                            defaultValue={dataRender.promotionCode}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            style={{width: "100%"}}
+                            inputRef={register}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={6}>
                         <TextField
                             id="totalCode"
                             name="totalCode"
-                            label="Số lượng khuyến mãi"
+                            label="Bên tổ chức"
                             type="number"
-                            variant="outlined"
                             defaultValue={dataRender.totalCode}
                             helperText={errors.totalCode?.message}
                             InputLabelProps={{
@@ -113,71 +103,10 @@ const InfomationFields = (props) => {
                     </Grid>
                     <Grid item xs={12} sm={3} md={3}>
                         <TextField
-                            id="totalApply"
-                            name="totalApply"
-                            label="Số lượt sử dụng cho mỗi khách"
-                            type="number"
-                            variant="outlined"
-                            defaultValue={dataRender.applyPerUser}
-                            helperText={errors.totalApply?.message}
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            style={{width: "100%"}}
-                            error={!!errors.totalApply}
-                            required
-                            inputRef={register({
-                                required: "Số lượt sử dụng cho mỗi khách tối thiểu là 1",
-                                pattern: {
-                                    value: /[0-9]/,
-                                    message: "Chỉ chấp nhận kí tự là số",
-                                },
-                            })}
-                        />
-                    </Grid>
-                    {edit && (
-                        <>
-                            <Grid item xs={12} sm={3} md={3}>
-                                <TextField
-                                    id="totalUsed"
-                                    name="totalUsed"
-                                    label="Số lượng đơn hàng đã áp dụng"
-                                    placeholder=""
-                                    disabled={true}
-                                    variant="outlined"
-                                    defaultValue={dataRender.totalUsed || 0}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    style={{width: "100%"}}
-                                    inputRef={register}
-                                />
-                            </Grid>
-                            <Grid item xs={12} sm={3} md={3}>
-                                <TextField
-                                    id="totalCollect"
-                                    name="totalCollect"
-                                    label="Số lượng mã được thu thập"
-                                    placeholder=""
-                                    disabled={true}
-                                    variant="outlined"
-                                    defaultValue={dataRender.totalCollect || 0}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    style={{width: "100%"}}
-                                    inputRef={register}
-                                />
-                            </Grid>
-                        </>
-                    )}
-                    <Grid item xs={12} sm={3} md={3}>
-                        <TextField
                             id="startTime"
                             name="startTime"
                             label="Thời gian bắt đầu"
                             placeholder=""
-                            variant="outlined"
                             defaultValue={startTime}
                             helperText={errors.startTime?.message}
                             type="datetime-local"
@@ -197,7 +126,6 @@ const InfomationFields = (props) => {
                             id="endTime = new Date()"
                             name="endTime"
                             label="Thời gian kết thúc"
-                            variant="outlined"
                             placeholder=""
                             type="datetime-local"
                             defaultValue={endTime}
