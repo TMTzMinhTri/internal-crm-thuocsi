@@ -5,12 +5,13 @@ import React from "react";
 const AutoCompleteField = (props) => {
   const { label, options, defaultValue, placeholder } = props;
 
-  const { hanleChange } = props;
+  const { handleChange } = props;
   return (
     <Autocomplete
+      fullWidth
       multiple
       options={options}
-      onChange={hanleChange}
+      onChange={handleChange}
       getOptionLabel={(option) => option.title}
       defaultValue={defaultValue}
       filterSelectedOptions

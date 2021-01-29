@@ -427,7 +427,7 @@ export function displayPromotionType(type) {
 export function displayLabelBasedOnScope(type) {
   switch (type) {
     case "CUSTOMER":
-      return "khách hàng";
+      return "cấp bậc khách hàng";
     case "PRODUCT_CATEGORY":
       return "danh mục sản phẩm";
     case "PRODUCT":

@@ -6,7 +6,7 @@ const SelectField = (props) => {
   const {
     title = "Theo loại chương trình",
     value = "",
-    data = [
+    options = [
       {
         value: "",
         label: "None",
@@ -16,14 +16,21 @@ const SelectField = (props) => {
         label: "Ten",
       },
     ],
+    option,
   } = props;
+
+  console.log(value, "value");
 
   const { handleChange } = props;
   return (
-    <FormControl required style={{ minWidth: 200, margin: 10 }}>
+    <FormControl fullWidth required>
       <InputLabel shrink>{title}</InputLabel>
-      <NativeSelect value={value} onChange={handleChange} defaultValue="">
-        {data.map((o) => (
+      <NativeSelect
+        placeholder="12312"
+        value={value}
+        onChange={handleChange(option)}
+      >
+        {options.map((o) => (
           <option value={o.value}>{o.label}</option>
         ))}
       </NativeSelect>

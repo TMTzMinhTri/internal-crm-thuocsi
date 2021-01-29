@@ -36,7 +36,6 @@ import {getCategoryClient} from "../../../client/category";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
-import ApplyFields from "components/component/promotion/apply-fields";
 import Link from "@material-ui/core/Link";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faAngleRight} from "@fortawesome/free-solid-svg-icons";
@@ -414,34 +413,6 @@ function render(props) {
                                 setError={setError}
                                 edit
                             />
-
-                            <Divider/>
-
-                            <ApplyFields
-                                open={open}
-                                state={state}
-                                register={register}
-                                handleChange={handleChange}
-                                handleChangeScope={handleChangeScope}
-                                handleOpenListProduct={() =>
-                                    setOpen({...open, openModalProductScopePromotion: true})
-                                }
-                                handleCloseListProduct={() =>
-                                    setOpen({...open, openModalProductScopePromotion: false})
-                                }
-                                handleOpenListCategory={() =>
-                                    setOpen({...open, openModalCategoryScopePromotion: true})
-                                }
-                                handleCloseListCategory={() =>
-                                    setOpen({...open, openModalCategoryScopePromotion: false})
-                                }
-                                handleAddProductPromotion={handleAddProductPromotion}
-                                handleRemoveProductPromotion={handleRemoveProductPromotion}
-                                handleAddCategoryPromotion={handleAddCategoryPromotion}
-                                handleRemoveCategoryPromotion={handleRemoveCategoryPromotion}
-                            />
-
-                            <Divider/>
 
                             <ButtonGroup fullWidth style={{marginTop: "1rem"}}>
                                 <Box  style={{marginLeft: "auto"}}>
