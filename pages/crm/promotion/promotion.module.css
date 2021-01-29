@@ -138,3 +138,13 @@
 .hoverIcon :hover{
     font-weight: bold;
 }
+
+.textBold {
+    font-weight: bold;
+}
+
+.textItalic {
+    font-style: italic;
+    margin-top: 1rem;
+    font-weight:  300;
+}

@@ -398,7 +398,7 @@ function render(props) {
             <Head>
                 <title>Tạo khuyến mãi</title>
             </Head>
-            <MyCard component={Paper} style={{padding: "0 3rem", height: "100%"}}>
+            <MyCard>
                 <FormGroup style={{width: "100%"}}>
                     <MyCardHeader title="TẠO CHƯƠNG TRÌNH KHUYẾN MÃI">
                     </MyCardHeader>

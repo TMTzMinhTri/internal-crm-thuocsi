@@ -42,6 +42,7 @@ const MuiSingleAuto = ({
     onNotSearchFieldChange,
     control,  // REACT HOOK FORM CONTROL
     disabled,
+    variant,
     errors }) => { // REACT HOOK FORM ERRORS 
 
     // TODO
@@ -93,7 +94,7 @@ const MuiSingleAuto = ({
                                 }
                                 error={hasError}
                                 placeholder={placeholder}
-                                variant="outlined"
+                                variant={"outlined"}
                                 style={{ width: "100%", minWidth: "250px" }}
                                 size="small"
                                 onBlur={() => {
@@ -116,9 +117,9 @@ const MuiSingleAuto = ({
                 onChange={([, { id }]) => id}
                 rules={{
                     validate: (d) => {
-                        if (required && required == true) {
+                        if (required && required === true) {
                             console.log("debug with d: ", d)
-                            if (typeof d === "undefined" || d === null || d?.length == 0) {
+                            if (typeof d === "undefined" || d === null || d?.length === 0) {
                                 return "Vui lòng nhập"
                             }
                         }
