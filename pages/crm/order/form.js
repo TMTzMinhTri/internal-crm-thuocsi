@@ -8,11 +8,9 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
-    TableFooter
+    TableFooter,
 } from "@material-ui/core";
-import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
@@ -23,23 +21,18 @@ import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import EditIcon from "@material-ui/icons/Edit";
+import DeleteIcon from "@material-ui/icons/Delete";
 import Typography from "@material-ui/core/Typography";
-import Autocomplete from '@material-ui/lab/Autocomplete';
 import { getMasterDataClient } from "client/master-data";
-import Head from "next/head";
 import Link from "next/link";
 import IconButton from "@material-ui/core/IconButton";
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./order.module.css";
-import { condUserType, statuses, scopes } from "components/global"
 import { NotFound } from "components/components-global";
 import { getOrderClient } from "client/order";
-import MuiSingleAuto from "components/muiauto/single.js"
-import zIndex from "@material-ui/core/styles/zIndex";
 import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 
@@ -135,11 +128,12 @@ export default function renderForm(props, toast) {
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.order : {}
 
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const [idxChangedItem, setIdxChangedItem] = useState()
     const [orderItem, setOrderItem] = useState(props.orderItem)
     const [maxQuantity, setMaxQuantity] = useState()
     const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
+    const [deletedOrderItem, setDeletedOrderItem] = useState(null);
     const router = useRouter();
 
     const { register, handleSubmit, errors, control, getValues } = useForm({
@@ -168,14 +162,30 @@ export default function renderForm(props, toast) {
         let orderClient = getOrderClient()
         let resp = await orderClient.updateOrderItem({
             totalPrice: parseInt(orderItem[i].price * orderItem[i].quantity), orderNo: orderItem[i].orderNo, orderItemNo: orderItem[i].orderItemNo
-            , quantity: parseInt(orderItem[i].quantity)
+            , quantity: parseInt(orderItem[i].quantity), sellerCode: orderItem[i].sellerCode,
         })
-
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
             success(titlePage + ' thành công')
             window.location.reload()
+        }
+    }
+
+    async function removeOrderItem(data) {
+        try {
+            const orderClient = getOrderClient();
+            const res = await orderClient.removeOrderItem(data.orderItemNo);
+            if (res.status === 'OK') {
+                toast.success("Xóa mặt hàng thành công");
+                props.order.totalPrice = props.order.totalPrice - data.totalPrice;
+                setOrderItem(orderItem.filter(v => v.id !== data.id));
+                setDeletedOrderItem(null);
+            } else {
+                toast.error(res.message);
+            }
+        } catch (err) {
+            toast.error(err.message);
         }
     }
 
@@ -186,10 +196,28 @@ export default function renderForm(props, toast) {
                 <TableCell align="left">{data.productSku}</TableCell>
                 <TableCell align="left">{data.sellerName}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
-                <TableCell align="right">{formatNumber(data.quantity)}
-                    <IconButton onClick={() => { setIdxChangedItem(index); setOpenChangeQuantityDialog(true); setMaxQuantity(orderItem[index].maxQuantity) }}>
-                        <EditIcon fontSize="small" />
-                    </IconButton>
+                <TableCell align="right">
+                    {formatNumber(data.quantity)}
+                    <Box marginLeft={1} clone>
+                        <IconButton
+                            size="small"
+                            onClick={() => {
+                                setIdxChangedItem(index);
+                                setOpenChangeQuantityDialog(true);
+                                setMaxQuantity(orderItem[index].maxQuantity)
+                            }}
+                        >
+                            <EditIcon fontSize="small" />
+                        </IconButton>
+                    </Box>
+                    <Box marginLeft={1} clone>
+                        <IconButton
+                            size="small"
+                            onClick={() => setDeletedOrderItem(data)}
+                        >
+                            <DeleteIcon fontSize="small" />
+                        </IconButton>
+                    </Box>
                 </TableCell>
                 <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
             </TableRow>
@@ -267,6 +295,35 @@ export default function renderForm(props, toast) {
         </div>
     );
 
+    const ConfirmDeleteOrderItemDialog = () => {
+        const handleClose = () => setDeletedOrderItem(null);
+        return (
+            <Dialog open={!!deletedOrderItem} onClose={handleClose}>
+                <DialogTitle>Xác nhận</DialogTitle>
+                <DialogContent dividers>
+                    Bạn có chắc muốn xóa mặt hàng?
+            </DialogContent>
+                <DialogActions>
+                    <Button
+                        color="default"
+                        onClick={handleClose}
+                    >
+                        Hủy bỏ
+                </Button>
+                    <Button
+                        color="secondary"
+                        autoFocus
+                        onClick={() => {
+                            removeOrderItem(deletedOrderItem);
+                            handleClose();
+                        }}
+                    >
+                        Xóa
+                </Button>
+                </DialogActions>
+            </Dialog>)
+    }
+
     return (
         <AppCRM select="/crm/order">
             {
@@ -274,6 +331,7 @@ export default function renderForm(props, toast) {
                     <FormGroup>
                         <form>
                             <ChangeQuantityDialog />
+                            <ConfirmDeleteOrderItemDialog />
                             <Box className={styles.contentPadding}>
                                 <Card variant="outlined">
                                     <CardContent>
@@ -396,16 +454,11 @@ export default function renderForm(props, toast) {
                                                         shrink: true,
                                                     }}
                                                     placeholder=""
-
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
                                                     style={{ width: '100%' }}
                                                     inputRef={
                                                         register()
                                                     }
                                                     required
-                                                    style={{ width: '100%' }}
                                                 />
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>

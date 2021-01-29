@@ -1,16 +1,20 @@
-import React, { useState } from "react";
 import { IconButton, TableCell, TextField } from "@material-ui/core";
 import { Done } from "@material-ui/icons";
+import React, { useEffect, useState } from "react";
 
-export function TableFeeValueCell({ code, initialFee, onUpdate }) {
+export const TableFeeValueCell = ({ code, initialFee, onUpdate }) => {
     const [fee, setFee] = useState(initialFee);
     const [focused, setFocused] = useState(false);
+    useEffect(() => {
+        setFee(initialFee);
+    }, [initialFee]);
     return (
         <TableCell>
             <TextField
-                variant="outlined"
                 size="small"
                 type="number"
+                placeholder="..."
+                variant="outlined"
                 fullWidth
                 InputProps={{
                     endAdornment: (
@@ -27,11 +31,11 @@ export function TableFeeValueCell({ code, initialFee, onUpdate }) {
                                 <Done />
                             </IconButton>
                         )
-                    )
+                    ), 
                 }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                onChange={e => setFee(e.target.value)}
+                onChange={e => setFee(+e.target.value)}
                 value={fee}
             />
         </TableCell>

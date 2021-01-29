@@ -1,5 +1,12 @@
-import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@material-ui/core"
+import React, { useEffect, useState } from "react";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+} from "@material-ui/core";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { useRouter } from "next/router";
@@ -7,6 +14,8 @@ import { useRouter } from "next/router";
 import { ViewType } from ".";
 import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
+import { unknownErrorText } from "components/commonErrors";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 /**
  * @param {object} props
@@ -20,31 +29,31 @@ import { getFeeClient } from "client/fee";
  * @param {number} props.limit
  * @param {number} props.total
  */
-export default function RegionTable({
-    data = [],
-    total = 0,
-    page = 0,
-    limit = 10,
-    q = '',
-    message = '',
-}) {
+export const RegionTable = (props) => {
     const router = useRouter();
     const toast = useToast();
-    const [tableData, setTableData] = useState(data);
+    const [tableData, setTableData] = useState(props.data);
+    const [openModal, setOpenModal] = useState(false);
+    const [currentEditValue, setCurrentEditValue] = useState(null);
 
-    const updateFee = async ({ code, fee }) => {
+    useEffect(() => {
+        setTableData(props.data);
+    }, [props.data]);
+
+    const updateFee = async () => {
         try {
+            const { code, fee } = currentEditValue;
             const feeClient = getFeeClient();
             const res = await feeClient.updateRegionFee(code, fee);
-            if (res.status === 'OK') {
-                toast.success('Cập nhật giá trị tính phí thành công.');
+            if (res.status === "OK") {
+                toast.success("Cập nhật giá trị tính phí thành công.");
                 const data = [...tableData];
                 data.find((v, i) => {
                     const found = v.code === code;
                     if (found) {
                         data[i].feeValue = fee;
                     }
-                })
+                });
                 setTableData(data);
             } else {
                 toast.error(res.message ?? unknownErrorText);
@@ -52,7 +61,7 @@ export default function RegionTable({
         } catch (err) {
             toast.error(err.message ?? unknownErrorText);
         }
-    }
+    };
 
     return (
         <TableContainer>
@@ -72,31 +81,46 @@ export default function RegionTable({
                     <TableCell>Giá trị tính phí</TableCell>
                 </TableHead>
                 <TableBody>
-                    {!tableData.length && (
+                    {!tableData?.length && (
                         <TableRow>
-                            <TableCell colSpan={3} align="left">{message}</TableCell>
+                            <TableCell colSpan={3} align="left">
+                                {props.message}
+                            </TableCell>
                         </TableRow>
                     )}
-                    {tableData.map(row => (
-                        <TableRow>
+                    {tableData?.map((row, i) => (
+                        <TableRow key={`tr_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
                             <TableCell>{row.level}</TableCell>
-                            <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={updateFee} />
+                            <TableFeeValueCell
+                                code={row.code}
+                                initialFee={row.feeValue}
+                                onUpdate={(values) => {
+                                    setCurrentEditValue(values);
+                                    setOpenModal(true);
+                                }}
+                            />
                         </TableRow>
                     ))}
                 </TableBody>
                 <MyTablePagination
                     labelUnit="vùng"
-                    count={total}
-                    rowsPerPage={limit}
-                    page={page}
+                    count={props.total}
+                    rowsPerPage={props.limit}
+                    page={props.page}
                     onChangePage={(_, page, rowsPerPage) => {
-                        router.push(`/crm/pricing?v=${ViewType.REGION}&page=${page}&limit=${rowsPerPage}&q=${q}`)
+                        router.push(
+                            `/crm/pricing?v=${ViewType.REGION}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
+                        );
                     }}
                 />
             </Table>
-
+            <ConfirmDialog
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                onConfirm={() => updateFee()}
+            />
         </TableContainer>
-    )
-}
+    );
+};

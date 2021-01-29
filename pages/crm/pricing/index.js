@@ -1,24 +1,25 @@
-import React, { useState } from 'react';
-import { Box, Grid, IconButton, makeStyles, MenuItem, Paper, Select, TextField } from "@material-ui/core";
+import React, { useEffect, useState } from 'react';
+import { Box, Grid, IconButton, Paper, Tab, Tabs, TextField } from "@material-ui/core";
 import { Search } from "@material-ui/icons";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import Head from "next/head";
 
 import { ViewType } from "containers/crm/pricing";
-import ProvinceTable from "containers/crm/pricing/ProvinceTable";
-import RegionTable from 'containers/crm/pricing/RegionTable';
 import AppCRM from "pages/_layout";
-import DistrictTable from 'containers/crm/pricing/DistrictTable';
-import WardTable from 'containers/crm/pricing/WardTable';
-import CustomerLevelTable from 'containers/crm/pricing/CustomerLevelTable';
 import { useRouter } from 'next/router';
 import { getFeeClient } from 'client/fee';
 import { unknownErrorText } from 'components/commonErrors';
+import { formatUrlSearch } from 'components/global';
+import { RegionTable } from 'containers/crm/pricing/RegionTable';
+import { ProvinceTable } from 'containers/crm/pricing/ProvinceTable';
+import { DistrictTable } from 'containers/crm/pricing/DistrictTable';
+import { CustomerLevelTable } from 'containers/crm/pricing/CustomerLevelTable';
+import { WardTable } from 'containers/crm/pricing/WardTable';
 
-export async function loadPricingData(ctx, type, offset, limit) {
+export async function loadPricingData(ctx, type, offset, limit, q) {
     const feeClient = getFeeClient(ctx);
     if (type === ViewType.REGION) {
-        const res = await feeClient.getRegionFeeList(offset, limit);
+        const res = await feeClient.getRegionFeeList(offset, limit, q);
         if (res.status === 'OK') {
             return {
                 total: res.total ?? null,
@@ -33,7 +34,7 @@ export async function loadPricingData(ctx, type, offset, limit) {
         return { message: res.message, }
     }
     if (type === ViewType.PROVINCE) {
-        const res = await feeClient.getProvinceFeeList(offset, limit);
+        const res = await feeClient.getProvinceFeeList(offset, limit, q);
         if (res.status === 'OK') {
             return {
                 total: res.total ?? null,
@@ -49,7 +50,7 @@ export async function loadPricingData(ctx, type, offset, limit) {
 
     }
     if (type === ViewType.DISTRICT) {
-        const res = await feeClient.getDistrictFeeList(offset, limit);
+        const res = await feeClient.getDistrictFeeList(offset, limit, q);
         if (res.status === 'OK') {
             return {
                 total: res.total ?? null,
@@ -64,7 +65,7 @@ export async function loadPricingData(ctx, type, offset, limit) {
         return { message: res.message, }
     }
     if (type === ViewType.WARD) {
-        const res = await feeClient.getWardFeeList(offset, limit);
+        const res = await feeClient.getWardFeeList(offset, limit, q);
         if (res.status === 'OK') {
             return {
                 total: res.total ?? null,
@@ -100,11 +101,12 @@ export async function getServerSideProps(ctx) {
         const {
             v = ViewType.CUSTOMER,
             q = '',
-            page = 0,
-            limit = 20,
         } = query;
+        const page = parseInt(query.page ?? 0, 10);
+        const limit = parseInt(query.limit ?? 20, 10);
+
         try {
-            const data = await loadPricingData(ctx, v, page * limit, limit);
+            const data = await loadPricingData(ctx, v, page * limit, limit, q);
             return {
                 props: {
                     viewType: v,
@@ -145,41 +147,61 @@ function render(props) {
     const [viewType, setViewType] = useState(props.viewType);
     const [searchText, setSearchText] = useState(props.q);
 
+    useEffect(() => {
+        setViewType(props.viewType);
+    }, [props.viewType]);
+
+    useEffect(() => {
+        setSearchText(props.q);
+    }, [props.q]);
+
+    const handleEnterPress = (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        router.push(`/crm/pricing?v=${viewType}&q=${formatUrlSearch(searchText)}`)
+    }
+
     return (
         <AppCRM select="/crm/pricing">
             <Head>
                 <title>Danh sách cấu hình giá</title>
             </Head>
-            <Box component={Paper} padding={2}>
+            <Box
+                component={Paper}
+                style={{ padding: "16px" }}
+                display="block"
+            >
                 <Grid container spacing={3}>
                     <Grid item container xs={12} spacing={3}>
-                        <Grid item md={3}>
-                            <TextField
-                                label="Tìm kiếm theo"
-                                variant="outlined"
-                                size="small"
-                                fullWidth
-                                select
-                                value={viewType}
-                                onChange={(e) => {
-                                    setViewType(e.target.value);
-                                    router.push(`/crm/pricing?v=${e.target.value}&q=${searchText}`);
+                        <Grid item xs={12}>
+                            <Tabs
+                                indicatorColor="primary"
+                                textColor="primary"
+                                variant="fullWidth"
+                                onChange={(_, value) => {
+                                    setViewType(value);
+                                    router.push(`/crm/pricing?v=${value}&q=${searchText}`);
                                 }}
+                                value={viewType}
                             >
-                                <MenuItem value={ViewType.REGION}>Theo vùng</MenuItem>
-                                <MenuItem value={ViewType.PROVINCE}>Theo tỉnh thành</MenuItem>
-                                <MenuItem value={ViewType.DISTRICT}>Theo quận huyện</MenuItem>
-                                <MenuItem value={ViewType.WARD}>Theo phường/xã</MenuItem>
-                                <MenuItem value={ViewType.CUSTOMER}>Theo khách hàng</MenuItem>
-                            </TextField>
+                                <Tab value={ViewType.CUSTOMER} label="Theo khách hàng" />
+                                <Tab value={ViewType.REGION} label="Theo vùng" />
+                                <Tab value={ViewType.PROVINCE} label="Theo tỉnh thành" />
+                                <Tab value={ViewType.DISTRICT} label="Theo quận huyện" />
+                                <Tab value={ViewType.WARD} label="Theo phường/xã" />
+                            </Tabs>
                         </Grid>
                         {viewType != ViewType.CUSTOMER && (
                             <Grid item md={4}>
                                 <TextField
                                     label="Tìm kiếm"
+                                    placeholder="Nhập tên tỉnh thành, quận huyện,..."
                                     variant="outlined"
                                     size="small"
                                     fullWidth
+                                    InputLabelProps={{
+                                        shrink: true
+                                    }}
                                     InputProps={{
                                         endAdornment: (
                                             < IconButton
@@ -188,16 +210,18 @@ function render(props) {
                                             >
                                                 <Search />
                                             </IconButton>
-                                        )
+                                        ),
                                     }}
                                     onChange={e => setSearchText(e.target.value)}
+                                    onKeyPress={handleEnterPress}
                                     value={searchText}
+
                                 />
                             </Grid>
                         )}
                     </Grid>
                     <Grid item container xs={12} >
-                        {props.viewType === ViewType.REGION && (
+                        {viewType === ViewType.REGION && (
                             <RegionTable
                                 data={props.regionData?.data}
                                 q={searchText}
@@ -207,7 +231,7 @@ function render(props) {
                                 total={props.regionData?.total}
                             />
                         )}
-                        {props.viewType === ViewType.PROVINCE && (
+                        {viewType === ViewType.PROVINCE && (
                             <ProvinceTable
                                 data={props.provinceData?.data}
                                 q={searchText}
@@ -217,7 +241,7 @@ function render(props) {
                                 total={props.provinceData?.total}
                             />
                         )}
-                        {props.viewType === ViewType.DISTRICT && (
+                        {viewType === ViewType.DISTRICT && (
                             <DistrictTable
                                 data={props.districtData?.data}
                                 q={searchText}
@@ -227,7 +251,7 @@ function render(props) {
                                 total={props.districtData?.total}
                             />
                         )}
-                        {props.viewType === ViewType.WARD && (
+                        {viewType === ViewType.WARD && (
                             <WardTable
                                 data={props.wardData?.data}
                                 q={searchText}
@@ -237,7 +261,7 @@ function render(props) {
                                 total={props.wardData?.total}
                             />
                         )}
-                        {props.viewType === ViewType.CUSTOMER && (
+                        {viewType === ViewType.CUSTOMER && (
                             <CustomerLevelTable
                                 data={props.customerData?.data}
                                 q={searchText}

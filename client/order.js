@@ -63,6 +63,16 @@ class OrderClient extends APIClient {
         )
     }
 
+    removeOrderItem(orderItemNo) {
+        return this.callFromClient(
+            'PUT',
+            `${URI}/order-item/remove`,
+            {
+                orderItemNo
+            }
+        )
+    }
+
     // updateStatus(data) {
     //     return this.callFromClient(
     //         "PUT",

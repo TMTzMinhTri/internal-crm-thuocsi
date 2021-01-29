@@ -1,4 +1,4 @@
-import { Backdrop, CircularProgress, createMuiTheme, ServerStyleSheets, ThemeProvider } from '@material-ui/core';
+import { Backdrop, CircularProgress, createMuiTheme, ThemeProvider } from '@material-ui/core';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
 import Loader from '@thuocsi/nextjs-components/loader/loader';
 import { ToastProvider } from "@thuocsi/nextjs-components/toast/providers/ToastProvider";
@@ -22,10 +22,6 @@ export default function App(props) {
     const [showBackdrop, setShowBackdrop] = React.useState(false)
 
     useEffect(() => {
-        const jssStyles = document.querySelector('#jss-server-side');
-        if (jssStyles && jssStyles.parentNode) {
-            jssStyles.parentNode.removeChild(jssStyles);
-        }
         let routeChangeStart = () => setShowBackdrop(true);
         let routeChangeComplete = () => setShowBackdrop(false);
     
@@ -44,11 +40,8 @@ export default function App(props) {
     )
     const {Component, pageProps} = props
 
-    // use ServerStyleSheets to remove affect of injected CSS
-    // ref: https://material-ui.com/guides/server-rendering/
-    const sheets = new ServerStyleSheets();
     if (pageProps.loggedIn) {
-        return sheets.collect(
+        return (
             <ThemeProvider theme={theme}>
                 <ToastProvider>
                     <Layout className={styles.blank} loggedInUserInfo={pageProps.loggedInUserInfo}>
@@ -62,7 +55,7 @@ export default function App(props) {
             </ThemeProvider>
         )
     } else {
-        return sheets.collect(<ThemeProvider theme={theme}>
+        return (<ThemeProvider theme={theme}>
             <Component {...pageProps} />
         </ThemeProvider>)
     }

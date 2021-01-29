@@ -8,14 +8,14 @@ import { Controller } from "react-hook-form";
 
 /**
  *  deboudce - OK
-	clear all - OK
-	load info - OK
-	search - OK
-	validate required/...
-	autofus - PENDINH
-	default vaue ? - OK
-	translate - OK 
-	reset error - PENDING
+    clear all - OK
+    load info - OK
+    search - OK
+    validate required/...
+    autofus - PENDINH
+    default vaue ? - OK
+    translate - OK 
+    reset error - PENDING
  * @param {*} param0 
  */
 
@@ -41,27 +41,28 @@ const MuiSingleAuto = ({
     onFieldChange, // HANDLE EVENT CHANGE
     onNotSearchFieldChange,
     control,  // REACT HOOK FORM CONTROL
-    errors})=>{ // REACT HOOK FORM ERRORS 
-        
+    disabled,
+    errors }) => { // REACT HOOK FORM ERRORS 
+
     // TODO
 
-    const hasError =  typeof errors[`${name}`] !== 'undefined';
+    const hasError = typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
     const [qOptions, setQOptions] = useState(options);
     const debouncedSearch = useDebounce(q?.trim(), 200);
 
-    if(typeof required === 'undefined') {
+    if (typeof required === 'undefined') {
         required = false
     }
     useEffect(() => {
-        if(debouncedSearch) {
+        if (debouncedSearch) {
             if (typeof onFieldChange !== 'undefined') {
                 onFieldChange(debouncedSearch).then((results) => {
                     setQOptions(results)
                 })
             }
         }
-    },[debouncedSearch,q]);
+    }, [debouncedSearch, q]);
 
     // useEffect(() => {
     //   setQOptions(options)
@@ -78,6 +79,7 @@ const MuiSingleAuto = ({
                         getOptionLabel={(option) => option.label?.toString()}
                         getOptionSelected={(option, val) => option.value === val.value}
                         noOptionsText="Không tìm thấy kết quả phù hợp"
+                        disabled={disabled}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -87,7 +89,7 @@ const MuiSingleAuto = ({
                                     shrink: true,
                                 }}
                                 helperText={
-                                    hasError?message:""
+                                    hasError ? message : ""
                                 }
                                 error={hasError}
                                 placeholder={placeholder}
@@ -102,7 +104,7 @@ const MuiSingleAuto = ({
                         )}
                         onChange={(e, data) => {
                             onChange(data);
-                            if(typeof(onNotSearchFieldChange) === 'function'){
+                            if (typeof (onNotSearchFieldChange) === 'function') {
                                 onNotSearchFieldChange(e, data)
                             }
                         }}
