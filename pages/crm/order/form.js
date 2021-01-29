@@ -108,7 +108,9 @@ export async function loadData(ctx) {
         for (let idx = 0; idx < orderItemResp.data?.length; idx++) {
             let sellerCode = orderItemResp.data[idx].productSku.split("").slice(0, orderItemResp.data[idx].productSku.split("").indexOf(".")).join("")
             let _sellerClient = getSellerClient(ctx, data)
+            console.log(sellerCode)
             let result = await _sellerClient.getSellerBySellerCode(sellerCode)
+            console.log(result)
             orderItemResp.data[idx] = { ...orderItemResp.data[idx], sellerName: result.status === "OK" ? result.data[0].name : "-" }
         }
 
@@ -159,12 +161,13 @@ export default function renderForm(props, toast) {
     }
 
     async function updateOrderItem(orderItem, i) {
+        console.log("aa")
         let orderClient = getOrderClient()
         let resp = await orderClient.updateOrderItem({
             totalPrice: parseInt(orderItem[i].price * orderItem[i].quantity), orderNo: orderItem[i].orderNo, orderItemNo: orderItem[i].orderItemNo
-            , quantity: parseInt(orderItem[i].quantity)
+            , quantity: parseInt(orderItem[i].quantity), sellerCode: orderItem[i].sellerCode,
         })
-
+        console.log(resp)
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
@@ -238,6 +241,7 @@ export default function renderForm(props, toast) {
         props.order.totalPrice = props.order.totalPrice - orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
         setOrderItem(tmpOrderItem)
         setOpenChangeQuantityDialog(false)
+        console.log("aa")
         await updateOrderItem(tmpOrderItem, idxChangedItem)
 
     }
@@ -299,30 +303,30 @@ export default function renderForm(props, toast) {
     const ConfirmDeleteOrderItemDialog = () => {
         const handleClose = () => setDeletedOrderItem(null);
         return (
-        <Dialog open={!!deletedOrderItem} onClose={handleClose}>
-            <DialogTitle>Xác nhận</DialogTitle>
-            <DialogContent dividers>
-                Bạn có chắc muốn xóa mặt hàng?
+            <Dialog open={!!deletedOrderItem} onClose={handleClose}>
+                <DialogTitle>Xác nhận</DialogTitle>
+                <DialogContent dividers>
+                    Bạn có chắc muốn xóa mặt hàng?
             </DialogContent>
-            <DialogActions>
-                <Button
-                    color="default"
-                    onClick={handleClose}
-                >
-                    Hủy bỏ
+                <DialogActions>
+                    <Button
+                        color="default"
+                        onClick={handleClose}
+                    >
+                        Hủy bỏ
                 </Button>
-                <Button
-                    color="secondary"
-                    autoFocus
-                    onClick={() => {
-                        removeOrderItem(deletedOrderItem);
-                        handleClose();
-                    }}
-                >
-                    Xóa
+                    <Button
+                        color="secondary"
+                        autoFocus
+                        onClick={() => {
+                            removeOrderItem(deletedOrderItem);
+                            handleClose();
+                        }}
+                    >
+                        Xóa
                 </Button>
-            </DialogActions>
-        </Dialog>)
+                </DialogActions>
+            </Dialog>)
     }
 
     return (
