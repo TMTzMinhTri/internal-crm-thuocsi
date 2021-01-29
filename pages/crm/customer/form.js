@@ -101,7 +101,7 @@ export default function renderForm(props, toast) {
     const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
     const [isDisabledWard, setDisabledWard] = useState(isWard);
     const router = useRouter();
-    const { register, handleSubmit, errors, control } = useForm({
+    const { register, handleSubmit, errors, control, watch } = useForm({
         defaultValues: editObject,
         mode: "onChange"
     });
@@ -646,11 +646,7 @@ export default function renderForm(props, toast) {
                                                                         required
                                                                         inputRef={
                                                                             register({
-                                                                                required: "Mật khẩu không thể để trống",
-                                                                                pattern: {
-                                                                                    value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
-                                                                                    message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
-                                                                                }
+                                                                                validate: (value) => value === watch('password') || "Mật khẩu không khớp, vui lòng nhập lại."
                                                                             })
                                                                         }
                                                                     />
@@ -658,7 +654,6 @@ export default function renderForm(props, toast) {
                                                             </Grid>
                                                         )
                                                 }
-
                                             </CardContent>
                                         </Card>
                                         <Divider />
@@ -670,8 +665,8 @@ export default function renderForm(props, toast) {
                                                 disabled={loading}
                                                 style={{ margin: 8 }}>
                                                 {loading && <CircularProgress size={20} />}
-                                    Lưu
-                                </Button>
+                                                Lưu
+                                            </Button>
                                             {
                                                 props.isUpdate ? (
                                                     <Link href={`/crm/customer`}>
@@ -686,20 +681,17 @@ export default function renderForm(props, toast) {
                                                             style={{ margin: 8 }}
                                                             disabled={loading}>
                                                             {loading && <CircularProgress size={20} />}
-                                            Làm mới
+                                                            Làm mới
                                                         </Button>
                                                     )
                                             }
-
                                         </Box>
-
                                     </Box>
                                 </form>
                             </FormGroup>
                         </Box>
                     )
             }
-
         </AppCRM>
     )
 }
