@@ -112,7 +112,11 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                         required: "Vui lòng nhập",
                                         min: {
                                             value: 1,
-                                            message: "Vui lòng nhập giá trị giá bán lớn hơn 1"
+                                            message: "Vui lòng nhập giá trị giá bán lớn hơn hoặc bằng 1"
+                                        },
+                                        max: {
+                                            value: 100000000,
+                                            message: "Vui lòng nhập giá trị giá bán nhỏ hơn hoặc bằng 100000000"
                                         },
                                         valueAsNumber: true, // important
 
@@ -177,12 +181,17 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                     required
                                     inputRef={
                                         register({
-                                            required: "Vui lòng nhập giá bán",
+                                            required: "Vui lòng nhập",
                                             min: {
                                                 value: 1,
-                                                message: "Vui lòng nhập giá trị giá bán lớn hơn 0"
+                                                message: "Vui lòng nhập giá trị giá bán lớn hơn hoặc bằng 1"
+                                            },
+                                            max: {
+                                                value: 100000000,
+                                                message: "Vui lòng nhập giá trị giá bán nhỏ hơn hoặc bằng 100000000"
                                             },
                                             valueAsNumber: true, // important
+    
                                         })
                                     }
                                 />
@@ -396,9 +405,9 @@ export default function renderForm(props, toast) {
         let result = await _client.updatePrice(formData)
         setLoading(false);
         if (result.status === "OK") {
-            success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định')
+            success(result.message ? 'Cập nhật thông tin thành công' : 'Có lỗi xảy ra')
         } else {
-            error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            error(result.message || 'Cập nhật thông tin không thành công')
         }
     }
 
@@ -633,7 +642,7 @@ export default function renderForm(props, toast) {
                                     {props.isUpdate ? <Button
                                         color="primary"
                                         disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length === 5)}
-                                        style={{ marginTop: '10px' }}
+                                        style={{ marginTop: '10px', display: defaultIds.length === 5 ? 'none' : '' }}
                                         onClick={() => {
                                             let mId = defaultIds.length - 1 <= 0 ? incrId + defaultIds.length : defaultIds.length + incrId + 1
                                             setDefaultIds([...defaultIds, mId + 1]);
