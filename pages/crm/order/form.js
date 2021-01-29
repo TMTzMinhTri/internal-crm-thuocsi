@@ -162,9 +162,8 @@ export default function renderForm(props, toast) {
         let orderClient = getOrderClient()
         let resp = await orderClient.updateOrderItem({
             totalPrice: parseInt(orderItem[i].price * orderItem[i].quantity), orderNo: orderItem[i].orderNo, orderItemNo: orderItem[i].orderItemNo
-            , quantity: parseInt(orderItem[i].quantity)
+            , quantity: parseInt(orderItem[i].quantity), sellerCode: orderItem[i].sellerCode,
         })
-
         if (resp.status !== 'OK') {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
@@ -299,30 +298,30 @@ export default function renderForm(props, toast) {
     const ConfirmDeleteOrderItemDialog = () => {
         const handleClose = () => setDeletedOrderItem(null);
         return (
-        <Dialog open={!!deletedOrderItem} onClose={handleClose}>
-            <DialogTitle>Xác nhận</DialogTitle>
-            <DialogContent dividers>
-                Bạn có chắc muốn xóa mặt hàng?
+            <Dialog open={!!deletedOrderItem} onClose={handleClose}>
+                <DialogTitle>Xác nhận</DialogTitle>
+                <DialogContent dividers>
+                    Bạn có chắc muốn xóa mặt hàng?
             </DialogContent>
-            <DialogActions>
-                <Button
-                    color="default"
-                    onClick={handleClose}
-                >
-                    Hủy bỏ
+                <DialogActions>
+                    <Button
+                        color="default"
+                        onClick={handleClose}
+                    >
+                        Hủy bỏ
                 </Button>
-                <Button
-                    color="secondary"
-                    autoFocus
-                    onClick={() => {
-                        removeOrderItem(deletedOrderItem);
-                        handleClose();
-                    }}
-                >
-                    Xóa
+                    <Button
+                        color="secondary"
+                        autoFocus
+                        onClick={() => {
+                            removeOrderItem(deletedOrderItem);
+                            handleClose();
+                        }}
+                    >
+                        Xóa
                 </Button>
-            </DialogActions>
-        </Dialog>)
+                </DialogActions>
+            </Dialog>)
     }
 
     return (
