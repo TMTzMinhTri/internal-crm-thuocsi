@@ -36,11 +36,14 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props,render)
 }
 
-export function render(props) {
+function render(props) {
     const classes = useStyles()
     const toast = useToast();
     const router = useRouter();
-    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm();
+
+    let {voucherCode} = props
+
+    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({defaultValues: voucherCode,mode: "onChange"});
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
 

@@ -43,6 +43,10 @@ export async function searchPromotion(promotionName){
     return getPromoClient().getPromotionFromClient(promotionName)
 }
 
+export async function createVoucherCode() {
+
+}
+
 function render(props) {
     const classes = useStyles()
     const toast = useToast();
@@ -50,9 +54,14 @@ function render(props) {
     const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm();
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
+    const [dataProps, setDataprops] = useState({
+        promotionCode: "",
+        type: "PUBLIC",
+    })
 
     const onSubmit = () => {
-
+        let value = getValues()
+        console.log('value',value)
     }
 
     const handleSetShowAutoComplete = (value) => {
@@ -61,6 +70,10 @@ function render(props) {
 
     const handleSetShowListAutoComplete = (value) => {
         setListPromotionSearch(value)
+    }
+
+    const handleChangePromotion = (e,promotion) => {
+        setDataprops({...dataProps,promotionCode: promotion.promotionCode})
     }
 
     return (
@@ -74,6 +87,9 @@ function render(props) {
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
+                        dataProps={dataProps}
+                        handleChangeType={(type) => setDataprops({...dataProps,type:type})}
+                        onChangePromotion={handleChangePromotion}
                         register={register}
                     />
                 </MyCardContent>

@@ -34,7 +34,7 @@ import {
     displayPromotionScope,
     displayPromotionType,
     displayRule,
-    displayStatus,
+    displayStatus, displayTime,
     formatTime,
     getPromotionScope, removeElement,
 } from "../../../components/component/until";
@@ -46,6 +46,9 @@ import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import { faAngleDoubleDown } from '@fortawesome/free-solid-svg-icons'
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import {faAngleUp,faAngleDown} from "@fortawesome/free-solid-svg-icons";
+import {MyCard, MyCardContent, MyCardHeader} from "@thuocsi/nextjs-components/my-card/my-card";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 
 
 export async function getServerSideProps(ctx) {
@@ -97,8 +100,10 @@ function render(props) {
     })
     let promotionName = router.query.promotionName || ''
 
-    const [page, setPage] = React.useState(parseInt(router.query.page || 0));
-    const [rowsPerPage, setRowsPerPage] = React.useState(parseInt(router.query.perPage) || 20);
+    const [page, setPage] = useState(parseInt(router.query.page || 0));
+    const [rowsPerPage, setRowsPerPage] = useState(parseInt(router.query.perPage) || 20);
+
+    const [typePromotion,setTypePromotion] = useState(defaultPromotionType.PROMOTION)
 
     const handleSelectTypePromotion = () => {
         setOpen({
@@ -211,198 +216,242 @@ function render(props) {
             <Head>
                 <title>Danh sách khuyến mãi</title>
             </Head>
-            <div className={styles.grid}>
-                <Grid container spacing={3} direction="row"
-                      justify="space-evenly"
-                      alignItems="center"
-                >
-                    <Grid item xs={12} sm={6} md={6}>
-                        <form>
-                            <Paper component="form" className={styles.search}>
-                                <InputBase
-                                    id="promotionName"
-                                    name="promotionName"
-                                    className={styles.input}
-                                    value={search}
-                                    onChange={handleChange}
-                                    inputRef={register}
-                                    placeholder="Tìm kiếm khuyến mãi"
-                                    inputProps={{'aria-label': 'Tìm kiếm khuyến mãi'}}
-                                />
-                                <IconButton className={styles.iconButton} aria-label="search"
-                                            onClick={handleSubmit(onSearch)}>
-                                    <SearchIcon/>
-                                </IconButton>
-                            </Paper>
-                        </form>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
-                        <ButtonGroup color="primary" aria-label="contained primary button group"
-                                     className={styles.rightGroup}
-                                     onClick={() => setOpen({...open, openModalCreate: true})}>
-                            <Button variant="contained" color="primary">Thêm khuyến mãi</Button>
-                        </ButtonGroup>
-                    </Grid>
-                </Grid>
-            </div>
-            {
-                promotionName === '' ? (
-                    <span/>
-                ) : (
-                    <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{promotionName}'</i></div>
-                )
-            }
-            <TableContainer component={Paper}>
-                <Table size="small" aria-label="a dense table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="left">Tên</TableCell>
-                            <TableCell align="left">Loại</TableCell>
-                            <TableCell align="left">Áp dụng cho</TableCell>
-                            <TableCell align="left">Chi tiết khuyến mãi</TableCell>
-                            <TableCell align="left">Trạng Thái</TableCell>
-                            <TableCell align="left">Đang chạy</TableCell>
-                            <TableCell align="left">Thời gian</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    {props.data?.length > 0 ? (
-                        <TableBody>
-                            {props.data.map((row, index) => (
-                                <TableRow key={index}>
-                                    <TableCell align="left">
-                                        <div style={{fontWeight: "bold"}}>{row.promotionName}</div>
-                                    </TableCell>
-                                    <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
-                                    <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
-                                    <TableCell align="left">
-                                        {
-                                            displayRule(row.rule).length > 0 && (
-                                                <Grid container spacing={1} direction="row">
-                                                    <Grid item xs={12} sm={11} md={11} direction="column">
-                                                        {
-                                                            displayRule(row.rule).map((rule, index) => (
-                                                                index < 2 ? (
-                                                                   <Grid  item xs={12} sm={11} md={11} direction="column">
-                                                                        {
-                                                                            index % 2 === 0 ? (
-                                                                                <div>{rule}</div>
-                                                                            ) : (
-                                                                                <div style={{fontStyle: "italic"}}>{rule}</div>
-                                                                            )
-                                                                        }
-                                                                    </Grid>
-                                                                ): (
-                                                                    <Grid name={"hideItem" + row.promotionId} style={{display: "none"}} item xs={12} sm={11} md={11} direction="column">
-                                                                        {
-                                                                            index % 2 === 0 ? (
-                                                                                <div>{rule}</div>
-                                                                            ) : (
-                                                                                <div  style={{fontStyle: "italic"}}>{rule}</div>
-                                                                            )
-                                                                        }
-                                                                    </Grid>
-                                                                )
-                                                            ))
-                                                        }
-                                                    </Grid>
-                                                    {
-                                                        displayRule(row.rule).length > 3  && (
-                                                            <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"} onClick={() => handleClickShowItem(row.promotionId)}>
-                                                                <IconButton>
-                                                                    <FontAwesomeIcon id={"buttonDown" + row.promotionId} icon={faAngleDown}/>
-                                                                    <FontAwesomeIcon id={"buttonUp" + row.promotionId} icon={faAngleUp} style={{display:"none"}}/>
-                                                                </IconButton>
-                                                            </Grid>
-                                                        )
-                                                    }
-                                                </Grid>
-                                            )
-                                        }
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        <div style={{fontWeight: "bold" }}>{displayStatus(row.status)}</div>
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        <Switch
-                                            onChange={event => {
-                                                handleActivePromotion(event, row.promotionId)
-                                            }}
-                                            checked={row.status === "ACTIVE" ? true : false}
-                                            color="primary"
+            <MyCard>
+                <MyCardHeader title="Danh sách khuyến mãi">
+                    <Link href={`/crm/promotion/new-voucher`}>
+                        <Button variant="contained" color="primary">Thêm mới</Button>
+                    </Link>
+                </MyCardHeader>
+
+                <MyCardContent>
+                    <div className={styles.grid}>
+                        <Grid container direction={"row"} spacing={2}>
+                            <Grid item xs={12} sm={6} md={6}>
+                                <form>
+                                    <Paper component="form" className={styles.search}>
+                                        <InputBase
+                                            id="promotionName"
+                                            name="promotionName"
+                                            className={styles.input}
+                                            value={search}
+                                            onChange={handleChange}
+                                            inputRef={register}
+                                            placeholder="Tìm kiếm khuyến mãi"
+                                            inputProps={{'aria-label': 'Tìm kiếm khuyến mãi'}}
                                         />
-                                    </TableCell>
-                                    <TableCell align="left">
-                                        <div>Từ : {formatTime(row.startTime)}</div>
-                                        <div>Đến : {formatTime(row.endTime)}</div>
-                                    </TableCell>
-                                    <TableCell align="center">
-                                        <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
-                                            <ButtonGroup color="primary" aria-label="contained primary button group">
-                                                <Button variant="contained" size="small" color="primary">Xem</Button>
-                                            </ButtonGroup>
-                                        </Link>
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    ) : (
-                        <div></div>
-                    )}
+                                        <IconButton className={styles.iconButton} aria-label="search"
+                                                    onClick={handleSubmit(onSearch)}>
+                                            <SearchIcon/>
+                                        </IconButton>
+                                    </Paper>
+                                </form>
+                            </Grid>
+                            <Grid item xs={12} sm={6} md={6}>
+                                <Tabs
+                                    indicatorColor="primary"
+                                    textColor="primary"
+                                    variant="fullWidth"
+                                    value={typePromotion}
+                                    onChange={(e,value) => setTypePromotion(value)}
+                                >
+                                 <Tab value={defaultPromotionType.PROMOTION} label="Chương trình khuyến mãi"/>
+                                 <Tab value={defaultPromotionType.VOUCHER_CODE} label="Mã khuyến mãi"/>
+                                </Tabs>
+                            </Grid>
+                        </Grid>
+
+                    </div>
                     {
-                        props.count > 0 ? (
-                            <MyTablePagination
-                                labelUnit="khuyến mãi"
-                                count={props.count}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                onChangePage={handleChangePage}
-                            />
+                        promotionName === '' ? (
+                            <span/>
                         ) : (
-                            <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
+                            <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{promotionName}'</i></div>
                         )
                     }
+                </MyCardContent>
+            </MyCard>
 
-                </Table>
-            </TableContainer>
+            <MyCard>
+                <MyCardContent>
+                    {
+                        typePromotion === defaultPromotionType.PROMOTION? (
+                            <TableContainer component={Paper}>
+                                <Table size="small" aria-label="a dense table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell align="left">Tên</TableCell>
+                                            <TableCell align="left">Loại</TableCell>
+                                            <TableCell align="left">Áp dụng cho</TableCell>
+                                            <TableCell align="left">Chi tiết khuyến mãi</TableCell>
+                                            <TableCell align="left">Trạng Thái</TableCell>
+                                            <TableCell align="left">Đang chạy</TableCell>
+                                            <TableCell align="left">Thời gian</TableCell>
+                                            <TableCell align="center">Thao tác</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    {props.data?.length > 0 ? (
+                                        <TableBody>
+                                            {props.data.map((row, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell align="left">
+                                                        <div style={{fontWeight: "bold"}}>{row.promotionName}</div>
+                                                    </TableCell>
+                                                    <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
+                                                    <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
+                                                    <TableCell align="left">
+                                                        {
+                                                            displayRule(row.rule).length > 0 && (
+                                                                <Grid container spacing={1} direction="row">
+                                                                    <Grid item xs={12} sm={11} md={11} direction="column">
+                                                                        {
+                                                                            displayRule(row.rule).map((rule, index) => (
+                                                                                index < 2 ? (
+                                                                                    <Grid  item xs={12} sm={11} md={11} direction="column">
+                                                                                        {
+                                                                                            index % 2 === 0 ? (
+                                                                                                <div>{rule}</div>
+                                                                                            ) : (
+                                                                                                <div style={{fontStyle: "italic"}}>{rule}</div>
+                                                                                            )
+                                                                                        }
+                                                                                    </Grid>
+                                                                                ): (
+                                                                                    <Grid name={"hideItem" + row.promotionId} style={{display: "none"}} item xs={12} sm={11} md={11} direction="column">
+                                                                                        {
+                                                                                            index % 2 === 0 ? (
+                                                                                                <div>{rule}</div>
+                                                                                            ) : (
+                                                                                                <div  style={{fontStyle: "italic"}}>{rule}</div>
+                                                                                            )
+                                                                                        }
+                                                                                    </Grid>
+                                                                                )
+                                                                            ))
+                                                                        }
+                                                                    </Grid>
+                                                                    {
+                                                                        displayRule(row.rule).length > 3  && (
+                                                                            <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"} onClick={() => handleClickShowItem(row.promotionId)}>
+                                                                                <IconButton>
+                                                                                    <FontAwesomeIcon id={"buttonDown" + row.promotionId} icon={faAngleDown}/>
+                                                                                    <FontAwesomeIcon id={"buttonUp" + row.promotionId} icon={faAngleUp} style={{display:"none"}}/>
+                                                                                </IconButton>
+                                                                            </Grid>
+                                                                        )
+                                                                    }
+                                                                </Grid>
+                                                            )
+                                                        }
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        <div style={{fontWeight: "bold" }}>{displayStatus(row.status)}</div>
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        <Switch
+                                                            onChange={event => {
+                                                                handleActivePromotion(event, row.promotionId)
+                                                            }}
+                                                            checked={row.status === "ACTIVE" ? true : false}
+                                                            color="primary"
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        <div>Từ : {formatTime(row.startTime)}</div>
+                                                        <div>Đến : {formatTime(row.endTime)}</div>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
+                                                            <ButtonGroup color="primary" aria-label="contained primary button group">
+                                                                <Button variant="contained" size="small" color="primary">Xem</Button>
+                                                            </ButtonGroup>
+                                                        </Link>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    ) : (
+                                        <div></div>
+                                    )}
+                                    {
+                                        props.count > 0 ? (
+                                            <MyTablePagination
+                                                labelUnit="khuyến mãi"
+                                                count={props.count}
+                                                rowsPerPage={rowsPerPage}
+                                                page={page}
+                                                onChangePage={handleChangePage}
+                                            />
+                                        ) : (
+                                            <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
+                                        )
+                                    }
 
-            <Modal open={open.openModalCreate} onClose={() => setOpen({...open, openModalCreate: false})}
-                   className={styles.modal}>
-                <div className={styles.modalBodyCreate}>
-                    <h3 style={{textAlign: "center", marginBottom: "2rem"}}>
-                        Loại khuyến mãi
-                    </h3>
-                    <div style={{margin: "auto"}}>
-                        <FormControl className={styles.select}>
-                            <Select
-                                autoWidth={false}
-                                style={{width: '100% !important'}}
-                                labelId="promotion-select-outlined-label"
-                                id="category-select-outlined"
-                                variant={"filled"}
-                                onChange={handleChangeTypePromotion}
-                                name="selectTypePromontion"
-                                value={stateTypePromotion}
-                                label="Loại khuyến mãi">
-                                <MenuItem value={"VOUCHERCODE"} key={"VOUCHERCODE"}>
-                                    Voucher khuyến mãi
-                                </MenuItem>
-                                <MenuItem value={"COMBO"} key={"COMBO"}>
-                                    Combo linh hoạt
-                                </MenuItem>
-                            </Select>
-                        </FormControl>
-                        <ButtonGroup color="primary" aria-label="contained primary button group"
-                                     className={styles.modalFooter}>
-                            <Button variant="contained" color="inherit"
-                                    onClick={() => setOpen({...open, openModalCreate: false})}
-                                    style={{marginRight: "1rem"}}>ĐÓNG</Button>
-                            <Button variant="contained" color="primary"
-                                    onClick={handleSelectTypePromotion}>Tạo khuyến mãi</Button>
-                        </ButtonGroup>
-                    </div>
-                </div>
-            </Modal>
+                                </Table>
+                            </TableContainer>
+                        ): (
+                            <TableContainer component={Paper}>
+                                <Table size="small" aria-label="a dense table">
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell align="left">Mã khuyến mãi</TableCell>
+                                            <TableCell align="left">Tên chương trình</TableCell>
+                                            <TableCell align="left">Loại mã</TableCell>
+                                            <TableCell align="left">Tổng số lần sử dụng toàn hệ thống</TableCell>
+                                            <TableCell align="left">Khách được sử dụng tối đa</TableCell>
+                                            <TableCell align="left">Hạn sử dụng</TableCell>
+                                            <TableCell align="center">Thao tác</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    {props.data?.length > 0 ? (
+                                        <TableBody>
+                                            {props.data.map((row, index) => (
+                                                <TableRow key={index}>
+                                                    <TableCell align="left">
+                                                        <div style={{fontWeight: "bold"}}>{row.code}</div>
+                                                    </TableCell>
+                                                    <TableCell align="left">{row.promotionName}</TableCell>
+                                                    <TableCell align="left">{row.type}</TableCell>
+                                                    <TableCell align="left">{row.maxUsage}</TableCell>
+                                                    <TableCell align="left">
+                                                        <div style={{fontWeight: "bold" }}>{row.maxUsagePerCustomer}</div>
+                                                    </TableCell>
+                                                    <TableCell align="left">
+                                                        <div>{displayTime(row.expiredDate)}</div>
+                                                    </TableCell>
+                                                    <TableCell align="center">
+                                                        <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
+                                                            <ButtonGroup color="primary" aria-label="contained primary button group">
+                                                                <Button variant="contained" size="small" color="primary">Xem</Button>
+                                                            </ButtonGroup>
+                                                        </Link>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    ) : (
+                                        <div></div>
+                                    )}
+                                    {
+                                        props.count > 0 ? (
+                                            <MyTablePagination
+                                                labelUnit="khuyến mãi"
+                                                count={props.count}
+                                                rowsPerPage={rowsPerPage}
+                                                page={page}
+                                                onChangePage={handleChangePage}
+                                            />
+                                        ) : (
+                                            <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
+                                        )
+                                    }
+
+                                </Table>
+                            </TableContainer>
+                        )
+                    }
+                </MyCardContent>
+            </MyCard>
+
         </AppCRM>
     )
 }

@@ -6,6 +6,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import cssStyle from "../../../pages/crm/promotion/promotion.module.css";
 import React, {useState} from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import {getPromoClient} from "../../../client/promo";
 
 
 const useStyles = makeStyles(theme => ({
@@ -19,6 +20,11 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
+
+export async function searchPromotion(prmotionCode){
+    return getPromoClient().getPromotionFromClient(prmotionCode)
+}
+
 export default function VoucherCodeBody(props) {
     const classes = useStyles()
     const [showAutoComplete, setShowAutoComplete] = useState(false);
@@ -26,13 +32,26 @@ export default function VoucherCodeBody(props) {
 
     const {
         errors,
+        dataProps,
+        handleChangeType,
+        onChangePromotion,
         register,
     }=props
+
+    const handleSearchPromotion = async (value) => {
+        let listPromontionResponse = await searchPromotion(value)
+        console.log('list',listPromontionResponse)
+        if (listPromontionResponse && listPromontionResponse.status === "OK") {
+            setListPromotionSearch(listPromontionResponse.data)
+        }else {
+            setListPromotionSearch([])
+        }
+    }
 
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} sm={6} md={6}>
-                <h4>Mã khuyến mãi</h4>
+                <h5>Mã khuyến mãi</h5>
                 <TextField
                     id="code"
                     name="code"
@@ -55,7 +74,7 @@ export default function VoucherCodeBody(props) {
                 />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-                <h4>Chương trình khuyến mãi áp dụng</h4>
+                <h5>Chương trình khuyến mãi áp dụng</h5>
                 <Autocomplete
                     fullWidth
                     id="promotionCode"
@@ -74,19 +93,20 @@ export default function VoucherCodeBody(props) {
                         <TextField
                             {...params}
                             label="Chương trình khuyến mãi áp dụng"
+                            name="promotionCode"
                             placeholder="Chương trình khuyến mãi áp dụng"
                             required
                             inputRef={register({
                                 required: "Vui lòng chọn chương trình khuyến mãi áp dụng",
                             })}
-                            onChange={(e) => handleSearchEmployee(e.target.value)}
+                            onChange={(e) => handleSearchPromotion(e.target.value)}
                         />
                     )}
-                    onChange={(e, value) => handleChangeEmployee(e, value)}
+                    onChange={(e, value) => onChangePromotion(e, value)}
                 />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-                <h4>Hạn sử dụng mã khuyến mãi</h4>
+                <h5>Hạn sử dụng mã khuyến mãi</h5>
                 <TextField
                     id="expiredDate"
                     name="expiredDate"
@@ -105,13 +125,14 @@ export default function VoucherCodeBody(props) {
                 />
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-                <h4>Loại mã</h4>
+                <h5>Loại mã</h5>
                 <InputLabel htmlFor="select-type">Loại mã *</InputLabel>
                 <Select
                     id="type"
                     name="type"
                     placeholder="chọn loại mã"
-                    defaultValue="PUBLIC"
+                    value={dataProps.type}
+                    onChange={(e,v) => handleChangeType(v)}
                     labelId="select-type"
                     style={{width: "100%"}}>
                     <MenuItem  value="PUBLIC">
@@ -123,7 +144,7 @@ export default function VoucherCodeBody(props) {
                 </Select>
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-                <h4>Tổng số lần sử dụng toàn hệ thống</h4>
+                <h5>Tổng số lần sử dụng toàn hệ thống</h5>
                 <TextField
                     id="maxUsage"
                     name="maxUsage"
@@ -140,7 +161,7 @@ export default function VoucherCodeBody(props) {
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-                <h4>Số lần áp dụng tối đa cho mỗi khách hàng</h4>
+                <h5>Số lần áp dụng tối đa cho mỗi khách hàng</h5>
                 <TextField
                     id="maxUsagePerCustomer"
                     name="maxUsagePerCustomer"
@@ -157,7 +178,7 @@ export default function VoucherCodeBody(props) {
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
-                <h3>Danh sách khách hàng được sử dụng</h3>
+                <h5>Danh sách khách hàng được sử dụng</h5>
                 <TextField
                     id="appliedCustomers"
                     name="appliedCustomers"
