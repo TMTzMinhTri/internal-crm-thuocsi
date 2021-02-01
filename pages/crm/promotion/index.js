@@ -34,7 +34,7 @@ import {
     displayPromotionScope,
     displayPromotionType,
     displayRule,
-    displayStatus, displayTime,
+    displayStatus, displayTime, displayUsage,
     formatTime,
     getPromotionScope, removeElement,
 } from "../../../components/component/until";
@@ -49,6 +49,7 @@ import {faAngleUp,faAngleDown} from "@fortawesome/free-solid-svg-icons";
 import {MyCard, MyCardContent, MyCardHeader} from "@thuocsi/nextjs-components/my-card/my-card";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
+import {getVoucherClient} from "../../../client/voucher";
 
 
 export async function getServerSideProps(ctx) {
@@ -64,14 +65,25 @@ export async function loadPromoData(ctx) {
     let page = query.page || 0;
     let limit = query.limit || 20;
     let offset = page * limit;
-    let promotionName = query.promotionName || "";
+    let search = query.search || "";
+    let type = query.type
 
-    let _promotionClient = getPromoClient(ctx, {})
-    let getPromotionResponse = await _promotionClient.getPromotion(promotionName, limit, offset, true)
-    if (getPromotionResponse && getPromotionResponse.status === "OK") {
-        returnObject.props.data = getPromotionResponse.data
-        returnObject.props.count = getPromotionResponse.total
+    if (type === defaultPromotionType.PROMOTION || !type) {
+        let _promotionClient = getPromoClient(ctx, {})
+        let getPromotionResponse = await _promotionClient.getPromotion(search, limit, offset, true)
+        if (getPromotionResponse && getPromotionResponse.status === "OK") {
+            returnObject.props.promotion = getPromotionResponse.data
+            returnObject.props.promotionCount = getPromotionResponse.total
+        }
+    }else {
+        let _voucherClient = getVoucherClient(ctx, {})
+        let getVoucherResponse = await _voucherClient.getVoucherCode(search, limit, offset, true)
+        if (getVoucherResponse && getVoucherResponse.status === "OK") {
+            returnObject.props.voucher = getVoucherResponse.data
+            returnObject.props.voucherCount = getVoucherResponse.total
+        }
     }
+
 
     // Pass data to the page via props
     return returnObject;
@@ -98,31 +110,19 @@ function render(props) {
     let [open, setOpen] = useState({
         openModalCreate: false,
     })
-    let promotionName = router.query.promotionName || ''
+    let textSearch = router.query.search || ''
 
     const [page, setPage] = useState(parseInt(router.query.page || 0));
     const [rowsPerPage, setRowsPerPage] = useState(parseInt(router.query.perPage) || 20);
 
-    const [typePromotion,setTypePromotion] = useState(defaultPromotionType.PROMOTION)
+    const [typePromotion,setTypePromotion] = useState(router.query.type || defaultPromotionType.PROMOTION)
 
-    const handleSelectTypePromotion = () => {
-        setOpen({
-            ...open, openModalCreate: false,
-        })
+    function searchPromotion() {
         router.push({
-            pathname: '/crm/promotion/new',
+            pathname: `/crm/promotion`,
             query: {
                 type: stateTypePromotion,
-            }
-        })
-    }
-
-    function searchPromotion(formData) {
-        let promotionName = formData.promotionName
-        Router.push({
-            pathname: '/crm/promotion',
-            query: {
-                promontionName: promotionName,
+                search: search,
             }
         })
     }
@@ -197,28 +197,37 @@ function render(props) {
 
 
     async function handleChange(event) {
-        const target = event.target;
-        const value = target.value;
-        setSearch(value);
+        setSearch(event.target.value);
+        if (event.target.value === "") {
+            router.push({
+                pathname: '/crm/promotion',
+                query : {
+                    ...router.query,
+                    search: '',
+                }
+            }).then(setSearch(''))
+        }
     }
 
-    function onSearch(formData) {
-        try {
-            searchPromotion(formData);
-            setSearch("");
-        } catch (error) {
-            console.log(error);
-        }
+    function handleChangeTab(event,value) {
+        setTypePromotion(value)
+        setSearch('')
+        router.push({
+            pathname: '/crm/promotion',
+            query : {
+                type: value,
+            }
+        })
     }
 
     return (
         <AppCRM select="/crm/promotion">
-            <Head>
+            <div>
                 <title>Danh sách khuyến mãi</title>
-            </Head>
+            </div>
             <MyCard>
                 <MyCardHeader title="Danh sách khuyến mãi">
-                    <Link href={`/crm/promotion/new-voucher`}>
+                    <Link href={`/crm/promotion/${typePromotion === defaultPromotionType.PROMOTION? "new-promotion" : "new-voucher"}`}>
                         <Button variant="contained" color="primary">Thêm mới</Button>
                     </Link>
                 </MyCardHeader>
@@ -227,24 +236,31 @@ function render(props) {
                     <div className={styles.grid}>
                         <Grid container direction={"row"} spacing={2}>
                             <Grid item xs={12} sm={6} md={6}>
-                                <form>
-                                    <Paper component="form" className={styles.search}>
-                                        <InputBase
-                                            id="promotionName"
-                                            name="promotionName"
-                                            className={styles.input}
-                                            value={search}
-                                            onChange={handleChange}
-                                            inputRef={register}
-                                            placeholder="Tìm kiếm khuyến mãi"
-                                            inputProps={{'aria-label': 'Tìm kiếm khuyến mãi'}}
-                                        />
-                                        <IconButton className={styles.iconButton} aria-label="search"
-                                                    onClick={handleSubmit(onSearch)}>
-                                            <SearchIcon/>
-                                        </IconButton>
-                                    </Paper>
-                                </form>
+                                <Paper className={styles.search}>
+                                    <InputBase
+                                        id="search"
+                                        name="search"
+                                        autoComplete="off"
+                                        className={styles.input}
+                                        value={search}
+                                        onChange={handleChange}
+                                        onKeyDown={event => {
+                                            if(event.key === "Enter") {
+                                                router.push({
+                                                    pathname: `/crm/promotion`,
+                                                    query: {
+                                                        ...router.query,
+                                                        search: search,
+                                                    }
+                                                })
+                                            }
+                                        }}
+                                        placeholder="Tìm kiếm khuyến mãi"
+                                        inputProps={{'aria-label': 'Tìm kiếm khuyến mãi'}}/>
+                                    <IconButton className={styles.iconButton} aria-label="search" onClick={searchPromotion}>
+                                        <SearchIcon/>
+                                    </IconButton>
+                                </Paper>
                             </Grid>
                             <Grid item xs={12} sm={6} md={6}>
                                 <Tabs
@@ -252,7 +268,7 @@ function render(props) {
                                     textColor="primary"
                                     variant="fullWidth"
                                     value={typePromotion}
-                                    onChange={(e,value) => setTypePromotion(value)}
+                                    onChange={handleChangeTab}
                                 >
                                  <Tab value={defaultPromotionType.PROMOTION} label="Chương trình khuyến mãi"/>
                                  <Tab value={defaultPromotionType.VOUCHER_CODE} label="Mã khuyến mãi"/>
@@ -262,10 +278,10 @@ function render(props) {
 
                     </div>
                     {
-                        promotionName === '' ? (
+                        textSearch === '' ? (
                             <span/>
                         ) : (
-                            <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{promotionName}'</i></div>
+                            <div className={styles.textSearch}>Kết quả tìm kiếm cho <i>'{textSearch}'</i></div>
                         )
                     }
                 </MyCardContent>
@@ -289,10 +305,10 @@ function render(props) {
                                             <TableCell align="center">Thao tác</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    {props.data?.length > 0 ? (
+                                    {props.promotion?.length > 0 ? (
                                         <TableBody>
-                                            {props.data.map((row, index) => (
-                                                <TableRow key={index}>
+                                            {props.promotion.map((row, index) => (
+                                                <TableRow key={row.promotionId}>
                                                     <TableCell align="left">
                                                         <div style={{fontWeight: "bold"}}>{row.promotionName}</div>
                                                     </TableCell>
@@ -306,7 +322,7 @@ function render(props) {
                                                                         {
                                                                             displayRule(row.rule).map((rule, index) => (
                                                                                 index < 2 ? (
-                                                                                    <Grid  item xs={12} sm={11} md={11} direction="column">
+                                                                                    <Grid  item xs={12} sm={11} md={11} direction="column" key={'_' + index + '_'}>
                                                                                         {
                                                                                             index % 2 === 0 ? (
                                                                                                 <div>{rule}</div>
@@ -316,7 +332,7 @@ function render(props) {
                                                                                         }
                                                                                     </Grid>
                                                                                 ): (
-                                                                                    <Grid name={"hideItem" + row.promotionId} style={{display: "none"}} item xs={12} sm={11} md={11} direction="column">
+                                                                                    <Grid name={"hideItem" + row.promotionId} key={row.promotionId + '_' + index} style={{display: "none"}} item xs={12} sm={11} md={11} direction="column">
                                                                                         {
                                                                                             index % 2 === 0 ? (
                                                                                                 <div>{rule}</div>
@@ -331,7 +347,7 @@ function render(props) {
                                                                     </Grid>
                                                                     {
                                                                         displayRule(row.rule).length > 3  && (
-                                                                            <Grid item xs={12} sm={1} md={1} alignItems={"flex-start"} onClick={() => handleClickShowItem(row.promotionId)}>
+                                                                            <Grid item xs={12} sm={1} md={1} onClick={() => handleClickShowItem(row.promotionId)}>
                                                                                 <IconButton>
                                                                                     <FontAwesomeIcon id={"buttonDown" + row.promotionId} icon={faAngleDown}/>
                                                                                     <FontAwesomeIcon id={"buttonUp" + row.promotionId} icon={faAngleUp} style={{display:"none"}}/>
@@ -373,15 +389,15 @@ function render(props) {
                                         <div></div>
                                     )}
                                     {
-                                        props.count > 0 ? (
+                                        props.promotionCount > 0 ? (
                                             <MyTablePagination
                                                 labelUnit="khuyến mãi"
-                                                count={props.count}
+                                                count={props.promotionCount}
                                                 rowsPerPage={rowsPerPage}
                                                 page={page}
                                                 onChangePage={handleChangePage}
                                             />
-                                        ) : (
+                                        ) : textSearch && (
                                             <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
                                         )
                                     }
@@ -402,24 +418,24 @@ function render(props) {
                                             <TableCell align="center">Thao tác</TableCell>
                                         </TableRow>
                                     </TableHead>
-                                    {props.data?.length > 0 ? (
+                                    {props.voucher?.length > 0 ? (
                                         <TableBody>
-                                            {props.data.map((row, index) => (
-                                                <TableRow key={index}>
+                                            {props.voucher.map((row, index) => (
+                                                <TableRow key={row.voucherId + "_" + index}>
                                                     <TableCell align="left">
                                                         <div style={{fontWeight: "bold"}}>{row.code}</div>
                                                     </TableCell>
                                                     <TableCell align="left">{row.promotionName}</TableCell>
                                                     <TableCell align="left">{row.type}</TableCell>
-                                                    <TableCell align="left">{row.maxUsage}</TableCell>
-                                                    <TableCell align="left">
-                                                        <div style={{fontWeight: "bold" }}>{row.maxUsagePerCustomer}</div>
+                                                    <TableCell align="center">{displayUsage(row.maxUsage)}</TableCell>
+                                                    <TableCell align="center">
+                                                        <div style={{fontWeight: "bold" }}>{displayUsage(row.maxUsagePerCustomer)}</div>
                                                     </TableCell>
                                                     <TableCell align="left">
-                                                        <div>{displayTime(row.expiredDate)}</div>
+                                                        <div>{formatTime(row.expiredDate)}</div>
                                                     </TableCell>
                                                     <TableCell align="center">
-                                                        <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
+                                                        <Link href={`/crm/promotion/edit-voucher?voucherId=${row.voucherId}`}>
                                                             <ButtonGroup color="primary" aria-label="contained primary button group">
                                                                 <Button variant="contained" size="small" color="primary">Xem</Button>
                                                             </ButtonGroup>
@@ -432,15 +448,15 @@ function render(props) {
                                         <div></div>
                                     )}
                                     {
-                                        props.count > 0 ? (
+                                        props.voucherCount > 0 ? (
                                             <MyTablePagination
                                                 labelUnit="khuyến mãi"
-                                                count={props.count}
+                                                count={props.voucherCount}
                                                 rowsPerPage={rowsPerPage}
                                                 page={page}
                                                 onChangePage={handleChangePage}
                                             />
-                                        ) : (
+                                        ) : textSearch && (
                                             <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
                                         )
                                     }

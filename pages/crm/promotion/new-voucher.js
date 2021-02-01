@@ -17,6 +17,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import {getPromoClient} from "../../../client/promo";
 import VoucherCodeBody from "../../../components/component/promotion/voucher-code-body";
+import {getVoucherClient} from "../../../client/voucher";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -43,8 +44,14 @@ export async function searchPromotion(promotionName){
     return getPromoClient().getPromotionFromClient(promotionName)
 }
 
-export async function createVoucherCode() {
-
+export async function createVoucherCode(code,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
+    expiredDate = expiredDate + ":00.000Z"
+    let data = {code,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer}
+    if (appliedCustomers && appliedCustomers.length > 0) {
+        data.appliedCustomers=appliedCustomers
+    }
+    console.log('data',data)
+    return getVoucherClient().createVoucher(data)
 }
 
 function render(props) {
@@ -55,13 +62,21 @@ function render(props) {
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
     const [dataProps, setDataprops] = useState({
-        promotionCode: "",
+        promotionId: "",
+        customerIds : [],
         type: "PUBLIC",
     })
 
-    const onSubmit = () => {
+    const onSubmit = async () => {
         let value = getValues()
-        console.log('value',value)
+        let {code,expiredDate,maxUsage,maxUsagePerCustomer} = value
+        let {promotionId,type,customerIds} = dataProps
+        let createVoucherResponse = await createVoucherCode(code,parseInt(promotionId),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
+        if (createVoucherResponse && createVoucherResponse.status === "OK") {
+            toast.success('Tạo mã khuyến mãi thành công')
+        }else {
+            toast.error(createVoucherResponse.message)
+        }
     }
 
     const handleSetShowAutoComplete = (value) => {
@@ -73,22 +88,34 @@ function render(props) {
     }
 
     const handleChangePromotion = (e,promotion) => {
-        setDataprops({...dataProps,promotionCode: promotion.promotionCode})
+        setDataprops({...dataProps,promotionId: promotion.promotionId})
+    }
+
+    const handleChangeCustomer = (e,customers) => {
+        let customerIds = []
+        customers.forEach(c => customerIds.push(c.customerID))
+        setDataprops({...dataProps,customerIds: customerIds})
+    }
+
+    const handleChangeType = (value) => {
+        setDataprops({...dataProps,type:value})
     }
 
     return (
         <AppCRM select="/crm/promotion">
-            <head>
+            <div>
                 <title>Tạo mã khuyến mãi</title>
-            </head>
+            </div>
             <MyCard>
                 <MyCardHeader title="THÊM MỚI MÃ KHUYẾN MÃI"/>
                 <MyCardContent style={{margin: "0 2rem"}}>
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
+                        promotion={[]}
+                        onChangeCustomer={handleChangeCustomer}
                         dataProps={dataProps}
-                        handleChangeType={(type) => setDataprops({...dataProps,type:type})}
+                        handleChangeType={handleChangeType}
                         onChangePromotion={handleChangePromotion}
                         register={register}
                     />

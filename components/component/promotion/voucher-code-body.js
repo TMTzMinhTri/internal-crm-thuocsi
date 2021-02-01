@@ -7,6 +7,7 @@ import cssStyle from "../../../pages/crm/promotion/promotion.module.css";
 import React, {useState} from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
+import {getCustomerClient} from "../../../client/customer";
 
 
 const useStyles = makeStyles(theme => ({
@@ -25,26 +26,45 @@ export async function searchPromotion(prmotionCode){
     return getPromoClient().getPromotionFromClient(prmotionCode)
 }
 
+export async function searchCustomer(customerName) {
+    return getCustomerClient().getCustomerFromClient(0,10,customerName)
+}
+
 export default function VoucherCodeBody(props) {
     const classes = useStyles()
-    const [showAutoComplete, setShowAutoComplete] = useState(false);
-    const [listPromotionSearch,setListPromotionSearch] = useState([])
-
     const {
         errors,
         dataProps,
         handleChangeType,
+        appliedCustomers,
+        promotion,
         onChangePromotion,
+        onChangeCustomer,
         register,
     }=props
 
+
+    const [showAutoComplete, setShowAutoComplete] = useState(false);
+    const [listPromotionSearch,setListPromotionSearch] = useState(promotion || [])
+    const [listCustomer, setListCustomer] = useState(appliedCustomers || [])
+
+
+
     const handleSearchPromotion = async (value) => {
-        let listPromontionResponse = await searchPromotion(value)
-        console.log('list',listPromontionResponse)
-        if (listPromontionResponse && listPromontionResponse.status === "OK") {
-            setListPromotionSearch(listPromontionResponse.data)
+        let listPromationResponse = await searchPromotion(value)
+        if (listPromationResponse && listPromationResponse.status === "OK") {
+            setListPromotionSearch(listPromationResponse.data)
         }else {
             setListPromotionSearch([])
+        }
+    }
+
+    const handleSearchCustomer = async (value) => {
+        let listCustomerResponse = await searchCustomer(value)
+        if (listCustomerResponse && listCustomerResponse.status === "OK") {
+            setListCustomer(listCustomerResponse.data)
+        }else {
+            setListCustomer([])
         }
     }
 
@@ -77,10 +97,11 @@ export default function VoucherCodeBody(props) {
                 <h5>Chương trình khuyến mãi áp dụng</h5>
                 <Autocomplete
                     fullWidth
-                    id="promotionCode"
-                    name="promotionCode"
+                    id="promotionId"
+                    name="promotionId"
                     options={listPromotionSearch}
                     loading={showAutoComplete}
+                    defaultValue={promotion[0]}
                     loadingText="Không tìm thấy chương trình khuyến mãi"
                     onOpen={() => {
                         setShowAutoComplete(true);
@@ -93,7 +114,7 @@ export default function VoucherCodeBody(props) {
                         <TextField
                             {...params}
                             label="Chương trình khuyến mãi áp dụng"
-                            name="promotionCode"
+                            name="promotionName"
                             placeholder="Chương trình khuyến mãi áp dụng"
                             required
                             inputRef={register({
@@ -132,7 +153,7 @@ export default function VoucherCodeBody(props) {
                     name="type"
                     placeholder="chọn loại mã"
                     value={dataProps.type}
-                    onChange={(e,v) => handleChangeType(v)}
+                    onChange={event => handleChangeType(event.target.value)}
                     labelId="select-type"
                     style={{width: "100%"}}>
                     <MenuItem  value="PUBLIC">
@@ -156,6 +177,7 @@ export default function VoucherCodeBody(props) {
                     label="Tổng số lần sử dụng toàn hệ thống"
                     placeholder="Tổng số lần sử dụng toàn hệ thống"
                     style={{width: "100%"}}
+                    inputRef={register}
                     required
                 />
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
@@ -173,19 +195,40 @@ export default function VoucherCodeBody(props) {
                     label="Số lần áp dụng tối đa cho mỗi khách hàng"
                     placeholder="Số lần áp dụng tối đa cho mỗi khách hàng"
                     style={{width: "100%"}}
+                    inputRef={register}
                     required
                 />
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
             </Grid>
             <Grid item xs={12} sm={6} md={6}>
                 <h5>Danh sách khách hàng được sử dụng</h5>
-                <TextField
+                <Autocomplete
+                    fullWidth
+                    multiple
                     id="appliedCustomers"
                     name="appliedCustomers"
-                    label="Danh sách khách hàng được sử dụng"
-                    placeholder=""
-                    style={{width: "100%"}}
-                    required
+                    options={listCustomer}
+                    defaultValue={appliedCustomers}
+                    loading={showAutoComplete}
+                    loadingText="Không tìm thấy danh sách khách hàng được sử dụng"
+                    onOpen={() => {
+                        setShowAutoComplete(true);
+                    }}
+                    onClose={() => {
+                        setShowAutoComplete(false);
+                    }}
+                    getOptionLabel={(option) => option.name }
+                    renderInput={(params) => (
+                        <TextField
+                            {...params}
+                            label="Danh sách khách hàng được sử dụng"
+                            name="appliedCustomers"
+                            placeholder="Danh sách khách hàng được sử dụng"
+                            required
+                            onChange={(e) => handleSearchCustomer(e.target.value)}
+                        />
+                    )}
+                    onChange={(e, value) => onChangeCustomer(e, value)}
                 />
                 <div className={cssStyle.textItalic}> ** LƯU Ý: Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi</div>
             </Grid>

@@ -393,3 +393,10 @@ export function removeElement(array, elem) {
         array.splice(index, 1);
     }
 }
+
+export function displayUsage(usage) {
+    if (usage === 0) {
+        return "Không giới hạn"
+    }
+    return usage
+}

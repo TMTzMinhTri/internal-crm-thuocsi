@@ -20,6 +20,26 @@ class CustomerClient extends APIClient {
             })
     }
 
+    getCustomerByIDs(ids) {
+        return this.callFromNextJS(
+            "POST",
+            `${URI}/account/list`,
+            {ids}
+            )
+    }
+
+    getCustomerFromClient(offset, limit, q) {
+        return this.callFromClient(
+            "GET",
+            `${URI}/account/list`,
+            {
+                q: q,
+                offset: offset,
+                limit: limit,
+                getTotal: true
+            })
+    }
+
     getCustomerByCustomerID(customerID) {
         return this.callFromNextJS(
             "GET",
