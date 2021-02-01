@@ -15,6 +15,7 @@ import { ProvinceTable } from 'containers/crm/pricing/ProvinceTable';
 import { DistrictTable } from 'containers/crm/pricing/DistrictTable';
 import { CustomerLevelTable } from 'containers/crm/pricing/CustomerLevelTable';
 import { WardTable } from 'containers/crm/pricing/WardTable';
+import { TagTable } from "containers/crm/pricing/TagTable";
 
 export async function loadPricingData(ctx, type, offset, limit, q) {
     const feeClient = getFeeClient(ctx);
@@ -93,6 +94,21 @@ export async function loadPricingData(ctx, type, offset, limit, q) {
         }
         return { message: res.message, }
     }
+    if (type === ViewType.TAG) {
+        const res = await feeClient.getTagFeeList(offset, limit, q);
+        if (res.status === 'OK') {
+            return {
+                total: res.total ?? null,
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy tag phù hợp.'
+            }
+        }
+        return { message: res.message, }
+    }
 }
 
 export async function getServerSideProps(ctx) {
@@ -118,6 +134,7 @@ export async function getServerSideProps(ctx) {
                     districtData: v === ViewType.DISTRICT ? data : null,
                     wardData: v === ViewType.WARD ? data : null,
                     customerData: v === ViewType.CUSTOMER ? data : null,
+                    tagData: v ===ViewType.TAG ? data : null,
                 }
             }
         } catch (err) {
@@ -128,6 +145,14 @@ export async function getServerSideProps(ctx) {
             }
         }
     })
+}
+
+const searchPlaceholderText = {
+    [ViewType.TAG]: "Nhập tên hoặc mã tag,...",
+    [ViewType.REGION]: "Nhập tên vùng,...",
+    [ViewType.PROVINCE]: "Nhập tên tỉnh thành,...",
+    [ViewType.DISTRICT]: "Nhập tên quận huyện,...",
+    [ViewType.WARD]: "Nhập tên phường/xã,...",
 }
 
 /**
@@ -141,6 +166,7 @@ export async function getServerSideProps(ctx) {
  * @param {object[]} props.districtData
  * @param {object[]} props.wardData
  * @param {object[]} props.customerData
+ * @param {object[]} props.tagData
  */
 function render(props) {
     const router = useRouter();
@@ -185,6 +211,7 @@ function render(props) {
                                 value={viewType}
                             >
                                 <Tab value={ViewType.CUSTOMER} label="Theo khách hàng" />
+                                <Tab value={ViewType.TAG} label="Theo tag" />
                                 <Tab value={ViewType.REGION} label="Theo vùng" />
                                 <Tab value={ViewType.PROVINCE} label="Theo tỉnh thành" />
                                 <Tab value={ViewType.DISTRICT} label="Theo quận huyện" />
@@ -195,7 +222,7 @@ function render(props) {
                             <Grid item md={4}>
                                 <TextField
                                     label="Tìm kiếm"
-                                    placeholder="Nhập tên tỉnh thành, quận huyện,..."
+                                    placeholder={searchPlaceholderText[viewType]}
                                     variant="outlined"
                                     size="small"
                                     fullWidth
@@ -229,6 +256,16 @@ function render(props) {
                                 page={props.page}
                                 limit={props.limit}
                                 total={props.regionData?.total}
+                            />
+                        )}
+                        {viewType === ViewType.TAG && (
+                            <TagTable
+                                data={props.tagData?.data}
+                                q={searchText}
+                                message={props.tagData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.tagData?.total}
                             />
                         )}
                         {viewType === ViewType.PROVINCE && (
