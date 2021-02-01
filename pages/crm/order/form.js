@@ -400,7 +400,30 @@ export default function renderForm(props, toast) {
                                                     }
                                                 />
                                             </Grid>
-
+                                            <Grid item xs={12} sm={4} md={4}>
+                                                <TextField
+                                                    id="customerID"
+                                                    name="customerID"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label="ID khách hàng"
+                                                    placeholder=""
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
+                                                    helperText={errors.customerID?.message}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                    error={!!errors.customerID}
+                                                    required
+                                                    inputRef={
+                                                        register()
+                                                    }
+                                                />
+                                            </Grid>
                                         </Grid>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={3} md={3}>
