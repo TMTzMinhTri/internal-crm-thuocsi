@@ -77,7 +77,7 @@ export const CustomerLevelTable = (props) => {
                     <TableBody>
                         {!tableData?.length && (
                             <TableRow>
-                                <TableCell colSpan={3} align="left">
+                                <TableCell colSpan={5} align="left">
                                     {props.message}
                                 </TableCell>
                             </TableRow>
