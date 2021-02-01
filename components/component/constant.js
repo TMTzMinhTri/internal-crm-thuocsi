@@ -81,6 +81,28 @@ export const defaultConditionInfo = {
   products: "products",
 };
 
+export const defaultScope = {
+  customer: "CUSTOMER",
+  product: "PRODUCT",
+  productCatergory: "PRODUCT_CATEGORY",
+  producer: "PRODUCER",
+  ingredient: "INGREDIENT",
+  area: "AREA",
+  productTag: "PRODUCT_TAG",
+};
+
+export const defaultCondition = {
+  orderValue: "ORVER_VALUE",
+  product: "PRODUCT",
+};
+
+export const defaultReward = {
+  precentage: "PRECENTAGE",
+  absolute: "ABSOLUTE",
+  gift: "GIFT",
+  point: "POINT",
+};
+
 export const scopes = [
   {
     value: "",
@@ -89,6 +111,10 @@ export const scopes = [
   {
     value: "CUSTOMER",
     label: "Theo khách hàng",
+  },
+  {
+    value: "PRODUCT",
+    label: "Theo sản phẩm",
   },
   {
     value: "PRODUCT_CATEGORY",
@@ -100,7 +126,7 @@ export const scopes = [
   },
   {
     value: "INGREDIENT",
-    label: "Theo thành phần",
+    label: "Theo hoạt chất",
   },
   {
     value: "AREA",

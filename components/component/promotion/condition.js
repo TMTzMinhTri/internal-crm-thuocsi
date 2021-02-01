@@ -23,72 +23,72 @@ const Condition = (props) => {
           option="condition"
         />
       </Grid>
-
-      {condition == "ORDER_VALUE" ? (
-        <Grid item container xs={6}>
-          <TextField
-            type="number"
-            id="minValue"
-            name="minValue"
-            label="Giá trị nhỏ nhất của đơn hàng"
-            placeholder=""
-            defaultValue={minValue}
-            helperText={errors.minValue?.message}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            fullWidth
-            error={!!errors.minValue}
-            required
-            inputRef={register({
-              required: "Vui lòng chọn thời gian kết thúc",
-            })}
-          />
-        </Grid>
-      ) : (
-        <Grid item container spacing={2}>
+      {condition != "" &&
+        (condition == "ORDER_VALUE" ? (
           <Grid item container xs={6}>
             <TextField
               type="number"
-              id="productQuantity"
-              name="productQuantity"
-              label="Số lượng sản phẩm yêu cầu"
+              id="minValue"
+              name="minValue"
+              label="Giá trị nhỏ nhất của đơn hàng"
               placeholder=""
-              defaultValue={productQuantity}
-              helperText={errors.productQuantity?.message}
+              defaultValue={minValue}
+              helperText={errors.minValue?.message}
               InputLabelProps={{
                 shrink: true,
               }}
               fullWidth
-              error={!!errors.productQuantity}
+              error={!!errors.minValue}
               required
               inputRef={register({
                 required: "Vui lòng chọn thời gian kết thúc",
               })}
             />
           </Grid>
-          <Grid item container xs={6}>
-            <TextField
-              type="number"
-              id="productValue"
-              name="productValue"
-              label="Giá trị sản phẩm yêu cầu"
-              placeholder=""
-              defaultValue={productValue}
-              helperText={errors.productValue?.message}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              fullWidth
-              error={!!errors.productValue}
-              required
-              inputRef={register({
-                required: "Vui lòng chọn thời gian kết thúc",
-              })}
-            />
-          </Grid>{" "}
-        </Grid>
-      )}
+        ) : (
+          <Grid item container spacing={2}>
+            <Grid item container xs={6}>
+              <TextField
+                type="number"
+                id="productQuantity"
+                name="productQuantity"
+                label="Số lượng sản phẩm yêu cầu"
+                placeholder=""
+                defaultValue={productQuantity}
+                helperText={errors.productQuantity?.message}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                error={!!errors.productQuantity}
+                required
+                inputRef={register({
+                  required: "Vui lòng chọn thời gian kết thúc",
+                })}
+              />
+            </Grid>
+            <Grid item container xs={6}>
+              <TextField
+                type="number"
+                id="productValue"
+                name="productValue"
+                label="Giá trị sản phẩm yêu cầu"
+                placeholder=""
+                defaultValue={productValue}
+                helperText={errors.productValue?.message}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                error={!!errors.productValue}
+                required
+                inputRef={register({
+                  required: "Vui lòng chọn thời gian kết thúc",
+                })}
+              />
+            </Grid>{" "}
+          </Grid>
+        ))}
     </>
   );
 };

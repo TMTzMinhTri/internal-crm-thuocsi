@@ -237,9 +237,10 @@ function render(props) {
   });
 
   const handleChangeList = (key) => (event, value) => {
-    console.log("hanleChangeList", key, value);
-    if (key == "scope") setScopeObject({ ...scopeObject, list: value });
-    else if (key == "reward") setRewardObject({ ...rewardObject, list: value });
+    if (key == "scope") {
+      setScopeObject({ ...scopeObject, list: value });
+    } else if (key == "reward")
+      setRewardObject({ ...rewardObject, list: value });
   };
 
   const handleChangeScopeObject = (key) => (event) => {
