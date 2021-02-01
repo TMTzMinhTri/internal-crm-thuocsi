@@ -44,9 +44,11 @@ const MuiSingleAuto = ({
     onNotSearchFieldChange,
     control,
     disabled,
-    errors,
-    variant = 'outlined'
-}) => {
+    variant,
+    errors }) => { // REACT HOOK FORM ERRORS 
+
+    // TODO
+
     const hasError = typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
     const [qOptions, setQOptions] = useState(options);
@@ -94,7 +96,7 @@ const MuiSingleAuto = ({
                                 }
                                 error={hasError}
                                 placeholder={placeholder}
-                                variant={variant}
+                                variant={"outlined"}
                                 style={{ width: "100%", minWidth: "250px" }}
                                 size="small"
                                 onBlur={() => {
@@ -117,9 +119,9 @@ const MuiSingleAuto = ({
                 onChange={([, { id }]) => id}
                 rules={{
                     validate: (d) => {
-                        if (required && required == true) {
+                        if (required && required === true) {
                             console.log("debug with d: ", d)
-                            if (typeof d === "undefined" || d === null || d?.length == 0) {
+                            if (typeof d === "undefined" || d === null || d?.length === 0) {
                                 return "Vui lòng nhập"
                             }
                         }
