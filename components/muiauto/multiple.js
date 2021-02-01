@@ -5,19 +5,6 @@ import useDebounce from "components/useDebounce";
 import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
-/**
- *  deboudce - OK
-	clear all - OK
-	load info - OK
-	search - OK
-	validate required/...
-	autofus - PENDINH
-	default vaue ? - OK
-	translate - OK 
-	reset error - PENDING
- * @param {*} param0 
- */
-
 const MuiMultipleAutocomplete = withStyles({
     tag: {
         height: 'auto',
@@ -28,40 +15,51 @@ const MuiMultipleAutocomplete = withStyles({
             overflowWrap: 'anywhere'
         }
     }
-})(Autocomplete); // Fix CSS scroll page when pick long tag
+})(Autocomplete);
 
+/**
+ * @param {object} props
+ * @param {string} props.name - field name
+ * @param {any[]} props.options - autocomplete options
+ * @param {string} props.label - label
+ * @param {string} props.placeholder - placeholder
+ * @param {boolean} props.required - required option
+ * @param {string} props.message - error message
+ * @param {Function} props.onFieldChange
+ * @param {object} props.control
+ * @param {boolean} props.disabled
+ * @param {object} props.errors
+ * @param {string} props.variant
+ */
 const MuiMultipleAuto = ({
-        name, // NAME INPUT
-        options,  // DATA OPTIONS label-value
-        label,  // LABEL
-        placeholder,
-        required, // boolean
-        message, // CUSTOM MESSAGE ERROR
-        onFieldChange, // HANDLE EVENT CHANGE
-        control,  // REACT HOOK FORM CONTROL
-        errors})=>{ // REACT HOOK FORM ERRORS 
-            
-    // TODO
-    
-    const hasError =  typeof errors[`${name}`] !== 'undefined';
+    name,
+    options,
+    label,
+    placeholder,
+    required = false,
+    message,
+    onFieldChange,
+    control,
+    disabled = false,
+    errors,
+    variant = 'outlined'
+}) => {
+
+    const hasError = typeof errors[`${name}`] !== 'undefined';
     const [q, setQ] = useState("");
     const [open, setOpen] = useState(false);
     const [qOptions, setQOptions] = useState(options);
     const debouncedSearch = useDebounce(q?.trim(), 200);
 
-    if(typeof required === 'undefined') {
-        required = false
-    }
-
     useEffect(() => {
-        if(debouncedSearch || open == true) {
+        if (debouncedSearch || open == true) {
             if (typeof onFieldChange !== 'undefined') {
                 onFieldChange(debouncedSearch).then((results) => {
                     setQOptions(results)
                 })
             }
         }
-    },[debouncedSearch,q, open]);
+    }, [debouncedSearch, q, open]);
 
     return (
         <div>
@@ -75,8 +73,9 @@ const MuiMultipleAuto = ({
                         getOptionLabel={(option) => option.label?.toString()}
                         getOptionSelected={(option, val) => option.value === val.value}
                         noOptionsText="Không tìm thấy kết quả phù hợp"
-                        onOpen={()=> {setQ(''), setOpen(true)}}
-                        onClose={()=> setOpen(false)}
+                        disabled={disabled}
+                        onOpen={() => { setQ(''); setOpen(true) }}
+                        onClose={() => setOpen(false)}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -86,11 +85,11 @@ const MuiMultipleAuto = ({
                                     shrink: true,
                                 }}
                                 helperText={
-                                    hasError?message:""
+                                    hasError ? message : ""
                                 }
                                 error={hasError}
                                 placeholder={placeholder}
-                                variant="outlined"
+                                variant={variant}
                                 size="small"
                                 onChange={(e) => setQ(e.target.value)}
                             />

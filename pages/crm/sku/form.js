@@ -112,7 +112,11 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                         required: "Vui lòng nhập",
                                         min: {
                                             value: 1,
-                                            message: "Vui lòng nhập giá trị giá bán lớn hơn 1"
+                                            message: "Vui lòng nhập giá trị giá bán lớn hơn hoặc bằng 1"
+                                        },
+                                        max: {
+                                            value: 100000000,
+                                            message: "Vui lòng nhập giá trị giá bán nhỏ hơn hoặc bằng 100000000"
                                         },
                                         valueAsNumber: true, // important
 
@@ -177,12 +181,17 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                     required
                                     inputRef={
                                         register({
-                                            required: "Vui lòng nhập giá bán",
+                                            required: "Vui lòng nhập",
                                             min: {
                                                 value: 1,
-                                                message: "Vui lòng nhập giá trị giá bán lớn hơn 0"
+                                                message: "Vui lòng nhập giá trị giá bán lớn hơn hoặc bằng 1"
+                                            },
+                                            max: {
+                                                value: 100000000,
+                                                message: "Vui lòng nhập giá trị giá bán nhỏ hơn hoặc bằng 100000000"
                                             },
                                             valueAsNumber: true, // important
+    
                                         })
                                     }
                                 />
@@ -191,7 +200,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                    Số lượng tối thiểu áp dụng<span style={{color: 'red'}}>*</span>:
+                                    Số lượng đặt tối thiểu trên một đơn hàng<span style={{color: 'red'}}>*</span>:
                                     </FormLabel>
                                 </Typography>
                                 <TextField
@@ -215,11 +224,11 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                             required: "Vui lòng nhập",
                                             min: {
                                                 value: 2,
-                                                message: "Vui lòng nhập số lượng tối thiểu lớn hơn 2"
+                                                message: "Vui lòng nhập số lượng đặt tối thiểu lớn hơn 2"
                                             },
                                             max: {
                                                 value: maxQuantity,
-                                                message: "Vui lòng nhập số lượng tối thiểu nhỏ hơn hoặc bằng " + maxQuantity
+                                                message: "Vui lòng nhập số lượng đặt tối thiểu nhỏ hơn hoặc bằng " + maxQuantity
                                             },
                                             // validate: value => {
                                             //     if (minQuantitys.includes(value)) {
@@ -396,9 +405,9 @@ export default function renderForm(props, toast) {
         let result = await _client.updatePrice(formData)
         setLoading(false);
         if (result.status === "OK") {
-            success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định')
+            success(result.message ? 'Cập nhật thông tin thành công' : 'Có lỗi xảy ra')
         } else {
-            error(result.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            error(result.message || 'Cập nhật thông tin không thành công')
         }
     }
 
@@ -532,7 +541,7 @@ export default function renderForm(props, toast) {
                                         <FormControl style={{width: '100%'}} size="small">
                                             <Typography gutterBottom>
                                                 <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                    Số lượng tối đa<span style={{color: 'red'}}>*</span>:
+                                                    Số lượng đặt tối đa trên một đơn hàng<span style={{color: 'red'}}>*</span>:
                                                 </FormLabel>
                                             </Typography>
                                             <TextField
@@ -557,7 +566,7 @@ export default function renderForm(props, toast) {
                                                         required: true,
                                                         min: {
                                                             value: 2,
-                                                            message: "Vui lòng nhập số lượng tối đa áp dụng lớn hơn hoặc bằng 2"
+                                                            message: "Vui lòng nhập số lượng đặt tối đa áp dụng lớn hơn hoặc bằng 2"
                                                         },
                                                         valueAsNumber: true, // important,
                                                     })
@@ -633,7 +642,7 @@ export default function renderForm(props, toast) {
                                     {props.isUpdate ? <Button
                                         color="primary"
                                         disabled={(typeof props.product === "undefined" && !getValues().productCode) || (defaultIds.length === 5)}
-                                        style={{ marginTop: '10px' }}
+                                        style={{ marginTop: '10px', display: defaultIds.length === 5 ? 'none' : '' }}
                                         onClick={() => {
                                             let mId = defaultIds.length - 1 <= 0 ? incrId + defaultIds.length : defaultIds.length + incrId + 1
                                             setDefaultIds([...defaultIds, mId + 1]);
