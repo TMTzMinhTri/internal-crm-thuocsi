@@ -200,7 +200,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                    Số lượng tối thiểu áp dụng<span style={{color: 'red'}}>*</span>:
+                                    Số lượng đặt tối thiểu trên một đơn hàng<span style={{color: 'red'}}>*</span>:
                                     </FormLabel>
                                 </Typography>
                                 <TextField
@@ -224,11 +224,11 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                             required: "Vui lòng nhập",
                                             min: {
                                                 value: 2,
-                                                message: "Vui lòng nhập số lượng tối thiểu lớn hơn 2"
+                                                message: "Vui lòng nhập số lượng đặt tối thiểu lớn hơn 2"
                                             },
                                             max: {
                                                 value: maxQuantity,
-                                                message: "Vui lòng nhập số lượng tối thiểu nhỏ hơn hoặc bằng " + maxQuantity
+                                                message: "Vui lòng nhập số lượng đặt tối thiểu nhỏ hơn hoặc bằng " + maxQuantity
                                             },
                                             // validate: value => {
                                             //     if (minQuantitys.includes(value)) {
@@ -541,7 +541,7 @@ export default function renderForm(props, toast) {
                                         <FormControl style={{width: '100%'}} size="small">
                                             <Typography gutterBottom>
                                                 <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                    Số lượng tối đa<span style={{color: 'red'}}>*</span>:
+                                                    Số lượng đặt tối đa trên một đơn hàng<span style={{color: 'red'}}>*</span>:
                                                 </FormLabel>
                                             </Typography>
                                             <TextField
@@ -566,7 +566,7 @@ export default function renderForm(props, toast) {
                                                         required: true,
                                                         min: {
                                                             value: 2,
-                                                            message: "Vui lòng nhập số lượng tối đa áp dụng lớn hơn hoặc bằng 2"
+                                                            message: "Vui lòng nhập số lượng đặt tối đa áp dụng lớn hơn hoặc bằng 2"
                                                         },
                                                         valueAsNumber: true, // important,
                                                     })
