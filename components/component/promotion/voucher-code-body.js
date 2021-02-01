@@ -38,6 +38,7 @@ export default function VoucherCodeBody(props) {
         handleChangeType,
         appliedCustomers,
         promotion,
+        edit,
         onChangePromotion,
         onChangeCustomer,
         register,
@@ -76,6 +77,7 @@ export default function VoucherCodeBody(props) {
                     id="code"
                     name="code"
                     label="Nhập mã khuyến mãi"
+                    disabled={edit}
                     helperText={errors.code?.message}
                     InputLabelProps={{
                         shrink: true,
@@ -159,7 +161,7 @@ export default function VoucherCodeBody(props) {
                     <MenuItem  value="PUBLIC">
                         <div style={{fontWeight: "bold"}}>PUBLIC</div>
                     </MenuItem>
-                    <MenuItem  value="PRIVATE ">
+                    <MenuItem  value="PRIVATE">
                         <div style={{fontWeight: "bold"}} >PRIVATE</div>
                     </MenuItem>
                 </Select>

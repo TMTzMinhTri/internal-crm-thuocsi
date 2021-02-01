@@ -59,13 +59,12 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props,render)
 }
 
-export async function updateVoucher(code,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
+export async function updateVoucher(voucherId,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
     expiredDate = expiredDate + ":00.000Z"
-    let data = {code,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer}
+    let data = {voucherId,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer}
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers=appliedCustomers
     }
-    console.log('data',data)
     return getVoucherClient().updateVoucher(data)
 }
 
@@ -89,12 +88,13 @@ function render(props) {
         let value = getValues()
         let {code,expiredDate,maxUsage,maxUsagePerCustomer} = value
         let {promotionId,type,customerIds} = dataProps
-        let createVoucherResponse = await updateVoucher(code,parseInt(promotionId),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
+        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Cập nhật mã khuyến mãi thành công')
         }else {
-            toast.error(createVoucherResponse.message)
+            return toast.error(createVoucherResponse.message)
         }
+        await router.push('/crm/promotion?type=VOUCHERCODE')
     }
 
     const handleSetShowAutoComplete = (value) => {
@@ -133,6 +133,7 @@ function render(props) {
                         control={control}
                         handleChangeType={handleChangeType}
                         dataProps={dataProps}
+                        edit={true}
                         appliedCustomers={props.customers}
                         onChangeCustomer={handleChangeCustomer}
                         onChangePromotion={handleChangePromotion}
