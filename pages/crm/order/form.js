@@ -367,7 +367,7 @@ export default function renderForm(props, toast) {
                             <Box className={styles.contentPadding}>
                                 <Typography variant="h6" component="h6"
                                     style={{ marginBottom: '10px', fontSize: 25, fontWeight: 'bold' }}>
-                                    Đơn hàng #{props.order.orderId}
+                                    Đơn hàng #{props.order?.orderId}
                                 </Typography>
                                 <Card variant="outlined">
                                     <CardContent>
