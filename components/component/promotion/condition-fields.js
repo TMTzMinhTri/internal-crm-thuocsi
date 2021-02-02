@@ -73,7 +73,7 @@ const ConditionFields = (props) => {
               spacing={2}
               direction="column"
             >
-            <Grid container>
+              <Grid container>
                 <h4>ĐIỀU KIỆN ÁP DỤNG KHUYẾN MÃI</h4>
               </Grid>
               <Condition
