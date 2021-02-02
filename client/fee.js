@@ -118,6 +118,19 @@ class FeeClient extends APIClient {
         )
     }
 
+    getThresholdFeeList(offset, limit, q) {
+        return this.callFromNextJS(
+            'GET',
+            `${PREFIX_PRODUCT}/thresholds/list`,
+            {
+                offset,
+                limit,
+                q,
+                getTotal: true,
+            }
+        )
+    }
+
     updateRegionFee(code, fee) {
         return this.callFromClient(
             'PUT',
@@ -177,6 +190,17 @@ class FeeClient extends APIClient {
         return this.callFromClient(
             'PUT',
             `${PREFIX_PRODUCT}/tags/fee`,
+            {
+                code,
+                feeValue: fee,
+            }
+        )
+    }
+
+    updateThresholdFee(code, fee) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX_PRODUCT}/this_is_mock/fee`,
             {
                 code,
                 feeValue: fee,

@@ -5,4 +5,5 @@ export const ViewType = {
     WARD: 'ward',
     CUSTOMER: 'customer',
     TAG: 'tag',
+    THRESHOLD: 'threshold',
 }

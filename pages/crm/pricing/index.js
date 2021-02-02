@@ -16,6 +16,7 @@ import { DistrictTable } from 'containers/crm/pricing/DistrictTable';
 import { CustomerLevelTable } from 'containers/crm/pricing/CustomerLevelTable';
 import { WardTable } from 'containers/crm/pricing/WardTable';
 import { TagTable } from "containers/crm/pricing/TagTable";
+import { ThresholdTable } from 'containers/crm/pricing/ThresholdTable';
 
 export async function loadPricingData(ctx, type, offset, limit, q) {
     const feeClient = getFeeClient(ctx);
@@ -109,6 +110,21 @@ export async function loadPricingData(ctx, type, offset, limit, q) {
         }
         return { message: res.message, }
     }
+    if (type === ViewType.THRESHOLD) {
+        const res = await feeClient.getThresholdsFeeList(offset, limit, q);
+        if (res.status === 'OK') {
+            return {
+                total: res.total ?? null,
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy ngưỡng giá phù hợp.'
+            }
+        }
+        return { message: res.message, }
+    }
 }
 
 export async function getServerSideProps(ctx) {
@@ -134,12 +150,17 @@ export async function getServerSideProps(ctx) {
                     districtData: v === ViewType.DISTRICT ? data : null,
                     wardData: v === ViewType.WARD ? data : null,
                     customerData: v === ViewType.CUSTOMER ? data : null,
-                    tagData: v ===ViewType.TAG ? data : null,
+                    tagData: v === ViewType.TAG ? data : null,
+                    thresholdData: v === ViewType.THRESHOLD ? data : null,
                 }
             }
         } catch (err) {
             return {
                 props: {
+                    viewType: v,
+                    q,
+                    page,
+                    limit,
                     message: err.message ?? unknownErrorText,
                 }
             }
@@ -153,6 +174,7 @@ const searchPlaceholderText = {
     [ViewType.PROVINCE]: "Nhập tên tỉnh thành,...",
     [ViewType.DISTRICT]: "Nhập tên quận huyện,...",
     [ViewType.WARD]: "Nhập tên phường/xã,...",
+    [ViewType.THRESHOLD]: "Nhập tên ngưỡng giá,...",
 }
 
 /**
@@ -212,6 +234,7 @@ function render(props) {
                             >
                                 <Tab value={ViewType.CUSTOMER} label="Theo khách hàng" />
                                 <Tab value={ViewType.TAG} label="Theo tag" />
+                                <Tab value={ViewType.THRESHOLD} label="Theo ngưỡng giá" />
                                 <Tab value={ViewType.REGION} label="Theo vùng" />
                                 <Tab value={ViewType.PROVINCE} label="Theo tỉnh thành" />
                                 <Tab value={ViewType.DISTRICT} label="Theo quận huyện" />
@@ -266,6 +289,16 @@ function render(props) {
                                 page={props.page}
                                 limit={props.limit}
                                 total={props.tagData?.total}
+                            />
+                        )}
+                        {viewType === ViewType.THRESHOLD && (
+                            <ThresholdTable
+                                data={props.thresholdData?.data}
+                                q={searchText}
+                                message={props.thresholdData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.thresholdData?.total}
                             />
                         )}
                         {viewType === ViewType.PROVINCE && (
