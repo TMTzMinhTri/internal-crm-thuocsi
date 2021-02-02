@@ -409,6 +409,12 @@ function render(props) {
     console.log(JSON.stringify(body), "body");
 
     let res = await createPromontion(body);
+
+    if (res.status == "OK") {
+      toast.success("Tạo chương trình khuyến mãi thành công");
+    } else {
+      toast.error("Xảy ra lỗi");
+    }
     console.log(res, "res");
   }
 

@@ -30,14 +30,27 @@ class CustomerClient extends APIClient {
     });
   }
 
+  getLevel() {
+    return this.callFromClient("GET", `${URI}/level/list`);
+  }
+
+  getCustomerByIDs(ids) {
+    return this.callFromNextJS("POST", `${URI}/account/list`, { ids });
+  }
+
+  getCustomerFromClient(offset, limit, q) {
+    return this.callFromClient("GET", `${URI}/account/list`, {
+      q: q,
+      offset: offset,
+      limit: limit,
+      getTotal: true,
+    });
+  }
+
   getCustomerByCustomerCode(customerCode) {
     return this.callFromNextJS("GET", `${URI}/account`, {
       customerCode: customerCode,
     });
-  }
-
-  getLevel() {
-    return this.callFromClient("GET", `${URI}/level/list`);
   }
 
   createNewCustomer(data) {
