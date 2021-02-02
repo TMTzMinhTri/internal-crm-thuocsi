@@ -87,18 +87,14 @@ const AutoCompleteField = (props) => {
     setProductList([]);
     let value = event.target.value;
     if (value != "") {
-      console.log(value, "value", type);
       let res = await fetchOptions(type, value);
-      console.log(res, "res");
       if (res?.status == "OK") {
-        console.log(res, "res");
         setProductList(res.data);
       } else {
         setProductList([]);
       }
     }
   };
-  console.log(options, "options");
 
   return (
     <Autocomplete
