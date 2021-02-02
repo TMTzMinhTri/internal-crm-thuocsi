@@ -112,10 +112,10 @@ export async function loadDataBefore(ctx) {
           break;
         case defaultScope.ingredient:
           typeVariable = "ingredients";
-          listRes = await getProductClient(ctx, {}).getIngredientByIDs(
-            o[typeVariable],
-            []
-          );
+          // listRes = await getProductClient(ctx, {}).getIngredientByIDs(
+          //   o[typeVariable],
+          //   []
+          // );
           break;
         case defaultScope.producer:
           typeVariable = "sellerCodes";
