@@ -11,7 +11,7 @@ import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagin
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { useRouter } from "next/router";
 
-import { ViewType } from ".";
+import { ViewType } from "./enum";
 import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
 import { unknownErrorText } from "components/commonErrors";

@@ -11,7 +11,7 @@ import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagin
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { useRouter } from "next/router";
 
-import { ViewType } from ".";
+import { ViewType } from "./enum";
 import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
 import { unknownErrorText } from "components/commonErrors";
@@ -30,7 +30,7 @@ import { ConfirmDialog } from "./ConfirmDialog";
  * @param {number} props.limit
  * @param {number} props.total
  */
-export const ThresholdTable = (props) => {
+export const PriceLevelTable = (props) => {
     const router = useRouter();
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);
@@ -113,7 +113,7 @@ export const ThresholdTable = (props) => {
                     page={props.page}
                     onChangePage={(_, page, rowsPerPage) => {
                         router.push(
-                            `/crm/pricing?v=${ViewType.THRESHOLD}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
+                            `/crm/pricing?v=${ViewType.PRICE_LEVEL}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
                         );
                     }}
                 />

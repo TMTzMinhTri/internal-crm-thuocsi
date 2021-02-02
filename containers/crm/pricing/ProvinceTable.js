@@ -9,7 +9,7 @@ import {
 } from "@material-ui/core";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useRouter } from "next/router";
-import { ViewType } from ".";
+import { ViewType } from "./enum";
 import { TableFeeValueCell } from "./TableFeeValueCell";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getFeeClient } from "client/fee";
