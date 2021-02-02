@@ -56,7 +56,7 @@ const ConditionFields = (props) => {
               direction="column"
             >
               <Grid container>
-                <h3>PHẠM VI ÁP DỤNG</h3>
+                <h4>PHẠM VI ÁP DỤNG</h4>
               </Grid>
               <Scope
                 register={register}
@@ -73,8 +73,8 @@ const ConditionFields = (props) => {
               spacing={2}
               direction="column"
             >
-              <Grid container>
-                <h3>ĐIỀU KIỆN ÁP DỤNG KHUYẾN MÃI</h3>
+            <Grid container>
+                <h4>ĐIỀU KIỆN ÁP DỤNG KHUYẾN MÃI</h4>
               </Grid>
               <Condition
                 register={register}
@@ -96,7 +96,7 @@ const ConditionFields = (props) => {
               direction="column"
             >
               <Grid container>
-                <h3>GIÁ TRỊ KHUYẾN MÃI</h3>
+                <h4>GIÁ TRỊ KHUYẾN MÃI</h4>
               </Grid>
               <Reward
                 register={register}
@@ -111,16 +111,18 @@ const ConditionFields = (props) => {
           </Grid>
           <Grid item xs={12}>
             <h4>Mô tả</h4>
-            <TextareaAutosize
-              className={classess.textarea}
-              rowsMin={20}
-              rowsMax={20}
-              style={{ width: "100% !important" }}
-              aria-label="maximum height"
-              placeholder="Nhập mô tả"
-              value={descriptionField}
-              onChange={handleChangeTextField("descriptionField")}
-            />
+            <Grid item xs={6}>
+              <TextareaAutosize
+                className={classess.textarea}
+                rowsMin={20}
+                rowsMax={20}
+                style={{ width: "100% !important" }}
+                aria-label="maximum height"
+                placeholder="Nhập mô tả"
+                value={descriptionField}
+                onChange={handleChangeTextField("descriptionField")}
+              />
+            </Grid>
           </Grid>
         </Grid>
       </CardContent>
