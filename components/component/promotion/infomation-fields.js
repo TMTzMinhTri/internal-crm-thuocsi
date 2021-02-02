@@ -15,8 +15,6 @@ const InfomationFields = (props) => {
       totalCollect: 0,
     },
     errors,
-    endTime = new Date(),
-    startTime = new Date(),
     register,
     edit = false,
     textField,
@@ -25,10 +23,11 @@ const InfomationFields = (props) => {
 
   const { handleChangeTextField } = props;
 
-  const { promotionField, promotionTypeField } = textField;
+  const { promotionField, promotionTypeField, startTime, endTime } = textField;
 
   const { promotionError, promotionTypeError } = errorTextField;
 
+  console.log(startTime, "startTime");
   return (
     <>
       <CardContent>
@@ -63,8 +62,7 @@ const InfomationFields = (props) => {
               })}
             />
           </Grid>
-          <Grid item xs={12} sm={1} md={1}>
-          </Grid>
+          <Grid item xs={12} sm={1} md={1}></Grid>
           <Grid item xs={12} sm={4} md={4}>
             <SelectField
               title="Bên tổ chức"
@@ -74,8 +72,7 @@ const InfomationFields = (props) => {
               handleChange={handleChangeTextField("promotionField")}
             />
           </Grid>
-          <Grid item xs={12} sm={3} md={3}>
-          </Grid>
+          <Grid item xs={12} sm={3} md={3}></Grid>
           <Grid item xs={12} sm={4} md={4}>
             <SelectField
               title="Hình thức áp dụng"
@@ -85,8 +82,7 @@ const InfomationFields = (props) => {
               handleChange={handleChangeTextField("promotionTypeField")}
             />
           </Grid>
-          <Grid item xs={12} sm={1} md={1}>
-          </Grid>
+          <Grid item xs={12} sm={1} md={1}></Grid>
           <Grid container item xs={4}>
             <Grid item xs={5}>
               <TextField
@@ -107,8 +103,7 @@ const InfomationFields = (props) => {
                 })}
               />
             </Grid>
-            <Grid item xs={2}>
-            </Grid>
+            <Grid item xs={2}></Grid>
             <Grid item xs={5}>
               <TextField
                 name="endTime"
@@ -128,7 +123,7 @@ const InfomationFields = (props) => {
                 })}
               />
             </Grid>
-        </Grid>
+          </Grid>
         </Grid>
       </CardContent>
     </>
