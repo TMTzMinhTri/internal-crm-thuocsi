@@ -321,8 +321,8 @@ function render(props) {
       rules.conditions[0].gifts = gifts;
     }
 
-    let fromDate = 0;
-    let toDate = 0;
+    let fromDate = "";
+    let toDate = "";
     if (value.startTime) {
       fromDate = new Date(value.startTime).toISOString();
     }
