@@ -133,10 +133,8 @@ const Condition = (props) => {
                 variant="contained"
                 color="primary"
                 onClick={handleAddProductOfProductList}
-                startIcon={<Add />}
-              >
-                Thêm
-              </Button>
+                startIcon={<Add/>}
+              />
             </Grid>
           </>
         ))}

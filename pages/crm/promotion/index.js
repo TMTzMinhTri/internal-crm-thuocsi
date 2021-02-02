@@ -11,7 +11,7 @@ import {
   MenuItem,
   InputLabel,
   TableHead,
-  TableRow,
+  TableRow, DialogTitle, Typography, DialogContent, DialogActions, Dialog,
 } from "@material-ui/core";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import Head from "next/head";
@@ -62,6 +62,8 @@ import {
   defaultPromotionStatus,
   defaultPromotionType,
 } from "components/component/constant";
+import ModalCustom from "../../../components/modal/dialogs";
+import CloseIcon from "@material-ui/icons/Close";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
@@ -87,7 +89,6 @@ export async function loadPromoData(ctx) {
       offset,
       true
     );
-    console.log("1234", getPromotionResponse);
     if (getPromotionResponse && getPromotionResponse.status === "OK") {
       returnObject.props.promotion = getPromotionResponse.data;
       returnObject.props.promotionCount = getPromotionResponse.total;
@@ -130,9 +131,12 @@ function render(props) {
     defaultPromotionType.VOUCHER_CODE
   );
   let [search, setSearch] = useState("");
-  let [open, setOpen] = useState({
-    openModalCreate: false,
-  });
+  let [openModal, setOpenModal] = useState({
+    open: false,
+    promotionId: 0,
+    promotionName: '',
+    checked: false,
+  })
   let textSearch = router.query.search || "";
 
   const [page, setPage] = useState(parseInt(router.query.page || 0));
@@ -194,44 +198,52 @@ function render(props) {
     });
   };
 
-  const handleActivePromotion = async (event, promotionID) => {
-    if (event.target.checked) {
+  const handleActivePromotion = async () => {
+    let {checked,promotionId} = openModal
+    if (checked) {
       let promotionResponse = await updatePromotion(
-        promotionID,
+          promotionId,
         defaultPromotionStatus.ACTIVE
       );
       if (!promotionResponse || promotionResponse.status !== "OK") {
+        setOpenModal({...openModal,open: false})
         return toast.error(promotionResponse.mesage);
       } else {
         props.promotion.forEach((d) => {
-          if (d.promotionId === promotionID) {
+          if (d.promotionId === promotionId) {
             return (d.status = defaultPromotionStatus.ACTIVE);
           }
         });
+        setOpenModal({...openModal,open: false})
         return toast.success("Cập nhật thành công");
       }
     } else {
       let promotionResponse = await updatePromotion(
-        promotionID,
+          promotionId,
         defaultPromotionStatus.EXPIRED
       );
       if (!promotionResponse || promotionResponse.status !== "OK") {
+        setOpenModal({...openModal,open: false})
         return toast.error(promotionResponse.mesage);
       } else {
         props.promotion.forEach((d) => {
-          if (d.promotionId === promotionID) {
+          if (d.promotionId === promotionId) {
             return (d.status = defaultPromotionStatus.EXPIRED);
           }
         });
+        setOpenModal({...openModal,open: false})
         return toast.success("Cập nhật thành công");
       }
     }
   };
 
-  async function handleChange(event) {
-    const target = event.target;
-    const value = target.value;
-    setSearch(value);
+  const handleConfirm = (promotionId,checked,open,promotionName) => {
+    setOpenModal({
+      open: open,
+      promotionName: promotionName,
+      promotionId: promotionId,
+      checked: checked,
+    })
   }
 
   async function handleChange(event) {
@@ -271,6 +283,7 @@ function render(props) {
         <MyCardHeader title="Danh sách khuyến mãi">
           <Link
             href={`/crm/promotion/${
+
               typePromotion === defaultPromotionType.PROMOTION
                 ? "new"
                 : "new-voucher"
@@ -382,7 +395,7 @@ function render(props) {
                         <TableCell align="left">
                           <Switch
                             onChange={(event) => {
-                              handleActivePromotion(event, row.promotionId);
+                              handleConfirm(row.promotionId,event.target.checked,true,row.promotionName);
                             }}
                             checked={row.status === "ACTIVE" ? true : false}
                             color="primary"
@@ -503,6 +516,27 @@ function render(props) {
               </Table>
             </TableContainer>
           )}
+          <Dialog open={openModal.open} scroll="body" fullWidth={true}>
+            <DialogTitle id={"modal"+"-dialog-title"} onClose={() =>setOpenModal({...openModal,open: false})}>
+              <Typography variant="h6">Thông báo!</Typography>
+                  <IconButton aria-label="close" onClick={() =>setOpenModal({...openModal,open: false})} style={{position: 'absolute', top: '1px', right: '1px'}}>
+                    <CloseIcon />
+                  </IconButton>
+            </DialogTitle>
+            <DialogContent dividers>
+              <div>
+                Bạn muốn <span style={{fontWeight: "bold"}}>{openModal.checked === true ?"bật" : "tắt"}</span> trạng thái của chương trình <span style={{fontWeight: "bold"}}>{openModal.promotionId + " - " + openModal.promotionName}</span> hay không?
+              </div>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() =>setOpenModal({...openModal,open: false})} variant={"contained"}>
+                Thoát
+              </Button>
+              <Button autoFocus color="primary" variant={"contained"} onClick={handleActivePromotion}>
+                Đồng ý
+              </Button>
+            </DialogActions>
+          </Dialog>
         </MyCardContent>
       </MyCard>
     </AppCRM>

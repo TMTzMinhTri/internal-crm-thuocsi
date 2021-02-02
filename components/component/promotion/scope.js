@@ -20,7 +20,7 @@ const Scope = (props) => {
     <>
       {scopeObject.map(
         ({ registeredBefore, registeredAfter, selectField }, index) => (
-          <Paper variant="outlined" style={{ padding: 10, margin: "10px 0" }}>
+          <Paper style={{ padding: 10, margin: "10px 0", border : 'none' }}>
             <Grid container spacing={2} direction="column">
               <Grid item container xs={6}>
                 <SelectField
@@ -97,7 +97,6 @@ const Scope = (props) => {
           startIcon={<Add />}
           onClick={handleAddScopeSelect}
         >
-          Thêm
         </Button>
       </Grid>
     </>

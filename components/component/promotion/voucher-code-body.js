@@ -133,7 +133,7 @@ export default function VoucherCodeBody(props) {
                     name="expiredDate"
                     helperText={errors.expiredDate?.message}
                     error={!!errors.expiredDate}
-                    label="Hạn sử dụng mã khuyến mãi"
+                    // label="Hạn sử dụng mã khuyến mãi"
                     placeholder=""
                     type="datetime-local"
                     InputLabelProps={{
