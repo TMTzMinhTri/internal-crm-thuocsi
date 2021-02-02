@@ -71,6 +71,7 @@ export async function loadPromoData(ctx) {
     if (type === defaultPromotionType.PROMOTION || !type) {
         let _promotionClient = getPromoClient(ctx, {})
         let getPromotionResponse = await _promotionClient.getPromotion(search, limit, offset, true)
+        console.log('1234',getPromotionResponse)
         if (getPromotionResponse && getPromotionResponse.status === "OK") {
             returnObject.props.promotion = getPromotionResponse.data
             returnObject.props.promotionCount = getPromotionResponse.total
@@ -212,6 +213,8 @@ function render(props) {
     function handleChangeTab(event,value) {
         setTypePromotion(value)
         setSearch('')
+        setPage(0)
+        setRowsPerPage(20)
         router.push({
             pathname: '/crm/promotion',
             query : {
@@ -219,6 +222,7 @@ function render(props) {
             }
         })
     }
+
 
     return (
         <AppCRM select="/crm/promotion">
@@ -295,13 +299,11 @@ function render(props) {
                                 <Table size="small" aria-label="a dense table">
                                     <TableHead>
                                         <TableRow>
-                                            <TableCell align="left">Tên</TableCell>
-                                            <TableCell align="left">Loại</TableCell>
-                                            <TableCell align="left">Áp dụng cho</TableCell>
-                                            <TableCell align="left">Chi tiết khuyến mãi</TableCell>
+                                            <TableCell align="left">Chương trình khuyến mãi</TableCell>
+                                            <TableCell align="left">Bên tổ chức</TableCell>
+                                            <TableCell align="left">Hình thức áp dụng</TableCell>
+                                            <TableCell align="left">Thời gian áp dụng</TableCell>
                                             <TableCell align="left">Trạng Thái</TableCell>
-                                            <TableCell align="left">Đang chạy</TableCell>
-                                            <TableCell align="left">Thời gian</TableCell>
                                             <TableCell align="center">Thao tác</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -314,51 +316,6 @@ function render(props) {
                                                     </TableCell>
                                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
                                                     <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
-                                                    <TableCell align="left">
-                                                        {
-                                                            displayRule(row.rule).length > 0 && (
-                                                                <Grid container spacing={1} direction="row">
-                                                                    <Grid item xs={12} sm={11} md={11} direction="column">
-                                                                        {
-                                                                            displayRule(row.rule).map((rule, index) => (
-                                                                                index < 2 ? (
-                                                                                    <Grid  item xs={12} sm={11} md={11} direction="column" key={'_' + index + '_'}>
-                                                                                        {
-                                                                                            index % 2 === 0 ? (
-                                                                                                <div>{rule}</div>
-                                                                                            ) : (
-                                                                                                <div style={{fontStyle: "italic"}}>{rule}</div>
-                                                                                            )
-                                                                                        }
-                                                                                    </Grid>
-                                                                                ): (
-                                                                                    <Grid name={"hideItem" + row.promotionId} key={row.promotionId + '_' + index} style={{display: "none"}} item xs={12} sm={11} md={11} direction="column">
-                                                                                        {
-                                                                                            index % 2 === 0 ? (
-                                                                                                <div>{rule}</div>
-                                                                                            ) : (
-                                                                                                <div  style={{fontStyle: "italic"}}>{rule}</div>
-                                                                                            )
-                                                                                        }
-                                                                                    </Grid>
-                                                                                )
-                                                                            ))
-                                                                        }
-                                                                    </Grid>
-                                                                    {
-                                                                        displayRule(row.rule).length > 3  && (
-                                                                            <Grid item xs={12} sm={1} md={1} onClick={() => handleClickShowItem(row.promotionId)}>
-                                                                                <IconButton>
-                                                                                    <FontAwesomeIcon id={"buttonDown" + row.promotionId} icon={faAngleDown}/>
-                                                                                    <FontAwesomeIcon id={"buttonUp" + row.promotionId} icon={faAngleUp} style={{display:"none"}}/>
-                                                                                </IconButton>
-                                                                            </Grid>
-                                                                        )
-                                                                    }
-                                                                </Grid>
-                                                            )
-                                                        }
-                                                    </TableCell>
                                                     <TableCell align="left">
                                                         <div style={{fontWeight: "bold" }}>{displayStatus(row.status)}</div>
                                                     </TableCell>
@@ -427,7 +384,9 @@ function render(props) {
                                                     </TableCell>
                                                     <TableCell align="left">{row.promotionName}</TableCell>
                                                     <TableCell align="left">{row.type}</TableCell>
-                                                    <TableCell align="center">{displayUsage(row.maxUsage)}</TableCell>
+                                                    <TableCell align="center">
+                                                        <div style={{fontWeight: "bold" }}>{displayUsage(row.maxUsage)}</div>
+                                                    </TableCell>
                                                     <TableCell align="center">
                                                         <div style={{fontWeight: "bold" }}>{displayUsage(row.maxUsagePerCustomer)}</div>
                                                     </TableCell>

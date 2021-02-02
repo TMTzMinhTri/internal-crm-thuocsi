@@ -281,7 +281,7 @@ export function displayRule(rule) {
 
 export function formatTime(time) {
     if (!time || time === "") {
-        return "Chưa cài đặt"
+        return "Không giới hạn"
     }
     time = time.substring(0, time.length - 4);
     if (Number.isInteger(time)) {
