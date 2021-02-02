@@ -108,7 +108,7 @@ function render(props) {
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "APPROVED"
+            props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "ACTIVE"
             setApprovedCustomerCode(null)
             success("Kích hoạt tài khoản thành công")
             // window.location.reload()
@@ -152,7 +152,7 @@ function render(props) {
                         </Tooltip>
                     </a>
                 </Link>
-                {row.data.status === 'APPROVED' ? <Tooltip title="Khóa tài khoản">
+                {row.data.status === 'ACTIVE' ? <Tooltip title="Khóa tài khoản">
                     <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row.data) }}>
                         <LockOpenIcon fontSize="small" />
                     </IconButton>
