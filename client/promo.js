@@ -41,6 +41,17 @@ class PromoClient extends APIClient{
         )
     }
 
+    getPromotionFromClient(promotionCode,limit,offset,getTotal) {
+        let q = JSON.stringify({promotionCode})
+        return this.callFromClient(
+            "GET",
+            `${constURL.PREFIX_PROMOTION}/promotion`,
+            {
+                q:q,limit,getTotal,offset
+            }
+        )
+    }
+
     // TODO
 
 }

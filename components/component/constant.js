@@ -11,6 +11,7 @@ export const defaultPromotionType = {
     COMBO: "COMBO",
     VOUCHER_CODE: "VOUCHERCODE",
     FREESHIP: " FREESHIP",
+    PROMOTION: "PROMOTOTION",
 }
 
 export const defaultPromotionScope = {
