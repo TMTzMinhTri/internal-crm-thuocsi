@@ -15,8 +15,6 @@ const InfomationFields = (props) => {
       totalCollect: 0,
     },
     errors,
-    endTime = new Date(),
-    startTime = new Date(),
     register,
     edit = false,
     textField,
@@ -25,7 +23,7 @@ const InfomationFields = (props) => {
 
   const { handleChangeTextField } = props;
 
-  const { promotionField, promotionTypeField } = textField;
+  const { promotionField, promotionTypeField, startTime, endTime } = textField;
 
   const { promotionError, promotionTypeError } = errorTextField;
 

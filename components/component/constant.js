@@ -10,7 +10,7 @@ export const queryParamGetProductGift = "GIFT";
 
 export const defaultPromotionType = {
   COMBO: "COMBO",
-  VOUCHER_CODE: "VOUCHERCODE",
+  VOUCHER_CODE: "VOUCHER",
   FREESHIP: " FREESHIP",
   PROMOTION: "PROMOTOTION",
 };

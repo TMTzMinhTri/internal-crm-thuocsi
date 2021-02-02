@@ -1,442 +1,638 @@
-import React, {useState} from "react";
-
-import Head from "next/head";
-import {useRouter} from "next/router";
 import {
-    Box,
-    Button, ButtonGroup,
-    Divider,
-    FormGroup,
-    Grid,
-    Paper,
+  Box,
+  Button,
+  FormGroup,
+  Paper,
+  Grid,
+  Divider,
+  ButtonGroup,
 } from "@material-ui/core";
-
+import Head from "next/head";
 import AppCRM from "pages/_layout";
-
-import {useForm} from "react-hook-form";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import styles from "./promotion.module.css";
 import {
-    doWithLoggedInUser,
-    renderWithLoggedInUser,
+  doWithLoggedInUser,
+  renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
-import {defaultNameRulesValue, defaultPromotionScope} from "../../../components/component/constant";
-import {
-    displayNameRule,
-    displayTime,
-    parseRuleToObject,
-    setRulesPromotion,
-    setScopeObjectPromontion,
-} from "../../../components/component/until";
-
-import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
-
-import {getPromoClient} from "../../../client/promo";
-import {getProductClient} from "../../../client/product";
-import {getCategoryClient} from "../../../client/category";
+import { getPromoClient } from "../../../client/promo";
 import ArrowBackIcon from "@material-ui/icons/ArrowBack";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getProductClient } from "../../../client/product";
+import { getCategoryClient } from "../../../client/category";
+import {
+  defaultCondition,
+  defaultNameRulesValue,
+  defaultPromotionScope,
+  defaultPromotionType,
+  defaultReward,
+  defaultRulePromotion,
+  defaultScope,
+  defaultTypeConditionsRule,
+  defaultUseTypePromotion,
+  queryParamGetProductGift,
+} from "../../../components/component/constant";
+import {
+  displayNameRule,
+  setRulesPromotion,
+  setScopeObjectPromontion,
+} from "../../../components/component/until";
+import { useRouter } from "next/router";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
+import dynamic from "next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faAngleRight, faPlus } from "@fortawesome/free-solid-svg-icons";
 import Link from "@material-ui/core/Link";
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faAngleRight} from "@fortawesome/free-solid-svg-icons";
 import TitleLink from "../../../components/component/promotion/title";
+import {
+  MyCard,
+  MyCardActions,
+  MyCardContent,
+  MyCardHeader,
+} from "@thuocsi/nextjs-components/my-card/my-card";
+import { getCustomerClient } from "client/customer";
 
 export async function getServerSideProps(ctx) {
-    return await doWithLoggedInUser(ctx, () => {
-        return loadPromotionData(ctx);
+  return await doWithLoggedInUser(ctx, (ctx) => {
+    return loadDataBefore(ctx);
+  });
+}
+
+export async function loadDataBefore(ctx) {
+  let returnObject = {
+    props: {
+      gift: [],
+      products: [],
+      productConditions: [],
+      categoryCodes: [],
+      customerLevels: [],
+      ingredients: [],
+      sellerCodes: [],
+      productTag: [],
+      areaCodes: [],
+    },
+  };
+  let promotionId = ctx.query.promotionId;
+
+  let _promotionClient = getPromoClient(ctx, {});
+  let promotionRes = await _promotionClient.getPromotionByID(promotionId);
+  if (promotionRes && promotionRes.status === "OK") {
+    let data = promotionRes.data[0];
+    console.log(data.rule.conditions[0].productConditions, "rule");
+
+    returnObject.props.promotionRes = data;
+
+    data.objects.map(async (o, index) => {
+      let typeVariable = "";
+      let listRes;
+      switch (o.scope) {
+        case defaultScope.product:
+          typeVariable = "products";
+          listRes = await getProductClient(ctx, {}).getListProductByIdsOrCodes(
+            o[typeVariable],
+            []
+          );
+          break;
+        case defaultScope.productCatergory:
+          typeVariable = "categoryCodes";
+          listRes = await getCategoryClient(ctx, {}).getListCategoryByCodes(
+            o[typeVariable],
+            []
+          );
+          break;
+        case defaultScope.customer:
+          typeVariable = "customerLevels";
+          listRes = await getCustomerClient(ctx, {}).getCustomerByIDs(
+            o[typeVariable],
+            []
+          );
+          break;
+        case defaultScope.ingredient:
+          typeVariable = "ingredients";
+          listRes = await getProductClient(ctx, {}).getIngredientByIDs(
+            o[typeVariable],
+            []
+          );
+          break;
+        case defaultScope.producer:
+          typeVariable = "sellerCodes";
+          break;
+        case defaultScope.productTag:
+          typeVariable = "productTag";
+        case defaultScope.area:
+          typeVariable = "areaCodes";
+
+        default:
+          break;
+      }
+
+      console.log(listRes, typeVariable);
+
+      returnObject.props[typeVariable] = listRes.data;
     });
-}
 
-export async function loadPromotionData(ctx) {
-    let returnObject = {props: {}};
-    let query = ctx.query;
-    let _promotionClient = getPromoClient(ctx, {});
-    let getPromotionResponse = await _promotionClient.getPromotionByID(
-        query.promotionId
-    );
-    if (getPromotionResponse && getPromotionResponse.status === "OK") {
-        returnObject.props.data = getPromotionResponse.data[0];
+    if (data.rule.conditions[0].gift) {
+      let listProductRes = await getProductClient(
+        ctx,
+        {}
+      ).getListProductByIdsOrCodes(data.rule.conditions[0].gift, []);
+      returnObject.props.gift = listProductRes.data;
     }
 
-    let defaultState = parseRuleToObject(getPromotionResponse.data[0]);
-    let _productClient = getProductClient(ctx, {});
-    if (defaultState.listProductIDs.length > 0) {
-        let listProductPromotionResponse = await _productClient.getListProductByIdsOrCodes(
-            defaultState.listProductIDs
-        );
-        if (
-            listProductPromotionResponse &&
-            listProductPromotionResponse.status === "OK"
-        ) {
-            defaultState.listProductPromotion = listProductPromotionResponse.data;
-        }
-    }
-    defaultState.listProductDefault = [];
-    let listProductDefault = await _productClient.getListProduct();
-    if (listProductDefault && listProductDefault.status === "OK") {
-        listProductDefault.data.forEach((product, index) => {
-            if (index < 5) {
-                defaultState.listProductDefault.push({
-                    product: product,
-                    active:
-                        defaultState.listProductIDs?.find(
-                            (productId) => productId === product.productID
-                        ) || false,
-                });
-            }
-        });
+    if (data.rule.conditions[0].productConditions) {
+      let listId = [];
+      data.rule.conditions[0].productConditions.map(async (o) =>
+        listId.push(o.productId)
+      );
+      let listProductRes = await getProductClient(
+        ctx,
+        {}
+      ).getListProductByIdsOrCodes(listId, []);
+      returnObject.props.productConditions = listProductRes.data;
     }
 
-    defaultState.listCategoryDefault = [];
-    let _categoryClient = getCategoryClient(ctx, {});
-    let listCategoryResponse = await _categoryClient.getListCategory();
-    if (listCategoryResponse && listCategoryResponse.status === "OK") {
-        defaultState.listCategoryDefaultProduct = listCategoryResponse.data
-        listCategoryResponse.data.forEach((category, index) => {
-            defaultState.listCategoryDefault.push({
-                category: category,
-                active:
-                    defaultState.listCategoryCodes?.find(
-                        (categoryCode) => categoryCode === category.code
-                    ) || false,
-            });
-        });
-    }
+    returnObject.props.promotionRes = data;
+  }
 
-    let listCategoryPromotionResponse = await _categoryClient.getListCategoryByCodes(
-        defaultState.listCategoryCodes);
-    if (listCategoryPromotionResponse && listCategoryPromotionResponse.status === "OK") {
-        defaultState.listCategoryPromotion = listCategoryPromotionResponse.data;
-    }
-
-    returnObject.props.defaultState = defaultState;
-    return returnObject;
-}
-
-async function updatePromotion(promotionCode, applyPerUser, totalCode, promotionName, promotionType, startTime, endTime, objects, useType, rule, promotionId) {
-    let data = {applyPerUser, totalCode, promotionName, promotionType, objects, useType, rule, promotionId};
-    if (promotionCode !== "") {
-        data.promotionCode = promotionCode;
-    }
-    if (startTime !== "") {
-        data.startTime = startTime
-    }
-    if (endTime !== "") {
-        data.endTime = endTime + ":00Z";
-    }
-    return getPromoClient().updatePromotion(data);
+  return returnObject;
 }
 
 export default function NewPage(props) {
-    return renderWithLoggedInUser(props, render);
+  return renderWithLoggedInUser(props, render);
+}
+
+async function createPromontion(data) {
+  return getPromoClient().createPromotion(data);
+}
+
+async function updatePromontion(data) {
+  return getPromoClient().updatePromotion(data);
+}
+
+async function getProduct(offset, limit, q) {
+  return getProductClient().getProductListFromClient(offset, limit, q);
+}
+
+async function getListProductByIDs(ids) {
+  return await getProductClient().getListProductByIdsClient(ids);
+}
+
+async function searchProductList(q, categoryCode) {
+  return await getProductClient().searchProductListFromClient(q, categoryCode);
+}
+
+async function getListCategory() {
+  return await getCategoryClient().getListCategoryFromClient("", "", "");
 }
 
 function render(props) {
-    const toast = useToast();
-    const router = useRouter();
-    const urls = [
-        {
-            title: "Trang chủ",
-            url: '/crm/promotion',
-        },
-        {
-            title: "Khuyến mãi",
-            url: '/crm/promotion',
-        },
-        {
-            title: "Chỉnh sửa",
-            url: `/crm/promotion/edit?promotionId=${router.query.promotionId}`
-        }
-    ]
-    let dataRender = props.data;
-    let defaultState = props.defaultState;
-    let startTime = dataRender.startTime;
-    let endTime = dataRender.endTime;
-    startTime = displayTime(startTime);
-    if (endTime !== "" || !endTime) {
-        endTime = displayTime(endTime);
+  console.log("props", props);
+  const {
+    products,
+    productConditions,
+    categoryCodes,
+    customerLevels,
+    ingredients,
+    sellerCodes,
+    productTag,
+    areaCodes,
+    promotionRes,
+  } = props;
+
+  const {
+    description,
+    endTime,
+    startTime,
+    promotionName,
+    promotionOrganizer,
+    promotionType,
+    objects,
+    rule,
+  } = promotionRes;
+
+  console.log(promotionRes, "promotionRes");
+
+  const toast = useToast();
+
+  const router = useRouter();
+
+  const urls = [
+    {
+      title: "Trang chủ",
+      url: "/crm/promotion",
+    },
+    {
+      title: "Khuyến mãi",
+      url: "/crm/promotion",
+    },
+    {
+      title: "Tạo mới",
+      url: `/crm/promotion/new?type=${router.query.type}`,
+    },
+  ];
+
+  const {
+    register,
+    getValues,
+    handleSubmit,
+    setError,
+    setValue,
+    reset,
+    errors,
+  } = useForm();
+
+  const [textField, setTextField] = useState({
+    startTime: startTime ? startTime : new Date(),
+    endTime: endTime ? endTime : new Date(),
+    descriptionField: description ? description : "",
+    promotionField: promotionOrganizer ? promotionOrganizer : "",
+    promotionTypeField: promotionType ? promotionType : "",
+  });
+
+  const [errorTextField, setErrorTextField] = useState({
+    descriptionError: "",
+    promotionError: "",
+    promotionTypeError: "",
+  });
+
+  const [scopeObject, setScopeObject] = useState([
+    {
+      selectField: "",
+      registeredBefore: new Date(),
+      registeredAfter: new Date(),
+      list: [],
+    },
+  ]);
+
+  const [conditionObject, setConditionObject] = useState({
+    selectField: "",
+    minValue: 0,
+    productList: [{ productName: "", productNumber: 0, productValue: 0 }],
+  });
+
+  const [rewardObject, setRewardObject] = useState({
+    selectField: "",
+    percentageDiscount: 0,
+    maxDiscount: 0,
+    absoluteDiscount: 0,
+    attachedProduct: [
+      {
+        product: "",
+        number: 0,
+      },
+    ],
+    pointValue: 0,
+  });
+
+  const handleChangeTextField = (key) => (event) => {
+    setTextField({ ...textField, [key]: event.target.value });
+  };
+
+  const handleAddAttachedProduct = () => {
+    rewardObject.attachedProduct.push({
+      product: "",
+      number: 0,
+    });
+    setRewardObject({ ...rewardObject });
+  };
+
+  const handleRemoveAttachedProduct = (index) => {
+    rewardObject.attachedProduct.splice(index, 1);
+    setRewardObject({ ...rewardObject });
+  };
+
+  const handleChangeListReward = (index) => (event, value) => {
+    rewardObject.attachedProduct[index].product = value;
+    setRewardObject({ ...rewardObject });
+  };
+
+  const handleChangeRewardField = (key) => (event) => {
+    setRewardObject({ ...rewardObject, [key]: event.target.value });
+  };
+
+  const handleChangeFieldOfProductList = (index, key) => (event) => {
+    conditionObject.productList[index][key] = event.target.value;
+    setConditionObject({ ...conditionObject });
+  };
+
+  const handleChangeConditionField = (key) => (event) => {
+    setConditionObject({ ...conditionObject, [key]: event.target.value });
+  };
+
+  const handleAddProductOfProductList = () => {
+    conditionObject.productList.push({
+      productName: "",
+      productNumber: 0,
+      productValue: 0,
+    });
+    setConditionObject({ ...conditionObject });
+  };
+
+  const handleRemoveProductOfProductList = (index) => {
+    conditionObject.productList.splice(index, 1);
+    setConditionObject({ ...conditionObject });
+  };
+
+  const handleAddScopeSelect = () => {
+    scopeObject.push({
+      selectField: "",
+      registeredBefore: new Date(),
+      registeredAfter: new Date(),
+      list: [],
+    });
+    setScopeObject([...scopeObject]);
+  };
+
+  const handleChangeScopeField = (index, key) => (event) => {
+    scopeObject[index][key] = event.target.value;
+    setScopeObject([...scopeObject]);
+  };
+
+  const handleChangeScopeList = (index) => (event, value) => {
+    scopeObject[index].list = value;
+    if (scopeObject[index].selectField == defaultScope.product) {
+      conditionObject.productList = [];
+      value.map((product, i) => {
+        conditionObject.productList.push({
+          product,
+          productNumber: 0,
+          productValue: 0,
+        });
+        setConditionObject({ ...conditionObject });
+        console.log(product, i, "handleChangeScopeList");
+        console.log(getValues(), "getValue");
+      });
     }
-    const [state, setState] = useState(defaultState);
-    const [updateDateProps, setUpdateDataProps] = useState({});
-    const {
-        promotionOption,
-        promotionTypeRule,
-        promotionScope,
-        promotionRulesLine,
-        conditions,
-        listProductDefault,
-        listProductPromotion,
-        listCategoryPromotion,
-        listGiftPromotion,
-        listCategoryDefaultProduct,
-        promotionUseType,
-        listCategoryDefault,
-    } = state;
-    const {
-        register,
-        getValues,
-        handleSubmit,
-        setError,
-        setValue,
-        reset,
-        errors,
-    } = useForm();
-    const [open, setOpen] = useState({
-        openModalGift: false,
-        openModalProductGift: false,
-        openModalProductScopePromotion: false,
-        openModalCategoryScopePromotion: false,
+    setScopeObject([...scopeObject]);
+  };
+
+  // func onSubmit used because useForm not working with some fields
+  async function onSubmit() {
+    let value = getValues();
+    console.log(value, "value");
+    console.log(scopeObject, "scopeObject");
+    console.log(conditionObject, "conditionObject");
+    console.log(rewardObject, "rewardObject");
+    let objects = [];
+    scopeObject.map((o, index) => {
+      switch (o.selectField) {
+        case defaultScope.product:
+          objects.push({
+            products: o.list.map((product) => product.productID),
+          });
+          break;
+        case defaultScope.customer:
+          objects.push({
+            registeredBefore: o.registeredBefore,
+            registeredAfter: o.registeredAfter,
+            customerLevels: o.list.map((level) => level.code),
+          });
+          break;
+        case defaultScope.area:
+          objects.push({
+            areaCodes: o.list.map((area) => area.code),
+          });
+          break;
+        case defaultScope.producer:
+          objects.push({
+            sellerCodes: o.list.map((seller) => seller.code),
+          });
+          break;
+        case defaultScope.productCatergory:
+          objects.push({
+            categoryCodes: o.list.map((category) => category.code),
+          });
+          break;
+        case defaultScope.ingredient:
+          objects.push({
+            ingredients: o.list.map((ingredient) => ingredient.code),
+          });
+          break;
+        case defaultScope.productTag:
+          objects.push({
+            productTag: o.list.map((tag) => tag.code),
+          });
+          break;
+        default:
+          break;
+      }
+      objects[index].scope = o.selectField;
+      objects[index].type = "MANY";
     });
 
-    const handleChange = (event) => {
-        setState({...state, [event.target.name]: event.target.value});
+    let rules = {
+      field: conditionObject.selectField,
+      type: rewardObject.selectField,
+      conditions: [{}],
     };
 
-    const handleChangeState = (name, value) => {
-        setState({...state, name: value});
-    };
+    let productConditions = [];
+    let minOrverValue = 0;
 
-
-    const resetPrice = () => {
-        for (const [key, value] of Object.entries(defaultNameRulesValue)) {
-            let priceMinValue = displayNameRule(promotionOption, value, 0);
-            setValue(priceMinValue, "");
-        }
-    };
-
-    const handleChangeStatus = (event) => {
-        let promotionRules = defaultState.promotionRulesLine
-        if ((event.target.value !== defaultState.promotionOption || promotionTypeRule !== defaultState.promotionTypeRule) && event.target.name === "promotionOption") {
-            promotionRules = [{id: 0}]
-        }
-        if (event.target.value !== defaultState.promotionTypeRule && event.target.name === "promotionTypeRule") {
-            promotionRules = [{id: 0}]
-        }
-        setState({
-            ...state,
-            [event.target.name]: event.target.value,
-            promotionRulesLine: promotionRules,
+    if (conditionObject.selectField == defaultCondition.product) {
+      console.log(conditionObject.selectField, "conditionObject.selectField");
+      conditionObject.productList.map((o, index) => {
+        productConditions.push({
+          productId: o.product.productID,
+          minQuantity: parseInt(value["productNumber" + index]),
+          minTotalValue: parseInt(value["productValue" + index]),
         });
-        resetPrice()
-        reset();
-    };
-
-    function handleRemoveCodePercent(id) {
-        const newCodes = promotionRulesLine.filter((item) => item.id !== id);
-        setState({...state, promotionRulesLine: newCodes});
+      });
+      rules.conditions[0].productConditions = productConditions;
+    }
+    if (conditionObject.selectField == defaultCondition.orderValue) {
+      minOrverValue = parseInt(value.minValue);
+      rules.conditions[0].minOrverValue = parseInt(minOrverValue);
     }
 
-    function handleAddCodePercent(id) {
-        setState({
-            ...state,
-            promotionRulesLine: [...promotionRulesLine, {id: id + 1}],
-        });
+    if (rewardObject.selectField == defaultReward.absolute) {
+      rules.conditions[0].discountValue = parseInt(value.absoluteDiscount);
     }
 
-    const handleAddProductPromotion = (productList) => {
-        setOpen({...open, openModalProductScopePromotion: false});
-        let listProductPromotion = [];
-        productList.forEach((product) => {
-            if (product.active) {
-                listProductPromotion.push(product.product);
-            }
-        });
-        setState({...state, listProductPromotion: listProductPromotion});
-    };
-
-    const handleAddCategoryPromotion = (categoryList) => {
-        setOpen({...open, openModalCategoryScopePromotion: false});
-        let listCategory = [];
-        categoryList.forEach((category) => {
-            if (category.active) {
-                listCategory.push(category.category);
-            }
-        });
-        setState({...state, listCategoryPromotion: listCategory});
-    };
-
-    const handleRemoveCategoryPromotion = (category) => {
-        let {listCategoryPromotion, listCategoryDefault} = state;
-        listCategoryPromotion.forEach((o, index) => {
-            if (o.categoryID === category.categoryID) {
-                return listCategoryPromotion.splice(index, 1);
-            }
-        });
-        listCategoryDefault.forEach((o) => {
-            if (o.category.categoryID === category.categoryID) {
-                o.active = false;
-            }
-        });
-        setState({
-            ...state,
-            listCategoryPromotion: listCategoryPromotion,
-            listCategoryDefault: listCategoryDefault,
-        });
-    };
-
-    const handleRemoveProductPromotion = (product) => {
-        let {listProductPromotion, listProductDefault} = state;
-        listProductPromotion.forEach((productPromotion, index) => {
-            if (productPromotion.productID === product.productID) {
-                return listProductPromotion.splice(index, 1);
-            }
-        });
-        listProductDefault.forEach((productDefault) => {
-            if (productDefault.product.productID === product.productID) {
-                product.active = false;
-            }
-        });
-        setState({
-            ...state,
-            listProductPromotion: listProductPromotion,
-            listProductDefault: listProductDefault,
-        });
-    };
-
-    const handleChangeScope = async (event) => {
-        if (event.target.value === defaultPromotionScope.PRODUCT) {
-            event.persist();
-            setState({
-                ...state,
-                listCategoryDefault: listCategoryDefault,
-                listProductPromotion: defaultState.listProductPromotion,
-                listCategoryPromotion: defaultState.listCategoryPromotion,
-                [event.target?.name]: event.target?.value,
-            });
-            setOpen({...open, openModalProductScopePromotion: true});
-        } else if (event.target.value === defaultPromotionScope.CATEGORY) {
-            setState({
-                ...state,
-                listCategoryPromotion: defaultState.listCategoryPromotion,
-                [event.target?.name]: event.target?.value,
-            });
-            setOpen({...open, openModalCategoryScopePromotion: true});
-        } else {
-            setState({
-                ...state,
-                [event.target?.name]: event.target?.value,
-                listCategoryPromotion: defaultState.listCategoryPromotion,
-                listProductPromotion: defaultState.listProductPromotion,
-            });
-        }
-    };
-
-    // func onSubmit used because useForm not working with some fields
-    async function onSubmit() {
-        let {promotionName, totalCode, startTime, endTime, totalApply, promotionCode,} = getValues();
-        let value = getValues();
-        let listProductIDs = [];
-        let listCategoryCodes = [];
-        if (promotionScope === defaultPromotionScope.PRODUCT) {
-            listProductPromotion.forEach((product) =>
-                listProductIDs.push(product.productID)
-            );
-        }
-        if (promotionScope === defaultPromotionScope.CATEGORY) {
-            listCategoryPromotion.forEach((category) =>
-                listCategoryCodes.push(category.code)
-            );
-        }
-
-        let rule = setRulesPromotion(promotionOption, promotionTypeRule, value, promotionRulesLine.length, listProductIDs);
-        startTime = startTime + ":00Z";
-        if (startTime === dataRender.startTime) {
-            startTime = ""
-        }
-        let objects = setScopeObjectPromontion(
-            promotionScope,
-            listProductIDs,
-            listCategoryCodes
-        );
-        let promotionResponse = await updatePromotion(
-            promotionCode,
-            parseInt(totalApply),
-            parseInt(totalCode),
-            promotionName,
-            dataRender.promotionType,
-            startTime,
-            endTime,
-            objects,
-            promotionUseType,
-            rule,
-            dataRender.promotionId
-        );
-
-        if (promotionResponse.status === "OK") {
-            toast.success("Cập nhật khuyến mãi thành công");
-            return router.push({
-                pathname: '/crm/promotion'
-            })
-        } else {
-            toast.error(promotionResponse.message);
-        }
+    if (rewardObject.selectField == defaultReward.precentage) {
+      rules.conditions[0].percent = value.percentageDiscount;
+      rules.conditions[0].maxDiscountValue = value.maxDiscount;
     }
 
-    return (
-        <AppCRM select="/crm/promotion">
-            <Head>
-                <title>Chỉnh sửa khuyến mãi</title>
-            </Head>
-            <Box component={Paper}  style={{padding: "0 3rem", height: "100%"}}>
-                <form>
-                    <FormGroup>
-                        <Grid style={{marginTop: "1rem"}}>
-                            <TitleLink urls={urls}/>
-                        </Grid>
-                        <Box >
-                            <Grid container justify="center" alignItems="center">
-                                <Box style={{fontSize: 24}}>
-                                    <h3>Chỉnh sửa khuyến mãi</h3>
-                                </Box>
-                            </Grid>
-                            <InfomationFields
-                                dataRender={dataRender}
-                                errors={errors}
-                                startTime={startTime}
-                                endTime={endTime}
-                                handleChange={handleChange}
-                                register={register}
-                                edit
-                            />
+    if (rewardObject.selectField == defaultReward.point) {
+      rules.conditions[0].pointValue = value.pointValue;
+    }
 
-                            <Divider/>
+    if (rewardObject.selectField == defaultReward.gift) {
+      let gifts = [];
+      rewardObject.attachedProduct.map((o, index) =>
+        gifts.push({
+          productId: o.product.productID,
+          quantity: parseInt(value["number" + index]),
+        })
+      );
+      rules.conditions[0].gifts = gifts;
+    }
 
-                            <ConditionFields
-                                state={state}
-                                errors={errors}
-                                handleAddCodePercent={handleAddCodePercent}
-                                handleChangeStatus={handleChangeStatus}
-                                handleRemoveCodePercent={handleRemoveCodePercent}
-                                handleChange={handleChange}
-                                register={register}
-                                getValues={getValues}
-                                setError={setError}
-                                edit
-                            />
+    let body = {
+      promotionId: promotionRes.promotionId,
+      promotionName: value.promotionName,
+      promotionType: textField.promotionTypeField,
+      promotionOrganizer: textField.promotionField,
+      startTime: value.startTime + ":00.000Z",
+      endTime: value.endTime + ":00.000Z",
+      description: textField.descriptionField,
+      rule: rules,
+      objects: objects,
+    };
 
-                            <ButtonGroup fullWidth style={{marginTop: "1rem"}}>
-                                <Box  style={{marginLeft: "auto"}}>
-                                    <Button
-                                        variant="contained"
-                                        color="primary"
-                                        onClick={handleSubmit(onSubmit)}
-                                        style={{margin: 8}}
-                                    >
-                                        Lưu
-                                    </Button>
-                                    <Button
-                                        variant="contained"
-                                        style={{margin: 8}}
-                                        onClick={() => router.back()}
-                                    >
-                                        Trở về
-                                    </Button>
-                                </Box>
-                            </ButtonGroup>
-                        </Box>
-                    </FormGroup>
-                </form>
-            </Box>
-        </AppCRM>
-    );
+    console.log(JSON.stringify(body), "body");
+
+    let res = await updatePromontion(body);
+
+    if (res.status == "OK") {
+      toast.success("Cập nhật khuyến mãi thành công");
+    } else {
+      toast.error("Xảy ra lỗi");
+    }
+    console.log(res, "res");
+  }
+
+  console.log(props, "props");
+
+  useEffect(() => {
+    if (objects) {
+      setValue("promotionName", promotionRes.promotionName);
+      console.log(products, "products");
+      objects.map((o, index) => {
+        console.log(o.scope, "scope");
+        scopeObject[index].selectField = o.scope;
+        if (o.scope == defaultScope.customer) {
+          scopeObject[index].registeredBefore = o.registeredBefore;
+          scopeObject[index].registeredAfter = o.registeredAfter;
+          scopeObject[index].list = customerLevels;
+        }
+
+        if (o.scope == defaultScope.area) {
+          scopeObject[index].list = areaCodes;
+        }
+
+        if (o.scope == defaultScope.ingredient) {
+          scopeObject[index].list = ingredients;
+        }
+
+        if (o.scope == defaultScope.producer) {
+          scopeObject[index].list = sellerCodes;
+        }
+
+        if (o.scope == defaultScope.product) {
+          scopeObject[index].list = products;
+          console.log(scopeObject[index], "scopeObject[index]");
+        }
+
+        if (o.scope == defaultScope.productCatergory) {
+          scopeObject[index].list = categoryCodes;
+        }
+
+        if (o.scope == defaultScope.productTag) {
+          scopeObject[index].list = productTag;
+        }
+
+        setScopeObject([...scopeObject]);
+      });
+
+      if (rule.field == defaultCondition.orderValue) {
+        conditionObject.minValue = rule.conditions[0].minOrderValue;
+      }
+
+      if (rule.field == defaultCondition.product) {
+        conditionObject.productList = productConditions.map((o, index) => ({
+          product: o,
+          productNumber:
+            rule.conditions[0].productConditions[index].minQuantity,
+          productValue:
+            rule.conditions[0].productConditions[index].minTotalValue,
+        }));
+      }
+
+      if (rule.type == defaultReward.absolute) {
+        rewardObject.absoluteDiscount = rule.conditions[0].discountValue;
+      }
+
+      if (rule.type == defaultReward.gift) {
+        rewardObject.attachedProduct = gift.map((o, index) => ({
+          product: o,
+          number: rule.conditions[0].gifts[index].quantity,
+        }));
+      }
+
+      setConditionObject({ ...conditionObject, selectField: rule.field });
+
+      setRewardObject({ ...rewardObject, selectField: rule.type });
+    }
+  }, [objects]);
+
+  console.log(scopeObject, "scopeObject");
+
+  return (
+    <AppCRM select="/crm/promotion">
+      <Head>
+        <title>Tạo khuyến mãi</title>
+      </Head>
+      <MyCard component={Paper} style={{ padding: "0 3rem", height: "100%" }}>
+        <FormGroup style={{ width: "100%" }}>
+          <MyCardHeader title="TẠO CHƯƠNG TRÌNH KHUYẾN MÃI"></MyCardHeader>
+          <MyCardContent>
+            <InfomationFields
+              errors={errors}
+              promotionType={router.query?.type}
+              textField={textField}
+              startTime={startTime}
+              endTime={endTime}
+              errorTextField={errorTextField}
+              handleChangeTextField={handleChangeTextField}
+              register={register}
+            />
+            <ConditionFields
+              register={register}
+              errors={errors}
+              setValue={setValue}
+              object={{ scopeObject, conditionObject, rewardObject }}
+              textField={textField}
+              handleAddAttachedProduct={handleAddAttachedProduct}
+              handleRemoveAttachedProduct={handleRemoveAttachedProduct}
+              handleChangeTextField={handleChangeTextField}
+              handleChangeScopeList={handleChangeScopeList}
+              handleChangeScopeField={handleChangeScopeField}
+              handleAddScopeSelect={handleAddScopeSelect}
+              handleChangeConditionField={handleChangeConditionField}
+              handleChangeFieldOfProductList={handleChangeFieldOfProductList}
+              handleChangeRewardField={handleChangeRewardField}
+              handleChangeListReward={handleChangeListReward}
+              handleAddProductOfProductList={handleAddProductOfProductList}
+              handleRemoveProductOfProductList={
+                handleRemoveProductOfProductList
+              }
+            />
+          </MyCardContent>
+          <MyCardActions>
+            <ButtonGroup>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSubmit(onSubmit)}
+                style={{ margin: 8 }}
+              >
+                Lưu
+              </Button>
+              <Button
+                variant="contained"
+                style={{ margin: 8 }}
+                onClick={() => router.reload()}
+              >
+                Làm mới
+              </Button>
+            </ButtonGroup>
+          </MyCardActions>
+        </FormGroup>
+      </MyCard>
+    </AppCRM>
+  );
 }
