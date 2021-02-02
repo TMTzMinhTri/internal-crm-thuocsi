@@ -200,7 +200,6 @@ const Reward = (props) => {
                     startIcon={<Add />}
                     onClick={handleAddAttachedProduct}
                   >
-                    Thêm
                   </Button>
                 </Grid>
               </>

@@ -96,9 +96,7 @@ const Scope = (props) => {
           color="primary"
           startIcon={<Add />}
           onClick={handleAddScopeSelect}
-        >
-          Thêm
-        </Button>
+        ></Button>
       </Grid>
     </>
   );

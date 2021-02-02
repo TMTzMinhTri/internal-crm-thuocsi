@@ -27,11 +27,12 @@ const InfomationFields = (props) => {
 
   const { promotionError, promotionTypeError } = errorTextField;
 
+  console.log(startTime, "startTime");
   return (
     <>
       <CardContent>
         <Grid spacing={2} container>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12} sm={4} md={4}>
             <TextField
               name="promotionName"
               label="Tên khuyến mãi"
@@ -61,7 +62,8 @@ const InfomationFields = (props) => {
               })}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12} sm={1} md={1}></Grid>
+          <Grid item xs={12} sm={4} md={4}>
             <SelectField
               title="Bên tổ chức"
               value={promotionField}
@@ -70,52 +72,57 @@ const InfomationFields = (props) => {
               handleChange={handleChangeTextField("promotionField")}
             />
           </Grid>
-          <Grid item xs={12} sm={6} md={6}>
+          <Grid item xs={12} sm={3} md={3}></Grid>
+          <Grid item xs={12} sm={4} md={4}>
             <SelectField
-              title="HÌnh thức áp dụng"
+              title="Hình thức áp dụng"
               value={promotionTypeField}
               error={promotionTypeError}
               options={promotionTypes}
               handleChange={handleChangeTextField("promotionTypeField")}
             />
           </Grid>
-          <Grid item xs={6}>
-            <TextField
-              name="startTime"
-              label="Thời gian bắt đầu"
-              placeholder=""
-              defaultValue={startTime}
-              helperText={errors.startTime?.message}
-              type="datetime-local"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              fullWidth
-              error={!!errors.startTime}
-              required
-              inputRef={register({
-                required: "Vui lòng chọn thời gian bắt đầu",
-              })}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              name="endTime"
-              label="Thời gian kết thúc"
-              placeholder=""
-              type="datetime-local"
-              defaultValue={endTime}
-              helperText={errors.endTime?.message}
-              error={!!errors.endTime}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              fullWidth
-              required
-              inputRef={register({
-                required: "Vui lòng chọn thời gian kết thúc",
-              })}
-            />
+          <Grid item xs={12} sm={1} md={1}></Grid>
+          <Grid container item xs={4}>
+            <Grid item xs={5}>
+              <TextField
+                name="startTime"
+                label="Thời gian bắt đầu"
+                placeholder=""
+                defaultValue={startTime}
+                helperText={errors.startTime?.message}
+                type="datetime-local"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                error={!!errors.startTime}
+                required
+                inputRef={register({
+                  required: "Vui lòng chọn thời gian bắt đầu",
+                })}
+              />
+            </Grid>
+            <Grid item xs={2}></Grid>
+            <Grid item xs={5}>
+              <TextField
+                name="endTime"
+                label="Thời gian kết thúc"
+                placeholder=""
+                type="datetime-local"
+                defaultValue={endTime}
+                helperText={errors.endTime?.message}
+                error={!!errors.endTime}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                required
+                inputRef={register({
+                  required: "Vui lòng chọn thời gian kết thúc",
+                })}
+              />
+            </Grid>
           </Grid>
         </Grid>
       </CardContent>

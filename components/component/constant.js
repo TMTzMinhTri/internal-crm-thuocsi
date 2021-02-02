@@ -198,7 +198,7 @@ export const rewards = [
 export const promotions = [
   {
     value: "",
-    label: "Chọn chương trình khuyến mãi",
+    label: "Chọn ...",
   },
   {
     value: defaultPromotion.marketPlace,

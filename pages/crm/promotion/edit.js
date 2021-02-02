@@ -35,6 +35,7 @@ import {
 } from "../../../components/component/constant";
 import {
   displayNameRule,
+  formatUTCTime,
   setRulesPromotion,
   setScopeObjectPromontion,
 } from "../../../components/component/until";
@@ -118,11 +119,21 @@ export async function loadDataBefore(ctx) {
           break;
         case defaultScope.producer:
           typeVariable = "sellerCodes";
+          // listRes = await getProductClient(ctx, {}).getIngredientByIDs(
+          //   o[typeVariable],
+          //   []
+          // );
           break;
         case defaultScope.productTag:
           typeVariable = "productTag";
+          // listRes = await getProductClient(ctx, {}).getIngredientByIDs(
+          //   o[typeVariable],
+          //   []
+          // );
+          break;
         case defaultScope.area:
           typeVariable = "areaCodes";
+          break;
 
         default:
           break;
@@ -244,12 +255,14 @@ function render(props) {
   } = useForm();
 
   const [textField, setTextField] = useState({
-    startTime: startTime ? startTime : new Date(),
-    endTime: endTime ? endTime : new Date(),
+    startTime: startTime ? formatUTCTime(startTime) : new Date(),
+    endTime: endTime ? formatUTCTime(endTime) : new Date(),
     descriptionField: description ? description : "",
     promotionField: promotionOrganizer ? promotionOrganizer : "",
     promotionTypeField: promotionType ? promotionType : "",
   });
+
+  console.log(formatUTCTime(startTime), "textField", new Date());
 
   const [errorTextField, setErrorTextField] = useState({
     descriptionError: "",
@@ -499,6 +512,8 @@ function render(props) {
 
   useEffect(() => {
     if (objects) {
+      setValue("startTime", formatUTCTime(promotionRes.startTime));
+      setValue("endTime", formatUTCTime(promotionRes.startTime));
       setValue("promotionName", promotionRes.promotionName);
       console.log(products, "products");
       objects.map((o, index) => {
@@ -574,11 +589,11 @@ function render(props) {
   return (
     <AppCRM select="/crm/promotion">
       <Head>
-        <title>Tạo khuyến mãi</title>
+        <title>Chỉnh sửa khuyến mãi</title>
       </Head>
       <MyCard component={Paper} style={{ padding: "0 3rem", height: "100%" }}>
         <FormGroup style={{ width: "100%" }}>
-          <MyCardHeader title="TẠO CHƯƠNG TRÌNH KHUYẾN MÃI"></MyCardHeader>
+          <MyCardHeader title="CHỈNH SỬA CHƯƠNG TRÌNH KHUYẾN MÃI"></MyCardHeader>
           <MyCardContent>
             <InfomationFields
               errors={errors}

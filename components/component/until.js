@@ -337,7 +337,6 @@ export function formatTime(time) {
   if (!time || time === "") {
     return "Không giới hạn";
   }
-  time = time.substring(0, time.length - 4);
   if (Number.isInteger(time)) {
     return new Intl.DateTimeFormat("vi", {
       year: "numeric",
@@ -361,6 +360,19 @@ export function formatTime(time) {
       return "Không xác định...";
     }
   }
+}
+
+export function formatUTCTime(time) {
+  let result =''
+  let date = new Date(time)
+  let year = date.getUTCFullYear()
+  let month = ("0" + (date.getMonth() + 1)).slice(-2)
+  let day = ("0" + (date.getDay())).slice(-2)
+  let hour = date.getHours()
+  let minute = date.getMinutes()
+  let seconds = date.getSeconds()
+  result = year + '-' + month + '-' + day + "T" + hour + ':' + minute
+  return result
 }
 
 export function getPromotionOrganizer(organizer) {
