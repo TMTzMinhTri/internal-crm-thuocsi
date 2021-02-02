@@ -5,16 +5,8 @@ import AppCRM from "../../_layout";
 import React, {useState} from "react";
 import {MyCard, MyCardActions, MyCardContent, MyCardHeader} from "@thuocsi/nextjs-components/my-card/my-card";
 import {Button, ButtonGroup, Grid, TextField} from "@material-ui/core";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
 import {useForm} from "react-hook-form";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import Input from "@material-ui/core/Input";
-import cssStyle from "./promotion.module.css"
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import FormControl from "@material-ui/core/FormControl";
-import Autocomplete from "@material-ui/lab/Autocomplete";
 import {getPromoClient} from "../../../client/promo";
 import VoucherCodeBody from "../../../components/component/promotion/voucher-code-body";
 import {getVoucherClient} from "../../../client/voucher";

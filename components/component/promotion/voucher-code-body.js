@@ -3,7 +3,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
-import cssStyle from "../../../pages/crm/promotion/promotion.module.css";
+import cssStyle from "./promotion.module.css";
 import React, {useState} from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
@@ -71,8 +71,8 @@ export default function VoucherCodeBody(props) {
 
     return (
         <Grid container spacing={2}>
-            <Grid item xs={12} sm={6} md={6}>
-                <h5>Mã khuyến mãi</h5>
+            <Grid item xs={12} sm={4} md={4}>
+                <h5 className={cssStyle.titleLabel}>Mã khuyến mãi</h5>
                 <TextField
                     id="code"
                     name="code"
@@ -95,8 +95,10 @@ export default function VoucherCodeBody(props) {
                     })}
                 />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <h5>Chương trình khuyến mãi áp dụng</h5>
+            <Grid item xs={12} sm={1} md={1}>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+                <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng</h5>
                 <Autocomplete
                     fullWidth
                     id="promotionId"
@@ -128,8 +130,10 @@ export default function VoucherCodeBody(props) {
                     onChange={(e, value) => onChangePromotion(e, value)}
                 />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <h5>Hạn sử dụng mã khuyến mãi</h5>
+            <Grid item xs={12} sm={3} md={3}>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+                <h5 className={cssStyle.titleLabel}>Hạn sử dụng mã khuyến mãi</h5>
                 <TextField
                     id="expiredDate"
                     name="expiredDate"
@@ -147,8 +151,10 @@ export default function VoucherCodeBody(props) {
                     })}
                 />
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <h5>Loại mã</h5>
+            <Grid item xs={12} sm={1} md={1}>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+                <h5 className={cssStyle.titleLabel}>Loại mã</h5>
                 <InputLabel htmlFor="select-type">Loại mã *</InputLabel>
                 <Select
                     id="type"
@@ -166,8 +172,10 @@ export default function VoucherCodeBody(props) {
                     </MenuItem>
                 </Select>
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <h5>Tổng số lần sử dụng toàn hệ thống</h5>
+            <Grid item xs={12} sm={3} md={3}>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+                <h5 className={cssStyle.titleLabel}>Tổng số lần sử dụng toàn hệ thống</h5>
                 <TextField
                     id="maxUsage"
                     name="maxUsage"
@@ -184,8 +192,10 @@ export default function VoucherCodeBody(props) {
                 />
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <h5>Số lần áp dụng tối đa cho mỗi khách hàng</h5>
+            <Grid item xs={12} sm={1} md={1}>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+                <h5 className={cssStyle.titleLabel}>Số lần áp dụng tối đa cho mỗi khách hàng</h5>
                 <TextField
                     id="maxUsagePerCustomer"
                     name="maxUsagePerCustomer"
@@ -202,8 +212,10 @@ export default function VoucherCodeBody(props) {
                 />
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
             </Grid>
-            <Grid item xs={12} sm={6} md={6}>
-                <h5>Danh sách khách hàng được sử dụng</h5>
+            <Grid item xs={12} sm={3} md={3}>
+            </Grid>
+            <Grid item xs={12} sm={4} md={4}>
+                <h5 className={cssStyle.titleLabel}>Danh sách khách hàng được sử dụng</h5>
                 <Autocomplete
                     fullWidth
                     multiple

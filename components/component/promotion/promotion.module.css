@@ -147,3 +147,25 @@
 .marginLine {
     margin-top: 2rem;
 }
+
+.textItalic {
+    font-style: italic;
+    font-size: 14px;
+    margin-top: 1.5rem;
+    font-weight:  300;
+    color: #828282;
+}
+
+.titleLabel {
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 24px;
+    /* identical to box height, or 200% */
+
+    letter-spacing: 0.15px;
+
+    color: #353434;
+    margin-block-start: 0.67em;
+    margin-block-end: 0.67em;
+}
