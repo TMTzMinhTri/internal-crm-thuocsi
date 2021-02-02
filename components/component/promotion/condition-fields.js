@@ -1,152 +1,131 @@
-import React, {useState} from "react";
-import {
-    CardContent,
-    FormControlLabel,
-    Radio,
-    RadioGroup,
-    TextField,
-    Card,
-    List,
-    ListItem,
-    InputAdornment,
-    IconButton,
-    Grid,
-    Typography, Select,
-} from "@material-ui/core";
-import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
-import styles from "./promotion.module.css"
-import AddCircleOutlineOutlinedIcon from "@material-ui/icons/AddCircleOutlineOutlined";
+import React from "react";
+import { CardContent, Grid } from "@material-ui/core";
 
-import {
-    defaultNameRulesValue,
-    defaultRulePromotion,
-    defaultTypeConditionsRule,
-} from "../constant";
-import {displayNameRule, parseConditionValue} from "../until";
-import RenderTableGift from "./modal-gift";
-import RenderTableProductGift from "./modal-product-gift";
-import Box from "@material-ui/core/Box";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import Input from "@material-ui/core/Input";
+import styles from "./promotion.module.css";
+
 import TextareaAutosize from "@material-ui/core/TextareaAutosize";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
-const useStyles = makeStyles(theme => ({
-    root: {
-        " .MuiTextField-root": {
-            margin: theme.spacing(1)
-        }
+import Scope from "./scope";
+import Condition from "./condition";
+import Reward from "./reward";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    " .MuiTextField-root": {
+      margin: theme.spacing(1),
     },
-    textarea: {
-        width: "100%",
-    }
+  },
+  textarea: {
+    width: "100%",
+  },
 }));
 
 const ConditionFields = (props) => {
-    const classess = useStyles()
-    const {
-        dataRender = {
-            promotionName: "",
-            totalCode: "",
-            applyPerUser: 1,
-            promotionCode: "",
-            totalUsed: 0,
-            totalCollect: 0,
-        },
-        errors,
-        promotionType,
-        endTime = new Date(),
-        startTime = new Date(),
-        register,
-        edit = false,
-    } = props;
+  const classess = useStyles();
 
-    return (
-        <>
-            <CardContent>
-                <Grid container spacing={2} direction={"row"}>
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Grid className={styles.marginLine}>
-                            <h3>PHẠM VI ÁP DỤNG</h3>
-                            <InputLabel htmlFor="select-promotionScope">Loại chương trình *</InputLabel>
-                            <Select
-                                id="promotionScope"
-                                name="promotionScope"
-                                placeholder="chọn loại phạm vi"
-                                labelId="select-promotionScope"
-                                style={{width: "100%"}}>
-                                <MenuItem disabled value="">
-                                    <em>chọn loại phạm vi</em>
-                                </MenuItem>
-                            </Select>
-                        </Grid>
-                        <Grid className={styles.marginLine}>
-                            <h3>ĐIỀU KIỆN ÁP DỤNG KHUYẾN MÃI</h3>
-                            <InputLabel id="select-promotionCondition">Loại điều kiện *</InputLabel>
-                            <Select
-                                id="promotionCondition"
-                                name="promotionCondition"
-                                label="Loại điều kiện"
-                                labelId="select-promotionCondition"
-                                placeholder="chọn loại điều kiện"
-                                helperText={errors?.totalCode?.message}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{width: "100%"}}
-                                error={!!errors?.totalCode}
-                                required
-                                inputRef={register({
-                                    required: "Số lượng khuyến mãi không được để trống",
-                                    pattern: {
-                                        value: /[0-9]/,
-                                        message: "Chỉ chấp nhận kí tự là số",
-                                    },
-                                })}
-                            />
-                        </Grid>
-                        <Grid className={styles.marginLine}>
-                            <h3>GIÁ TRỊ KHUYẾN MÃI</h3>
-                            <InputLabel id="select-promotionRule">Loại khuyến mãi *</InputLabel>
-                            <Select
-                                id="promotionRule"
-                                name="promotionRule"
-                                label="Loại khuyến mãi"
-                                placeholder="chọn loại khuyến mãi"
-                                labelId="select-promotionRule"
-                                helperText={errors?.totalCode?.message}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                style={{width: "100%"}}
-                                error={!!errors?.totalCode}
-                                required
-                                inputRef={register({
-                                    required: "Số lượng khuyến mãi không được để trống",
-                                    pattern: {
-                                        value: /[0-9]/,
-                                        message: "Chỉ chấp nhận kí tự là số",
-                                    },
-                                })}
-                            />
-                        </Grid>
-                    </Grid>
-                    <Grid  item xs={12} sm={6} md={6}>
-                        <h4>Mô tả</h4>
-                        <TextareaAutosize
-                            className={classess.textarea}
-                            rowsMin={20}
-                            rowsMax={20}
-                            style={{width: "100% !important"}}
-                            aria-label="maximum height"
-                            placeholder="Nhập mô tả"
-                        />
-                    </Grid>
-                </Grid>
-            </CardContent>
-        </>
-    );
+  const { errors, register, object, textField, setValue } = props;
+
+  const {
+    handleChangeTextField,
+    handleChangeScopeList,
+    handleChangeScopeField,
+    handleAddScopeSelect,
+    handleChangeConditionField,
+    handleChangeRewardField,
+    handleChangeListReward,
+    handleAddProductOfProductList,
+    handleRemoveProductOfProductList,
+    handleAddAttachedProduct,
+    handleRemoveAttachedProduct,
+  } = props;
+
+  const { descriptionField } = textField;
+
+  const { scopeObject, conditionObject, rewardObject } = object;
+
+  return (
+    <>
+      <CardContent>
+        <Grid container spacing={2} direction="column">
+          <Grid item xs={12}>
+            <Grid
+              container
+              className={styles.marginLine}
+              spacing={2}
+              direction="column"
+            >
+              <Grid container>
+                <h3>PHẠM VI ÁP DỤNG</h3>
+              </Grid>
+              <Scope
+                register={register}
+                errors={errors}
+                handleAddScopeSelect={handleAddScopeSelect}
+                handleChangeScopeField={handleChangeScopeField}
+                handleChangeScopeList={handleChangeScopeList}
+                scopeObject={scopeObject}
+              />
+            </Grid>
+            <Grid
+              container
+              className={styles.marginLine}
+              spacing={2}
+              direction="column"
+            >
+              <Grid container>
+                <h3>ĐIỀU KIỆN ÁP DỤNG KHUYẾN MÃI</h3>
+              </Grid>
+              <Condition
+                register={register}
+                errors={errors}
+                handleAddProductOfProductList={handleAddProductOfProductList}
+                handleRemoveProductOfProductList={
+                  handleRemoveProductOfProductList
+                }
+                handleChangeConditionField={handleChangeConditionField}
+                scope={scopeObject}
+                setValue={setValue}
+                condition={conditionObject}
+              />
+            </Grid>
+            <Grid
+              container
+              className={styles.marginLine}
+              spacing={2}
+              direction="column"
+            >
+              <Grid container>
+                <h3>GIÁ TRỊ KHUYẾN MÃI</h3>
+              </Grid>
+              <Reward
+                register={register}
+                errors={errors}
+                handleChangeRewardField={handleChangeRewardField}
+                handleChangeListReward={handleChangeListReward}
+                handleAddAttachedProduct={handleAddAttachedProduct}
+                handleRemoveAttachedProduct={handleRemoveAttachedProduct}
+                reward={rewardObject}
+              />
+            </Grid>
+          </Grid>
+          <Grid item xs={12}>
+            <h4>Mô tả</h4>
+            <TextareaAutosize
+              className={classess.textarea}
+              rowsMin={20}
+              rowsMax={20}
+              style={{ width: "100% !important" }}
+              aria-label="maximum height"
+              placeholder="Nhập mô tả"
+              value={descriptionField}
+              onChange={handleChangeTextField("descriptionField")}
+            />
+          </Grid>
+        </Grid>
+      </CardContent>
+    </>
+  );
 };
 
 export default ConditionFields;

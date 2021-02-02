@@ -10,6 +10,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
 import VoucherCodeBody from "../../../components/component/promotion/voucher-code-body";
 import {getVoucherClient} from "../../../client/voucher";
+import {defaultPromotionType} from "../../../components/component/constant";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -32,15 +33,13 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props,render)
 }
 
-export async function searchPromotion(promotionName){
-    return getPromoClient().getPromotionFromClient(promotionName)
-}
-
 export async function createVoucherCode(code,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
-    expiredDate = expiredDate + ":00.000Z"
-    let data = {code,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer}
+    let data = {code,promotionId,type,maxUsage,maxUsagePerCustomer}
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers=appliedCustomers
+    }
+    if (expiredDate) {
+        data.expiredDate = expiredDate + ":00.000Z"
     }
     console.log('data',data)
     return getVoucherClient().createVoucher(data)
@@ -54,18 +53,18 @@ function render(props) {
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
     const [dataProps, setDataprops] = useState({
-        promotionId: "",
         customerIds : [],
         type: "PUBLIC",
     })
 
     const onSubmit = async () => {
         let value = getValues()
-        let {code,expiredDate,maxUsage,maxUsagePerCustomer} = value
-        let {promotionId,type,customerIds} = dataProps
-        let createVoucherResponse = await createVoucherCode(code,parseInt(promotionId),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
+        let {code,expiredDate,maxUsage,maxUsagePerCustomer,promotionId} = value
+        let {type,customerIds} = dataProps
+        let createVoucherResponse = await createVoucherCode(code,parseInt(promotionId.value),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Tạo mã khuyến mãi thành công')
+            router.push(`/crm/promotion?type=${defaultPromotionType.VOUCHER_CODE}`)
         }else {
             toast.error(createVoucherResponse.message)
         }
@@ -78,15 +77,12 @@ function render(props) {
     const handleSetShowListAutoComplete = (value) => {
         setListPromotionSearch(value)
     }
-
-    const handleChangePromotion = (e,promotion) => {
-        setDataprops({...dataProps,promotionId: promotion.promotionId})
-    }
+    
 
     const handleChangeCustomer = (e,customers) => {
         let customerIds = []
         customers.forEach(c => customerIds.push(c.customerID))
-        setDataprops({...dataProps,customerIds: customerIds})
+        setDataprops({...dataProps,customerIds: customerIds || []})
     }
 
     const handleChangeType = (value) => {
@@ -108,7 +104,6 @@ function render(props) {
                         onChangeCustomer={handleChangeCustomer}
                         dataProps={dataProps}
                         handleChangeType={handleChangeType}
-                        onChangePromotion={handleChangePromotion}
                         register={register}
                     />
                 </MyCardContent>
@@ -116,9 +111,6 @@ function render(props) {
                     <ButtonGroup>
                         <Button variant="contained" color="primary" style={{margin: 8}}   onClick={handleSubmit(onSubmit)}>
                             THÊM MÃ KHUYẾN MÃI
-                        </Button>
-                        <Button variant="contained" style={{margin: 8}} onClick={() => router.reload()}>
-                           LÀM MỚI
                         </Button>
                     </ButtonGroup>
                 </MyCardActions>
