@@ -60,7 +60,6 @@ export async function loadOrderData(ctx) {
     console.log(offset)
     let orderClient = getOrderClient(ctx, data)
     let resp = await orderClient.getOrder(offset, limit, q)
-    console.log(resp.data[0])
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
             return { props: { data: [], count: 0, message: 'Không tìm thấy đơn hàng' } }
