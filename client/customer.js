@@ -61,8 +61,12 @@ class CustomerClient extends APIClient {
     return this.callFromClient("PUT", `${URI}/account`, data);
   }
 
-  updateStatus(data) {
+  approveAccount(data) {
     return this.callFromClient("PUT", `${URI}/account/approve`, data);
+  }
+
+  lockAccount(data) {
+    return this.callFromClient("PUT", `${URI}/account/lock`, data);
   }
 }
 

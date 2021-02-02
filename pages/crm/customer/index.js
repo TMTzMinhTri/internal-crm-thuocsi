@@ -104,7 +104,7 @@ function render(props) {
     async function approveAccount() {
         const _client = getCustomerClient()
         setOpenApproveDialog(false)
-        const resp = await _client.updateStatus({ code: approvedCustomerCode.code, status: "APPROVED" })
+        const resp = await _client.approveAccount({ code: approvedCustomerCode.code, status: "APPROVED" })
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
@@ -118,7 +118,7 @@ function render(props) {
     async function lockAccount() {
         const _client = getCustomerClient()
         setOpenLockAccountDialog(false)
-        const resp = await _client.updateStatus({ code: lockedCustomerCode.code, status: "NEW" })
+        const resp = await _client.lockAccount({ code: lockedCustomerCode.code, status: "NEW" })
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
