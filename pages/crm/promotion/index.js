@@ -35,7 +35,7 @@ import {
     displayPromotionType,
     displayRule,
     displayStatus, displayTime, displayUsage,
-    formatTime,
+    formatTime, getPromotionOrganizer,
     getPromotionScope, removeElement,
 } from "../../../components/component/until";
 import Switch from "@material-ui/core/Switch";
@@ -312,12 +312,13 @@ function render(props) {
                                             {props.promotion.map((row, index) => (
                                                 <TableRow key={row.promotionId}>
                                                     <TableCell align="left">
-                                                        <div style={{fontWeight: "bold"}}>{row.promotionName}</div>
+                                                        <div>{row.promotionName}</div>
                                                     </TableCell>
+                                                    <TableCell align="left">{getPromotionOrganizer(row.promotionOrganizer)}</TableCell>
                                                     <TableCell align="left">{displayPromotionType(row.promotionType)}</TableCell>
-                                                    <TableCell align="left">{getPromotionScope(row.objects)}</TableCell>
                                                     <TableCell align="left">
-                                                        <div style={{fontWeight: "bold" }}>{displayStatus(row.status)}</div>
+                                                        <div>Từ : {formatTime(row.startTime)}</div>
+                                                        <div>Đến : {formatTime(row.endTime)}</div>
                                                     </TableCell>
                                                     <TableCell align="left">
                                                         <Switch
@@ -327,10 +328,6 @@ function render(props) {
                                                             checked={row.status === "ACTIVE" ? true : false}
                                                             color="primary"
                                                         />
-                                                    </TableCell>
-                                                    <TableCell align="left">
-                                                        <div>Từ : {formatTime(row.startTime)}</div>
-                                                        <div>Đến : {formatTime(row.endTime)}</div>
                                                     </TableCell>
                                                     <TableCell align="center">
                                                         <Link href={`/crm/promotion/edit?promotionId=${row.promotionId}`}>
@@ -380,15 +377,15 @@ function render(props) {
                                             {props.voucher.map((row, index) => (
                                                 <TableRow key={row.voucherId + "_" + index}>
                                                     <TableCell align="left">
-                                                        <div style={{fontWeight: "bold"}}>{row.code}</div>
+                                                        <div>{row.code}</div>
                                                     </TableCell>
                                                     <TableCell align="left">{row.promotionName}</TableCell>
                                                     <TableCell align="left">{row.type}</TableCell>
                                                     <TableCell align="center">
-                                                        <div style={{fontWeight: "bold" }}>{displayUsage(row.maxUsage)}</div>
+                                                        <div>{displayUsage(row.maxUsage)}</div>
                                                     </TableCell>
                                                     <TableCell align="center">
-                                                        <div style={{fontWeight: "bold" }}>{displayUsage(row.maxUsagePerCustomer)}</div>
+                                                        <div>{displayUsage(row.maxUsagePerCustomer)}</div>
                                                     </TableCell>
                                                     <TableCell align="left">
                                                         <div>{formatTime(row.expiredDate)}</div>
