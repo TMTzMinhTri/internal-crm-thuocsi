@@ -37,7 +37,7 @@ async function searchAreaList(q) {
 }
 
 async function searchSellerList(q) {
-  return await getSellerClient().getSellerClient(0, 20, q);
+  return await getProductClient().getProducerClient(q);
 }
 
 async function searchIngredientList(q) {
@@ -85,16 +85,20 @@ const AutoCompleteField = (props) => {
   const handleChangeTextField = async (event) => {
     console.log(event.target.value, "handleChangeTextField", type);
     setProductList([]);
+
     let value = event.target.value;
-    if (value != "") {
-      let res = await fetchOptions(type, value);
-      if (res?.status == "OK") {
-        setProductList(res.data);
-      } else {
-        setProductList([]);
-      }
+    console.log(value, "value", type);
+    let res = await fetchOptions(type, value);
+    console.log(res, "res");
+    if (res?.status == "OK") {
+      console.log(res, "res");
+      setProductList(res.data);
+    } else {
+      setProductList([]);
     }
   };
+
+  console.log(options, "options");
 
   return (
     <Autocomplete
@@ -112,6 +116,7 @@ const AutoCompleteField = (props) => {
           variant="standard"
           label={label}
           placeholder={placeholder}
+          onClick={() => handleChangeTextField({ target: { value: "" } })}
           onChange={handleChangeTextField}
         />
       )}

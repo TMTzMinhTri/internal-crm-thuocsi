@@ -11,6 +11,10 @@ class AreaClient extends APIClient {
   getListArea(q) {
     return this.callFromClient("GET", `${PREFIX}/region/list`, q);
   }
+
+  getListAreaByIDs(q) {
+    return this.callFromClient("POST", `${PREFIX}/region/list`, q);
+  }
 }
 
 export function getAreaClient(ctx, data) {
