@@ -67,7 +67,7 @@ const Scope = (props) => {
                         <TextField
                           id={"registeredAfter" + index}
                           name={"registeredAfter" + index}
-                          label="Thời gian kết thúc"
+                          label="Đăng kí sau ngày"
                           placeholder=""
                           defaultValue={registeredAfter}
                           helperText={errors.registeredAfter?.message}
