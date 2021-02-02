@@ -1,7 +1,7 @@
 import {
     defaultConditionInfo,
     defaultNameRulesQuantity,
-    defaultNameRulesValue,
+    defaultNameRulesValue, defaultPromotionOrganizer,
     defaultPromotionScope,
     defaultPromotionStatus,
     defaultPromotionType,
@@ -281,7 +281,7 @@ export function displayRule(rule) {
 
 export function formatTime(time) {
     if (!time || time === "") {
-        return "Chưa cài đặt"
+        return "Không giới hạn"
     }
     time = time.substring(0, time.length - 4);
     if (Number.isInteger(time)) {
@@ -309,21 +309,17 @@ export function formatTime(time) {
     }
 }
 
-export function displayPromotionScope(promotionScope) {
-    switch (promotionScope) {
-        case defaultPromotionScope.GLOBAL:
-            return "Toàn sàn";
-        case defaultPromotionScope.CATEGORY:
-            return "Danh mục sản phẩm";
-        case defaultPromotionScope.PRODUCT:
-            return "Sản phẩm được chọn";
-        case defaultPromotionScope.SELLER:
-            return "Toàn gian hàng";
-        case defaultPromotionScope.SKU:
-            return "Sản phẩm của gian hàng";
-        default:
-            return "Không xác định";
+export function getPromotionOrganizer(organizer) {
+    let scope = "Không xác định";
+    switch (organizer) {
+        case defaultPromotionOrganizer.COORPORATE:
+            return "Chương trình hợp tác của 2 bên"
+        case defaultPromotionOrganizer.MARKETPLACE:
+            return  "Chương trình của riêng sàn"
+        case defaultPromotionOrganizer.SELLER:
+            return "Chương trình của riêng nhà bán hàng"
     }
+    return scope;
 }
 
 export function getPromotionScope(objects) {
@@ -365,7 +361,7 @@ export function displayPromotionType(type) {
         case defaultPromotionType.FREESHIP:
             return "Miễn phí vận chuyển";
         case defaultPromotionType.VOUCHER_CODE:
-            return "Mã giảm giá";
+            return "Mã khuyến mãi (Voucher)";
         default:
             return "Không xác định";
     }

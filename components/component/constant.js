@@ -14,6 +14,12 @@ export const defaultPromotionType = {
     PROMOTION: "PROMOTOTION",
 }
 
+export const defaultPromotionOrganizer = {
+    MARKETPLACE: "MARKETPLACE",
+    SELLER: "SELLER",
+    COORPORATE: "COORPORATE "
+}
+
 export const defaultPromotionScope = {
     GLOBAL: "GLOBAL",
     SELLER: "SELLER",

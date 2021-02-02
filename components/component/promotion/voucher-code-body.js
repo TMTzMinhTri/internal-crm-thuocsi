@@ -8,6 +8,8 @@ import React, {useState} from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
+import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
+import {Controller} from "react-hook-form";
 
 
 const useStyles = makeStyles(theme => ({
@@ -22,8 +24,8 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export async function searchPromotion(prmotionCode){
-    return getPromoClient().getPromotionFromClient(prmotionCode)
+export async function searchPromotion(promotionName){
+    return getPromoClient().getPromotionFromClient(promotionName)
 }
 
 export async function searchCustomer(customerName) {
@@ -38,8 +40,8 @@ export default function VoucherCodeBody(props) {
         handleChangeType,
         appliedCustomers,
         promotion,
+        control,
         edit,
-        onChangePromotion,
         onChangeCustomer,
         register,
     }=props
@@ -48,6 +50,7 @@ export default function VoucherCodeBody(props) {
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState(promotion || [])
     const [listCustomer, setListCustomer] = useState(appliedCustomers || [])
+    const hasError = typeof errors[`promotionName`] !== 'undefined';
 
 
 
@@ -55,8 +58,12 @@ export default function VoucherCodeBody(props) {
         let listPromationResponse = await searchPromotion(value)
         if (listPromationResponse && listPromationResponse.status === "OK") {
             setListPromotionSearch(listPromationResponse.data)
+            return listPromationResponse.data.map((item) => {
+                return {label: item.promotionName, value: item.promotionId}
+            })
         }else {
             setListPromotionSearch([])
+            return []
         }
     }
 
@@ -69,6 +76,12 @@ export default function VoucherCodeBody(props) {
         }
     }
 
+    const validateNumber = (number,message) => {
+        if (number < 0) {
+            return message
+        }
+    }
+
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} sm={4} md={4}>
@@ -76,7 +89,6 @@ export default function VoucherCodeBody(props) {
                 <TextField
                     id="code"
                     name="code"
-                    // label="Nhập mã khuyến mãi"
                     disabled={edit}
                     helperText={errors.code?.message}
                     InputLabelProps={{
@@ -87,11 +99,7 @@ export default function VoucherCodeBody(props) {
                     style={{width: "100%"}}
                     required
                     inputRef={register({
-                        required: "Mã khuyến mãi không được để trống",
-                        pattern: {
-                            value: /[A-Za-z]/,
-                            message: "Mã khuyến mãi phải có kí tự là chứ số",
-                        },
+                        required: "Mã khuyến mãi không được để trống"
                     })}
                 />
             </Grid>
@@ -99,35 +107,21 @@ export default function VoucherCodeBody(props) {
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
                 <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng<span style={{color : 'red'}}> *</span></h5>
-                <Autocomplete
-                    fullWidth
+                <MuiSingleAuto
                     id="promotionId"
+                    options={
+                        listPromotionSearch.map((item) => {
+                            return {label: item.promotionName, value: item.promotionId}
+                        })
+                    }
                     name="promotionId"
-                    options={listPromotionSearch}
-                    loading={showAutoComplete}
-                    defaultValue={promotion[0]}
-                    loadingText="Không tìm thấy chương trình khuyến mãi"
-                    onOpen={() => {
-                        setShowAutoComplete(true);
-                    }}
-                    onClose={() => {
-                        setShowAutoComplete(false);
-                    }}
-                    getOptionLabel={(option) => option.promotionName }
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            // label="Chương trình khuyến mãi áp dụng"
-                            name="promotionName"
-                            placeholder="Chương trình khuyến mãi áp dụng"
-                            required
-                            inputRef={register({
-                                required: "Vui lòng chọn chương trình khuyến mãi áp dụng",
-                            })}
-                            onChange={(e) => handleSearchPromotion(e.target.value)}
-                        />
-                    )}
-                    onChange={(e, value) => onChangePromotion(e, value)}
+                    variant="standard"
+                    onFieldChange={handleSearchPromotion}
+                    placeholder="Chọn chương trình khuyến mãi áp dụng"
+                    control={control}
+                    errors={errors}
+                    message="Vui lòng chọn chương trình khuyến mãi áp dụng"
+                    required={true}
                 />
             </Grid>
             <Grid item xs={12} sm={3} md={3}>
@@ -139,7 +133,7 @@ export default function VoucherCodeBody(props) {
                     name="expiredDate"
                     helperText={errors.expiredDate?.message}
                     error={!!errors.expiredDate}
-                    // label="Hạn sử dụng mã khuyến mãi"
+                    label="Hạn sử dụng mã khuyến mãi"
                     placeholder=""
                     type="datetime-local"
                     InputLabelProps={{
@@ -147,7 +141,6 @@ export default function VoucherCodeBody(props) {
                     }}
                     style={{width: "100%"}}
                     inputRef={register({
-                        required: "Vui lòng chọn hạn sử dụng mã khuyến mãi",
                     })}
                 />
             </Grid>
@@ -155,7 +148,6 @@ export default function VoucherCodeBody(props) {
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
                 <h5 className={cssStyle.titleLabel}>Loại mã</h5>
-                {/* <InputLabel htmlFor="select-type" style={{fontSize: '12px'}}>Loại mã *</InputLabel> */}
                 <Select
                     id="type"
                     name="type"
@@ -183,11 +175,15 @@ export default function VoucherCodeBody(props) {
                     InputProps={{
                         className: classes[".MuiInputBase-input"]
                     }}
+                    helperText={errors.maxUsage?.message}
+                    error={!!errors.maxUsage}
                     defaultValue={0}
-                    // label="Tổng số lần sử dụng toàn hệ thống"
                     placeholder="Tổng số lần sử dụng toàn hệ thống"
                     style={{width: "100%", fontWeight : 'normal'}}
-                    inputRef={register}
+                    inputRef={register({
+                        required: "Tổng số lần sử dụng toàn hệ thống không được để trống",
+                        validate: (value) => validateNumber(value,"Tổng số lần sử dụng toàn hệ thống không được âm")
+                    })}
                     required
                 />
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
@@ -203,11 +199,15 @@ export default function VoucherCodeBody(props) {
                     InputProps={{
                         className: classes[".MuiInputBase-input"]
                     }}
+                    helperText={errors.maxUsagePerCustomer?.message}
+                    error={!!errors.maxUsagePerCustomer}
                     defaultValue={0}
-                    // label="Số lần áp dụng tối đa cho mỗi khách hàng"
                     placeholder="Số lần áp dụng tối đa cho mỗi khách hàng"
                     style={{width: "100%", fontWeight : 'normal'}}
-                    inputRef={register}
+                    inputRef={register({
+                        required: "Số lần áp dụng tối đa cho mỗi khách hàng không được để trống",
+                        validate: (value) => validateNumber(value,"Số lần áp dụng tối đa cho mỗi khách hàng không được âm")
+                    })}
                     required
                 />
                 <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
@@ -235,7 +235,6 @@ export default function VoucherCodeBody(props) {
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            // label="Danh sách khách hàng được sử dụng"
                             name="appliedCustomers"
                             placeholder="Danh sách khách hàng được sử dụng"
                             required

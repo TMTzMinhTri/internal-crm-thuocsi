@@ -35,9 +35,13 @@ export async function loadVoucherCode(ctx) {
     let returnObject = {props: {}}
     let voucherId = ctx.query.voucherId
     let voucherResponse = await getVoucherClient(ctx,{}).getVoucherById(parseInt(voucherId))
+    console.log('voucer',voucherResponse)
     if (voucherResponse && voucherResponse.status === "OK") {
         returnObject.props.voucher = voucherResponse.data[0]
-        returnObject.props.voucher.expiredDate =  voucherResponse.data[0].expiredDate.slice(0,voucherResponse.data[0].expiredDate.length - 4)
+        if (voucherResponse.data[0].expiredDate) {
+            returnObject.props.voucher.expiredDate =  voucherResponse.data[0].expiredDate.slice(0,voucherResponse.data[0].expiredDate.length - 4)
+
+        }
         let promotionResponse = await getPromoClient(ctx,{}).getPromotionByID(parseInt(voucherResponse.data[0].promotionId))
         if (promotionResponse && promotionResponse.status === "OK") {
             returnObject.props.promotion = promotionResponse.data
@@ -60,10 +64,12 @@ export default function NewPage(props) {
 }
 
 export async function updateVoucher(voucherId,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
-    expiredDate = expiredDate + ":00.000Z"
-    let data = {voucherId,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer}
+    let data = {voucherId,promotionId,type,maxUsage,maxUsagePerCustomer}
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers=appliedCustomers
+    }
+    if (expiredDate) {
+        data.expiredDate = expiredDate + ":00.000Z"
     }
     return getVoucherClient().updateVoucher(data)
 }
@@ -72,23 +78,22 @@ function render(props) {
     const classes = useStyles()
     const toast = useToast();
     const router = useRouter();
-
     let voucher = props.voucher
 
-    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({defaultValues: voucher,mode: "onChange"});
+    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({defaultValues: {...voucher,promotionId: props.promotion.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0]},mode: "onChange"});
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
     const [dataProps, setDataprops] = useState({
-        promotionId: voucher.promotionId,
         customerIds : voucher.appliedCustomers,
         type: voucher.type,
     })
 
     const onSubmit = async () => {
         let value = getValues()
-        let {code,expiredDate,maxUsage,maxUsagePerCustomer} = value
-        let {promotionId,type,customerIds} = dataProps
-        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
+        let {code,expiredDate,maxUsage,maxUsagePerCustomer,promotionId} = value
+        let {type,customerIds} = dataProps
+        console.log('val',value)
+        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Cập nhật mã khuyến mãi thành công')
         }else {
@@ -148,11 +153,6 @@ function render(props) {
                         <Button variant="contained" color="primary" style={{margin: 8}}   onClick={handleSubmit(onSubmit)}>
                             XÁC NHẬN
                         </Button>
-                        <Link href='/crm/promotion'>
-                            <Button variant="contained" style={{margin: 8}}>
-                                TRỞ VỀ
-                            </Button>
-                        </Link>
                     </ButtonGroup>
                 </MyCardActions>
             </MyCard>
