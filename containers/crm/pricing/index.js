@@ -4,4 +4,5 @@ export const ViewType = {
     DISTRICT: 'district',
     WARD: 'ward',
     CUSTOMER: 'customer',
+    TAG: 'tag',
 }

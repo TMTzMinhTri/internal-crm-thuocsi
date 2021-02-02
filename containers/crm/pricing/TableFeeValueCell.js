@@ -33,6 +33,9 @@ export const TableFeeValueCell = ({ code, initialFee, onUpdate }) => {
                         )
                     ), 
                 }}
+                inputProps={{
+                    min: 0
+                }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 onChange={e => setFee(+e.target.value)}

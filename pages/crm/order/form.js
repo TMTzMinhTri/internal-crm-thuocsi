@@ -14,12 +14,15 @@ import {
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Divider from "@material-ui/core/Divider";
+import { Done } from "@material-ui/icons";
 import { formatNumber, orderStatus } from "components/global"
 import FormControl from "@material-ui/core/FormControl";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
+import { ConfirmDialog } from "containers/crm/order/ConfirmDialog"
+import { TableQuantityValueCell } from "containers/crm/order/TableQuantityValueCell"
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import Typography from "@material-ui/core/Typography";
@@ -129,14 +132,18 @@ export default function renderForm(props, toast) {
     let editObject = props.isUpdate ? props.order : {}
 
     const [loading] = useState(false);
-    const [idxChangedItem, setIdxChangedItem] = useState()
+    // const [idxChangedItem, setIdxChangedItem] = useState()
+    const [openModal, setOpenModal] = useState(false);
+    const [defaultQuantity, setDefaultQuantity] = useState(props.orderItem?.map(item => item.quantity))
     const [orderItem, setOrderItem] = useState(props.orderItem)
+    const [focused, setFocused] = useState(false)
+    const [currentEditValue, setCurrentEditValue] = useState(null)
     const [maxQuantity, setMaxQuantity] = useState()
-    const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
+    // const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
     const [deletedOrderItem, setDeletedOrderItem] = useState(null);
     const router = useRouter();
 
-    const { register, handleSubmit, errors, control, getValues } = useForm({
+    const { register, handleSubmit, errors, control, getValues, setError, clearErrors } = useForm({
         defaultValues: editObject,
         mode: "onSubmit"
     });
@@ -196,8 +203,24 @@ export default function renderForm(props, toast) {
                 <TableCell align="left">{data.productSku}</TableCell>
                 <TableCell align="left">{data.sellerName}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
-                <TableCell align="right">
-                    {formatNumber(data.quantity)}
+                <TableQuantityValueCell
+                    orderNo={data.orderNo}
+                    orderItemNo={data.orderItemNo}
+                    maxQuantity={data.maxQuantity}
+                    errors={errors}
+                    clearErrors={clearErrors}
+                    defaultQuantity={defaultQuantity[index]}
+                    initialQuantity={data.quantity}
+                    setError={setError}
+                    onUpdate={(values) => {
+                        setCurrentEditValue(values);
+                        setOpenModal(true);
+                    }}
+                    onChange={(value) => {
+                        orderItem[index].quantity = value
+                    }}
+                />
+                {/* {formatNumber(data.quantity)}
                     <Box marginLeft={1} clone>
                         <IconButton
                             size="small"
@@ -217,8 +240,7 @@ export default function renderForm(props, toast) {
                         >
                             <DeleteIcon fontSize="small" />
                         </IconButton>
-                    </Box>
-                </TableCell>
+                    </Box> */}
                 <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
             </TableRow>
         );
@@ -226,74 +248,79 @@ export default function renderForm(props, toast) {
 
 
     const changeQuantityHandler = async () => {
-        let quantityItem = parseInt(getValues('quantityItem'), 10)
+        // let quantityItem = parseInt(getValues('quantityItem'), 10)
+        const { orderNo, orderItemNo, quantity } = currentEditValue
+        let idxChangedItem = orderItem?.map((item, idx) => {
+            if (item.orderItemNo == orderItemNo) return idx
+        })
+
         let tmpOrderItem = orderItem.map((item, idx) => {
             if (idx == idxChangedItem) {
-                return { ...item, quantity: quantityItem, totalPrice: quantityItem * item.price }
+                return { ...item, quantity: quantity, totalPrice: quantity * item.price }
             }
             return item
         })
         // better performance
         props.order.totalPrice = props.order.totalPrice - orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
         setOrderItem(tmpOrderItem)
-        setOpenChangeQuantityDialog(false)
+        // setOpenChangeQuantityDialog(false)
         await updateOrderItem(tmpOrderItem, idxChangedItem)
 
     }
 
 
-    const ChangeQuantityDialog = () => (
-        <div>
-            <Dialog
-                open={openChangeQuantityDialog}
-                onClose={() => setOpenChangeQuantityDialog(false)}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
-            >
-                <DialogTitle id="alert-dialog-title">
-                    {"Thay đổi số lượng sản phẩm"}
-                </DialogTitle>
-                <DialogContent>
-                    <TextField
-                        defaultValue={1}
-                        style={{ margin: '0 auto', width: '100%' }}
-                        // variant="outlined"
-                        id="quantityItem"
-                        name="quantityItem"
-                        size="small"
-                        type="number"
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        placeholder=""
-                        onChange={event => {
-                            if (event.target.value < 1) {
-                                event.target.value = 1;
-                            }
-                            if (event.target.value > orderItem[idxChangedItem].maxQuantity) {
-                                event.target.value = orderItem[idxChangedItem].maxQuantity;
-                            }
-                        }}
-                        // error={!!errors.quantityItem}
-                        // helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
-                        inputRef={register({
-                            valueAsNumber: true,
-                            min: 0
-                        })}
-                        label={"Số lượng ( tối đa " + maxQuantity + " )"}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setOpenChangeQuantityDialog(false)} color="primary">
-                        Hủy bỏ
-                    </Button>
-                    <Button onClick={() => changeQuantityHandler()} color="primary" autoFocus>
-                        Đồng ý
-                     </Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    );
+    // const ChangeQuantityDialog = () => (
+    //     <div>
+    //         <Dialog
+    //             open={openChangeQuantityDialog}
+    //             onClose={() => setOpenChangeQuantityDialog(false)}
+    //             aria-labelledby="alert-dialog-title"
+    //             aria-describedby="alert-dialog-description"
+    //         >
+    //             <DialogTitle id="alert-dialog-title">
+    //                 {"Thay đổi số lượng sản phẩm"}
+    //             </DialogTitle>
+    //             <DialogContent>
+    //                 <TextField
+    //                     defaultValue={1}
+    //                     style={{ margin: '0 auto', width: '100%' }}
+    //                     // variant="outlined"
+    //                     id="quantityItem"
+    //                     name="quantityItem"
+    //                     size="small"
+    //                     type="number"
+    //                     InputLabelProps={{
+    //                         shrink: true,
+    //                     }}
+    //                     placeholder=""
+    //                     onChange={event => {
+    //                         if (event.target.value < 1) {
+    //                             event.target.value = 1;
+    //                         }
+    //                         if (event.target.value > orderItem[idxChangedItem].maxQuantity) {
+    //                             event.target.value = orderItem[idxChangedItem].maxQuantity;
+    //                         }
+    //                     }}
+    //                     // error={!!errors.quantityItem}
+    //                     // helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
+    //                     inputRef={register({
+    //                         valueAsNumber: true,
+    //                         min: 0
+    //                     })}
+    //                     label={"Số lượng ( tối đa " + maxQuantity + " )"}
+    //                 />
+    //             </DialogContent>
+    //             <DialogActions>
+    //                 <Button onClick={() => setOpenChangeQuantityDialog(false)} color="primary">
+    //                     Hủy bỏ
+    //                 </Button>
+    //                 <Button onClick={() => changeQuantityHandler()} color="primary" autoFocus>
+    //                     Đồng ý
+    //                  </Button>
+    //             </DialogActions>
+    //         </Dialog>
+    //     </div>
+    // );
 
     const ConfirmDeleteOrderItemDialog = () => {
         const handleClose = () => setDeletedOrderItem(null);
@@ -330,9 +357,18 @@ export default function renderForm(props, toast) {
                 <Box component={Paper} display="block">
                     <FormGroup>
                         <form>
-                            <ChangeQuantityDialog />
+                            {/* <ChangeQuantityDialog /> */}
+                            <ConfirmDialog
+                                open={openModal}
+                                onClose={() => setOpenModal(false)}
+                                onConfirm={() => changeQuantityHandler()}
+                            />
                             <ConfirmDeleteOrderItemDialog />
                             <Box className={styles.contentPadding}>
+                                <Typography variant="h6" component="h6"
+                                    style={{ marginBottom: '10px', fontSize: 25, fontWeight: 'bold' }}>
+                                    Đơn hàng #{props.order?.orderId}
+                                </Typography>
                                 <Card variant="outlined">
                                     <CardContent>
                                         <Typography variant="h6" component="h6"
@@ -358,6 +394,30 @@ export default function renderForm(props, toast) {
                                                     }}
                                                     style={{ width: '100%' }}
                                                     error={!!errors.customerName}
+                                                    required
+                                                    inputRef={
+                                                        register()
+                                                    }
+                                                />
+                                            </Grid>
+                                            <Grid item xs={12} sm={4} md={4}>
+                                                <TextField
+                                                    id="customerID"
+                                                    name="customerID"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    label="ID khách hàng"
+                                                    placeholder=""
+                                                    inputProps={{
+                                                        readOnly: true,
+                                                        disabled: true,
+                                                    }}
+                                                    helperText={errors.customerID?.message}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    style={{ width: '100%' }}
+                                                    error={!!errors.customerID}
                                                     required
                                                     inputRef={
                                                         register()
@@ -562,7 +622,7 @@ export default function renderForm(props, toast) {
                                                 <TableCell align="left">SKU</TableCell>
                                                 <TableCell align="left">Tên người bán</TableCell>
                                                 <TableCell align="left">Tên sản phẩm</TableCell>
-                                                <TableCell align="right">Số lượng</TableCell>
+                                                <TableCell align="left">Số lượng</TableCell>
                                                 <TableCell align="right">Thành tiền</TableCell>
                                             </TableRow>
                                         </TableHead>

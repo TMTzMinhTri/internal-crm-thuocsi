@@ -40,7 +40,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
-import { formatDateTime,formatNumber } from "components/global"
+import { formatDateTime, formatNumber } from "components/global"
 import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
 import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
 
@@ -57,9 +57,10 @@ export async function loadOrderData(ctx) {
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
-
+    console.log(offset)
     let orderClient = getOrderClient(ctx, data)
-    let resp = await orderClient.getOrder(offset, limit,q)
+    let resp = await orderClient.getOrder(offset, limit, q)
+    console.log(resp.data[0])
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
             return { props: { data: [], count: 0, message: 'Không tìm thấy đơn hàng' } }
@@ -87,6 +88,7 @@ function render(props) {
     const [search, setSearch] = useState(q);
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
+
     const { error, success } = useToast()
 
     async function handleChange(event) {
@@ -111,7 +113,7 @@ function render(props) {
             <TableCell align="right">{formatNumber(row.data.totalPrice)}</TableCell>
             <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
             <TableCell align="center">{row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
-            : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}</TableCell>
+                : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}</TableCell>
             <TableCell align="left">
                 <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
                     <a>
@@ -213,6 +215,6 @@ function render(props) {
                     />
                 </Table>
             </TableContainer>
-        </AppCRM> 
+        </AppCRM>
     );
 }

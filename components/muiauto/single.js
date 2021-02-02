@@ -6,19 +6,6 @@ import useDebounce from "components/useDebounce";
 import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 
-/**
- *  deboudce - OK
-    clear all - OK
-    load info - OK
-    search - OK
-    validate required/...
-    autofus - PENDINH
-    default vaue ? - OK
-    translate - OK 
-    reset error - PENDING
- * @param {*} param0 
- */
-
 const MuiSingleAutocomplete = withStyles({
     tag: {
         height: 'auto',
@@ -29,19 +16,35 @@ const MuiSingleAutocomplete = withStyles({
             overflowWrap: 'anywhere'
         }
     }
-})(Autocomplete); // Fix CSS scroll page when pick long tag
+})(Autocomplete);
 
+/**
+ * @param {object} props
+ * @param {string} props.name - field name
+ * @param {any[]} props.options - autocomplete options
+ * @param {string} props.label - label
+ * @param {string} props.placeholder - placeholder
+ * @param {boolean} props.required - required option
+ * @param {string} props.message - error message
+ * @param {Function} props.onFieldChange
+ * @param {Function} props.onNotSearchFieldChange
+ * @param {object} props.control
+ * @param {boolean} props.disabled
+ * @param {object} props.errors
+ * @param {string} props.variant
+ */
 const MuiSingleAuto = ({
-    name, // NAME INPUT
-    options,  // DATA OPTIONS label-value
-    label,  // LABEL
+    name,
+    options,
+    label,
     placeholder,
-    required, // boolean
-    message, // CUSTOM MESSAGE ERROR
-    onFieldChange, // HANDLE EVENT CHANGE
+    required,
+    message,
+    onFieldChange,
     onNotSearchFieldChange,
-    control,  // REACT HOOK FORM CONTROL
+    control,
     disabled,
+    variant,
     errors }) => { // REACT HOOK FORM ERRORS 
 
     // TODO
@@ -93,7 +96,7 @@ const MuiSingleAuto = ({
                                 }
                                 error={hasError}
                                 placeholder={placeholder}
-                                variant="outlined"
+                                variant={"outlined"}
                                 style={{ width: "100%", minWidth: "250px" }}
                                 size="small"
                                 onBlur={() => {
@@ -116,9 +119,9 @@ const MuiSingleAuto = ({
                 onChange={([, { id }]) => id}
                 rules={{
                     validate: (d) => {
-                        if (required && required == true) {
+                        if (required && required === true) {
                             console.log("debug with d: ", d)
-                            if (typeof d === "undefined" || d === null || d?.length == 0) {
+                            if (typeof d === "undefined" || d === null || d?.length === 0) {
                                 return "Vui lòng nhập"
                             }
                         }

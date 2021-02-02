@@ -53,7 +53,7 @@ export async function loadCustomerData(ctx) {
     let offset = page * limit
 
     let customerClient = getCustomerClient(ctx, data)
-    
+    console.log(offset)
     let resp = await customerClient.getCustomer(offset, limit, q)
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
@@ -65,8 +65,8 @@ export async function loadCustomerData(ctx) {
     const customerCommon = getCommonAPI(ctx, {})
     const resLevel = await customerCommon.getListLevelCustomers()
     let condUserType = []
-    if(resLevel.status === 'OK'){
-        condUserType = resLevel.data.map(item =>{ return {value: item.code, label: item.name } })
+    if (resLevel.status === 'OK') {
+        condUserType = resLevel.data.map(item => { return { value: item.code, label: item.name } })
     }
     // Pass data to the page via props
     return { props: { data: resp.data, count: resp.total, condUserType } }
@@ -82,8 +82,8 @@ function render(props) {
     const [openApproveDialog, setOpenApproveDialog] = useState(false);
     const [openLockAccountDialog, setOpenLockAccountDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
-    const [lockedCustomerCode,setLockedCustomerCode]=useState();
-    
+    const [lockedCustomerCode, setLockedCustomerCode] = useState();
+
     let q = router.query.q || "";
     const [search, setSearch] = useState(q);
     let page = parseInt(router.query.page) || 0;
@@ -104,11 +104,11 @@ function render(props) {
     async function approveAccount() {
         const _client = getCustomerClient()
         setOpenApproveDialog(false)
-        const resp = await _client.updateStatus({ code:approvedCustomerCode.code, status: "APPROVED" })
+        const resp = await _client.updateStatus({ code: approvedCustomerCode.code, status: "APPROVED" })
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "APPROVED" 
+            props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "APPROVED"
             setApprovedCustomerCode(null)
             success("Kích hoạt tài khoản thành công")
             // window.location.reload()
@@ -118,11 +118,11 @@ function render(props) {
     async function lockAccount() {
         const _client = getCustomerClient()
         setOpenLockAccountDialog(false)
-        const resp = await _client.updateStatus({ code:lockedCustomerCode.code, status: "NEW" })
+        const resp = await _client.updateStatus({ code: lockedCustomerCode.code, status: "NEW" })
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            props.data.filter(row => row.code === lockedCustomerCode.code)[0].status = "NEW" 
+            props.data.filter(row => row.code === lockedCustomerCode.code)[0].status = "NEW"
             setApprovedCustomerCode(null)
             success("Khóa tài khoản thành công")
             // window.location.reload()
@@ -153,12 +153,12 @@ function render(props) {
                     </a>
                 </Link>
                 {row.data.status === 'APPROVED' ? <Tooltip title="Khóa tài khoản">
-                    <IconButton onClick={() => {setOpenLockAccountDialog(true); setLockedCustomerCode(row.data)}}>
+                    <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row.data) }}>
                         <LockOpenIcon fontSize="small" />
                     </IconButton>
                 </Tooltip> : row.data.status !== 'DRAFT' ? <Tooltip title="Kích hoạt tài khoản">
-                    <IconButton onClick={() => {setOpenApproveDialog(true); setApprovedCustomerCode(row.data)}}>
-                        <LockIcon fontSize="small" style={{color:'red'}}/>
+                    <IconButton onClick={() => { setOpenApproveDialog(true); setApprovedCustomerCode(row.data) }}>
+                        <LockIcon fontSize="small" style={{ color: 'red' }} />
                     </IconButton>
                 </Tooltip> : null}
             </TableCell>
@@ -227,7 +227,7 @@ function render(props) {
                 <title>Danh sách khách hàng</title>
             </Head>
             {openApproveDialog ? <ApproveDialog /> : null}
-            {openLockAccountDialog ? <LockAccountDialog/> : null }
+            {openLockAccountDialog ? <LockAccountDialog /> : null}
             <div className={styles.grid}>
                 <Grid container spacing={3} direction="row"
                     justify="space-between"
@@ -277,7 +277,7 @@ function render(props) {
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
-                        <col width="10%"  />
+                        <col width="10%" />
                     </colgroup>
                     <TableHead>
                         <TableRow>
