@@ -53,26 +53,6 @@ import {
   MyCardHeader,
 } from "@thuocsi/nextjs-components/my-card/my-card";
 
-const defaultState = {
-  promotionOption: defaultRulePromotion.MIN_ORDER_VALUE,
-  promotionTypeRule: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
-  promotionScope: defaultPromotionScope.GLOBAL,
-  promotionUseType: defaultUseTypePromotion.MANY,
-  promotionRulesLine: [
-    {
-      id: 1,
-    },
-  ],
-  listGiftPromotion: [],
-  listProductGiftPromotion: [],
-  listProductPromotion: [],
-  listCategoryDefault: [],
-  listProductAction: [],
-  listCategoryAction: [],
-  listProductDefault: [],
-  listCategoryPromotion: [],
-};
-
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
     return loadDataBefore(ctx);
@@ -80,33 +60,8 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadDataBefore(ctx) {
-  let returnObject = { props: { defaultState: defaultState } };
-  let _categoryClient = getCategoryClient(ctx, {});
-  let listCategoryResponse = await _categoryClient.getListCategory();
-  if (listCategoryResponse && listCategoryResponse.status === "OK") {
-    listCategoryResponse.data.forEach((category, index) => {
-      returnObject.props.defaultState.listCategoryDefault.push({
-        category: category,
-        active: false,
-      });
-    });
-  }
-
-  let _productClient = getProductClient(ctx, {});
-  let listProductResponse = await _productClient.getProductList(0, 5, "");
-
-  if (listProductResponse && listProductResponse.status === "OK") {
-    listProductResponse.data.forEach((product, index) => {
-      returnObject.props.defaultState.listProductDefault.push({
-        product: product,
-        active: false,
-      });
-    });
-    returnObject.props.defaultState.listCategoryProduct =
-      listCategoryResponse.data;
-  }
-
-  return returnObject;
+  let returnObject = { props: { } };
+  return returnObject
 }
 
 export default function NewPage(props) {
@@ -114,12 +69,6 @@ export default function NewPage(props) {
 }
 
 async function createPromontion(data) {
-  // if (promotionCode !== "") {
-  //   data.promotionCode = promotionCode;
-  // }
-  // if (endTime !== "") {
-  //   data.endTime = endTime;
-  // }
   return getPromoClient().createPromotion(data);
 }
 
@@ -142,22 +91,6 @@ async function getListCategory() {
 function render(props) {
   const toast = useToast();
   const router = useRouter();
-
-  const urls = [
-    {
-      title: "Trang chủ",
-      url: "/crm/promotion",
-    },
-    {
-      title: "Khuyến mãi",
-      url: "/crm/promotion",
-    },
-    {
-      title: "Tạo mới",
-      url: `/crm/promotion/new?type=${router.query.type}`,
-    },
-  ];
-  const [state, setState] = useState(props.defaultState);
 
   const {
     register,
@@ -285,8 +218,6 @@ function render(props) {
           productValue: 0,
         });
         setConditionObject({ ...conditionObject });
-        console.log(product, i, "handleChangeScopeList");
-        console.log(getValues(), "getValue");
       });
     }
     setScopeObject([...scopeObject]);
@@ -295,10 +226,6 @@ function render(props) {
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
     let value = getValues();
-    console.log(value, "value");
-    console.log(scopeObject, "scopeObject");
-    console.log(conditionObject, "conditionObject");
-    console.log(rewardObject, "rewardObject");
     let objects = [];
     scopeObject.map((o, index) => {
       switch (o.selectField) {
@@ -356,7 +283,6 @@ function render(props) {
     let minOrverValue = 0;
 
     if (conditionObject.selectField == defaultCondition.product) {
-      console.log(conditionObject.selectField, "conditionObject.selectField");
       conditionObject.productList.map((o, index) => {
         productConditions.push({
           productId: o.product.productID,
@@ -395,27 +321,34 @@ function render(props) {
       rules.conditions[0].gifts = gifts;
     }
 
+    let fromDate = "";
+    let toDate = "";
+    if (value.startTime) {
+      fromDate = new Date(value.startTime).toISOString();
+    }
+    if (value.endTime) {
+      toDate = new Date(value.endTime).toISOString();
+    }
+
     let body = {
       promotionName: value.promotionName,
       promotionType: textField.promotionTypeField,
       promotionOrganizer: textField.promotionField,
-      startTime: value.startTime + ":00.000Z",
-      endTime: value.endTime + ":00.000Z",
+      startTime: fromDate,
+      endTime: toDate,
       description: textField.descriptionField,
       rule: rules,
       objects: objects,
     };
 
-    console.log(JSON.stringify(body), "body");
 
     let res = await createPromontion(body);
 
     if (res.status == "OK") {
       toast.success("Tạo chương trình khuyến mãi thành công");
     } else {
-      toast.error("Xảy ra lỗi");
+      toast.error(res.message);
     }
-    console.log(res, "res");
   }
 
   return (

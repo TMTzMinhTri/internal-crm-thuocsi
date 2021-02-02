@@ -39,7 +39,7 @@ export async function createVoucherCode(code,promotionId,expiredDate,type,maxUsa
         data.appliedCustomers=appliedCustomers
     }
     if (expiredDate) {
-        data.expiredDate = expiredDate + ":00.000Z"
+        data.expiredDate = new Date(expiredDate).toISOString()
     }
     console.log('data',data)
     return getVoucherClient().createVoucher(data)

@@ -7,7 +7,7 @@ import { displayLabelBasedOnScope } from "../until";
 import AutoCompleteField from "./autocomplete-field";
 import SelectField from "./select-field";
 
-const Scope = (props) => {
+const   Scope = (props) => {
   const { scopeObject, register, errors } = props;
 
   const {
