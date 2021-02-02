@@ -201,8 +201,12 @@ function render(props) {
     percentageDiscount: 0,
     maxDiscount: 0,
     absoluteDiscount: 0,
-    attachedProduct: [],
-    number: 0,
+    attachedProduct: [
+      {
+        product: "",
+        number: 0,
+      },
+    ],
     pointValue: 0,
   });
 
@@ -210,8 +214,22 @@ function render(props) {
     setTextField({ ...textField, [key]: event.target.value });
   };
 
-  const handleChangeListReward = (event, value) => {
-    setRewardObject({ ...rewardObject, list: value });
+  const handleAddAttachedProduct = () => {
+    rewardObject.attachedProduct.push({
+      product: "",
+      number: 0,
+    });
+    setRewardObject({ ...rewardObject });
+  };
+
+  const handleRemoveAttachedProduct = (index) => {
+    rewardObject.attachedProduct.splice(index, 1);
+    setRewardObject({ ...rewardObject });
+  };
+
+  const handleChangeListReward = (index) => (event, value) => {
+    rewardObject.attachedProduct[index].product = value;
+    setRewardObject({ ...rewardObject });
   };
 
   const handleChangeRewardField = (key) => (event) => {
@@ -366,6 +384,17 @@ function render(props) {
       rules.conditions[0].pointValue = value.pointValue;
     }
 
+    if (rewardObject.selectField == defaultReward.gift) {
+      let gifts = [];
+      rewardObject.attachedProduct.map((o, index) =>
+        gifts.push({
+          productId: o.product.productID,
+          quantity: parseInt(value["number" + index]),
+        })
+      );
+      rules.conditions[0].gifts = gifts;
+    }
+
     let body = {
       promotionName: value.promotionName,
       promotionType: textField.promotionTypeField,
@@ -406,6 +435,8 @@ function render(props) {
               setValue={setValue}
               object={{ scopeObject, conditionObject, rewardObject }}
               textField={textField}
+              handleAddAttachedProduct={handleAddAttachedProduct}
+              handleRemoveAttachedProduct={handleRemoveAttachedProduct}
               handleChangeTextField={handleChangeTextField}
               handleChangeScopeList={handleChangeScopeList}
               handleChangeScopeField={handleChangeScopeField}

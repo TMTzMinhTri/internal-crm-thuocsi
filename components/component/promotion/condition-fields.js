@@ -36,6 +36,8 @@ const ConditionFields = (props) => {
     handleChangeListReward,
     handleAddProductOfProductList,
     handleRemoveProductOfProductList,
+    handleAddAttachedProduct,
+    handleRemoveAttachedProduct,
   } = props;
 
   const { descriptionField } = textField;
@@ -101,6 +103,8 @@ const ConditionFields = (props) => {
                 errors={errors}
                 handleChangeRewardField={handleChangeRewardField}
                 handleChangeListReward={handleChangeListReward}
+                handleAddAttachedProduct={handleAddAttachedProduct}
+                handleRemoveAttachedProduct={handleRemoveAttachedProduct}
                 reward={rewardObject}
               />
             </Grid>

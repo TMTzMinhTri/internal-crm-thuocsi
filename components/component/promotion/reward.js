@@ -1,4 +1,11 @@
-import { Grid, ListItem, TextField } from "@material-ui/core";
+import {
+  Button,
+  Grid,
+  IconButton,
+  ListItem,
+  TextField,
+} from "@material-ui/core";
+import { Add, Delete } from "@material-ui/icons";
 import React from "react";
 import { defaultReward, rewards } from "../constant";
 
@@ -8,7 +15,12 @@ import SelectField from "./select-field";
 const Reward = (props) => {
   const { reward, register, errors } = props;
 
-  const { handleChangeRewardField, handleChangeListReward } = props;
+  const {
+    handleChangeRewardField,
+    handleChangeListReward,
+    handleAddAttachedProduct,
+    handleRemoveAttachedProduct,
+  } = props;
 
   const {
     percentageDiscount,
@@ -17,6 +29,7 @@ const Reward = (props) => {
     number,
     pointValue,
     selectField,
+    attachedProduct,
   } = reward;
 
   const top100Films = [
@@ -86,52 +99,27 @@ const Reward = (props) => {
           </>
         ) : (
           <>
-            <Grid item container spacing={2} key={selectField}>
-              {selectField == defaultReward.precentage ? (
+            {selectField == defaultReward.precentage ? (
+              <Grid item container spacing={2} key={selectField}>
                 <Grid item container xs={6}>
                   <TextField
                     type="number"
-                    id={
-                      selectField == "PERCENTAGE"
-                        ? "percentageDiscount"
-                        : "number"
-                    }
-                    name={
-                      selectField == "PERCENTAGE"
-                        ? "percentageDiscount"
-                        : "number"
-                    }
-                    label={
-                      selectField == "PERCENTAGE"
-                        ? "Giá trị giảm giá theo %"
-                        : "Số lượng sản phẩm tặng kèm"
-                    }
+                    id={"percentageDiscount"}
+                    name={"percentageDiscount"}
+                    label={"Giá trị giảm giá theo %"}
                     placeholder=""
-                    defaultValue={
-                      selectField == "PERCENTAGE" ? percentageDiscount : number
-                    }
-                    helperText={
-                      selectField == "PERCENTAGE"
-                        ? errors.percentageDiscount?.message
-                        : errors.number?.message
-                    }
+                    defaultValue={percentageDiscount}
+                    helperText={errors.percentageDiscount?.message}
                     InputLabelProps={{
                       shrink: true,
                     }}
                     fullWidth
-                    error={
-                      selectField == "PERCENTAGE"
-                        ? !!errors.percentageDiscount
-                        : !!errors.number
-                    }
+                    error={!!errors.percentageDiscount}
                     required
                     inputRef={register({
-                      required:
-                        selectField == "PERCENTAGE"
-                          ? "Giá trị giảm giá không được trống"
-                          : "Số lượng không được trống",
+                      required: "Giá trị giảm giá không được trống",
                       max: {
-                        value: selectField == "PERCENTAGE" && 100,
+                        value: 100,
                         message: "Giá trị lớn nhất là 100",
                       },
                       min: {
@@ -141,57 +129,82 @@ const Reward = (props) => {
                     })}
                   />
                 </Grid>
-              ) : (
                 <Grid item container xs={6}>
-                  <AutoCompleteField
-                    label="Sản phẩm tặng kèm"
+                  <TextField
+                    type="number"
+                    id={"maxDiscount"}
+                    name={"maxDiscount"}
+                    label={"Giá trị giảm tối đa"}
                     placeholder=""
-                    defaultValue={[]}
-                    options={[{ name: "" }]}
-                    handleChange={handleChangeListReward}
-                    type={selectField}
+                    defaultValue={maxDiscount}
+                    helperText={errors.maxDiscount?.message}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                    fullWidth
+                    error={!!errors.maxDiscount}
+                    required
+                    inputRef={register({
+                      required: "Vui lòng chọn thời gian kết thúc",
+                    })}
                   />
                 </Grid>
-              )}
-              <Grid item container xs={6}>
-                <TextField
-                  type="number"
-                  id={
-                    selectField == "PERCENTAGE" ? "maxDiscount" : "pointValue"
-                  }
-                  name={
-                    selectField == "PERCENTAGE" ? "maxDiscount" : "pointValue"
-                  }
-                  label={
-                    selectField == "PERCENTAGE"
-                      ? "Giá trị giảm tối đa"
-                      : "Số lượng được tặng"
-                  }
-                  placeholder=""
-                  defaultValue={
-                    selectField == "PERCENTAGE" ? maxDiscount : pointValue
-                  }
-                  helperText={
-                    selectField == "PERCENTAGE"
-                      ? errors.maxDiscount?.message
-                      : errors.pointValue?.message
-                  }
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  fullWidth
-                  error={
-                    selectField == "PERCENTAGE"
-                      ? !!errors.maxDiscount
-                      : !!errors.pointValue
-                  }
-                  required
-                  inputRef={register({
-                    required: "Vui lòng chọn thời gian kết thúc",
-                  })}
-                />
-              </Grid>{" "}
-            </Grid>
+              </Grid>
+            ) : (
+              <>
+                {attachedProduct.map((o, index) => (
+                  <Grid item container spacing={2} key={selectField}>
+                    <Grid item container xs={6}>
+                      <AutoCompleteField
+                        label="Sản phẩm tặng kèm"
+                        placeholder=""
+                        multiple={false}
+                        defaultValue={[]}
+                        options={[{ name: "" }]}
+                        handleChange={handleChangeListReward(index)}
+                        type={selectField}
+                      />
+                    </Grid>
+                    <Grid item container xs={5}>
+                      <TextField
+                        type="number"
+                        name={"number" + index}
+                        label={"Số lượng được tặng"}
+                        placeholder=""
+                        defaultValue={o.number}
+                        helperText={errors["number" + index]?.message}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        fullWidth
+                        error={!!errors["number" + index]}
+                        required
+                        inputRef={register({
+                          required: "Vui lòng chọn thời gian kết thúc",
+                        })}
+                      />
+                    </Grid>
+                    <Grid item xs={1}>
+                      <IconButton
+                        onClick={() => handleRemoveAttachedProduct(index)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Grid>
+                  </Grid>
+                ))}
+                <Grid item xs={2}>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    startIcon={<Add />}
+                    onClick={handleAddAttachedProduct}
+                  >
+                    Thêm
+                  </Button>
+                </Grid>
+              </>
+            )}
           </>
         ))}
     </>

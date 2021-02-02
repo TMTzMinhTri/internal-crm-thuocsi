@@ -28,7 +28,7 @@ async function searchTagList(q) {
 async function searchGiftList(q) {
   return await getProductClient().searchProductCategoryListFromClient(
     q,
-    "gift"
+    "GIFT"
   );
 }
 
@@ -45,7 +45,14 @@ async function searchIngredientList(q) {
 }
 
 const AutoCompleteField = (props) => {
-  const { label, options, defaultValue, placeholder, type } = props;
+  const {
+    label,
+    options,
+    defaultValue,
+    placeholder,
+    type,
+    multiple = true,
+  } = props;
 
   const { handleChange } = props;
 
@@ -96,7 +103,7 @@ const AutoCompleteField = (props) => {
   return (
     <Autocomplete
       fullWidth
-      multiple
+      multiple={multiple}
       options={productList.length > 0 ? productList : options}
       onChange={handleChange}
       getOptionLabel={(option) => option.name}
