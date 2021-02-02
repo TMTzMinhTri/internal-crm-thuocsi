@@ -23,11 +23,22 @@ const useStyles = makeStyles((theme) => ({
 
 const ConditionFields = (props) => {
   const classess = useStyles();
-  const { errors, register, selectFields, object } = props;
 
-  const { handleChangeSelectField, handleChangeList } = props;
+  const { errors, register, object, textField, setValue } = props;
 
-  const { scope, condition, reward } = selectFields;
+  const {
+    handleChangeTextField,
+    handleChangeScopeList,
+    handleChangeScopeField,
+    handleAddScopeSelect,
+    handleChangeConditionField,
+    handleChangeRewardField,
+    handleChangeListReward,
+    handleAddProductOfProductList,
+    handleRemoveProductOfProductList,
+  } = props;
+
+  const { descriptionField } = textField;
 
   const { scopeObject, conditionObject, rewardObject } = object;
 
@@ -48,9 +59,9 @@ const ConditionFields = (props) => {
               <Scope
                 register={register}
                 errors={errors}
-                handleChangeSelectField={handleChangeSelectField}
-                handleChangeList={handleChangeList}
-                scope={scope}
+                handleAddScopeSelect={handleAddScopeSelect}
+                handleChangeScopeField={handleChangeScopeField}
+                handleChangeScopeList={handleChangeScopeList}
                 scopeObject={scopeObject}
               />
             </Grid>
@@ -66,10 +77,14 @@ const ConditionFields = (props) => {
               <Condition
                 register={register}
                 errors={errors}
-                handleChangeSelectField={handleChangeSelectField}
-                handleChangeList={handleChangeList}
-                condition={condition}
-                conditionObject={conditionObject}
+                handleAddProductOfProductList={handleAddProductOfProductList}
+                handleRemoveProductOfProductList={
+                  handleRemoveProductOfProductList
+                }
+                handleChangeConditionField={handleChangeConditionField}
+                scope={scopeObject}
+                setValue={setValue}
+                condition={conditionObject}
               />
             </Grid>
             <Grid
@@ -84,10 +99,9 @@ const ConditionFields = (props) => {
               <Reward
                 register={register}
                 errors={errors}
-                handleChangeSelectField={handleChangeSelectField}
-                handleChangeList={handleChangeList}
-                reward={reward}
-                rewardObject={rewardObject}
+                handleChangeRewardField={handleChangeRewardField}
+                handleChangeListReward={handleChangeListReward}
+                reward={rewardObject}
               />
             </Grid>
           </Grid>
@@ -100,6 +114,8 @@ const ConditionFields = (props) => {
               style={{ width: "100% !important" }}
               aria-label="maximum height"
               placeholder="Nhập mô tả"
+              value={descriptionField}
+              onChange={handleChangeTextField("descriptionField")}
             />
           </Grid>
         </Grid>

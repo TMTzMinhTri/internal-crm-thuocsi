@@ -22,10 +22,13 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getProductClient } from "../../../client/product";
 import { getCategoryClient } from "../../../client/category";
 import {
+  defaultCondition,
   defaultNameRulesValue,
   defaultPromotionScope,
   defaultPromotionType,
+  defaultReward,
   defaultRulePromotion,
+  defaultScope,
   defaultTypeConditionsRule,
   defaultUseTypePromotion,
   queryParamGetProductGift,
@@ -91,7 +94,7 @@ export async function loadDataBefore(ctx) {
 
   let _productClient = getProductClient(ctx, {});
   let listProductResponse = await _productClient.getProductList(0, 5, "");
-  console.log("list", listProductResponse);
+
   if (listProductResponse && listProductResponse.status === "OK") {
     listProductResponse.data.forEach((product, index) => {
       returnObject.props.defaultState.listProductDefault.push({
@@ -110,34 +113,13 @@ export default function NewPage(props) {
   return renderWithLoggedInUser(props, render);
 }
 
-async function createPromontion(
-  promotionCode,
-  totalCode,
-  promotionName,
-  promotionType,
-  startTime,
-  endTime,
-  objects,
-  applyPerUser,
-  rule,
-  useType
-) {
-  let data = {
-    totalCode,
-    promotionName,
-    promotionType,
-    startTime,
-    objects,
-    applyPerUser,
-    rule,
-    useType,
-  };
-  if (promotionCode !== "") {
-    data.promotionCode = promotionCode;
-  }
-  if (endTime !== "") {
-    data.endTime = endTime;
-  }
+async function createPromontion(data) {
+  // if (promotionCode !== "") {
+  //   data.promotionCode = promotionCode;
+  // }
+  // if (endTime !== "") {
+  //   data.endTime = endTime;
+  // }
   return getPromoClient().createPromotion(data);
 }
 
@@ -176,21 +158,6 @@ function render(props) {
     },
   ];
   const [state, setState] = useState(props.defaultState);
-  const {
-    promotionOption,
-    promotionTypeRule,
-    promotionScope,
-    listProductPromotion,
-    listCategoryPromotion,
-    listProductDefault,
-    listCategoryDefault,
-    listCategoryFull,
-    promotionRulesLine,
-    listGiftPromotion,
-    listProductGiftPromotion,
-    promotionUseType,
-    listProductAction,
-  } = state;
 
   const {
     register,
@@ -202,299 +169,218 @@ function render(props) {
     errors,
   } = useForm();
 
-  const [selectFields, setSelectFields] = useState({
-    scope: "",
-    condition: "",
-    reward: "",
+  const [textField, setTextField] = useState({
+    descriptionField: "",
+    promotionField: "",
+    promotionTypeField: "",
   });
 
-  const [scopeObject, setScopeObject] = useState({
-    list: [],
-    startTime: new Date(),
-    endTime: new Date(),
+  const [errorTextField, setErrorTextField] = useState({
+    descriptionError: "",
+    promotionError: "",
+    promotionTypeError: "",
   });
+
+  const [scopeObject, setScopeObject] = useState([
+    {
+      selectField: "",
+      registeredBefore: new Date(),
+      registeredAfter: new Date(),
+      list: [],
+    },
+  ]);
 
   const [conditionObject, setConditionObject] = useState({
+    selectField: "",
     minValue: 0,
-    productQuantity: 0,
-    productValue: 0,
+    productList: [{ productName: "", productNumber: 0, productValue: 0 }],
   });
 
   const [rewardObject, setRewardObject] = useState({
-    discountValuePercent: 0,
-    maxDiscountValue: 0,
+    selectField: "",
+    percentageDiscount: 0,
+    maxDiscount: 0,
     absoluteDiscount: 0,
-    giftList: [],
-    giftQuantity: 0,
-    point: 0,
+    attachedProduct: [],
+    number: 0,
+    pointValue: 0,
   });
 
-  const [open, setOpen] = useState({
-    openModalGift: false,
-    openModalProductGift: false,
-    openModalProductScopePromotion: false,
-    openModalCategoryScopePromotion: false,
-  });
-
-  const handleChangeList = (key) => (event, value) => {
-    if (key == "scope") {
-      setScopeObject({ ...scopeObject, list: value });
-    } else if (key == "reward")
-      setRewardObject({ ...rewardObject, list: value });
+  const handleChangeTextField = (key) => (event) => {
+    setTextField({ ...textField, [key]: event.target.value });
   };
 
-  const handleChangeScopeObject = (key) => (event) => {
-    setScopeObject({
-      ...scopeObject,
-      [key]: event.target.value,
+  const handleChangeListReward = (event, value) => {
+    setRewardObject({ ...rewardObject, list: value });
+  };
+
+  const handleChangeRewardField = (key) => (event) => {
+    setRewardObject({ ...rewardObject, [key]: event.target.value });
+  };
+
+  const handleChangeFieldOfProductList = (index, key) => (event) => {
+    conditionObject.productList[index][key] = event.target.value;
+    setConditionObject({ ...conditionObject });
+  };
+
+  const handleChangeConditionField = (key) => (event) => {
+    setConditionObject({ ...conditionObject, [key]: event.target.value });
+  };
+
+  const handleAddProductOfProductList = () => {
+    conditionObject.productList.push({
+      productName: "",
+      productNumber: 0,
+      productValue: 0,
     });
+    setConditionObject({ ...conditionObject });
   };
 
-  const handleChangeConditionObject = (key) => (event) => {
-    setConditionObject({
-      ...conditionObject,
-      [key]: event.target.value,
+  const handleRemoveProductOfProductList = (index) => {
+    conditionObject.productList.splice(index, 1);
+    setConditionObject({ ...conditionObject });
+  };
+
+  const handleAddScopeSelect = () => {
+    scopeObject.push({
+      selectField: "",
+      registeredBefore: new Date(),
+      registeredAfter: new Date(),
+      list: [],
     });
+    setScopeObject([...scopeObject]);
   };
 
-  const handleChangeRewardObject = (key) => (event) => {
-    setRewardObject({
-      ...rewardObject,
-      [key]: event.target.value,
-    });
+  const handleChangeScopeField = (index, key) => (event) => {
+    scopeObject[index][key] = event.target.value;
+    setScopeObject([...scopeObject]);
   };
 
-  const handleChangeSelectField = (key) => (event) => {
-    setSelectFields({
-      ...selectFields,
-      [key]: event.target.value,
-    });
-  };
-
-  const handleChange = (event) => {
-    setState({ ...state, [event.target.name]: event.target.value });
-  };
-
-  const handleChangeScope = async (event) => {
-    if (event.target.value === defaultPromotionScope.PRODUCT) {
-      event.persist();
-      let productDefaultResponse = await getProduct(0, 5, "");
-      if (productDefaultResponse && productDefaultResponse.status === "OK") {
-        let listProductDefault = [];
-        productDefaultResponse.data.forEach((productResponse) => {
-          listProductDefault.push({
-            product: productResponse,
-            active: false,
-          });
+  const handleChangeScopeList = (index) => (event, value) => {
+    scopeObject[index].list = value;
+    if (scopeObject[index].selectField == defaultScope.product) {
+      conditionObject.productList = [];
+      value.map((product, i) => {
+        conditionObject.productList.push({
+          product,
+          productNumber: 0,
+          productValue: 0,
         });
-        setState({
-          ...state,
-          [event.target?.name]: event.target?.value,
-          listProductDefault: listProductDefault,
-          listCategoryDefault: [],
-          listProductPromotion: [],
-        });
-        setOpen({ ...open, openModalProductScopePromotion: true });
-      }
-    } else if (event.target.value === defaultPromotionScope.CATEGORY) {
-      event.persist();
-      let listCategoryResponse = await getListCategory();
-      if (!listCategoryResponse || listCategoryResponse.status !== "OK") {
-        return toast.warn("Không tìm thấy danh sách danh mục");
-      }
-      let listCategoryDefault = [];
-      listCategoryResponse.data.forEach((categoryResponse, index) => {
-        listCategoryDefault.push({
-          category: categoryResponse,
-          active: false,
-        });
-      });
-      setState({
-        ...state,
-        [event.target?.name]: event.target?.value,
-        listCategoryDefault: listCategoryDefault,
-        listProductDefault: [],
-        listCategoryPromotion: [],
-      });
-      setOpen({ ...open, openModalCategoryScopePromotion: true });
-    } else {
-      setState({
-        ...state,
-        [event.target?.name]: event.target?.value,
-        listCategoryPromotion: [],
-        listProductPromotion: [],
+        setConditionObject({ ...conditionObject });
+        console.log(product, i, "handleChangeScopeList");
+        console.log(getValues(), "getValue");
       });
     }
-  };
-
-  const resetPrice = () => {
-    for (const [key, value] of Object.entries(defaultNameRulesValue)) {
-      let priceMinValue = displayNameRule(promotionOption, value, 0);
-      setValue(priceMinValue, "");
-    }
-  };
-
-  const handleChangeStatus = (event) => {
-    setState({
-      ...state,
-      [event.target.name]: event.target.value,
-      promotionRulesLine: [{ id: 0 }],
-    });
-    resetPrice();
-    reset();
-  };
-
-  const handleAddProductPromotion = (productList) => {
-    setOpen({ ...open, openModalProductScopePromotion: false });
-    let listProductPromotion = [];
-    productList.forEach((product) => {
-      if (product.active) {
-        listProductPromotion.push(product.product);
-      }
-    });
-    setState({ ...state, listProductPromotion: listProductPromotion });
-  };
-
-  const handleAddCategoryPromotion = (categoryList) => {
-    setOpen({ ...open, openModalCategoryScopePromotion: false });
-    let listCategory = [];
-    categoryList.forEach((category) => {
-      if (
-        category.active &&
-        !listCategory?.find(
-          (c) => c.categoryID === category.category.categoryID
-        )
-      ) {
-        listCategory.push(category.category);
-      }
-    });
-    setState({ ...state, listCategoryPromotion: listCategory });
-  };
-
-  function handleRemoveCodePercent(id) {
-    const newCodes = promotionRulesLine.filter((item) => item.id !== id);
-    setState({ ...state, promotionRulesLine: newCodes });
-  }
-
-  function handleAddCodePercent(id) {
-    setState({
-      ...state,
-      promotionRulesLine: [...promotionRulesLine, { id: id + 1 }],
-    });
-  }
-
-  const handleRemoveProductPromotion = (product) => {
-    let { listProductPromotion, listProductDefault } = state;
-    listProductPromotion.forEach((productPromotion, index) => {
-      if (productPromotion.productID === product.productID) {
-        return listProductPromotion.splice(index, 1);
-      }
-    });
-    listProductDefault.forEach((productDefault) => {
-      if (productDefault.product.productID === product.productID) {
-        productDefault.active = false;
-      }
-    });
-    setState({
-      ...state,
-      listProductPromotion: listProductPromotion,
-      listProductDefault: listProductDefault,
-    });
-  };
-
-  const handleRemoveCategoryPromotion = (category) => {
-    let { listCategoryPromotion, listCategoryDefault } = state;
-    listCategoryPromotion.forEach((o, index) => {
-      if (o.categoryID === category.categoryID) {
-        return listCategoryPromotion.splice(index, 1);
-      }
-    });
-    listCategoryDefault.forEach((o) => {
-      if (o.category.categoryID === category.categoryID) {
-        o.active = false;
-      }
-    });
-    setState({
-      ...state,
-      listCategoryPromotion: listCategoryPromotion,
-      listCategoryDefault: listCategoryDefault,
-    });
-  };
-
-  const handleAddGift = (listGiftNew) => {
-    let listGiftAction = listGiftPromotion;
-    listGiftNew.forEach((giftNew) => {
-      if (giftNew.active) {
-        listGiftAction.push(giftNew);
-      }
-    });
-    setState({ ...state, listGiftPromotion: listGiftAction });
+    setScopeObject([...scopeObject]);
   };
 
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
-    let {
-      promotionName,
-      totalCode,
-      startTime,
-      endTime,
-      totalApply,
-      promotionCode,
-    } = getValues();
     let value = getValues();
-    let listProductIDs = [];
-    let listCategoryCodes = [];
-    if (promotionScope === defaultPromotionScope.PRODUCT) {
-      listProductPromotion.forEach((product) =>
-        listProductIDs.push(product.productID)
-      );
-    }
-    if (promotionScope === defaultPromotionScope.CATEGORY) {
-      listCategoryPromotion.forEach((category) =>
-        listCategoryCodes.push(category.code)
-      );
-    }
-    let rule = setRulesPromotion(
-      promotionOption,
-      promotionTypeRule,
-      value,
-      promotionRulesLine.length,
-      listGiftPromotion,
-      listProductGiftPromotion
-    );
-    startTime = startTime + ":00Z";
-    if (endTime !== "") {
-      endTime = endTime + ":00Z";
-    }
-    let objects = setScopeObjectPromontion(
-      promotionScope,
-      listProductIDs,
-      listCategoryCodes
-    );
-    let promotionResponse = await createPromontion(
-      promotionCode,
-      parseInt(totalCode),
-      promotionName,
-      router.query?.type,
-      startTime,
-      endTime,
-      objects,
-      parseInt(totalApply),
-      rule,
-      promotionUseType
-    );
-    if (promotionResponse.status === "OK") {
-      console.lo;
-      toast.success("Tạo khuyến mãi thành công");
-      return router.push({
-        pathname: "/crm/promotion/edit",
-        query: {
-          promotionId: promotionResponse.data[0]?.promotionId,
-        },
+    console.log(value, "value");
+    console.log(scopeObject, "scopeObject");
+    console.log(conditionObject, "conditionObject");
+    console.log(rewardObject, "rewardObject");
+    let objects = [];
+    scopeObject.map((o, index) => {
+      switch (o.selectField) {
+        case defaultScope.product:
+          objects.push({
+            products: o.list.map((product) => product.productID),
+          });
+          break;
+        case defaultScope.customer:
+          objects.push({
+            registeredBefore: o.registeredBefore,
+            registeredAfter: o.registeredAfter,
+            customerLevels: o.list.map((level) => level.code),
+          });
+          break;
+        case defaultScope.area:
+          objects.push({
+            areaCodes: o.list.map((area) => area.code),
+          });
+          break;
+        case defaultScope.producer:
+          objects.push({
+            sellerCodes: o.list.map((seller) => seller.code),
+          });
+          break;
+        case defaultScope.productCatergory:
+          objects.push({
+            categoryCodes: o.list.map((category) => category.code),
+          });
+          break;
+        case defaultScope.ingredient:
+          objects.push({
+            ingredients: o.list.map((ingredient) => ingredient.code),
+          });
+          break;
+        case defaultScope.productTag:
+          objects.push({
+            productTag: o.list.map((tag) => tag.code),
+          });
+          break;
+        default:
+          break;
+      }
+      objects[index].scope = o.selectField;
+      objects[index].type = "MANY";
+    });
+
+    let rules = {
+      field: conditionObject.selectField,
+      type: rewardObject.selectField,
+      conditions: [{}],
+    };
+
+    let productConditions = [];
+    let minOrverValue = 0;
+
+    if (conditionObject.selectField == defaultCondition.product) {
+      console.log(conditionObject.selectField, "conditionObject.selectField");
+      conditionObject.productList.map((o, index) => {
+        productConditions.push({
+          productId: o.product.productID,
+          minQuantity: parseInt(value["productNumber" + index]),
+          minTotalValue: parseInt(value["productValue" + index]),
+        });
       });
-    } else {
-      toast.error(`${promotionResponse.message}`);
+      rules.conditions[0].productConditions = productConditions;
     }
+    if (conditionObject.selectField == defaultCondition.orderValue) {
+      minOrverValue = parseInt(value.minValue);
+      rules.conditions[0].minOrverValue = parseInt(minOrverValue);
+    }
+
+    if (rewardObject.selectField == defaultReward.absolute) {
+      rules.conditions[0].discountValue = parseInt(value.absoluteDiscount);
+    }
+
+    if (rewardObject.selectField == defaultReward.precentage) {
+      rules.conditions[0].percent = value.percentageDiscount;
+      rules.conditions[0].maxDiscountValue = value.maxDiscount;
+    }
+
+    if (rewardObject.selectField == defaultReward.point) {
+      rules.conditions[0].pointValue = value.pointValue;
+    }
+
+    let body = {
+      promotionName: value.promotionName,
+      promotionType: textField.promotionTypeField,
+      promotionOrganizer: textField.promotionField,
+      startTime: value.startTime + ":00.000Z",
+      endTime: value.endTime + ":00.000Z",
+      description: textField.descriptionField,
+      rule: rules,
+      objects: objects,
+    };
+
+    console.log(JSON.stringify(body), "body");
+
+    let res = await createPromontion(body);
+    console.log(res, "res");
   }
 
   return (
@@ -509,16 +395,29 @@ function render(props) {
             <InfomationFields
               errors={errors}
               promotionType={router.query?.type}
-              handleChange={handleChange}
+              textField={textField}
+              errorTextField={errorTextField}
+              handleChangeTextField={handleChangeTextField}
               register={register}
             />
             <ConditionFields
               register={register}
               errors={errors}
+              setValue={setValue}
               object={{ scopeObject, conditionObject, rewardObject }}
-              selectFields={selectFields}
-              handleChangeSelectField={handleChangeSelectField}
-              handleChangeList={handleChangeList}
+              textField={textField}
+              handleChangeTextField={handleChangeTextField}
+              handleChangeScopeList={handleChangeScopeList}
+              handleChangeScopeField={handleChangeScopeField}
+              handleAddScopeSelect={handleAddScopeSelect}
+              handleChangeConditionField={handleChangeConditionField}
+              handleChangeFieldOfProductList={handleChangeFieldOfProductList}
+              handleChangeRewardField={handleChangeRewardField}
+              handleChangeListReward={handleChangeListReward}
+              handleAddProductOfProductList={handleAddProductOfProductList}
+              handleRemoveProductOfProductList={
+                handleRemoveProductOfProductList
+              }
             />
           </MyCardContent>
           <MyCardActions>

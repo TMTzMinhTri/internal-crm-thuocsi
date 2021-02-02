@@ -7,6 +7,7 @@ export const constURL = {
 };
 
 export const queryParamGetProductGift = "GIFT";
+
 export const defaultPromotionType = {
   COMBO: "COMBO",
   VOUCHER_CODE: "VOUCHERCODE",
@@ -92,7 +93,7 @@ export const defaultScope = {
 };
 
 export const defaultCondition = {
-  orderValue: "ORVER_VALUE",
+  orderValue: "ORDER_VALUE",
   product: "PRODUCT",
 };
 
@@ -101,6 +102,12 @@ export const defaultReward = {
   absolute: "ABSOLUTE",
   gift: "GIFT",
   point: "POINT",
+};
+
+export const defaultPromotion = {
+  marketPlace: "MARKETPLACE",
+  seller: "SELLER",
+  coorporate: "COORPORATE",
 };
 
 export const scopes = [
@@ -152,6 +159,10 @@ export const conditions = [
     value: "PRODUCT",
     label: "Theo sản phẩm",
   },
+  {
+    value: "NO_RULE",
+    label: "Không có điều kiện",
+  },
 ];
 
 export const rewards = [
@@ -174,5 +185,43 @@ export const rewards = [
   {
     valie: "POINT",
     label: "Điểm thành viên (loyalty)",
+  },
+];
+
+export const promotions = [
+  {
+    value: "",
+    label: "Chọn chương trình khuyến mãi",
+  },
+  {
+    value: defaultPromotion.marketPlace,
+    label: "Chương trình riêng của sàn",
+  },
+  {
+    value: defaultPromotion.coorporate,
+    label: "Chương trình hợp tác của 2 bên",
+  },
+  {
+    value: defaultPromotion.seller,
+    label: "Chương trình của riêng nhà bán hàng",
+  },
+];
+
+export const promotionTypes = [
+  {
+    value: "",
+    label: "Chọn loại khuyến mãi",
+  },
+  {
+    value: defaultPromotionType.VOUCHER_CODE,
+    label: "Mã khuyến mãi (Voucher)",
+  },
+  {
+    value: defaultPromotionType.FREESHIP,
+    label: "Miễn phí vận chuyển",
+  },
+  {
+    value: defaultPromotionType.COMBO,
+    label: "Combo",
   },
 ];

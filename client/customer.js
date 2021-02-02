@@ -36,6 +36,10 @@ class CustomerClient extends APIClient {
     });
   }
 
+  getLevel() {
+    return this.callFromClient("GET", `${URI}/level/list`);
+  }
+
   createNewCustomer(data) {
     return this.callFromClient("POST", `${URI}/account`, data);
   }

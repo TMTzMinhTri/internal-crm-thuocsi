@@ -3,33 +3,13 @@ import React from "react";
 import { FormControl, InputLabel, NativeSelect } from "@material-ui/core";
 
 const SelectField = (props) => {
-  const {
-    title = "Theo loại chương trình",
-    value = "",
-    options = [
-      {
-        value: "",
-        label: "None",
-      },
-      {
-        value: 10,
-        label: "Ten",
-      },
-    ],
-    option,
-  } = props;
-
-  console.log(value, "value");
+  const { title, value, options, error } = props;
 
   const { handleChange } = props;
   return (
     <FormControl fullWidth required>
       <InputLabel shrink>{title}</InputLabel>
-      <NativeSelect
-        placeholder="12312"
-        value={value}
-        onChange={handleChange(option)}
-      >
+      <NativeSelect placeholder="" value={value} onChange={handleChange}>
         {options.map((o) => (
           <option value={o.value}>{o.label}</option>
         ))}

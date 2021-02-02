@@ -452,6 +452,16 @@ export function limitText(text, size) {
   return text;
 }
 
+export const renderScopeOptionName = (option, index) => {
+  let text = option + index;
+  return text;
+};
+
+export const renderConditionVariableName = (option, variableName, index) => {
+  let text = option + variableName + index;
+  return text;
+};
+
 export function displayNameRule(promotionOption, nameValue, index) {
   switch (promotionOption) {
     case defaultRulePromotion.MIN_ORDER_VALUE:
