@@ -57,7 +57,7 @@ export async function loadOrderData(ctx) {
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
-
+    console.log(offset)
     let orderClient = getOrderClient(ctx, data)
     let resp = await orderClient.getOrder(offset, limit, q)
     console.log(resp.data[0])
@@ -88,6 +88,7 @@ function render(props) {
     const [search, setSearch] = useState(q);
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
+
     const { error, success } = useToast()
 
     async function handleChange(event) {
