@@ -14,6 +14,7 @@ export const TableQuantityValueCell = ({ orderNo, orderItemNo, initialQuantity, 
                 size="small"
                 id="quantity"
                 type="number"
+                disabled
                 placeholder="..."
                 variant="outlined"
                 fullWidth
@@ -46,13 +47,13 @@ export const TableQuantityValueCell = ({ orderNo, orderItemNo, initialQuantity, 
                             message: "Vui lòng nhập số lượng lớn hơn 0"
                         });
                     }
-                    else if (e.target.value > maxQuantity) {
-                        setQuantity(maxQuantity)
-                        setError("quantity", {
-                            type: "max",
-                            message: `Vui lòng nhập số lượng nhỏ hơn ${maxQuantity + 1}`
-                        });
-                    }
+                    // else if (e.target.value > maxQuantity) {
+                    //     setQuantity(maxQuantity)
+                    //     setError("quantity", {
+                    //         type: "max",
+                    //         message: `Vui lòng nhập số lượng nhỏ hơn ${maxQuantity + 1}`
+                    //     });
+                    // }
                     else {
                         if (errors.quantity) clearErrors("quantity")
                     }
