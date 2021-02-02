@@ -150,7 +150,7 @@
 
 .textItalic {
     font-style: italic;
-    font-size: 14px;
+    font-size: 12px;
     margin-top: 1.5rem;
     font-weight:  300;
     color: #828282;
@@ -159,7 +159,7 @@
 .titleLabel {
     font-style: normal;
     font-weight: normal;
-    font-size: 16px;
+    font-size: 15px;
     line-height: 24px;
     /* identical to box height, or 200% */
 

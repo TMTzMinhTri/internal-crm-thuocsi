@@ -72,11 +72,11 @@ export default function VoucherCodeBody(props) {
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Mã khuyến mãi</h5>
+                <h5 className={cssStyle.titleLabel}>Mã khuyến mãi<span style={{color : 'red'}}> *</span></h5>
                 <TextField
                     id="code"
                     name="code"
-                    label="Nhập mã khuyến mãi"
+                    // label="Nhập mã khuyến mãi"
                     disabled={edit}
                     helperText={errors.code?.message}
                     InputLabelProps={{
@@ -98,7 +98,7 @@ export default function VoucherCodeBody(props) {
             <Grid item xs={12} sm={1} md={1}>
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng</h5>
+                <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng<span style={{color : 'red'}}> *</span></h5>
                 <Autocomplete
                     fullWidth
                     id="promotionId"
@@ -117,7 +117,7 @@ export default function VoucherCodeBody(props) {
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            label="Chương trình khuyến mãi áp dụng"
+                            // label="Chương trình khuyến mãi áp dụng"
                             name="promotionName"
                             placeholder="Chương trình khuyến mãi áp dụng"
                             required
@@ -139,7 +139,7 @@ export default function VoucherCodeBody(props) {
                     name="expiredDate"
                     helperText={errors.expiredDate?.message}
                     error={!!errors.expiredDate}
-                    label="Hạn sử dụng mã khuyến mãi"
+                    // label="Hạn sử dụng mã khuyến mãi"
                     placeholder=""
                     type="datetime-local"
                     InputLabelProps={{
@@ -155,7 +155,7 @@ export default function VoucherCodeBody(props) {
             </Grid>
             <Grid item xs={12} sm={4} md={4}>
                 <h5 className={cssStyle.titleLabel}>Loại mã</h5>
-                <InputLabel htmlFor="select-type">Loại mã *</InputLabel>
+                {/* <InputLabel htmlFor="select-type" style={{fontSize: '12px'}}>Loại mã *</InputLabel> */}
                 <Select
                     id="type"
                     name="type"
@@ -164,11 +164,11 @@ export default function VoucherCodeBody(props) {
                     onChange={event => handleChangeType(event.target.value)}
                     labelId="select-type"
                     style={{width: "100%"}}>
-                    <MenuItem  value="PUBLIC">
-                        <div style={{fontWeight: "bold"}}>PUBLIC</div>
+                    <MenuItem value="PUBLIC">
+                        <div style={{fontSize : 16, fontWeight : 'bold'}}>Public</div>
                     </MenuItem>
-                    <MenuItem  value="PRIVATE">
-                        <div style={{fontWeight: "bold"}} >PRIVATE</div>
+                    <MenuItem value="PRIVATE">
+                        <div style={{fontSize : 16, fontWeight : 'bold'}}>Private</div>
                     </MenuItem>
                 </Select>
             </Grid>
@@ -184,9 +184,9 @@ export default function VoucherCodeBody(props) {
                         className: classes[".MuiInputBase-input"]
                     }}
                     defaultValue={0}
-                    label="Tổng số lần sử dụng toàn hệ thống"
+                    // label="Tổng số lần sử dụng toàn hệ thống"
                     placeholder="Tổng số lần sử dụng toàn hệ thống"
-                    style={{width: "100%"}}
+                    style={{width: "100%", fontWeight : 'normal'}}
                     inputRef={register}
                     required
                 />
@@ -204,9 +204,9 @@ export default function VoucherCodeBody(props) {
                         className: classes[".MuiInputBase-input"]
                     }}
                     defaultValue={0}
-                    label="Số lần áp dụng tối đa cho mỗi khách hàng"
+                    // label="Số lần áp dụng tối đa cho mỗi khách hàng"
                     placeholder="Số lần áp dụng tối đa cho mỗi khách hàng"
-                    style={{width: "100%"}}
+                    style={{width: "100%", fontWeight : 'normal'}}
                     inputRef={register}
                     required
                 />
@@ -235,7 +235,7 @@ export default function VoucherCodeBody(props) {
                     renderInput={(params) => (
                         <TextField
                             {...params}
-                            label="Danh sách khách hàng được sử dụng"
+                            // label="Danh sách khách hàng được sử dụng"
                             name="appliedCustomers"
                             placeholder="Danh sách khách hàng được sử dụng"
                             required
@@ -244,7 +244,7 @@ export default function VoucherCodeBody(props) {
                     )}
                     onChange={(e, value) => onChangeCustomer(e, value)}
                 />
-                <div className={cssStyle.textItalic}> ** LƯU Ý: Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi</div>
+                <div className={cssStyle.textItalic}>Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi</div>
             </Grid>
         </Grid>
     )
