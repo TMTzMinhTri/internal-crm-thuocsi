@@ -220,27 +220,6 @@ export default function renderForm(props, toast) {
                         orderItem[index].quantity = value
                     }}
                 />
-                {/* {formatNumber(data.quantity)}
-                    <Box marginLeft={1} clone>
-                        <IconButton
-                            size="small"
-                            onClick={() => {
-                                setIdxChangedItem(index);
-                                setOpenChangeQuantityDialog(true);
-                                setMaxQuantity(orderItem[index].maxQuantity)
-                            }}
-                        >
-                            <EditIcon fontSize="small" />
-                        </IconButton>
-                    </Box>
-                    <Box marginLeft={1} clone>
-                        <IconButton
-                            size="small"
-                            onClick={() => setDeletedOrderItem(data)}
-                        >
-                            <DeleteIcon fontSize="small" />
-                        </IconButton>
-                    </Box> */}
                 <TableCell align="right">{formatNumber(data.totalPrice)}</TableCell>
             </TableRow>
         );
@@ -267,60 +246,6 @@ export default function renderForm(props, toast) {
         await updateOrderItem(tmpOrderItem, idxChangedItem)
 
     }
-
-
-    // const ChangeQuantityDialog = () => (
-    //     <div>
-    //         <Dialog
-    //             open={openChangeQuantityDialog}
-    //             onClose={() => setOpenChangeQuantityDialog(false)}
-    //             aria-labelledby="alert-dialog-title"
-    //             aria-describedby="alert-dialog-description"
-    //         >
-    //             <DialogTitle id="alert-dialog-title">
-    //                 {"Thay đổi số lượng sản phẩm"}
-    //             </DialogTitle>
-    //             <DialogContent>
-    //                 <TextField
-    //                     defaultValue={1}
-    //                     style={{ margin: '0 auto', width: '100%' }}
-    //                     // variant="outlined"
-    //                     id="quantityItem"
-    //                     name="quantityItem"
-    //                     size="small"
-    //                     type="number"
-    //                     InputLabelProps={{
-    //                         shrink: true,
-    //                     }}
-    //                     placeholder=""
-    //                     onChange={event => {
-    //                         if (event.target.value < 1) {
-    //                             event.target.value = 1;
-    //                         }
-    //                         if (event.target.value > orderItem[idxChangedItem].maxQuantity) {
-    //                             event.target.value = orderItem[idxChangedItem].maxQuantity;
-    //                         }
-    //                     }}
-    //                     // error={!!errors.quantityItem}
-    //                     // helperText={errors.quantityItem ? "Nhập số lượng lớn hơn 0" : null}
-    //                     inputRef={register({
-    //                         valueAsNumber: true,
-    //                         min: 0
-    //                     })}
-    //                     label={"Số lượng ( tối đa " + maxQuantity + " )"}
-    //                 />
-    //             </DialogContent>
-    //             <DialogActions>
-    //                 <Button onClick={() => setOpenChangeQuantityDialog(false)} color="primary">
-    //                     Hủy bỏ
-    //                 </Button>
-    //                 <Button onClick={() => changeQuantityHandler()} color="primary" autoFocus>
-    //                     Đồng ý
-    //                  </Button>
-    //             </DialogActions>
-    //         </Dialog>
-    //     </div>
-    // );
 
     const ConfirmDeleteOrderItemDialog = () => {
         const handleClose = () => setDeletedOrderItem(null);
@@ -384,9 +309,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="customerName"
                                                     name="customerName"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="Tên khách hàng"
                                                     placeholder=""
                                                     inputProps={{
                                                         readOnly: true,
@@ -412,9 +335,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="customerID"
                                                     name="customerID"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="ID khách hàng"
                                                     placeholder=""
                                                     inputProps={{
                                                         readOnly: true,
@@ -442,8 +363,6 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="customerPhone"
                                                     name="customerPhone"
-                                                    // label="Số điện thoại"
-                                                    // variant="outlined"
                                                     size="small"
                                                     placeholder=""
                                                     inputProps={{
@@ -473,9 +392,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="customerShippingAddress"
                                                     name="customerShippingAddress"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="Địa chỉ"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -503,9 +420,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="customerProvinceCode"
                                                     name="customerProvinceCode"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="Tỉnh/Thành Phố"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -527,9 +442,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="customerDistrictCode"
                                                     name="customerDistrictCode"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="Quận/Huyện"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -553,9 +466,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="customerWardCode"
                                                     name="customerWardCode"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="Phường/Xã"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -579,9 +490,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="deliveryPlatform"
                                                     name="deliveryPlatform"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="Hình thức vận chuyển"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -603,9 +512,7 @@ export default function renderForm(props, toast) {
                                                 <TextField
                                                     id="paymentMethod"
                                                     name="paymentMethod"
-                                                    // variant="outlined"
                                                     size="small"
-                                                    // label="Phương thức thanh toán"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -621,7 +528,6 @@ export default function renderForm(props, toast) {
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
                                                 <FormControl style={{ width: '100%' }} size="small">
-                                                    {/* <InputLabel id="department-select-label" >Trạng thái</InputLabel> */}
                                                     <Typography variant="h6" component="h6"
                                                         style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>Trạng thái</Typography>
                                                     <Controller
