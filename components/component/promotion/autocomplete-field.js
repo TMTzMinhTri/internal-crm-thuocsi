@@ -6,7 +6,7 @@ import { getCustomerClient } from "client/customer";
 import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 import { getTagClient } from "client/tag";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { defaultReward, defaultScope } from "../constant";
 
 async function searchProductList(q) {
@@ -37,7 +37,7 @@ async function searchAreaList(q) {
 }
 
 async function searchSellerList(q) {
-  return await getSellerClient().getSellerClient(0, 20, q);
+  return await getProductClient().getProducerClient(q);
 }
 
 async function searchIngredientList(q) {
@@ -56,7 +56,7 @@ const AutoCompleteField = (props) => {
 
   const { handleChange } = props;
 
-  const [productList, setProductList] = useState([]);
+  const [productList, setProductList] = useState(defaultValue);
 
   const fetchOptions = async (type, value) => {
     switch (type) {
@@ -85,20 +85,24 @@ const AutoCompleteField = (props) => {
   const handleChangeTextField = async (event) => {
     console.log(event.target.value, "handleChangeTextField", type);
     setProductList([]);
+
     let value = event.target.value;
-    if (value != "") {
-      console.log(value, "value", type);
-      let res = await fetchOptions(type, value);
+    console.log(value, "value", type);
+    let res = await fetchOptions(type, value);
+    console.log(res, "res");
+    if (res?.status == "OK") {
       console.log(res, "res");
-      if (res?.status == "OK") {
-        console.log(res, "res");
-        setProductList(res.data);
-      } else {
-        setProductList([]);
-      }
+      setProductList(res.data);
+    } else {
+      setProductList([]);
     }
   };
-  console.log(options, "options");
+
+  useEffect(() => {
+    handleChangeTextField({ target: { value: "" } });
+  }, []);
+
+  console.log(defaultValue, "defaultValue");
 
   return (
     <Autocomplete
@@ -107,6 +111,7 @@ const AutoCompleteField = (props) => {
       options={productList.length > 0 ? productList : options}
       onChange={handleChange}
       getOptionLabel={(option) => option.name}
+      value={defaultValue}
       defaultValue={defaultValue}
       filterSelectedOptions
       renderInput={(params) => (
@@ -116,6 +121,7 @@ const AutoCompleteField = (props) => {
           variant="standard"
           label={label}
           placeholder={placeholder}
+          onClick={() => handleChangeTextField({ target: { value: "" } })}
           onChange={handleChangeTextField}
         />
       )}

@@ -19,6 +19,12 @@ class ProductClient extends APIClient {
     });
   }
 
+  getListProductByIdsClient(ids) {
+    return this.callFromClient("POST", `${PREFIX}/product/list`, {
+      productIds: ids,
+    });
+  }
+
   getListSKUProduct(offset, limit, q) {
     return this.callFromNextJS("GET", `${PREFIX}/sku/list`, {
       q,
@@ -118,9 +124,21 @@ class ProductClient extends APIClient {
     });
   }
 
-  getIngredientList(q) {
+  getProducerClient(q) {
     return this.callFromClient("GET", `${PREFIX}/manufacturer/list`, {
       q: q,
+    });
+  }
+
+  getIngredientList(q) {
+    return this.callFromClient("GET", `${PREFIX}/ingredient/list`, {
+      q: q,
+    });
+  }
+
+  getIngredientByIDs(ids) {
+    return this.callFromClient("POST", `${PREFIX}/ingredient/list`, {
+      ids,
     });
   }
 }

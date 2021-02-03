@@ -1,43 +1,38 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 import { constURL } from "../components/component/constant";
-const prefix = constURL.PREFIX_PRODUCT
+const prefix = constURL.PREFIX_PRODUCT;
 class CategoryClient extends APIClient {
+  constructor(ctx, data) {
+    super(ctx, data);
+  }
 
-    constructor(ctx, data) {
-        super(ctx, data)
-    }
+  getListCategory(offset, limit, q) {
+    return this.callFromNextJS("GET", `${prefix}/category/list`, {
+      q: q ? q : "",
+      offset: offset,
+      limit: limit,
+      getTotal: true,
+    });
+  }
 
-    getListCategory(offset, limit, q) {
-        return this.callFromNextJS(
-            "GET",
-            `${prefix}/category/list`, {
-                q: q?q: "",
-                offset: offset,
-                limit: limit,
-                getTotal: true
-            })
-    }
+  getListCategoryByCodes(codes) {
+    return this.callFromNextJS("POST", `${prefix}/category/list`, { codes });
+  }
 
-    getListCategoryByCodes(codes) {
-        return this.callFromNextJS(
-            "POST",
-            `${prefix}/category/list`,
-            {codes}
-        )
-    }
+  getListCategoryByCodesClient(codes) {
+    return this.callFromClient("POST", `${prefix}/category/list`, { codes });
+  }
 
-    getListCategoryFromClient(offset, limit, q) {
-        return this.callFromClient(
-            "GET",
-            `${prefix}/category/list`, {
-                q: q,
-                offset: offset,
-                limit: limit,
-                getTotal: true
-            })
-    }
+  getListCategoryFromClient(offset, limit, q) {
+    return this.callFromClient("GET", `${prefix}/category/list`, {
+      q: q,
+      offset: offset,
+      limit: limit,
+      getTotal: true,
+    });
+  }
 }
 
 export function getCategoryClient(ctx, data) {
-    return new CategoryClient(ctx, data)
+  return new CategoryClient(ctx, data);
 }

@@ -19,8 +19,8 @@ const Scope = (props) => {
   return (
     <>
       {scopeObject.map(
-        ({ registeredBefore, registeredAfter, selectField }, index) => (
-          <Paper style={{ padding: 10, margin: "10px 0", border : 'none' }}>
+        ({ registeredBefore, registeredAfter, selectField, list }, index) => (
+          <Paper variant="outlined" style={{ padding: 10, margin: "10px 0" }}>
             <Grid container spacing={2} direction="column">
               <Grid item container xs={6}>
                 <SelectField
@@ -39,7 +39,7 @@ const Scope = (props) => {
                         selectField
                       )}`}
                       placeholder=""
-                      defaultValue={[]}
+                      defaultValue={list}
                       options={[{ name: "" }]}
                       type={selectField}
                       handleChange={handleChangeScopeList(index)}
@@ -67,7 +67,7 @@ const Scope = (props) => {
                         <TextField
                           id={"registeredAfter" + index}
                           name={"registeredAfter" + index}
-                          label="Thời gian kết thúc"
+                          label="Đăng kí sau ngày"
                           placeholder=""
                           defaultValue={registeredAfter}
                           helperText={errors.registeredAfter?.message}
@@ -96,8 +96,7 @@ const Scope = (props) => {
           color="primary"
           startIcon={<Add />}
           onClick={handleAddScopeSelect}
-        >
-        </Button>
+        ></Button>
       </Grid>
     </>
   );
