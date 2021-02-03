@@ -79,15 +79,19 @@ export async function loadDataBefore(ctx) {
 
   let _promotionClient = getPromoClient(ctx, {});
   let promotionRes = await _promotionClient.getPromotionByID(promotionId);
+
   if (promotionRes && promotionRes.status === "OK") {
     let data = promotionRes.data[0];
     console.log(data.rule.conditions[0].productConditions, "rule");
 
     returnObject.props.promotionRes = data;
 
-    data.objects.map(async (o, index) => {
+    let products = [];
+
+    await data.objects.map(async (o, index) => {
       let typeVariable = "";
       let listRes;
+
       switch (o.scope) {
         case defaultScope.product:
           typeVariable = "products";
@@ -95,6 +99,7 @@ export async function loadDataBefore(ctx) {
             o.products,
             []
           );
+          console.log(listRes, "listRes");
           returnObject.props.products = listRes.data;
           return;
         case defaultScope.productCatergory:
@@ -141,10 +146,7 @@ export async function loadDataBefore(ctx) {
         default:
           break;
       }
-
-      console.log(listRes, typeVariable);
-
-      // returnObject.props[typeVariable] = listRes.data;
+      console.log(returnObject, "returnObject");
     });
 
     if (data.rule.conditions[0].gift) {
@@ -165,10 +167,10 @@ export async function loadDataBefore(ctx) {
         {}
       ).getListProductByIdsOrCodes(listId, []);
       returnObject.props.productConditions = listProductRes.data;
-      returnObject.props.products = listProductRes.data;
+      // returnObject.props.products = listProductRes.data;
     }
   }
-  console.log(returnObject.props, "returnObject.props");
+
   return returnObject;
 }
 
@@ -222,9 +224,18 @@ function render(props) {
     promotionType,
     objects,
     rule,
-  } = promotionRes;
-
-  console.log(products, "productsproducts");
+  } = promotionRes
+    ? promotionRes
+    : {
+        description: "",
+        endTime: new Date(),
+        startTime: new Date(),
+        promotionName: "",
+        promotionOrganizer: "",
+        promotionType: "",
+        objects: null,
+        rule: null,
+      };
 
   const toast = useToast();
 
