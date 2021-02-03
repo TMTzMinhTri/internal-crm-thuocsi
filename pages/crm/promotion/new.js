@@ -60,8 +60,8 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadDataBefore(ctx) {
-  let returnObject = { props: { } };
-  return returnObject
+  let returnObject = { props: {} };
+  return returnObject;
 }
 
 export default function NewPage(props) {
@@ -280,7 +280,7 @@ function render(props) {
     };
 
     let productConditions = [];
-    let minOrverValue = 0;
+    let minOrderValue = 0;
 
     if (conditionObject.selectField == defaultCondition.product) {
       conditionObject.productList.map((o, index) => {
@@ -293,8 +293,8 @@ function render(props) {
       rules.conditions[0].productConditions = productConditions;
     }
     if (conditionObject.selectField == defaultCondition.orderValue) {
-      minOrverValue = parseInt(value.minValue);
-      rules.conditions[0].minOrverValue = parseInt(minOrverValue);
+      minOrderValue = parseInt(value.minValue);
+      rules.conditions[0].minOrderValue = parseInt(minOrderValue);
     }
 
     if (rewardObject.selectField == defaultReward.absolute) {
@@ -340,7 +340,6 @@ function render(props) {
       rule: rules,
       objects: objects,
     };
-
 
     let res = await createPromontion(body);
 
