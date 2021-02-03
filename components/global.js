@@ -120,7 +120,7 @@ export const statuses = [
         label: "Khách",
     },
     {
-        value: "APPROVED",
+        value: "ACTIVE",
         label: "Đã kích hoạt"
     }
 ]
