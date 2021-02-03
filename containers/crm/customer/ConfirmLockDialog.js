@@ -21,7 +21,7 @@ export const ConfirmLockDialog = ({ open, onConfirm, onClose }) => {
     };
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Cập nhật số lượng</DialogTitle>
+            <DialogTitle>Khóa tài khoản</DialogTitle>
             <DialogContent dividers>
                 <DialogContentText>
                     Bạn có chắc muốn khóa tài khoản này không?

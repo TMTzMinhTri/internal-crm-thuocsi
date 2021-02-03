@@ -21,7 +21,7 @@ export const ConfirmApproveDialog = ({ open, onConfirm, onClose }) => {
     };
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Cập nhật số lượng</DialogTitle>
+            <DialogTitle>Kích hoạt tài khoản</DialogTitle>
             <DialogContent dividers>
                 <DialogContentText>
                     Bạn có chắc muốn kích hoạt tài khoản này không?
