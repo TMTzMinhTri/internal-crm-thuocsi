@@ -56,8 +56,8 @@ import {
 import { getCustomerClient } from "client/customer";
 
 export async function getServerSideProps(ctx) {
-  return await doWithLoggedInUser(ctx, (ctx) => {
-    return loadDataBefore(ctx);
+  return await doWithLoggedInUser(ctx, async (ctx) => {
+    return await loadDataBefore(ctx);
   });
 }
 
@@ -65,87 +65,18 @@ export async function loadDataBefore(ctx) {
   let returnObject = {
     props: {
       gift: [],
-      products: [],
       productConditions: [],
-      categoryCodes: [],
-      customerLevels: [],
-      ingredients: [],
-      sellerCodes: [],
-      productTag: [],
-      areaCodes: [],
     },
   };
   let promotionId = ctx.query.promotionId;
 
   let _promotionClient = getPromoClient(ctx, {});
   let promotionRes = await _promotionClient.getPromotionByID(promotionId);
+
   if (promotionRes && promotionRes.status === "OK") {
     let data = promotionRes.data[0];
-    console.log(data.rule.conditions[0].productConditions, "rule");
 
     returnObject.props.promotionRes = data;
-
-    data.objects.map(async (o, index) => {
-      let typeVariable = "";
-      let listRes;
-      switch (o.scope) {
-        case defaultScope.product:
-          typeVariable = "products";
-          listRes = await getProductClient(ctx, {}).getListProductByIdsOrCodes(
-            o.products,
-            []
-          );
-          returnObject.props.products = listRes.data;
-          return;
-        case defaultScope.productCatergory:
-          typeVariable = "categoryCodes";
-          listRes = await getCategoryClient(ctx, {}).getListCategoryByCodes(
-            o[typeVariable],
-            []
-          );
-          returnObject.props.categoryCodes = listRes.data;
-          return;
-        case defaultScope.customer:
-          typeVariable = "customerLevels";
-          listRes = await getCustomerClient(ctx, {}).getCustomerByIDs(
-            o[typeVariable],
-            []
-          );
-          returnObject.props.customerLevels = listRes.data;
-          break;
-        case defaultScope.ingredient:
-          typeVariable = "ingredients";
-          // listRes = await getProductClient(ctx, {}).getIngredientByIDs(
-          //   o[typeVariable],
-          //   []
-          // );
-          break;
-        case defaultScope.producer:
-          typeVariable = "sellerCodes";
-          // listRes = await getProductClient(ctx, {}).getIngredientByIDs(
-          //   o[typeVariable],
-          //   []
-          // );
-          break;
-        case defaultScope.productTag:
-          typeVariable = "productTag";
-          // listRes = await getProductClient(ctx, {}).getIngredientByIDs(
-          //   o[typeVariable],
-          //   []
-          // );
-          break;
-        case defaultScope.area:
-          typeVariable = "areaCodes";
-          break;
-
-        default:
-          break;
-      }
-
-      console.log(listRes, typeVariable);
-
-      // returnObject.props[typeVariable] = listRes.data;
-    });
 
     if (data.rule.conditions[0].gift) {
       let listProductRes = await getProductClient(
@@ -165,10 +96,9 @@ export async function loadDataBefore(ctx) {
         {}
       ).getListProductByIdsOrCodes(listId, []);
       returnObject.props.productConditions = listProductRes.data;
-      returnObject.props.products = listProductRes.data;
     }
   }
-  console.log(returnObject.props, "returnObject.props");
+
   return returnObject;
 }
 
@@ -184,12 +114,8 @@ async function updatePromontion(data) {
   return getPromoClient().updatePromotion(data);
 }
 
-async function getProduct(offset, limit, q) {
-  return getProductClient().getProductListFromClient(offset, limit, q);
-}
-
-async function getListProductByIDs(ids) {
-  return await getProductClient().getListProductByIdsClient(ids);
+async function getListProductByCodesClient(q) {
+  return getProductClient().getListProductByIdsClient(q);
 }
 
 async function searchProductList(q, categoryCode) {
@@ -201,17 +127,7 @@ async function getListCategory() {
 }
 
 function render(props) {
-  const {
-    products,
-    productConditions,
-    categoryCodes,
-    customerLevels,
-    ingredients,
-    sellerCodes,
-    productTag,
-    areaCodes,
-    promotionRes,
-  } = props;
+  const { productConditions, promotionRes, gift } = props;
 
   const {
     description,
@@ -222,9 +138,18 @@ function render(props) {
     promotionType,
     objects,
     rule,
-  } = promotionRes;
-
-  console.log(products, "productsproducts");
+  } = promotionRes
+    ? promotionRes
+    : {
+        description: "",
+        endTime: new Date(),
+        startTime: new Date(),
+        promotionName: "",
+        promotionOrganizer: "",
+        promotionType: "",
+        objects: null,
+        rule: null,
+      };
 
   const toast = useToast();
 
@@ -254,6 +179,16 @@ function render(props) {
     reset,
     errors,
   } = useForm({ defaultValues: { startTime: formatUTCTime(startTime) } });
+
+  const [listDataForAutoComplete, setListDataForAutoComplete] = useState({
+    products: [],
+    categoryCodes: [],
+    customerLevels: [],
+    ingredients: [],
+    sellerCodes: [],
+    productTag: [],
+    areaCodes: [],
+  });
 
   const [textField, setTextField] = useState({
     startTime: startTime ? formatUTCTime(startTime) : new Date(),
@@ -297,6 +232,16 @@ function render(props) {
     ],
     pointValue: 0,
   });
+
+  const {
+    products,
+    categoryCodes,
+    customerLevels,
+    ingredients,
+    sellerCodes,
+    productTag,
+    areaCodes,
+  } = listDataForAutoComplete;
 
   const handleChangeTextField = (key) => (event) => {
     setTextField({ ...textField, [key]: event.target.value });
@@ -373,11 +318,56 @@ function render(props) {
           productValue: 0,
         });
         setConditionObject({ ...conditionObject });
-        console.log(product, i, "handleChangeScopeList");
-        console.log(getValues(), "getValue");
       });
     }
     setScopeObject([...scopeObject]);
+  };
+
+  const getListDataForAutoComplete = () => {
+    objects.map(async (o, index) => {
+      let typeVariable = "";
+      let listRes;
+      switch (o.scope) {
+        case defaultScope.product:
+          typeVariable = "products";
+          listRes = await getListProductByCodesClient(o.products);
+          break;
+
+        case defaultScope.productCatergory:
+          typeVariable = "categoryCodes";
+          listRes = await getCategoryClient(ctx, {}).getListCategoryByCodes(
+            o[typeVariable]
+          );
+          break;
+        case defaultScope.customer:
+          typeVariable = "customerLevels";
+          listRes = await getCustomerClient(ctx, {}).getCustomerByIDs(
+            o[typeVariable],
+            []
+          );
+          break;
+        case defaultScope.ingredient:
+          typeVariable = "ingredients";
+          break;
+        case defaultScope.producer:
+          typeVariable = "sellerCodes";
+          break;
+        case defaultScope.productTag:
+          typeVariable = "productTag";
+          break;
+        case defaultScope.area:
+          typeVariable = "areaCodes";
+          break;
+
+        default:
+          break;
+      }
+      console.log(listRes, typeVariable, "getListDataForAutoComplete");
+      setListDataForAutoComplete({
+        ...listDataForAutoComplete,
+        [typeVariable]: listRes.data,
+      });
+    });
   };
 
   // func onSubmit used because useForm not working with some fields
@@ -484,7 +474,7 @@ function render(props) {
       promotionName: value.promotionName,
       promotionType: textField.promotionTypeField,
       promotionOrganizer: textField.promotionField,
-      startTime: value.startTime + ":00.000Z",
+      startTime: value.startTime + ":00Z",
       endTime: value.endTime + ":00.000Z",
       description: textField.descriptionField,
       rule: rules,
@@ -504,6 +494,10 @@ function render(props) {
   }
 
   console.log("props", props);
+
+  useEffect(() => {
+    getListDataForAutoComplete();
+  }, []);
 
   useEffect(() => {
     if (objects) {
@@ -577,6 +571,8 @@ function render(props) {
       setRewardObject({ ...rewardObject, selectField: rule.type });
     }
   }, [objects, products]);
+
+  console.log(scopeObject, "scopenObject");
 
   return (
     <AppCRM select="/crm/promotion">
