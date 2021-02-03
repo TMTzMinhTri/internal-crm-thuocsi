@@ -91,10 +91,13 @@ export async function loadDataBefore(ctx) {
       switch (o.scope) {
         case defaultScope.product:
           typeVariable = "products";
+          console.log(o, "productsssss");
           listRes = await getProductClient(ctx, {}).getListProductByIdsOrCodes(
-            o[typeVariable],
+            o.products,
             []
           );
+          returnObject.props.products = listRes.data;
+          console.log(listRes, "listReslistRes");
           break;
         case defaultScope.productCatergory:
           typeVariable = "categoryCodes";
@@ -102,6 +105,7 @@ export async function loadDataBefore(ctx) {
             o[typeVariable],
             []
           );
+          returnObject.props.categoryCodes = listRes.data;
           break;
         case defaultScope.customer:
           typeVariable = "customerLevels";
@@ -109,6 +113,7 @@ export async function loadDataBefore(ctx) {
             o[typeVariable],
             []
           );
+          returnObject.props.customerLevels = listRes.data;
           break;
         case defaultScope.ingredient:
           typeVariable = "ingredients";
@@ -142,6 +147,7 @@ export async function loadDataBefore(ctx) {
       console.log(listRes, typeVariable);
 
       returnObject.props[typeVariable] = listRes.data;
+      console.log(returnObject.props, "returnObject.props");
     });
 
     if (data.rule.conditions[0].gift) {
@@ -199,7 +205,6 @@ async function getListCategory() {
 }
 
 function render(props) {
-  console.log("props", props);
   const {
     products,
     productConditions,
@@ -223,7 +228,7 @@ function render(props) {
     rule,
   } = promotionRes;
 
-  console.log(promotionRes, "promotionRes");
+  console.log(products, "productsproducts");
 
   const toast = useToast();
 
@@ -252,7 +257,7 @@ function render(props) {
     setValue,
     reset,
     errors,
-  } = useForm();
+  } = useForm({ defaultValues: { startTime: formatUTCTime(startTime) } });
 
   const [textField, setTextField] = useState({
     startTime: startTime ? formatUTCTime(startTime) : new Date(),
@@ -261,8 +266,6 @@ function render(props) {
     promotionField: promotionOrganizer ? promotionOrganizer : "",
     promotionTypeField: promotionType ? promotionType : "",
   });
-
-  console.log(formatUTCTime(startTime), "textField", new Date());
 
   const [errorTextField, setErrorTextField] = useState({
     descriptionError: "",
@@ -384,10 +387,6 @@ function render(props) {
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
     let value = getValues();
-    console.log(value, "value");
-    console.log(scopeObject, "scopeObject");
-    console.log(conditionObject, "conditionObject");
-    console.log(rewardObject, "rewardObject");
     let objects = [];
     scopeObject.map((o, index) => {
       switch (o.selectField) {
@@ -442,7 +441,7 @@ function render(props) {
     };
 
     let productConditions = [];
-    let minOrverValue = 0;
+    let minOrderValue = 0;
 
     if (conditionObject.selectField == defaultCondition.product) {
       console.log(conditionObject.selectField, "conditionObject.selectField");
@@ -456,8 +455,8 @@ function render(props) {
       rules.conditions[0].productConditions = productConditions;
     }
     if (conditionObject.selectField == defaultCondition.orderValue) {
-      minOrverValue = parseInt(value.minValue);
-      rules.conditions[0].minOrverValue = parseInt(minOrverValue);
+      minOrderValue = parseInt(value.minValue);
+      rules.conditions[0].minOrderValue = parseInt(minOrderValue);
     }
 
     if (rewardObject.selectField == defaultReward.absolute) {
@@ -508,14 +507,11 @@ function render(props) {
     console.log(res, "res");
   }
 
-  console.log(props, "props");
-
   useEffect(() => {
     if (objects) {
       setValue("startTime", formatUTCTime(promotionRes.startTime));
       setValue("endTime", formatUTCTime(promotionRes.startTime));
       setValue("promotionName", promotionRes.promotionName);
-      console.log(products, "products");
       objects.map((o, index) => {
         console.log(o.scope, "scope");
         scopeObject[index].selectField = o.scope;
@@ -582,7 +578,7 @@ function render(props) {
 
       setRewardObject({ ...rewardObject, selectField: rule.type });
     }
-  }, [objects]);
+  }, [objects, products]);
 
   console.log(scopeObject, "scopeObject");
 
