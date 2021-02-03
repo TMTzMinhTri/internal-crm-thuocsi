@@ -372,17 +372,21 @@ export default function renderForm(props, toast) {
                                 <Card variant="outlined">
                                     <CardContent>
                                         <Typography variant="h6" component="h6"
-                                            style={{ marginBottom: '10px', fontSize: 18 }}>
+                                            style={{ marginBottom: '10px', fontSize: 21, fontWeight: 'bold' }}>
                                             Thông tin đơn hàng
                                                 </Typography>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={4} md={4}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    Tên khách hàng
+                                                </Typography>
                                                 <TextField
                                                     id="customerName"
                                                     name="customerName"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="Tên khách hàng"
+                                                    // label="Tên khách hàng"
                                                     placeholder=""
                                                     inputProps={{
                                                         readOnly: true,
@@ -401,12 +405,16 @@ export default function renderForm(props, toast) {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} sm={4} md={4}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    ID khách hàng
+                                                </Typography>
                                                 <TextField
                                                     id="customerID"
                                                     name="customerID"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="ID khách hàng"
+                                                    // label="ID khách hàng"
                                                     placeholder=""
                                                     inputProps={{
                                                         readOnly: true,
@@ -427,11 +435,15 @@ export default function renderForm(props, toast) {
                                         </Grid>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={3} md={3}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    ID khách hàng
+                                                </Typography>
                                                 <TextField
                                                     id="customerPhone"
                                                     name="customerPhone"
-                                                    label="Số điện thoại"
-                                                    variant="outlined"
+                                                    // label="Số điện thoại"
+                                                    // variant="outlined"
                                                     size="small"
                                                     placeholder=""
                                                     inputProps={{
@@ -454,12 +466,16 @@ export default function renderForm(props, toast) {
                                         </Grid>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={6} md={6}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    ID khách hàng
+                                                </Typography>
                                                 <TextField
                                                     id="customerShippingAddress"
                                                     name="customerShippingAddress"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="Địa chỉ"
+                                                    // label="Địa chỉ"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -480,12 +496,16 @@ export default function renderForm(props, toast) {
                                         </Grid>
                                         <Grid spacing={3} container>
                                             <Grid item xs={12} sm={3} md={3}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    ID khách hàng
+                                                </Typography>
                                                 <TextField
                                                     id="customerProvinceCode"
                                                     name="customerProvinceCode"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="Tỉnh/Thành Phố"
+                                                    // label="Tỉnh/Thành Phố"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -500,12 +520,16 @@ export default function renderForm(props, toast) {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    ID khách hàng
+                                                </Typography>
                                                 <TextField
                                                     id="customerDistrictCode"
                                                     name="customerDistrictCode"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="Quận/Huyện"
+                                                    // label="Quận/Huyện"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -522,12 +546,16 @@ export default function renderForm(props, toast) {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    ID khách hàng
+                                                </Typography>
                                                 <TextField
                                                     id="customerWardCode"
                                                     name="customerWardCode"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="Phường/Xã"
+                                                    // label="Phường/Xã"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -543,14 +571,17 @@ export default function renderForm(props, toast) {
                                             </Grid>
                                         </Grid>
                                         <Grid spacing={3} container>
-
                                             <Grid item xs={12} sm={3} md={3}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    Hình thức vận chuyển
+                                                </Typography>
                                                 <TextField
                                                     id="deliveryPlatform"
                                                     name="deliveryPlatform"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="Hình thức vận chuyển"
+                                                    // label="Hình thức vận chuyển"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -565,12 +596,16 @@ export default function renderForm(props, toast) {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
+                                                <Typography variant="h6" component="h6"
+                                                    style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                                    Phương thức thanh toán
+                                                </Typography>
                                                 <TextField
                                                     id="paymentMethod"
                                                     name="paymentMethod"
-                                                    variant="outlined"
+                                                    // variant="outlined"
                                                     size="small"
-                                                    label="Phương thức thanh toán"
+                                                    // label="Phương thức thanh toán"
                                                     inputProps={{
                                                         readOnly: true,
                                                         disabled: true,
@@ -585,8 +620,10 @@ export default function renderForm(props, toast) {
                                                 />
                                             </Grid>
                                             <Grid item xs={12} sm={3} md={3}>
-                                                <FormControl style={{ width: '100%' }} size="small" variant="outlined">
-                                                    <InputLabel id="department-select-label">Trạng thái</InputLabel>
+                                                <FormControl style={{ width: '100%' }} size="small">
+                                                    {/* <InputLabel id="department-select-label" >Trạng thái</InputLabel> */}
+                                                    <Typography variant="h6" component="h6"
+                                                        style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>Trạng thái</Typography>
                                                     <Controller
                                                         name="status"
                                                         control={control}
