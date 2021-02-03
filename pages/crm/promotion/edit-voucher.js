@@ -38,9 +38,14 @@ export async function loadVoucherCode(ctx) {
     let voucherResponse = await getVoucherClient(ctx,{}).getVoucherById(parseInt(voucherId))
     if (voucherResponse && voucherResponse.status === "OK") {
         returnObject.props.voucher = voucherResponse.data[0]
-        if (voucherResponse.data[0].expiredDate) {
-            returnObject.props.voucher.expiredDate =  formatUTCTime(voucherResponse.data[0].expiredDate)
-            console.log(returnObject.props.voucher)
+        if (voucherResponse.data[0].startTime) {
+            returnObject.props.voucher.startTime =  formatUTCTime(voucherResponse.data[0].startTime)
+        }
+        if (voucherResponse.data[0].endTime) {
+            returnObject.props.voucher.endTime =  formatUTCTime(voucherResponse.data[0].endTime)
+        }
+        if (voucherResponse.data[0].publicTime) {
+            returnObject.props.voucher.publicTime =  formatUTCTime(voucherResponse.data[0].publicTime)
         }
         let promotionResponse = await getPromoClient(ctx,{}).getPromotionByID(parseInt(voucherResponse.data[0].promotionId))
         if (promotionResponse && promotionResponse.status === "OK") {
