@@ -57,7 +57,7 @@ export async function loadOrderData(ctx) {
     let page = query.page || 0
     let limit = query.limit || 20
     let offset = page * limit
-    console.log(offset)
+
     let orderClient = getOrderClient(ctx, data)
     let resp = await orderClient.getOrder(offset, limit, q)
     if (resp.status !== 'OK') {
