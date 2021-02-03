@@ -178,7 +178,7 @@ function render(props) {
     setValue,
     reset,
     errors,
-  } = useForm({ defaultValues: { startTime: formatUTCTime(startTime) } });
+  } = useForm({ defaultValues: { startTime: formatUTCTime(startTime),endTime: formatUTCTime(endTime)} });
 
   const [listDataForAutoComplete, setListDataForAutoComplete] = useState({
     products: [],
@@ -191,8 +191,6 @@ function render(props) {
   });
 
   const [textField, setTextField] = useState({
-    startTime: startTime ? formatUTCTime(startTime) : new Date(),
-    endTime: endTime ? formatUTCTime(endTime) : new Date(),
     descriptionField: description ? description : "",
     promotionField: promotionOrganizer ? promotionOrganizer : "",
     promotionTypeField: promotionType ? promotionType : "",
@@ -501,8 +499,6 @@ function render(props) {
 
   useEffect(() => {
     if (objects) {
-      setValue("startTime", formatUTCTime(promotionRes.startTime));
-      setValue("endTime", formatUTCTime(promotionRes.startTime));
       setValue("promotionName", promotionRes.promotionName);
       objects.map((o, index) => {
         console.log(o.scope, "scope");
@@ -587,8 +583,6 @@ function render(props) {
               errors={errors}
               promotionType={router.query?.type}
               textField={textField}
-              startTime={startTime}
-              endTime={endTime}
               errorTextField={errorTextField}
               handleChangeTextField={handleChangeTextField}
               register={register}
