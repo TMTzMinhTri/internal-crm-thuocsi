@@ -132,14 +132,12 @@ export default function renderForm(props, toast) {
     let editObject = props.isUpdate ? props.order : {}
 
     const [loading] = useState(false);
-    // const [idxChangedItem, setIdxChangedItem] = useState()
     const [openModal, setOpenModal] = useState(false);
     const [defaultQuantity, setDefaultQuantity] = useState(props.orderItem?.map(item => item.quantity))
     const [orderItem, setOrderItem] = useState(props.orderItem)
     const [focused, setFocused] = useState(false)
     const [currentEditValue, setCurrentEditValue] = useState(null)
     const [maxQuantity, setMaxQuantity] = useState()
-    // const [openChangeQuantityDialog, setOpenChangeQuantityDialog] = useState(false)
     const [deletedOrderItem, setDeletedOrderItem] = useState(null);
     const router = useRouter();
 
@@ -227,7 +225,6 @@ export default function renderForm(props, toast) {
 
 
     const changeQuantityHandler = async () => {
-        // let quantityItem = parseInt(getValues('quantityItem'), 10)
         const { orderNo, orderItemNo, quantity } = currentEditValue
         let idxChangedItem = orderItem?.map((item, idx) => {
             if (item.orderItemNo == orderItemNo) return idx
@@ -242,7 +239,6 @@ export default function renderForm(props, toast) {
         // better performance
         props.order.totalPrice = props.order.totalPrice - orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
         setOrderItem(tmpOrderItem)
-        // setOpenChangeQuantityDialog(false)
         await updateOrderItem(tmpOrderItem, idxChangedItem)
 
     }
