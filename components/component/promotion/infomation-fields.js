@@ -87,6 +87,7 @@ const InfomationFields = (props) => {
             <Grid item xs={5}>
               <TextField
                 name="startTime"
+                id="startTime"
                 label="Thời gian bắt đầu"
                 placeholder=""
                 defaultValue={startTime}
