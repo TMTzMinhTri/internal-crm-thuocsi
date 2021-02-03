@@ -60,7 +60,7 @@ export const TagTable = (props) => {
 
     return (
         <TableContainer>
-            <Table>
+            <Table  size="small">
                 <colgroup>
                     <col width="16%"></col>
                     <col width="16%"></col>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+    IconButton,
     Table,
     TableBody,
     TableCell,
@@ -7,6 +8,7 @@ import {
     TableHead,
     TableRow,
 } from "@material-ui/core";
+import { Edit } from "@material-ui/icons";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { useRouter } from "next/router";
@@ -16,6 +18,7 @@ import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
 import { unknownErrorText } from "components/commonErrors";
 import { ConfirmDialog } from "./ConfirmDialog";
+import Link from "next/link";
 
 /**
  * @param {object} props
@@ -66,20 +69,22 @@ export const PriceLevelTable = (props) => {
 
     return (
         <TableContainer>
-            <Table>
+            <Table size="small">
                 <colgroup>
+                    <col width="15%"></col>
+                    <col width="25%"></col>
+                    <col width="15%"></col>
+                    <col width="15%"></col>
                     <col width="20%"></col>
-                    <col width="20%"></col>
-                    <col width="20%"></col>
-                    <col width="20%"></col>
-                    <col width="20%"></col>
+                    <col width="15%"></col>
                 </colgroup>
                 <TableHead>
                     <TableCell>Mã ngưỡng giá</TableCell>
                     <TableCell>Tên</TableCell>
-                    <TableCell>Giá mua từ</TableCell>
-                    <TableCell>Giá mua đến</TableCell>
+                    <TableCell align="right">Giá mua từ</TableCell>
+                    <TableCell align="right">Giá mua đến</TableCell>
                     <TableCell>Giá trị tính phí</TableCell>
+                    <TableCell align="center">Thao tác</TableCell>
                 </TableHead>
                 <TableBody>
                     {!tableData?.length && (
@@ -93,8 +98,8 @@ export const PriceLevelTable = (props) => {
                         <TableRow key={`tr_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.fromPrice}</TableCell>
-                            <TableCell>{row.toPrice}</TableCell>
+                            <TableCell align="right">{row.fromPrice}</TableCell>
+                            <TableCell align="right">{row.toPrice}</TableCell>
                             <TableFeeValueCell
                                 code={row.code}
                                 initialFee={row.feeValue}
@@ -103,6 +108,14 @@ export const PriceLevelTable = (props) => {
                                     setOpenModal(true);
                                 }}
                             />
+                            <TableCell align="center">
+                                <Link href={`/crm/pricing/price-level/edit?priceLevelCode=${row.code}`}>
+                                    <IconButton>
+                                        <Edit />
+                                    </IconButton>
+                                </Link>
+
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

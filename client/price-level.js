@@ -24,6 +24,28 @@ class PriceLevelClient extends APIClient {
         )
     }
 
+    updatePriceLevel({
+        code,
+        name,
+        fromPrice,
+        toPrice,
+        description,
+        feeValue,
+    }) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX_PRICING}/price-level`,
+            {
+                code,
+                name,
+                fromPrice,
+                toPrice,
+                description,
+                feeValue,
+            },
+        )
+    }
+
     getPriceLevelByCode(priceLevelCode) {
         return this.callFromNextJS(
             'GET',
@@ -42,11 +64,23 @@ class PriceLevelClient extends APIClient {
                 limit,
                 offset,
                 q,
+                getTotal: true,
+            }
+        )
+    }
+
+    updateFeeValueByPriceLevelCode(priceLevelCode, feeValue) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX_PRICING}/price-level/fee`,
+            {
+                code: priceLevelCode,
+                feeValue,
             }
         )
     }
 }
 
-export function getPriceLevelClient(ctx, data) {
+export function getPriceLevelClient(ctx, data = {}) {
     return new PriceLevelClient(ctx, data);
 }

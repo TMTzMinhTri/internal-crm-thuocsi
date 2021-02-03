@@ -65,7 +65,7 @@ export const RegionTable = (props) => {
 
     return (
         <TableContainer>
-            <Table>
+            <Table  size="small">
                 <colgroup>
                     <col width="10%"></col>
                     <col width="25%"></col>

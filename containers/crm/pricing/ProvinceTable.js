@@ -64,7 +64,7 @@ export const ProvinceTable = (props) => {
 
     return (
         <TableContainer>
-            <Table>
+            <Table  size="small">
                 <colgroup>
                     <col width="25%"></col>
                     <col width="25%"></col>

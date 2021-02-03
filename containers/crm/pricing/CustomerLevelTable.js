@@ -59,7 +59,7 @@ export const CustomerLevelTable = (props) => {
     return (
         <>
             <TableContainer>
-                <Table>
+                <Table  size="small">
                     <colgroup>
                         <col width="20%"></col>
                         <col width="20%"></col>

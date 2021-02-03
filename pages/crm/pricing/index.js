@@ -24,7 +24,7 @@ import { getPriceLevelClient } from 'client/price-level';
 
 export async function loadPricingData(ctx, type, offset, limit, q) {
     const feeClient = getFeeClient(ctx);
-    const priceLevelClient = getPriceLevelClient(ctx);
+    const priceLevelClient = getPriceLevelClient(ctx, {});
     if (type === ViewType.REGION) {
         const res = await feeClient.getRegionFeeList(offset, limit, q);
         if (res.status === 'OK') {

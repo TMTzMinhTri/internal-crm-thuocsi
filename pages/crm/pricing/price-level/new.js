@@ -1,15 +1,17 @@
 import React from "react";
 import Head from "next/head";
-import { Box, Button, Grid, Paper, TextField, Typography } from "@material-ui/core";
+import { Box, Button, CircularProgress, Grid, Paper, TextField, Typography } from "@material-ui/core";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
 import AppCRM from "pages/_layout";
 import Link from "next/link";
 import { getPriceLevelClient } from "client/price-level";
-import { useRouter } from "next/router";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { MoneyToText } from "components/global";
 import { unknownErrorText } from "components/commonErrors";
+import { PriceLevelValidator } from "view-models/pricing";
 
 export async function getServerSideProps(ctx) {
     return doWithLoggedInUser(ctx, async () => {
@@ -19,10 +21,21 @@ export async function getServerSideProps(ctx) {
     })
 }
 
-const render = (props) => {
+const render = () => {
     const router = useRouter();
     const toast = useToast();
-    const { register, handleSubmit } = useForm();
+    const { register, handleSubmit, errors, watch, formState: { isDirty, isValid, isSubmitting } } = useForm({
+        defaultValues: {
+            name: '',
+            fromPrice: null,
+            toPrice: null,
+            feeValue: 0,
+        },
+        mode: 'onChange',
+    });
+    const { fromPrice, toPrice } = watch();
+    // Keep this to handle on any onChange (force re-render)
+    const formValid = isDirty && isValid;
 
     const createNewPriceLevel = async (formData) => {
         try {
@@ -32,13 +45,15 @@ const render = (props) => {
                 toast.success("Tạo cài đặt thành công")
                 router.push(`/crm/pricing/price-level/edit?priceLevelCode=${resp.data?.[0]?.code}`)
             } else {
-                toast.error( resp.message || "Tạo cài đặt không thành công")
+                toast.error(resp.message || "Tạo cài đặt không thành công")
             }
         } catch (e) {
-            toast.error( e.message || unknownErrorText)
+            toast.error(e.message || unknownErrorText)
         }
 
     }
+
+    console.log({isDirty, isValid});
 
     return (
         <AppCRM select="/crm/pricing">
@@ -50,7 +65,7 @@ const render = (props) => {
                 padding={3}
                 display="block"
             >
-                <form noValidate>
+                <form onSubmit={handleSubmit(createNewPriceLevel)}>
                     <Grid container>
                         <Grid container spacing={3} xs={12} md={6}>
                             <Grid item xs={12}>
@@ -69,7 +84,9 @@ const render = (props) => {
                                     }}
                                     required
                                     fullWidth
-                                    inputRef={register}
+                                    helperText={errors.name?.message}
+                                    error={!!errors.name}
+                                    inputRef={register(PriceLevelValidator.name)}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -79,12 +96,30 @@ const render = (props) => {
                                     variant="outlined"
                                     label="Giá mua từ"
                                     size="small"
+                                    type="number"
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
                                     required
                                     fullWidth
-                                    inputRef={register}
+                                    helperText={errors.fromPrice?.message ?? `${MoneyToText.convert(fromPrice)} đồng`}
+                                    error={!!errors.fromPrice}
+                                    inputRef={register({
+                                        ...PriceLevelValidator.fromPrice,
+                                        valueAsNumber: true,
+                                        validate: price => {
+                                            if (!toPrice) return true;
+                                            if (toPrice <= price) {
+                                                return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới."
+                                            }
+                                        }
+                                    })}
+                                    inputProps={{
+                                        min: 0
+                                    }}
+                                    InputProps={{
+                                        endAdornment: 'đ',
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -94,12 +129,30 @@ const render = (props) => {
                                     variant="outlined"
                                     label="Giá mua đến"
                                     size="small"
+                                    type="number"
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
                                     required
                                     fullWidth
-                                    inputRef={register}
+                                    helperText={errors.toPrice?.message ?? `${MoneyToText.convert(toPrice)} đồng`}
+                                    error={!!errors.toPrice}
+                                    inputRef={register({
+                                        ...PriceLevelValidator.toPrice,
+                                        valueAsNumber: true,
+                                        validate: price => {
+                                            if (!fromPrice) return true;
+                                            if (fromPrice >= price) {
+                                                return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới."
+                                            }
+                                        }
+                                    })}
+                                    inputProps={{
+                                        min: 0
+                                    }}
+                                    InputProps={{
+                                        endAdornment: 'đ',
+                                    }}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -129,7 +182,15 @@ const render = (props) => {
                                     required
                                     type="number"
                                     fullWidth
-                                    inputRef={register}
+                                    helperText={errors.feeValue?.message}
+                                    error={!!errors.feeValue}
+                                    inputRef={register({
+                                        ...PriceLevelValidator.feeValue,
+                                        valueAsNumber: true,
+                                    })}
+                                    inputProps={{
+                                        min: 0
+                                    }}
                                 />
                             </Grid>
                             <Grid container item xs={12} spacing={1}>
@@ -137,8 +198,10 @@ const render = (props) => {
                                     <Button
                                         variant="contained"
                                         color="primary"
-                                        onClick={handleSubmit(createNewPriceLevel)}
+                                        disabled={!formValid}
+                                        type="submit"
                                     >
+                                        {isSubmitting && <CircularProgress size={20} />}
                                         Lưu
                                     </Button>
                                 </Grid>
