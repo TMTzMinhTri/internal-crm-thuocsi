@@ -91,14 +91,12 @@ export async function loadDataBefore(ctx) {
       switch (o.scope) {
         case defaultScope.product:
           typeVariable = "products";
-          console.log(o, "productsssss");
           listRes = await getProductClient(ctx, {}).getListProductByIdsOrCodes(
             o.products,
             []
           );
           returnObject.props.products = listRes.data;
-          console.log(listRes, "listReslistRes");
-          break;
+          return;
         case defaultScope.productCatergory:
           typeVariable = "categoryCodes";
           listRes = await getCategoryClient(ctx, {}).getListCategoryByCodes(
@@ -106,7 +104,7 @@ export async function loadDataBefore(ctx) {
             []
           );
           returnObject.props.categoryCodes = listRes.data;
-          break;
+          return;
         case defaultScope.customer:
           typeVariable = "customerLevels";
           listRes = await getCustomerClient(ctx, {}).getCustomerByIDs(
@@ -146,8 +144,7 @@ export async function loadDataBefore(ctx) {
 
       console.log(listRes, typeVariable);
 
-      returnObject.props[typeVariable] = listRes.data;
-      console.log(returnObject.props, "returnObject.props");
+      // returnObject.props[typeVariable] = listRes.data;
     });
 
     if (data.rule.conditions[0].gift) {
@@ -168,11 +165,10 @@ export async function loadDataBefore(ctx) {
         {}
       ).getListProductByIdsOrCodes(listId, []);
       returnObject.props.productConditions = listProductRes.data;
+      returnObject.props.products = listProductRes.data;
     }
-
-    returnObject.props.promotionRes = data;
   }
-
+  console.log(returnObject.props, "returnObject.props");
   return returnObject;
 }
 
@@ -507,6 +503,8 @@ function render(props) {
     console.log(res, "res");
   }
 
+  console.log("props", props);
+
   useEffect(() => {
     if (objects) {
       setValue("startTime", formatUTCTime(promotionRes.startTime));
@@ -579,8 +577,6 @@ function render(props) {
       setRewardObject({ ...rewardObject, selectField: rule.type });
     }
   }, [objects, products]);
-
-  console.log(scopeObject, "scopeObject");
 
   return (
     <AppCRM select="/crm/promotion">

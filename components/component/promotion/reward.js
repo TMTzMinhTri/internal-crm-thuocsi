@@ -39,7 +39,7 @@ const Reward = (props) => {
     { title: "The Dark Knight", year: 2008 },
   ];
 
-  console.log(reward, "reward");
+  console.log(selectField, "selectField == defaultReward.precentage");
 
   return (
     <>
@@ -53,7 +53,7 @@ const Reward = (props) => {
         />
       </Grid>
       {selectField != "" &&
-        (selectField == "ABSOLUTE" || selectField == defaultReward.point ? (
+        (selectField == "ABSOLUTE" || selectField == "POINT" ? (
           <>
             <Grid item container xs={6} key={selectField}>
               <TextField
@@ -99,8 +99,8 @@ const Reward = (props) => {
           </>
         ) : (
           <>
-            {selectField == defaultReward.precentage ? (
-              <Grid item container spacing={2} key={selectField}>
+            {selectField == "PERCENTAGE" ? (
+              <Grid item container spacing={2}>
                 <Grid item container xs={6}>
                   <TextField
                     type="number"
@@ -199,8 +199,7 @@ const Reward = (props) => {
                     color="primary"
                     startIcon={<Add />}
                     onClick={handleAddAttachedProduct}
-                  >
-                  </Button>
+                  ></Button>
                 </Grid>
               </>
             )}
