@@ -368,9 +368,8 @@ export function formatUTCTime(time) {
   let year = date.getUTCFullYear()
   let month = ("0" + (date.getMonth() + 1)).slice(-2)
   let day = ("0" + (date.getDay())).slice(-2)
-  let hour = date.getHours()
-  let minute = date.getMinutes()
-  let seconds = date.getSeconds()
+  let hour = ("0" + (date.getHours())).slice(-2)
+  let minute = ("0" + (date.getMinutes())).slice(-2)
   result = year + '-' + month + '-' + day + "T" + hour + ':' + minute
   return result
 }
