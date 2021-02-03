@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+    Box,
     IconButton,
     Table,
     TableBody,
@@ -48,7 +49,7 @@ export const PriceLevelTable = (props) => {
         try {
             const { code, fee } = currentEditValue;
             const feeClient = getFeeClient();
-            const res = await feeClient.updateThresholdFee(code, fee);
+            const res = await feeClient.updatePriceLevelFee(code, fee);
             if (res.status === "OK") {
                 toast.success("Cập nhật giá trị tính phí thành công.");
                 const data = [...tableData];
@@ -110,9 +111,11 @@ export const PriceLevelTable = (props) => {
                             />
                             <TableCell align="center">
                                 <Link href={`/crm/pricing/price-level/edit?priceLevelCode=${row.code}`}>
-                                    <IconButton>
-                                        <Edit />
-                                    </IconButton>
+                                    <Box padding={1} clone>
+                                        <IconButton size="small">
+                                            <Edit />
+                                        </IconButton>
+                                    </Box>
                                 </Link>
 
                             </TableCell>

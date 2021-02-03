@@ -1,7 +1,12 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 import { constURL } from "./constrant";
-const { PREFIX_MASTER, PREFIX_CUSTOMER, PREFIX_PRODUCT } = constURL;
-const PREFIX = constURL.PREFIX_PRICING;
+const {
+    PREFIX_MASTER,
+    PREFIX_CUSTOMER,
+    PREFIX_PRODUCT,
+    PREFIX_PRICING,
+} = constURL;
+const PREFIX = PREFIX_PRICING;
 
 class FeeClient extends APIClient {
     constructor(ctx, data) {
@@ -197,10 +202,10 @@ class FeeClient extends APIClient {
         )
     }
 
-    updateThresholdFee(code, fee) {
+    updatePriceLevelFee(code, fee) {
         return this.callFromClient(
             'PUT',
-            `${PREFIX_PRODUCT}/this_is_mock/fee`,
+            `${PREFIX}/price-level/fee`,
             {
                 code,
                 feeValue: fee,

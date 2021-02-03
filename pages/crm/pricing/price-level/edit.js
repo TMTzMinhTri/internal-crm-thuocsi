@@ -85,13 +85,29 @@ const render = ({ priceLevelData, message, status }) => {
                             <Grid item xs={12}>
                                 <Typography variant="h5">Chỉnh sửa cài đặt ngưỡng giá</Typography>
                             </Grid>
-
+                            <Grid item xs={12}>
+                                <TextField
+                                    id="code"
+                                    name="code"
+                                    variant="outlined"
+                                    label="Mã cài đặt"
+                                    size="small"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    required
+                                    helperText={errors.code?.message}
+                                    error={!!errors.code}
+                                    disabled
+                                    inputRef={register}
+                                />
+                            </Grid>
                             <Grid item xs={12}>
                                 <TextField
                                     id="name"
                                     name="name"
                                     variant="outlined"
-                                    label="Tên cài dặt"
+                                    label="Tên cài đặt"
                                     size="small"
                                     InputLabelProps={{
                                         shrink: true,
@@ -180,6 +196,8 @@ const render = ({ priceLevelData, message, status }) => {
                                         shrink: true,
                                     }}
                                     fullWidth
+                                    multiline
+                                    rows={4}
                                     inputRef={register}
                                 />
                             </Grid>
