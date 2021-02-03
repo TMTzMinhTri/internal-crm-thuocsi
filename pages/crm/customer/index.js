@@ -53,7 +53,7 @@ export async function loadCustomerData(ctx) {
     let offset = page * limit
 
     let customerClient = getCustomerClient(ctx, data)
-    console.log(offset)
+
     let resp = await customerClient.getCustomer(offset, limit, q)
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
