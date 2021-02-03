@@ -69,7 +69,7 @@ export async function updateVoucher(voucherId,promotionId,expiredDate,type,maxUs
         data.appliedCustomers=appliedCustomers
     }
     if (expiredDate) {
-        data.expiredDate = expiredDate + ":00.000Z"
+        data.expiredDate = new Date(expiredDate).toISOString()
     }
     return getVoucherClient().updateVoucher(data)
 }
