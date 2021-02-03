@@ -99,9 +99,8 @@ const AutoCompleteField = (props) => {
   };
 
   useEffect(() => {
-    console.log(defaultValue, "defaultValue");
     handleChangeTextField({ target: { value: "" } });
-  }, [defaultValue]);
+  }, []);
 
   console.log(defaultValue, "defaultValue");
 
@@ -112,6 +111,7 @@ const AutoCompleteField = (props) => {
       options={productList.length > 0 ? productList : options}
       onChange={handleChange}
       getOptionLabel={(option) => option.name}
+      value={defaultValue}
       defaultValue={defaultValue}
       filterSelectedOptions
       renderInput={(params) => (
