@@ -1,8 +1,8 @@
-export const ViewType = {
-    REGION: 'region',
-    PROVINCE: 'province',
-    DISTRICT: 'district',
-    WARD: 'ward',
-    CUSTOMER: 'customer',
-    TAG: 'tag',
-}
+export * from "./enum";
+export * from "./CustomerLevelTable";
+export * from "./DistrictTable";
+export * from "./ProvinceTable";
+export * from "./RegionTable";
+export * from "./TagTable";
+export * from "./PriceLevelTable";
+export * from "./WardTable";
