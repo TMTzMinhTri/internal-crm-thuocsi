@@ -1,7 +1,12 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 import { constURL } from "./constrant";
-const { PREFIX_MASTER, PREFIX_CUSTOMER, PREFIX_PRODUCT } = constURL;
-const PREFIX = constURL.PREFIX_PRICING;
+const {
+    PREFIX_MASTER,
+    PREFIX_CUSTOMER,
+    PREFIX_PRODUCT,
+    PREFIX_PRICING,
+} = constURL;
+const PREFIX = PREFIX_PRICING;
 
 class FeeClient extends APIClient {
     constructor(ctx, data) {
@@ -118,6 +123,19 @@ class FeeClient extends APIClient {
         )
     }
 
+    getThresholdFeeList(offset, limit, q) {
+        return this.callFromNextJS(
+            'GET',
+            `${PREFIX_PRODUCT}/thresholds/list`,
+            {
+                offset,
+                limit,
+                q,
+                getTotal: true,
+            }
+        )
+    }
+
     updateRegionFee(code, fee) {
         return this.callFromClient(
             'PUT',
@@ -177,6 +195,17 @@ class FeeClient extends APIClient {
         return this.callFromClient(
             'PUT',
             `${PREFIX_PRODUCT}/tags/fee`,
+            {
+                code,
+                feeValue: fee,
+            }
+        )
+    }
+
+    updatePriceLevelFee(code, fee) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX}/price-level/fee`,
             {
                 code,
                 feeValue: fee,
