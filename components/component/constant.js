@@ -190,7 +190,7 @@ export const rewards = [
     label: "Quà tặng",
   },
   {
-    valie: "POINT",
+    value: "POINT",
     label: "Điểm thành viên (loyalty)",
   },
 ];

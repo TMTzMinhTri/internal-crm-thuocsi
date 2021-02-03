@@ -29,6 +29,7 @@ const Condition = (props) => {
         />
       </Grid>
       {selectField != "" &&
+        selectField != "NO_RULE" &&
         (selectField == "ORDER_VALUE" ? (
           <Grid item container xs={6}>
             <TextField
@@ -133,7 +134,7 @@ const Condition = (props) => {
                 variant="contained"
                 color="primary"
                 onClick={handleAddProductOfProductList}
-                startIcon={<Add/>}
+                startIcon={<Add />}
               />
             </Grid>
           </>

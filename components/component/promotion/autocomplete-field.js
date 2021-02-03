@@ -6,7 +6,7 @@ import { getCustomerClient } from "client/customer";
 import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 import { getTagClient } from "client/tag";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { defaultReward, defaultScope } from "../constant";
 
 async function searchProductList(q) {
@@ -56,7 +56,7 @@ const AutoCompleteField = (props) => {
 
   const { handleChange } = props;
 
-  const [productList, setProductList] = useState([]);
+  const [productList, setProductList] = useState(defaultValue);
 
   const fetchOptions = async (type, value) => {
     switch (type) {
@@ -98,7 +98,12 @@ const AutoCompleteField = (props) => {
     }
   };
 
-  console.log(options, "options");
+  useEffect(() => {
+    console.log(defaultValue, "defaultValue");
+    handleChangeTextField({ target: { value: "" } });
+  }, [defaultValue]);
+
+  console.log(defaultValue, "defaultValue");
 
   return (
     <Autocomplete
