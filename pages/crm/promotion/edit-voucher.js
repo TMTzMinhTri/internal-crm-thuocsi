@@ -13,7 +13,7 @@ import {getVoucherClient} from "../../../client/voucher";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
 import {createVoucherCode} from "./new-voucher";
-import {formatUTCTime, getUTCTime} from "../../../components/component/until";
+import {formatUTCTime} from "../../../components/component/until";
 
 const useStyles = makeStyles(theme => ({
     root: {
