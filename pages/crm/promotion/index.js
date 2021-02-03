@@ -372,7 +372,7 @@ function render(props) {
                     <TableCell align="left">Hình thức áp dụng</TableCell>
                     <TableCell align="left">Thời gian áp dụng</TableCell>
                     <TableCell align="left">Trạng Thái</TableCell>
-                    {/* <TableCell align="center">Thao tác</TableCell> */}
+                    <TableCell align="center">Thao tác</TableCell>
                   </TableRow>
                 </TableHead>
                 {props.promotion?.length > 0 ? (
@@ -401,7 +401,7 @@ function render(props) {
                             color="primary"
                           />
                         </TableCell>
-                        {/* <TableCell align="center">
+                        <TableCell align="center">
                           <Link
                             href={`/crm/promotion/edit?promotionId=${row.promotionId}`}
                           >
@@ -418,7 +418,7 @@ function render(props) {
                               </Button>
                             </ButtonGroup>
                           </Link>
-                        </TableCell> */}
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

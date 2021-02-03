@@ -13,6 +13,7 @@ import {getVoucherClient} from "../../../client/voucher";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
 import {createVoucherCode} from "./new-voucher";
+import {formatUTCTime} from "../../../components/component/until";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -35,12 +36,11 @@ export async function loadVoucherCode(ctx) {
     let returnObject = {props: {}}
     let voucherId = ctx.query.voucherId
     let voucherResponse = await getVoucherClient(ctx,{}).getVoucherById(parseInt(voucherId))
-    console.log('voucer',voucherResponse)
     if (voucherResponse && voucherResponse.status === "OK") {
         returnObject.props.voucher = voucherResponse.data[0]
         if (voucherResponse.data[0].expiredDate) {
-            returnObject.props.voucher.expiredDate =  voucherResponse.data[0].expiredDate.slice(0,voucherResponse.data[0].expiredDate.length - 4)
-
+            returnObject.props.voucher.expiredDate =  formatUTCTime(voucherResponse.data[0].expiredDate)
+            console.log(returnObject.props.voucher)
         }
         let promotionResponse = await getPromoClient(ctx,{}).getPromotionByID(parseInt(voucherResponse.data[0].promotionId))
         if (promotionResponse && promotionResponse.status === "OK") {
@@ -92,7 +92,6 @@ function render(props) {
         let value = getValues()
         let {code,expiredDate,maxUsage,maxUsagePerCustomer,promotionId} = value
         let {type,customerIds} = dataProps
-        console.log('val',value)
         let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Cập nhật mã khuyến mãi thành công')
