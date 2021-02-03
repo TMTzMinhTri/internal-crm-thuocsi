@@ -32,6 +32,8 @@ const Reward = (props) => {
     attachedProduct,
   } = reward;
 
+  console.log(selectField, "selectField");
+
   return (
     <>
       <Grid item container xs={6}>
@@ -99,12 +101,12 @@ const Reward = (props) => {
                     name={"percentageDiscount"}
                     label={"Giá trị giảm giá theo %"}
                     placeholder=""
-                    defaultValue={percentageDiscount}
                     helperText={errors.percentageDiscount?.message}
                     InputLabelProps={{
                       shrink: true,
                     }}
                     fullWidth
+                    defaultValue={percentageDiscount}
                     error={!!errors.percentageDiscount}
                     required
                     inputRef={register({
@@ -127,11 +129,11 @@ const Reward = (props) => {
                     name={"maxDiscount"}
                     label={"Giá trị giảm tối đa"}
                     placeholder=""
-                    defaultValue={maxDiscount}
                     helperText={errors.maxDiscount?.message}
                     InputLabelProps={{
                       shrink: true,
                     }}
+                    defaultValue={maxDiscount}
                     fullWidth
                     error={!!errors.maxDiscount}
                     required
@@ -150,7 +152,7 @@ const Reward = (props) => {
                         label="Sản phẩm tặng kèm"
                         placeholder=""
                         multiple={false}
-                        defaultValue={[]}
+                        defaultValue={o}
                         options={[{ name: "" }]}
                         handleChange={handleChangeListReward(index)}
                         type={selectField}

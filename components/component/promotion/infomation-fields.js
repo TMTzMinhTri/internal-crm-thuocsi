@@ -27,7 +27,6 @@ const InfomationFields = (props) => {
 
   const { promotionError, promotionTypeError } = errorTextField;
 
-  console.log(startTime, "startTime");
   return (
     <>
       <CardContent>
@@ -90,7 +89,6 @@ const InfomationFields = (props) => {
                 id="startTime"
                 label="Thời gian bắt đầu"
                 placeholder=""
-                defaultValue={startTime}
                 helperText={errors.startTime?.message}
                 type="datetime-local"
                 InputLabelProps={{
@@ -111,7 +109,6 @@ const InfomationFields = (props) => {
                 label="Thời gian kết thúc"
                 placeholder=""
                 type="datetime-local"
-                defaultValue={endTime}
                 helperText={errors.endTime?.message}
                 error={!!errors.endTime}
                 InputLabelProps={{

@@ -61,13 +61,16 @@ const Scope = (props) => {
                           }}
                           fullWidth
                           error={!!errors.registeredBefore}
+                          inputRef={register({
+                            required: "Vui lòng chọn thời gian",
+                          })}
                         />
                       </Grid>
                       <Grid item container xs={6}>
                         <TextField
                           id={"registeredAfter" + index}
                           name={"registeredAfter" + index}
-                          label="Thời gian kết thúc"
+                          label="Đăng kí sau ngày"
                           placeholder=""
                           defaultValue={registeredAfter}
                           helperText={errors.registeredAfter?.message}
@@ -78,7 +81,7 @@ const Scope = (props) => {
                           fullWidth
                           error={!!errors.registeredAfter}
                           inputRef={register({
-                            required: "Vui lòng chọn thời gian kết thúc",
+                            required: "Vui lòng chọn thời gian",
                           })}
                         />
                       </Grid>

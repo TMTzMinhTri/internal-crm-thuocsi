@@ -34,10 +34,6 @@ class CustomerClient extends APIClient {
     return this.callFromClient("GET", `${URI}/level/list`);
   }
 
-  getLevelByIDs(ids) {
-    return this.callFromClient("POST", `${URI}/level/list`, { ids });
-  }
-
   getCustomerByIDs(ids) {
     return this.callFromNextJS("POST", `${URI}/account/list`, { ids });
   }
