@@ -91,13 +91,11 @@ export async function loadDataBefore(ctx) {
       switch (o.scope) {
         case defaultScope.product:
           typeVariable = "products";
-          console.log(o, "productsssss");
           listRes = await getProductClient(ctx, {}).getListProductByIdsOrCodes(
             o.products,
             []
           );
           returnObject.props.products = listRes.data;
-          console.log(listRes, "listReslistRes");
           break;
         case defaultScope.productCatergory:
           typeVariable = "categoryCodes";
@@ -146,7 +144,7 @@ export async function loadDataBefore(ctx) {
 
       console.log(listRes, typeVariable);
 
-      returnObject.props[typeVariable] = listRes.data;
+      // returnObject.props[typeVariable] = listRes.data;
       console.log(returnObject.props, "returnObject.props");
     });
 
@@ -168,9 +166,8 @@ export async function loadDataBefore(ctx) {
         {}
       ).getListProductByIdsOrCodes(listId, []);
       returnObject.props.productConditions = listProductRes.data;
+      returnObject.props.products = listProductRes.data;
     }
-
-    returnObject.props.promotionRes = data;
   }
 
   return returnObject;
@@ -507,6 +504,8 @@ function render(props) {
     console.log(res, "res");
   }
 
+  console.log("props", props);
+
   useEffect(() => {
     if (objects) {
       setValue("startTime", formatUTCTime(promotionRes.startTime));
@@ -579,8 +578,6 @@ function render(props) {
       setRewardObject({ ...rewardObject, selectField: rule.type });
     }
   }, [objects, products]);
-
-  console.log(scopeObject, "scopeObject");
 
   return (
     <AppCRM select="/crm/promotion">

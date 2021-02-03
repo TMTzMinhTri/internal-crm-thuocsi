@@ -10,8 +10,10 @@ const SelectField = (props) => {
     <FormControl fullWidth required>
       <InputLabel shrink>{title}</InputLabel>
       <NativeSelect placeholder="" value={value} onChange={handleChange}>
-        {options.map((o) => (
-          <option value={o.value}>{o.label}</option>
+        {options.map((o, index) => (
+          <option key={index} value={o.value}>
+            {o.label}
+          </option>
         ))}
       </NativeSelect>
     </FormControl>
