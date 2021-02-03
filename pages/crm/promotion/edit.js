@@ -106,8 +106,6 @@ export async function loadDataBefore(ctx) {
     }
   }
 
-  console.log(returnObject, "returnObject");
-
   return returnObject;
 }
 
@@ -410,7 +408,6 @@ function render(props) {
           break;
       }
 
-      console.log(listRes, typeVariable, "getListDataForAutoComplete");
       if (listRes && listRes.status && listRes.status == "OK") {
         setListDataForAutoComplete({
           ...listDataForAutoComplete,
@@ -484,7 +481,6 @@ function render(props) {
     let minOrderValue = 0;
 
     if (conditionObject.selectField == defaultCondition.product) {
-      console.log(conditionObject.selectField, "conditionObject.selectField");
       conditionObject.productList.map((o, index) => {
         productConditions.push({
           productId: o.product.productID,
@@ -535,8 +531,6 @@ function render(props) {
       objects: objects,
     };
 
-    console.log(JSON.stringify(body), "body");
-
     let res = await updatePromontion(body);
 
     if (res.status == "OK") {
@@ -554,7 +548,6 @@ function render(props) {
   useEffect(() => {
     if (objects) {
       setValue("promotionName", promotionRes.promotionName);
-      console.log(getValues(), "getValuess");
       objects.map((o, index) => {
         scopeObject[index].selectField = o.scope;
         if (o.scope == defaultScope.customer) {
@@ -633,8 +626,6 @@ function render(props) {
   }, [objects, listDataForAutoComplete]);
 
   console.log(props, "props");
-
-  console.log(scopeObject, "rewardObject");
 
   return (
     <AppCRM select="/crm/promotion">
