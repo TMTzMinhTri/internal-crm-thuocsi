@@ -96,7 +96,7 @@ export async function loadDataBefore(ctx) {
             []
           );
           returnObject.props.products = listRes.data;
-          break;
+          return;
         case defaultScope.productCatergory:
           typeVariable = "categoryCodes";
           listRes = await getCategoryClient(ctx, {}).getListCategoryByCodes(
@@ -104,7 +104,7 @@ export async function loadDataBefore(ctx) {
             []
           );
           returnObject.props.categoryCodes = listRes.data;
-          break;
+          return;
         case defaultScope.customer:
           typeVariable = "customerLevels";
           listRes = await getCustomerClient(ctx, {}).getCustomerByIDs(
@@ -145,7 +145,6 @@ export async function loadDataBefore(ctx) {
       console.log(listRes, typeVariable);
 
       // returnObject.props[typeVariable] = listRes.data;
-      console.log(returnObject.props, "returnObject.props");
     });
 
     if (data.rule.conditions[0].gift) {
@@ -169,7 +168,7 @@ export async function loadDataBefore(ctx) {
       returnObject.props.products = listProductRes.data;
     }
   }
-
+  console.log(returnObject.props, "returnObject.props");
   return returnObject;
 }
 
