@@ -12,7 +12,7 @@ import Link from "@material-ui/core/Link";
 import {getVoucherClient} from "../../../client/voucher";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
-import {createVoucherCode} from "./new-voucher";
+import {createVoucherCode} from "./new";
 import {formatUTCTime} from "../../../components/component/util";
 
 const useStyles = makeStyles(theme => ({
@@ -129,7 +129,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/promotion">
+        <AppCRM select="/crm/voucher">
             <div>
                 <title>Chỉnh sửa mã khuyến mãi</title>
             </div>

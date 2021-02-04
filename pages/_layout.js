@@ -68,6 +68,12 @@ export default class AppCRM extends Component {
                     link: "/crm/promotion",
                     icon: faPercentage
                 },
+                {
+                    key: "VOUCHER",
+                    name: "Mã khuyến mãi",
+                    link: "/crm/voucher",
+                    icon: faPercentage
+                },
                 // {
                 //     key: "PROMO",
                 //     name: "Mã giảm giá",

@@ -96,7 +96,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/promotion">
+        <AppCRM select="/crm/voucher">
             <div>
                 <title>Tạo mã khuyến mãi</title>
             </div>
