@@ -20,7 +20,6 @@ class ProductClient extends APIClient {
   }
 
   getListProductByIdsClient(ids) {
-    console.log(ids, "ids");
     return this.callFromClient("POST", `${PREFIX}/product/list`, {
       productIds: ids,
     });

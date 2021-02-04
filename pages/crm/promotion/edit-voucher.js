@@ -13,7 +13,7 @@ import {getVoucherClient} from "../../../client/voucher";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
 import {createVoucherCode} from "./new-voucher";
-import {formatUTCTime, getUTCTime} from "../../../components/component/until";
+import {formatUTCTime} from "../../../components/component/until";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -38,10 +38,6 @@ export async function loadVoucherCode(ctx) {
     let voucherResponse = await getVoucherClient(ctx,{}).getVoucherById(parseInt(voucherId))
     if (voucherResponse && voucherResponse.status === "OK") {
         returnObject.props.voucher = voucherResponse.data[0]
-        if (voucherResponse.data[0].expiredDate) {
-            returnObject.props.voucher.expiredDate =  formatUTCTime(voucherResponse.data[0].expiredDate)
-            console.log(returnObject.props.voucher)
-        }
         let promotionResponse = await getPromoClient(ctx,{}).getPromotionByID(parseInt(voucherResponse.data[0].promotionId))
         if (promotionResponse && promotionResponse.status === "OK") {
             returnObject.props.promotion = promotionResponse.data
@@ -69,7 +65,7 @@ export async function updateVoucher(voucherId,promotionId,expiredDate,type,maxUs
         data.appliedCustomers=appliedCustomers
     }
     if (expiredDate) {
-        data.expiredDate = expiredDate + ":00.000Z"
+        data.expiredDate = new Date(expiredDate).toISOString()
     }
     return getVoucherClient().updateVoucher(data)
 }
@@ -80,7 +76,7 @@ function render(props) {
     const router = useRouter();
     let voucher = props.voucher
 
-    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({defaultValues: {...voucher,promotionId: props.promotion.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0]},mode: "onChange"});
+    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({defaultValues: {...voucher,expiredDate: formatUTCTime(voucher.expiredDate) || '',promotionId: props.promotion.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0]},mode: "onChange"});
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
     const [dataProps, setDataprops] = useState({

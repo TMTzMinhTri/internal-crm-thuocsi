@@ -83,15 +83,10 @@ const AutoCompleteField = (props) => {
   };
 
   const handleChangeTextField = async (event) => {
-    console.log(event.target.value, "handleChangeTextField", type);
     setProductList([]);
-
     let value = event.target.value;
-    console.log(value, "value", type);
     let res = await fetchOptions(type, value);
-    console.log(res, "res");
     if (res?.status == "OK") {
-      console.log(res, "res");
       setProductList(res.data);
     } else {
       setProductList([]);
@@ -99,9 +94,8 @@ const AutoCompleteField = (props) => {
   };
 
   useEffect(() => {
-    console.log(defaultValue, "defaultValue");
     handleChangeTextField({ target: { value: "" } });
-  }, [defaultValue]);
+  }, [type]);
 
   console.log(defaultValue, "defaultValue");
 
@@ -112,6 +106,7 @@ const AutoCompleteField = (props) => {
       options={productList.length > 0 ? productList : options}
       onChange={handleChange}
       getOptionLabel={(option) => option.name}
+      value={defaultValue}
       defaultValue={defaultValue}
       filterSelectedOptions
       renderInput={(params) => (
@@ -121,7 +116,6 @@ const AutoCompleteField = (props) => {
           variant="standard"
           label={label}
           placeholder={placeholder}
-          onClick={() => handleChangeTextField({ target: { value: "" } })}
           onChange={handleChangeTextField}
         />
       )}

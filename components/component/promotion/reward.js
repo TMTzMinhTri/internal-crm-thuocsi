@@ -32,14 +32,7 @@ const Reward = (props) => {
     attachedProduct,
   } = reward;
 
-  const top100Films = [
-    { title: "The Shawshank Redemption", year: 1994 },
-    { title: "The Godfather", year: 1972 },
-    { title: "The Godfather: Part II", year: 1974 },
-    { title: "The Dark Knight", year: 2008 },
-  ];
-
-  console.log(selectField, "selectField == defaultReward.precentage");
+  console.log(selectField, "selectField");
 
   return (
     <>
@@ -108,12 +101,12 @@ const Reward = (props) => {
                     name={"percentageDiscount"}
                     label={"Giá trị giảm giá theo %"}
                     placeholder=""
-                    defaultValue={percentageDiscount}
                     helperText={errors.percentageDiscount?.message}
                     InputLabelProps={{
                       shrink: true,
                     }}
                     fullWidth
+                    defaultValue={percentageDiscount}
                     error={!!errors.percentageDiscount}
                     required
                     inputRef={register({
@@ -136,11 +129,11 @@ const Reward = (props) => {
                     name={"maxDiscount"}
                     label={"Giá trị giảm tối đa"}
                     placeholder=""
-                    defaultValue={maxDiscount}
                     helperText={errors.maxDiscount?.message}
                     InputLabelProps={{
                       shrink: true,
                     }}
+                    defaultValue={maxDiscount}
                     fullWidth
                     error={!!errors.maxDiscount}
                     required
@@ -159,7 +152,7 @@ const Reward = (props) => {
                         label="Sản phẩm tặng kèm"
                         placeholder=""
                         multiple={false}
-                        defaultValue={[]}
+                        defaultValue={o}
                         options={[{ name: "" }]}
                         handleChange={handleChangeListReward(index)}
                         type={selectField}

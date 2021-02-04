@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Grid, IconButton, Paper, Tab, Tabs, TextField } from "@material-ui/core";
+import { Box, Button, Grid, IconButton, Paper, Tab, Tabs, TextField } from "@material-ui/core";
 import { Search } from "@material-ui/icons";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import Head from "next/head";
@@ -10,15 +10,21 @@ import { useRouter } from 'next/router';
 import { getFeeClient } from 'client/fee';
 import { unknownErrorText } from 'components/commonErrors';
 import { formatUrlSearch } from 'components/global';
-import { RegionTable } from 'containers/crm/pricing/RegionTable';
-import { ProvinceTable } from 'containers/crm/pricing/ProvinceTable';
-import { DistrictTable } from 'containers/crm/pricing/DistrictTable';
-import { CustomerLevelTable } from 'containers/crm/pricing/CustomerLevelTable';
-import { WardTable } from 'containers/crm/pricing/WardTable';
-import { TagTable } from "containers/crm/pricing/TagTable";
+import {
+    RegionTable,
+    ProvinceTable,
+    DistrictTable,
+    CustomerLevelTable,
+    WardTable,
+    TagTable,
+    PriceLevelTable,
+} from "containers/crm/pricing";
+import Link from 'next/link';
+import { getPriceLevelClient } from 'client/price-level';
 
 export async function loadPricingData(ctx, type, offset, limit, q) {
     const feeClient = getFeeClient(ctx);
+    const priceLevelClient = getPriceLevelClient(ctx, {});
     if (type === ViewType.REGION) {
         const res = await feeClient.getRegionFeeList(offset, limit, q);
         if (res.status === 'OK') {
@@ -109,15 +115,42 @@ export async function loadPricingData(ctx, type, offset, limit, q) {
         }
         return { message: res.message, }
     }
+    if (type === ViewType.PRICE_LEVEL) {
+        const res = await priceLevelClient.getPriceLevelList(offset, limit, q);
+        if (res.status === 'OK') {
+            return {
+                total: res.total ?? null,
+                data: res.data,
+            }
+        }
+        if (res.status === 'NOT_FOUND') {
+            return {
+                message: 'Không tìm thấy ngưỡng giá phù hợp.'
+            }
+        }
+        return { message: res.message, }
+    }
 }
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, async (ctx) => {
         const query = ctx.query;
-        const {
+        let {
             v = ViewType.CUSTOMER,
             q = '',
         } = query;
+
+        if (
+            v !== ViewType.CUSTOMER &&
+            v !== ViewType.PRICE_LEVEL &&
+            v !== ViewType.TAG &&
+            v !== ViewType.REGION &&
+            v !== ViewType.PROVINCE &&
+            v !== ViewType.DISTRICT &&
+            v !== ViewType.WARD
+        )
+            v = ViewType.CUSTOMER;
+
         const page = parseInt(query.page ?? 0, 10);
         const limit = parseInt(query.limit ?? 20, 10);
 
@@ -134,12 +167,17 @@ export async function getServerSideProps(ctx) {
                     districtData: v === ViewType.DISTRICT ? data : null,
                     wardData: v === ViewType.WARD ? data : null,
                     customerData: v === ViewType.CUSTOMER ? data : null,
-                    tagData: v ===ViewType.TAG ? data : null,
+                    tagData: v === ViewType.TAG ? data : null,
+                    priceLevelData: v === ViewType.PRICE_LEVEL ? data : null,
                 }
             }
         } catch (err) {
             return {
                 props: {
+                    viewType: v,
+                    q,
+                    page,
+                    limit,
                     message: err.message ?? unknownErrorText,
                 }
             }
@@ -153,6 +191,7 @@ const searchPlaceholderText = {
     [ViewType.PROVINCE]: "Nhập tên tỉnh thành,...",
     [ViewType.DISTRICT]: "Nhập tên quận huyện,...",
     [ViewType.WARD]: "Nhập tên phường/xã,...",
+    [ViewType.PRICE_LEVEL]: "Nhập tên ngưỡng giá,...",
 }
 
 /**
@@ -212,6 +251,7 @@ function render(props) {
                             >
                                 <Tab value={ViewType.CUSTOMER} label="Theo khách hàng" />
                                 <Tab value={ViewType.TAG} label="Theo tag" />
+                                <Tab value={ViewType.PRICE_LEVEL} label="Theo ngưỡng giá" />
                                 <Tab value={ViewType.REGION} label="Theo vùng" />
                                 <Tab value={ViewType.PROVINCE} label="Theo tỉnh thành" />
                                 <Tab value={ViewType.DISTRICT} label="Theo quận huyện" />
@@ -219,32 +259,43 @@ function render(props) {
                             </Tabs>
                         </Grid>
                         {viewType != ViewType.CUSTOMER && (
-                            <Grid item md={4}>
-                                <TextField
-                                    label="Tìm kiếm"
-                                    placeholder={searchPlaceholderText[viewType]}
-                                    variant="outlined"
-                                    size="small"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true
-                                    }}
-                                    InputProps={{
-                                        endAdornment: (
-                                            < IconButton
-                                                size="small"
-                                                onClick={() => router.push(`/crm/pricing?v=${viewType}&q=${searchText}`)}
-                                            >
-                                                <Search />
-                                            </IconButton>
-                                        ),
-                                    }}
-                                    onChange={e => setSearchText(e.target.value)}
-                                    onKeyPress={handleEnterPress}
-                                    value={searchText}
+                            <>
+                                <Grid item md={4}>
+                                    <TextField
+                                        label="Tìm kiếm"
+                                        placeholder={searchPlaceholderText[viewType]}
+                                        variant="outlined"
+                                        size="small"
+                                        fullWidth
+                                        InputLabelProps={{
+                                            shrink: true
+                                        }}
+                                        InputProps={{
+                                            endAdornment: (
+                                                < IconButton
+                                                    size="small"
+                                                    onClick={() => router.push(`/crm/pricing?v=${viewType}&q=${searchText}`)}
+                                                >
+                                                    <Search />
+                                                </IconButton>
+                                            ),
+                                        }}
+                                        onChange={e => setSearchText(e.target.value)}
+                                        onKeyPress={handleEnterPress}
+                                        value={searchText}
 
-                                />
-                            </Grid>
+                                    />
+                                </Grid>
+                                <Grid item container xs={12} md={8} justify="flex-end">
+                                    {viewType === ViewType.PRICE_LEVEL && (
+                                        <Grid item>
+                                            <Link href="/crm/pricing/price-level/new">
+                                                <Button variant="contained" color="primary">Tạo mới</Button>
+                                            </Link>
+                                        </Grid>
+                                    )}
+                                </Grid>
+                            </>
                         )}
                     </Grid>
                     <Grid item container xs={12} >
@@ -266,6 +317,16 @@ function render(props) {
                                 page={props.page}
                                 limit={props.limit}
                                 total={props.tagData?.total}
+                            />
+                        )}
+                        {viewType === ViewType.PRICE_LEVEL && (
+                            <PriceLevelTable
+                                data={props.priceLevelData?.data}
+                                q={searchText}
+                                message={props.priceLevelData?.message}
+                                page={props.page}
+                                limit={props.limit}
+                                total={props.priceLevelData?.total}
                             />
                         )}
                         {viewType === ViewType.PROVINCE && (

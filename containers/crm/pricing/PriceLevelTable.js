@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
+    Box,
+    IconButton,
     Table,
     TableBody,
     TableCell,
@@ -7,6 +9,7 @@ import {
     TableHead,
     TableRow,
 } from "@material-ui/core";
+import { Edit } from "@material-ui/icons";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { useRouter } from "next/router";
@@ -16,20 +19,22 @@ import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
 import { unknownErrorText } from "components/commonErrors";
 import { ConfirmDialog } from "./ConfirmDialog";
+import Link from "next/link";
 
 /**
  * @param {object} props
  * @param {object[]} props.data
  * @param {string} props.data[].code
  * @param {string} props.data[].name
- * @param {string} props.data[].level
+ * @param {string} props.data[].fromPrice
+ * @param {string} props.data[].toPrice
  * @param {string} props.data[].feeValue
  * @param {string} props.q
  * @param {number} props.page
  * @param {number} props.limit
  * @param {number} props.total
  */
-export const RegionTable = (props) => {
+export const PriceLevelTable = (props) => {
     const router = useRouter();
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);
@@ -44,7 +49,7 @@ export const RegionTable = (props) => {
         try {
             const { code, fee } = currentEditValue;
             const feeClient = getFeeClient();
-            const res = await feeClient.updateRegionFee(code, fee);
+            const res = await feeClient.updatePriceLevelFee(code, fee);
             if (res.status === "OK") {
                 toast.success("Cập nhật giá trị tính phí thành công.");
                 const data = [...tableData];
@@ -65,20 +70,22 @@ export const RegionTable = (props) => {
 
     return (
         <TableContainer>
-            <Table  size="small">
+            <Table size="small">
                 <colgroup>
-                    <col width="10%"></col>
+                    <col width="15%"></col>
                     <col width="25%"></col>
                     <col width="15%"></col>
-                    <col width="10%"></col>
-                    <col width="25%"></col>
+                    <col width="15%"></col>
+                    <col width="20%"></col>
                     <col width="15%"></col>
                 </colgroup>
                 <TableHead>
-                    <TableCell>Mã vùng</TableCell>
+                    <TableCell>Mã ngưỡng giá</TableCell>
                     <TableCell>Tên</TableCell>
-                    <TableCell>Cấp</TableCell>
+                    <TableCell align="right">Giá mua từ</TableCell>
+                    <TableCell align="right">Giá mua đến</TableCell>
                     <TableCell>Giá trị tính phí</TableCell>
+                    <TableCell align="center">Thao tác</TableCell>
                 </TableHead>
                 <TableBody>
                     {!tableData?.length && (
@@ -92,7 +99,8 @@ export const RegionTable = (props) => {
                         <TableRow key={`tr_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.level}</TableCell>
+                            <TableCell align="right">{row.fromPrice}</TableCell>
+                            <TableCell align="right">{row.toPrice}</TableCell>
                             <TableFeeValueCell
                                 code={row.code}
                                 initialFee={row.feeValue}
@@ -101,17 +109,27 @@ export const RegionTable = (props) => {
                                     setOpenModal(true);
                                 }}
                             />
+                            <TableCell align="center">
+                                <Link href={`/crm/pricing/price-level/edit?priceLevelCode=${row.code}`}>
+                                    <Box padding={1} clone>
+                                        <IconButton size="small">
+                                            <Edit />
+                                        </IconButton>
+                                    </Box>
+                                </Link>
+
+                            </TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
                 <MyTablePagination
-                    labelUnit="vùng"
+                    labelUnit="ngưỡng giá"
                     count={props.total}
                     rowsPerPage={props.limit}
                     page={props.page}
                     onChangePage={(_, page, rowsPerPage) => {
                         router.push(
-                            `/crm/pricing?v=${ViewType.REGION}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
+                            `/crm/pricing?v=${ViewType.PRICE_LEVEL}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
                         );
                     }}
                 />
