@@ -24,9 +24,10 @@ const useStyles = makeStyles((theme) => ({
 const ConditionFields = (props) => {
   const classess = useStyles();
 
-  const { errors, register, object, textField, setValue } = props;
+  const { errors, register, object, textField, setValue, control } = props;
 
   const {
+    handleChangeProductListOfCondition,
     handleChangeTextField,
     handleChangeScopeList,
     handleChangeScopeField,
@@ -77,8 +78,12 @@ const ConditionFields = (props) => {
                 <h4>ĐIỀU KIỆN ÁP DỤNG KHUYẾN MÃI</h4>
               </Grid>
               <Condition
+                control={control}
                 register={register}
                 errors={errors}
+                handleChangeProductListOfCondition={
+                  handleChangeProductListOfCondition
+                }
                 handleAddProductOfProductList={handleAddProductOfProductList}
                 handleRemoveProductOfProductList={
                   handleRemoveProductOfProductList
