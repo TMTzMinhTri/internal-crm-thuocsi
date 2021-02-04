@@ -22,7 +22,7 @@ import {
 import styles from "./promotion.module.css";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
 import {defaultPromotionScope} from "../constant";
-import {limitText} from "../until";
+import {limitText} from "../util";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 
 const RenderTableListCategory = (props) => {

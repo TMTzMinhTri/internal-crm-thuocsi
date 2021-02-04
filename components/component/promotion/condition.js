@@ -2,7 +2,7 @@ import { Button, Grid, IconButton, Paper, TextField } from "@material-ui/core";
 import { Add, Delete, Remove, RemoveOutlined } from "@material-ui/icons";
 import React, { useEffect } from "react";
 import { conditions, defaultScope, scopes } from "../constant";
-import { displayLabelBasedOnScope } from "../until";
+import { displayLabelBasedOnScope } from "../util";
 import AutoCompleteField from "./autocomplete-field";
 import SelectField from "./select-field";
 

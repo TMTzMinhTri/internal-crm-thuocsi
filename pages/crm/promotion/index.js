@@ -41,7 +41,7 @@ import {
   getPromotionOrganizer,
   getPromotionScope,
   removeElement,
-} from "../../../components/component/until";
+} from "../../../components/component/util";
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
 import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";

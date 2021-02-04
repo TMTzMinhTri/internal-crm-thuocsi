@@ -5,7 +5,7 @@ import {
   defaultPromotionOrganizer,
   defaultPromotionScope,
   defaultPromotionStatus,
-  defaultPromotionType,
+  defaultPromotionType, defaultReward,
   defaultRulePromotion,
   defaultTypeConditionsRule,
   defaultTypeProduct,
@@ -391,7 +391,7 @@ export function getPromotionScope(objects) {
   let scope = "Không xác định";
   objects?.forEach((obj) => {
     if (obj.scope) {
-      scope = displayPromotionScope(obj.scope);
+      scope = displayLabelBasedOnScope(obj.scope);
       return scope;
     }
   });
@@ -436,18 +436,8 @@ export function displayLabelBasedOnScope(type) {
   switch (type) {
     case "CUSTOMER":
       return "cấp bậc khách hàng";
-    case "PRODUCT_CATEGORY":
-      return "danh mục sản phẩm";
-    case "PRODUCT":
-      return "sản phẩm";
-    case "PRODUCER":
-      return "nhà sản xuất";
-    case "INGREDIENT":
-      return "thành phần";
     case "AREA":
       return "khu vực";
-    case "PRODUCT_TAG":
-      return "tag sản phẩm";
     default:
       return "";
   }
@@ -491,4 +481,17 @@ export function displayUsage(usage) {
     return "Không giới hạn";
   }
   return usage;
+}
+
+export function displayPromotionReward(type) {
+  switch (type) {
+    case defaultReward.absolute:
+      return "Giảm giá tuyệt đối"
+    case defaultReward.gift:
+      return "Quà tặng"
+    case defaultReward.point:
+      return "Điểm thành viên"
+    case defaultReward.precentage:
+      return "Giảm giá theo %"
+  }
 }

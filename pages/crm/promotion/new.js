@@ -37,13 +37,11 @@ import {
   displayNameRule,
   setRulesPromotion,
   setScopeObjectPromontion,
-} from "../../../components/component/until";
+} from "../../../components/component/util";
 import { useRouter } from "next/router";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
 import dynamic from "next";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleRight, faPlus } from "@fortawesome/free-solid-svg-icons";
 import Link from "@material-ui/core/Link";
 import TitleLink from "../../../components/component/promotion/title";
 import {

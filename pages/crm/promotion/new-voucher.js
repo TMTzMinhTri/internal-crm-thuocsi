@@ -102,7 +102,7 @@ function render(props) {
             </div>
             <MyCard>
                 <MyCardHeader title="THÊM MỚI MÃ KHUYẾN MÃI"/>
-                <MyCardContent style={{margin: "0 2rem"}}>
+                <MyCardContent style={{margin: "0 3rem 3rem 3rem"}}>
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
