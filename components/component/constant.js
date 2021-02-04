@@ -105,7 +105,7 @@ export const defaultCondition = {
 };
 
 export const defaultReward = {
-  precentage: "PRECENTAGE",
+  percentage: "PERCENTAGE",
   absolute: "ABSOLUTE",
   gift: "GIFT",
   point: "POINT",
