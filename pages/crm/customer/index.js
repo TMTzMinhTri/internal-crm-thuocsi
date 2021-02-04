@@ -58,7 +58,7 @@ export async function loadCustomerData(ctx) {
         }
         return { props: { data: [], count: 0, message: resp.message } }
     }
-
+    
     const customerCommon = getCommonAPI(ctx, {})
     const resLevel = await customerCommon.getListLevelCustomers()
     let condUserType = []
@@ -139,7 +139,8 @@ function render(props) {
                 <TableCell align="left">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
                 <TableCell align="center">
-                    <Button size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>
+                    {row.isActive == -1 && row.status == 'ACTIVE' ? <Button size="small" variant="outlined" style={{ color: 'red', borderColor: 'red' }}>Bị Khóa</Button> :
+                        <Button size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>}
                 </TableCell>
                 <TableCell align="left">
                     <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
@@ -167,7 +168,7 @@ function render(props) {
                                 </IconButton>
                             </Tooltip> : null}
                 </TableCell>
-            </TableRow>
+            </TableRow >
         );
     }
 
