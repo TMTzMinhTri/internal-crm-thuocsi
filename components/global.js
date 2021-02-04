@@ -110,18 +110,22 @@ export const statuses = [
     {
         value: "DRAFT",
         label: "Nháp",
+        color: "grey",
     },
     {
         value: "NEW",
         label: "Mới",
+        color: "blue"
     },
     {
         value: "GUEST",
         label: "Khách",
+        color: "grey",
     },
     {
         value: "ACTIVE",
-        label: "Đã kích hoạt"
+        label: "Đã kích hoạt",
+        color: "green"
     }
 ]
 
