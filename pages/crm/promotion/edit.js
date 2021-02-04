@@ -202,13 +202,7 @@ function render(props) {
     reset,
     control,
     errors,
-  } = useForm({
-    defaultValues: {
-      startTime: formatUTCTime(startTime),
-      endTime: formatUTCTime(endTime),
-    },
-    mode: "onChange",
-  });
+  } = useForm({ defaultValues: { startTime: formatUTCTime(startTime),endTime: formatUTCTime(endTime)} });
 
   const [listDataForAutoComplete, setListDataForAutoComplete] = useState({
     products: [],

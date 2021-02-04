@@ -23,7 +23,7 @@ const InfomationFields = (props) => {
 
   const { handleChangeTextField } = props;
 
-  const { promotionField, promotionTypeField, startTime, endTime } = textField;
+  const { promotionField, promotionTypeField } = textField;
 
   const { promotionError, promotionTypeError } = errorTextField;
 

@@ -3,69 +3,77 @@ const URI = `/marketplace/customer/v1`;
 // const URI = ``
 
 class CustomerClient extends APIClient {
-  constructor(ctx, data) {
-    super(ctx, data);
-  }
+    constructor(ctx, data) {
+        super(ctx, data);
+    }
 
-  getCustomer(offset, limit, q) {
-    return this.callFromNextJS("GET", `${URI}/account/list`, {
-      q: q,
-      offset: offset,
-      limit: limit,
-      getTotal: true,
-    });
-  }
+    getCustomer(offset, limit, q) {
+        return this.callFromNextJS("GET", `${URI}/account/list`, {
+            q: q,
+            offset: offset,
+            limit: limit,
+            getTotal: true,
+        });
+    }
 
-  getCustomerClient(q) {
-    return this.callFromClient("GET", `${URI}/account/list`, {
-      q: q,
-      limit: 20,
-      getTotal: true,
-    });
-  }
+    getCustomerClient(q) {
+        return this.callFromClient("GET", `${URI}/account/list`, {
+            q: q,
+            limit: 20,
+            getTotal: true,
+        });
+    }
 
-  getCustomerByCustomerID(customerID) {
-    return this.callFromNextJS("GET", `${URI}/account`, {
-      customerID: customerID,
-    });
-  }
+    getCustomerByCustomerID(customerID) {
+        return this.callFromNextJS("GET", `${URI}/account`, {
+            customerID: customerID,
+        });
+    }
 
-  getLevel() {
-    return this.callFromClient("GET", `${URI}/level/list`);
-  }
+    getLevel() {
+        return this.callFromClient("GET", `${URI}/level/list`);
+    }
 
-  getCustomerByIDs(ids) {
-    return this.callFromNextJS("POST", `${URI}/account/list`, { ids });
-  }
+    getLevelByIDs(ids) {
+        return this.callFromClient("POST", `${URI}/level/list`, { ids });
+    }
 
-  getCustomerFromClient(offset, limit, q) {
-    return this.callFromClient("GET", `${URI}/account/list`, {
-      q: q,
-      offset: offset,
-      limit: limit,
-      getTotal: true,
-    });
-  }
+    getCustomerByIDs(ids) {
+        return this.callFromNextJS("POST", `${URI}/account/list`, { ids });
+    }
 
-  getCustomerByCustomerCode(customerCode) {
-    return this.callFromNextJS("GET", `${URI}/account`, {
-      customerCode: customerCode,
-    });
-  }
+    getCustomerFromClient(offset, limit, q) {
+        return this.callFromClient("GET", `${URI}/account/list`, {
+            q: q,
+            offset: offset,
+            limit: limit,
+            getTotal: true,
+        });
+    }
 
-  createNewCustomer(data) {
-    return this.callFromClient("POST", `${URI}/account`, data);
-  }
+    getCustomerByCustomerCode(customerCode) {
+        return this.callFromNextJS("GET", `${URI}/account`, {
+            customerCode: customerCode,
+        });
+    }
 
-  updateCustomer(data) {
-    return this.callFromClient("PUT", `${URI}/account`, data);
-  }
+    createNewCustomer(data) {
+        return this.callFromClient("POST", `${URI}/account`, data);
+    }
 
-  updateStatus(data) {
-    return this.callFromClient("PUT", `${URI}/account/approve`, data);
-  }
+    updateCustomer(data) {
+        return this.callFromClient("PUT", `${URI}/account`, data);
+    }
+
+    approveAccount(data) {
+        return this.callFromClient("PUT", `${URI}/account/approve`, data);
+    }
+
+    lockAccount(data) {
+        return this.callFromClient("PUT", `${URI}/account/lock`, data);
+    }
 }
 
 export function getCustomerClient(ctx, data) {
-  return new CustomerClient(ctx, data);
+    return new CustomerClient(ctx, data);
 }
