@@ -172,8 +172,8 @@ export default function VoucherCodeBody(props) {
                         })}
                     />
                 </Grid>
-                <Grid container direction={"row"} className={cssStyle.marginLinePromotion}>
-                    <Grid item xs={6}>
+                <Grid container direction={"row"} alignItems={"center"} className={cssStyle.marginLinePromotion}>
+                    <Grid alignItems={"flex-start"} item xs={6}>
                         <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu</h5>
                         <TextField
                             id="startTime"
@@ -185,12 +185,12 @@ export default function VoucherCodeBody(props) {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            style={{width: "100%"}}
+                            style={{width: "90%"}}
                             inputRef={register({
                             })}
                         />
                     </Grid>
-                    <Grid item xs={6} >
+                    <Grid alignItems={"flex-end"} item xs={6} >
                         <h5 className={cssStyle.titleLabel}>Thời gian kết thúc</h5>
                         <TextField
                             id="endTime"
@@ -202,7 +202,7 @@ export default function VoucherCodeBody(props) {
                             InputLabelProps={{
                                 shrink: true,
                             }}
-                            style={{width: "100%"}}
+                            style={{width: "90%"}}
                             inputRef={register({
                             })}
                         />
@@ -293,7 +293,7 @@ export default function VoucherCodeBody(props) {
                         required={true}
                     />
                 </Grid>
-                <Grid item className={cssStyle.marginLinePromotion}>
+                <Grid item xs={5} className={cssStyle.marginLinePromotion}>
                     <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị
                         <Tooltip title="Tới thời gian này sẽ cho hiển thị trên app/web thuocsi">
                                 <span>
