@@ -60,6 +60,15 @@ export async function loadVoucherCode(ctx) {
             returnObject.props.customers = []
         }
     }
+    let promotionDefaultResponse =  await getPromoClient(ctx,{}).getPromotion('',5,0,false)
+    if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
+        returnObject.props.listPromotionDefault = promotionDefaultResponse.data
+    }
+
+    let listCustomerDefaultReponse = getCustomerClient(ctx,{}).getCustomer(0,5)
+    if (listCustomerDefaultReponse && listCustomerDefaultReponse.status === "OK") {
+        returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data
+    }
 
     return returnObject
 }
@@ -139,10 +148,12 @@ function render(props) {
                     <VoucherCodeBody
                         errors={errors}
                         promotion={props.promotion}
+                        listPromotionDefault = {props.listPromotionDefault || []}
                         control={control}
                         handleChangeType={handleChangeType}
                         dataProps={dataProps}
                         edit={true}
+                        showPromotionPublic={true}
                         appliedCustomers={props.customers}
                         onChangeCustomer={handleChangeCustomer}
                         onChangePromotion={handleChangePromotion}
@@ -155,7 +166,7 @@ function render(props) {
                 <MyCardActions>
                     <ButtonGroup>
                         <Button variant="contained" color="primary" style={{margin: 8}}   onClick={handleSubmit(onSubmit)}>
-                            XÁC NHẬN
+                            CẬP NHẬT
                         </Button>
                     </ButtonGroup>
                 </MyCardActions>

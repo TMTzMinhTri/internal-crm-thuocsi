@@ -10,7 +10,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
 import VoucherCodeBody from "../../../components/component/promotion/voucher-code-body";
 import {getVoucherClient} from "../../../client/voucher";
-import {defaultPromotionType} from "../../../components/component/constant";
+import {getCustomerClient} from "../../../client/customer";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -25,8 +25,31 @@ const useStyles = makeStyles(theme => ({
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return {props : {}}
+        return loadDataPromotion(ctx)
     })
+}
+
+export async function loadDataPromotion(ctx) {
+    let returnObject = {props : {}}
+    let promtoionId = ctx.query.promotionId
+
+    let listCustomerDefaultReponse = await getCustomerClient(ctx,{}).getCustomer(0,5,"")
+    if (listCustomerDefaultReponse && listCustomerDefaultReponse.status === "OK") {
+        returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data
+    }
+
+    let promotionDefaultResponse =  await getPromoClient(ctx,{}).getPromotion('',5,0,false)
+    if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
+        returnObject.props.listPromotionDefault = promotionDefaultResponse.data
+    }
+
+    if (promtoionId) {
+        let promotionResponse =  await getPromoClient(ctx,{}).getPromotionByID(promtoionId)
+        if (promotionResponse && promotionResponse.status === "OK") {
+            returnObject.props.promotion = promotionResponse.data
+        }
+    }
+    return returnObject
 }
 
 export default function NewPage(props) {
@@ -55,7 +78,9 @@ function render(props) {
     const classes = useStyles()
     const toast = useToast();
     const router = useRouter();
-    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm();
+    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm(
+        {defaultValues : {promotionId: !!router.query.promotionId ? props.promotion?.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0] : {}},mode: "onChange"}
+    );
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
     const [dataProps, setDataprops] = useState({
@@ -106,9 +131,12 @@ function render(props) {
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
-                        promotion={[]}
+                        listPromotionDefault={props.listPromotionDefault || []}
                         onChangeCustomer={handleChangeCustomer}
+                        showPromotionPublic={!!router.query.promotionId}
+                        promotion={props.promotion || []}
                         dataProps={dataProps}
+                        listCustomerDefault={props.listCustomerDefault || []}
                         handleChangeType={handleChangeType}
                         register={register}
                     />

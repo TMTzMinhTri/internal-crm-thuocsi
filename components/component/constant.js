@@ -28,7 +28,7 @@ export const defaultPromotionScope = {
   PRODUCT: "PRODUCT",
   SKU: "SKU",
   AREA: "AREA",
-  CUSTOMER: "CUSTOMER"
+  CUSTOMER: "CUSTOMER_LEVEL"
 };
 
 export const defaultPromotionStatus = {
