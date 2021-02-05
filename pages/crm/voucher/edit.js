@@ -12,8 +12,8 @@ import Link from "@material-ui/core/Link";
 import {getVoucherClient} from "../../../client/voucher";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
-import {createVoucherCode} from "./new-voucher";
-import {formatUTCTime} from "../../../components/component/until";
+import {createVoucherCode} from "./new";
+import {formatUTCTime} from "../../../components/component/util";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -51,6 +51,15 @@ export async function loadVoucherCode(ctx) {
             returnObject.props.customers = []
         }
     }
+    let promotionDefaultResponse =  await getPromoClient(ctx,{}).getPromotion('',5,0,false)
+    if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
+        returnObject.props.listPromotionDefault = promotionDefaultResponse.data
+    }
+
+    let listCustomerDefaultReponse = getCustomerClient(ctx,{}).getCustomer(0,5)
+    if (listCustomerDefaultReponse && listCustomerDefaultReponse.status === "OK") {
+        returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data
+    }
 
     return returnObject
 }
@@ -76,7 +85,30 @@ function render(props) {
     const router = useRouter();
     let voucher = props.voucher
 
-    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({defaultValues: {...voucher,expiredDate: formatUTCTime(voucher.expiredDate) || '',promotionId: props.promotion.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0]},mode: "onChange"});
+    let startTime = ''
+    let endTime = ''
+    let publicTime = ''
+
+    if (voucher.startTime) {
+        startTime =  formatUTCTime(voucher.startTime)
+    }
+    if (voucher.endTime) {
+        endTime =  formatUTCTime(voucher.endTime)
+    }
+    if (voucher.publicTime) {
+        publicTime =  formatUTCTime(voucher.publicTime)
+    }
+
+    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({
+        defaultValues:
+            {
+                ...voucher,
+                startTime: startTime,
+                endTime: endTime,
+                publicTime: publicTime,
+                promotionId: props.promotion.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0]
+            },
+        mode: "onChange"});
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
     const [dataProps, setDataprops] = useState({
@@ -120,20 +152,22 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/promotion">
+        <AppCRM select="/crm/voucher">
             <div>
                 <title>Chỉnh sửa mã khuyến mãi</title>
             </div>
             <MyCard>
                 <MyCardHeader title="CHỈNH SỬA MÃ KHUYẾN MÃI"/>
-                <MyCardContent style={{margin: "0 2rem"}}>
+                <MyCardContent style={{margin: "0 3rem 3rem 3rem"}}>
                     <VoucherCodeBody
                         errors={errors}
                         promotion={props.promotion}
+                        listPromotionDefault = {props.listPromotionDefault || []}
                         control={control}
                         handleChangeType={handleChangeType}
                         dataProps={dataProps}
                         edit={true}
+                        showPromotionPublic={true}
                         appliedCustomers={props.customers}
                         onChangeCustomer={handleChangeCustomer}
                         onChangePromotion={handleChangePromotion}
@@ -146,7 +180,7 @@ function render(props) {
                 <MyCardActions>
                     <ButtonGroup>
                         <Button variant="contained" color="primary" style={{margin: 8}}   onClick={handleSubmit(onSubmit)}>
-                            XÁC NHẬN
+                            CẬP NHẬT
                         </Button>
                     </ButtonGroup>
                 </MyCardActions>
