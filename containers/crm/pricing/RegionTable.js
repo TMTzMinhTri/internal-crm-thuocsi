@@ -65,19 +65,21 @@ export const RegionTable = (props) => {
 
     return (
         <TableContainer>
-            <Table  size="small">
+            <Table size="small">
                 <colgroup>
                     <col width="10%"></col>
-                    <col width="25%"></col>
                     <col width="15%"></col>
-                    <col width="10%"></col>
-                    <col width="25%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
+                    <col width="20%"></col>
                     <col width="15%"></col>
                 </colgroup>
                 <TableHead>
                     <TableCell>Mã vùng</TableCell>
                     <TableCell>Tên</TableCell>
-                    <TableCell>Cấp</TableCell>
+                    <TableCell>Thời gian giao hàng từ thuốc sỉ</TableCell>
+                    <TableCell>Thời gian giao hàng từ DVGH</TableCell>
+                    <TableCell>Tổng thời gian dự kiến</TableCell>
                     <TableCell>Giá trị tính phí</TableCell>
                 </TableHead>
                 <TableBody>
@@ -92,7 +94,9 @@ export const RegionTable = (props) => {
                         <TableRow key={`tr_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.level}</TableCell>
+                            <TableCell>{row.estThuocSi} ngày</TableCell>
+                            <TableCell>{row.estLogistic} ngày</TableCell>
+                            <TableCell>{row.estThuocSi + row.estLogistic} ngày</TableCell>
                             <TableFeeValueCell
                                 code={row.code}
                                 initialFee={row.feeValue}

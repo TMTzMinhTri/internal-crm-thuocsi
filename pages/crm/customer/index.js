@@ -58,7 +58,7 @@ export async function loadCustomerData(ctx) {
         }
         return { props: { data: [], count: 0, message: resp.message } }
     }
-    
+
     const customerCommon = getCommonAPI(ctx, {})
     const resLevel = await customerCommon.getListLevelCustomers()
     let condUserType = []
@@ -126,8 +126,8 @@ function render(props) {
     }
 
     const RenderRow = ({ row, i }) => {
-        let mainColor = statuses.find((e) => e.value === row.status)?.color
-        let status = statuses.find((e) => e.value === row.status)?.label
+        let mainColor = statuses.find((e) => e.value === row.status)?.color || "grey"
+        let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định"
         return (
             <TableRow key={i}>
                 <TableCell component="th" scope="row">
