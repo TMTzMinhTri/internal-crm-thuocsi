@@ -52,6 +52,10 @@ import {
   MyCardHeader,
 } from "@thuocsi/nextjs-components/my-card/my-card";
 import { getCustomerClient } from "client/customer";
+import { getTagClient } from "client/tag";
+import { getAreaClient } from "client/area";
+import { getProducerClient } from "client/producer";
+import { getIngredientClient } from "client/ingredient";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, async (ctx) => {
@@ -62,10 +66,12 @@ export async function getServerSideProps(ctx) {
 export async function loadDataBefore(ctx) {
   let returnObject = {
     props: {
-      gift: [],
+      gifts: [],
       productConditions: [],
+      promotionRes: null,
     },
   };
+
   let promotionId = ctx.query.promotionId;
 
   let _promotionClient = getPromoClient(ctx, {});
@@ -76,12 +82,13 @@ export async function loadDataBefore(ctx) {
 
     returnObject.props.promotionRes = data;
 
-    if (data.rule.conditions[0].gift) {
+    if (data.rule.conditions[0].gifts) {
+      let ids = data.rule.conditions[0].gifts.map((o) => o.productId);
       let listProductRes = await getProductClient(
         ctx,
         {}
-      ).getListProductByIdsOrCodes(data.rule.conditions[0].gift, []);
-      returnObject.props.gift = listProductRes.data;
+      ).getListProductByIdsOrCodes(ids, []);
+      returnObject.props.gifts = listProductRes.data;
     }
 
     if (data.rule.conditions[0].productConditions) {
@@ -116,16 +123,32 @@ async function getListProductByCodesClient(q) {
   return getProductClient().getListProductByIdsClient(q);
 }
 
-async function searchProductList(q, categoryCode) {
-  return await getProductClient().searchProductListFromClient(q, categoryCode);
+async function getListCategoryByCodesClient(q) {
+  return getCategoryClient().getListCategoryByCodesClient(q);
 }
 
-async function getListCategory() {
-  return await getCategoryClient().getListCategoryFromClient("", "", "");
+async function getListProductTagByCodesClient(q) {
+  return getTagClient().getTagByTagCodeClient(q);
+}
+
+async function getListAreaClient() {
+  return getAreaClient().getListArea();
+}
+
+async function getListLevelClient() {
+  return getCustomerClient().getLevel();
+}
+
+async function getListProducerByCodesClient(q) {
+  return getProducerClient().getProducerByCodesClient(q);
+}
+
+async function getListIngredientByCodesClient(q) {
+  return getIngredientClient().getIngredientByCodesClient(q);
 }
 
 function render(props) {
-  const { productConditions, promotionRes, gift } = props;
+  const { productConditions, promotionRes, gifts } = props;
 
   const {
     description,
@@ -175,8 +198,9 @@ function render(props) {
     setError,
     setValue,
     reset,
+    control,
     errors,
-  } = useForm({ defaultValues: { startTime: formatUTCTime(startTime) } });
+  } = useForm({ defaultValues: { startTime: formatUTCTime(startTime),endTime: formatUTCTime(endTime)} });
 
   const [listDataForAutoComplete, setListDataForAutoComplete] = useState({
     products: [],
@@ -189,8 +213,6 @@ function render(props) {
   });
 
   const [textField, setTextField] = useState({
-    startTime: startTime ? formatUTCTime(startTime) : new Date(),
-    endTime: endTime ? formatUTCTime(endTime) : new Date(),
     descriptionField: description ? description : "",
     promotionField: promotionOrganizer ? promotionOrganizer : "",
     promotionTypeField: promotionType ? promotionType : "",
@@ -321,50 +343,69 @@ function render(props) {
     setScopeObject([...scopeObject]);
   };
 
+  const handleChangeProductListOfCondition = (index) => (event, value) => {
+    conditionObject.productList[index] = {
+      product: value,
+      productNumber: 0,
+      productValue: 0,
+    };
+
+    setConditionObject({ ...conditionObject });
+  };
+
   const getListDataForAutoComplete = () => {
     objects.map(async (o, index) => {
       let typeVariable = "";
-      let listRes;
+      let listRes = [];
+
+      let arrAll = [];
       switch (o.scope) {
         case defaultScope.product:
           typeVariable = "products";
-          listRes = await getListProductByCodesClient(o.products);
+          listRes = await getListProductByCodesClient(o[typeVariable]);
           break;
 
         case defaultScope.productCatergory:
           typeVariable = "categoryCodes";
-          listRes = await getCategoryClient(ctx, {}).getListCategoryByCodes(
-            o[typeVariable]
-          );
+          listRes = await getListCategoryByCodesClient(o[typeVariable]);
           break;
         case defaultScope.customer:
           typeVariable = "customerLevels";
-          listRes = await getCustomerClient(ctx, {}).getCustomerByIDs(
-            o[typeVariable],
-            []
+          arrAll = await getListLevelClient();
+          o.customerLevels.map((code) =>
+            listRes.push(arrAll.data.find((v) => v.code == code))
           );
           break;
         case defaultScope.ingredient:
           typeVariable = "ingredients";
+          // listRes = await getListIngredientByCodesClient(o[typeVariable]);
           break;
         case defaultScope.producer:
-          typeVariable = "sellerCodes";
+          typeVariable = "producerCodes";
+          listRes = getListProducerByCodesClient(o[typeVariable]);
           break;
         case defaultScope.productTag:
           typeVariable = "productTag";
+          listRes = await getListProductTagByCodesClient(o[typeVariable]);
           break;
         case defaultScope.area:
           typeVariable = "areaCodes";
+          arrAll = await getListAreaClient();
+          o.areaCodes.map((code) =>
+            listRes.push(arrAll.data.find((v) => v.code == code))
+          );
           break;
 
         default:
           break;
       }
-      console.log(listRes, typeVariable, "getListDataForAutoComplete");
-      setListDataForAutoComplete({
-        ...listDataForAutoComplete,
-        [typeVariable]: listRes.data,
-      });
+
+      if (listRes && listRes.status && listRes.status == "OK") {
+        setListDataForAutoComplete({
+          ...listDataForAutoComplete,
+          [typeVariable]: listRes.data ? listRes.data : listRes,
+        });
+      }
     });
   };
 
@@ -381,8 +422,8 @@ function render(props) {
           break;
         case defaultScope.customer:
           objects.push({
-            registeredBefore: o.registeredBefore,
-            registeredAfter: o.registeredAfter,
+            registeredBefore: new Date(o.registeredBefore).toISOString(),
+            registeredAfter: new Date(o.registeredAfter).toISOString(),
             customerLevels: o.list.map((level) => level.code),
           });
           break;
@@ -393,7 +434,7 @@ function render(props) {
           break;
         case defaultScope.producer:
           objects.push({
-            sellerCodes: o.list.map((seller) => seller.code),
+            producerCodes: o.list.map((producer) => producer.code),
           });
           break;
         case defaultScope.productCatergory:
@@ -415,7 +456,11 @@ function render(props) {
           break;
       }
       objects[index].scope = o.selectField;
-      objects[index].type = "MANY";
+      if (o.list.length == 0) {
+        objects[index].type = "ALL";
+      } else {
+        objects[index].type = "MANY";
+      }
     });
 
     let rules = {
@@ -428,7 +473,6 @@ function render(props) {
     let minOrderValue = 0;
 
     if (conditionObject.selectField == defaultCondition.product) {
-      console.log(conditionObject.selectField, "conditionObject.selectField");
       conditionObject.productList.map((o, index) => {
         productConditions.push({
           productId: o.product.productID,
@@ -447,13 +491,13 @@ function render(props) {
       rules.conditions[0].discountValue = parseInt(value.absoluteDiscount);
     }
 
-    if (rewardObject.selectField == defaultReward.precentage) {
-      rules.conditions[0].percent = value.percentageDiscount;
-      rules.conditions[0].maxDiscountValue = value.maxDiscount;
+    if (rewardObject.selectField == defaultReward.percentage) {
+      rules.conditions[0].percent = parseInt(value.percentageDiscount);
+      rules.conditions[0].maxDiscountValue = parseInt(value.maxDiscount);
     }
 
     if (rewardObject.selectField == defaultReward.point) {
-      rules.conditions[0].pointValue = value.pointValue;
+      rules.conditions[0].pointValue = parseInt(value.pointValue);
     }
 
     if (rewardObject.selectField == defaultReward.gift) {
@@ -472,14 +516,12 @@ function render(props) {
       promotionName: value.promotionName,
       promotionType: textField.promotionTypeField,
       promotionOrganizer: textField.promotionField,
-      startTime: value.startTime + ":00Z",
-      endTime: value.endTime + ":00.000Z",
+      startTime: new Date(value.startTime).toISOString(),
+      endTime: new Date(value.endTime).toISOString(),
       description: textField.descriptionField,
       rule: rules,
       objects: objects,
     };
-
-    console.log(JSON.stringify(body), "body");
 
     let res = await updatePromontion(body);
 
@@ -491,19 +533,14 @@ function render(props) {
     console.log(res, "res");
   }
 
-  console.log("props", props);
-
   useEffect(() => {
     getListDataForAutoComplete();
   }, []);
 
   useEffect(() => {
     if (objects) {
-      setValue("startTime", formatUTCTime(promotionRes.startTime));
-      setValue("endTime", formatUTCTime(promotionRes.startTime));
       setValue("promotionName", promotionRes.promotionName);
       objects.map((o, index) => {
-        console.log(o.scope, "scope");
         scopeObject[index].selectField = o.scope;
         if (o.scope == defaultScope.customer) {
           scopeObject[index].registeredBefore = o.registeredBefore;
@@ -525,7 +562,6 @@ function render(props) {
 
         if (o.scope == defaultScope.product) {
           scopeObject[index].list = products;
-          console.log(scopeObject[index], "scopeObject[index]");
         }
 
         if (o.scope == defaultScope.productCatergory) {
@@ -558,19 +594,30 @@ function render(props) {
       }
 
       if (rule.type == defaultReward.gift) {
-        rewardObject.attachedProduct = gift.map((o, index) => ({
-          product: o,
-          number: rule.conditions[0].gifts[index].quantity,
-        }));
+        gifts.map((o, index) => {
+          setValue("number" + index, rule.conditions[0].gifts[index].quantity);
+        });
+        rewardObject.attachedProduct = gifts;
+      }
+
+      if (rule.type == defaultReward.percentage) {
+        rewardObject.percentageDiscount =
+          promotionRes.rule.conditions[0].percent;
+        rewardObject.maxDiscount =
+          promotionRes.rule.conditions[0].maxDiscountValue;
+      }
+
+      if (rule.type == defaultReward.point) {
+        rewardObject.pointValue = promotionRes.rule.conditions[0].pointValue;
       }
 
       setConditionObject({ ...conditionObject, selectField: rule.field });
 
       setRewardObject({ ...rewardObject, selectField: rule.type });
     }
-  }, [objects, products]);
+  }, [objects, listDataForAutoComplete]);
 
-  console.log(scopeObject, "scopenObject");
+  console.log(props, "props");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -585,8 +632,6 @@ function render(props) {
               errors={errors}
               promotionType={router.query?.type}
               textField={textField}
-              startTime={startTime}
-              endTime={endTime}
               errorTextField={errorTextField}
               handleChangeTextField={handleChangeTextField}
               register={register}
@@ -594,9 +639,13 @@ function render(props) {
             <ConditionFields
               register={register}
               errors={errors}
+              control={control}
               setValue={setValue}
               object={{ scopeObject, conditionObject, rewardObject }}
               textField={textField}
+              handleChangeProductListOfCondition={
+                handleChangeProductListOfCondition
+              }
               handleAddAttachedProduct={handleAddAttachedProduct}
               handleRemoveAttachedProduct={handleRemoveAttachedProduct}
               handleChangeTextField={handleChangeTextField}

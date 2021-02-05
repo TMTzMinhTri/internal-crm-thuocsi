@@ -98,6 +98,7 @@ function render(props) {
     setValue,
     reset,
     errors,
+    control,
   } = useForm();
 
   const [textField, setTextField] = useState({
@@ -221,6 +222,16 @@ function render(props) {
     setScopeObject([...scopeObject]);
   };
 
+  const handleChangeProductListOfCondition = (index) => (event, value) => {
+    conditionObject.productList[index] = {
+      product: value,
+      productNumber: 0,
+      productValue: 0,
+    };
+
+    setConditionObject({ ...conditionObject });
+  };
+
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
     let value = getValues();
@@ -234,8 +245,8 @@ function render(props) {
           break;
         case defaultScope.customer:
           objects.push({
-            registeredBefore: o.registeredBefore,
-            registeredAfter: o.registeredAfter,
+            registeredBefore: new Date(o.registeredBefore).toISOString(),
+            registeredAfter: new Date(o.registeredAfter).toISOString(),
             customerLevels: o.list.map((level) => level.code),
           });
           break;
@@ -261,7 +272,7 @@ function render(props) {
           break;
         case defaultScope.productTag:
           objects.push({
-            productTag: o.list.map((tag) => tag.code),
+            productTags: o.list.map((tag) => tag.code),
           });
           break;
         default:
@@ -299,7 +310,7 @@ function render(props) {
       rules.conditions[0].discountValue = parseInt(value.absoluteDiscount);
     }
 
-    if (rewardObject.selectField == defaultReward.precentage) {
+    if (rewardObject.selectField == defaultReward.percentage) {
       rules.conditions[0].percent = value.percentageDiscount;
       rules.conditions[0].maxDiscountValue = value.maxDiscount;
     }
@@ -369,8 +380,12 @@ function render(props) {
               register={register}
               errors={errors}
               setValue={setValue}
+              control={control}
               object={{ scopeObject, conditionObject, rewardObject }}
               textField={textField}
+              handleChangeProductListOfCondition={
+                handleChangeProductListOfCondition
+              }
               handleAddAttachedProduct={handleAddAttachedProduct}
               handleRemoveAttachedProduct={handleRemoveAttachedProduct}
               handleChangeTextField={handleChangeTextField}

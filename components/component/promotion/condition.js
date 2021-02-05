@@ -1,21 +1,25 @@
 import { Button, Grid, IconButton, Paper, TextField } from "@material-ui/core";
 import { Add, Delete, Remove, RemoveOutlined } from "@material-ui/icons";
 import React, { useEffect } from "react";
+import { Controller } from "react-hook-form";
 import { conditions, defaultScope, scopes } from "../constant";
 import { displayLabelBasedOnScope } from "../util";
 import AutoCompleteField from "./autocomplete-field";
 import SelectField from "./select-field";
 
 const Condition = (props) => {
-  const { condition, register, errors, scope, setValue } = props;
+  const { condition, register, errors, scope, setValue, control } = props;
 
   const {
     handleChangeConditionField,
     handleAddProductOfProductList,
     handleRemoveProductOfProductList,
+    handleChangeProductListOfCondition,
   } = props;
 
   const { minValue, productList, selectField } = condition;
+
+  console.log(productList, "productList");
 
   return (
     <>
@@ -55,13 +59,34 @@ const Condition = (props) => {
           <>
             {productList.map((o, index) => (
               <Paper
+                key={index}
                 Paper
                 variant="outlined"
                 style={{ padding: 10, margin: "10px 0" }}
               >
                 <Grid item container spacing={2} alignItems="center">
                   <Grid item container xs={4}>
-                    <TextField
+                    <Controller
+                      name={"productName" + index}
+                      as={
+                        <AutoCompleteField
+                          label="Tên sản phẩm"
+                          placeholder=""
+                          multiple={false}
+                          defaultValue={o.product ? o.product : []}
+                          options={[{ name: "" }]}
+                          type="PRODUCT"
+                          handleChange={handleChangeProductListOfCondition(
+                            index
+                          )}
+                        />
+                      }
+                      onChange={([, obj]) => console.log(obj, "obj")}
+                      control={control}
+                      defaultValue={o.product?.name}
+                      value={o.product?.name}
+                    />
+                    {/* <TextField
                       id={"productName" + index}
                       name={"productName" + index}
                       label="Tên sản phẩm"
@@ -77,7 +102,7 @@ const Condition = (props) => {
                       inputRef={register({
                         required: "Tên sản phẩm không được trống",
                       })}
-                    />
+                    /> */}
                   </Grid>
                   <Grid item container xs={3}>
                     <TextField
