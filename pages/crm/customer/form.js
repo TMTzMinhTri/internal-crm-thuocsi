@@ -291,8 +291,8 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
                                                                     pattern: {
-                                                                        value: /.+@.+[.].+/,
-                                                                        message: "Email không hợp lệ"
+                                                                        value: /^[a-z0-9!#$%&'*+\/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+\/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/,
+                                                                        message: "Email không hợp lệ",
                                                                     }
                                                                 })
                                                             }
