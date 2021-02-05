@@ -58,7 +58,7 @@ export async function loadCustomerData(ctx) {
         }
         return { props: { data: [], count: 0, message: resp.message } }
     }
-
+    
     const customerCommon = getCommonAPI(ctx, {})
     const resLevel = await customerCommon.getListLevelCustomers()
     let condUserType = []
@@ -101,11 +101,11 @@ function render(props) {
     async function approveAccount() {
         const _client = getCustomerClient()
         setOpenApproveAccountDialog(false)
-        const resp = await _client.approveAccount({ code: approvedCustomerCode.code, isActive: true })
+        const resp = await _client.approveAccount({ code: approvedCustomerCode.code, isActive: 1 })
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            props.data.filter(row => row.code === approvedCustomerCode.code)[0].isActive = true
+            props.data.filter(row => row.code === approvedCustomerCode.code)[0].isActive = 1
             props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "ACTIVE"
             setApprovedCustomerCode(null)
             success("Kích hoạt tài khoản thành công")
@@ -115,57 +115,62 @@ function render(props) {
     async function lockAccount() {
         const _client = getCustomerClient()
         setOpenLockAccountDialog(false)
-        const resp = await _client.lockAccount({ code: lockedCustomerCode.code, isActive: false })
+        const resp = await _client.lockAccount({ code: lockedCustomerCode.code, isActive: -1 })
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            props.data.filter(row => row.code === lockedCustomerCode.code)[0].isActive = false
+            props.data.filter(row => row.code === lockedCustomerCode.code)[0].isActive = -1
             setApprovedCustomerCode(null)
             success("Khóa tài khoản thành công")
         }
     }
 
-    const RenderRow = (row, i) => (
-        <TableRow key={i}>
-            <TableCell component="th" scope="row">
-                {row.data.code}
-            </TableCell>
-            <TableCell align="left">{row.data.name}</TableCell>
-            <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email || '-'}</TableCell>
-            <TableCell align="left">{props.condUserType.find(e => e.value === row.data.level)?.label || '-'}</TableCell>
-            <TableCell align="left">{row.data.point}</TableCell>
-            <TableCell align="left">{row.data.phone}</TableCell>
-            <TableCell align="left">
-                {!row.data.isActive && row.data.status == "ACTIVE" ? "Bị khóa" : statuses.find((e) => e.value === row.data.status)?.label}
-            </TableCell>
-            <TableCell align="left">
-                <Link href={`/crm/customer/edit?customerCode=${row.data.code}`}>
-                    <a>
-                        <Tooltip title="Cập nhật thông tin">
-                            <IconButton>
-                                <EditIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    </a>
-                </Link>
-                {row.data.isActive ? <Tooltip title="Khóa tài khoản">
-                    <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row.data) }}>
-                        <CheckCircleIcon fontSize="small" style={{ color: 'green' }} />
-                    </IconButton>
-                </Tooltip> :
-                    row.data.status == 'ACTIVE' && !row.data.isActive ? <Tooltip title="Kích hoạt tài khoản">
-                        <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row.data) }}>
-                            <RemoveCircleIcon fontSize="small" style={{ color: 'red' }} />
+    const RenderRow = ({ row, i }) => {
+        let mainColor = statuses.find((e) => e.value === row.status)?.color
+        let status = statuses.find((e) => e.value === row.status)?.label
+        return (
+            <TableRow key={i}>
+                <TableCell component="th" scope="row">
+                    {row.code}
+                </TableCell>
+                <TableCell align="left">{row.name}</TableCell>
+                <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.email || '-'}</TableCell>
+                <TableCell align="left">{props.condUserType.find(e => e.value === row.level)?.label || '-'}</TableCell>
+                <TableCell align="left">{row.point}</TableCell>
+                <TableCell align="left">{row.phone}</TableCell>
+                <TableCell align="center">
+                    {row.isActive == -1 && row.status == 'ACTIVE' ? <Button size="small" variant="outlined" style={{ color: 'red', borderColor: 'red' }}>Bị Khóa</Button> :
+                        <Button size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>}
+                </TableCell>
+                <TableCell align="left">
+                    <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
+                        <a>
+                            <Tooltip title="Cập nhật thông tin">
+                                <IconButton>
+                                    <EditIcon fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </a>
+                    </Link>
+                    {row.isActive == '1' ? <Tooltip title="Khóa tài khoản">
+                        <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row) }}>
+                            <CheckCircleIcon fontSize="small" style={{ color: 'green' }} />
                         </IconButton>
                     </Tooltip> :
-                        row.data.status !== 'DRAFT' ? <Tooltip title="Kích hoạt tài khoản">
-                            <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row.data) }}>
-                                <CheckCircleIcon fontSize="small" style={{ color: 'grey' }} />
+                        row.isActive == '-1' ? <Tooltip title="Kích hoạt tài khoản">
+                            <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
+                                <RemoveCircleIcon fontSize="small" style={{ color: 'red' }} />
                             </IconButton>
-                        </Tooltip> : null}
-            </TableCell>
-        </TableRow>
-    );
+                        </Tooltip> :
+                            row.status !== 'DRAFT' ? <Tooltip title="Kích hoạt tài khoản">
+                                <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
+                                    <CheckCircleIcon fontSize="small" style={{ color: 'grey' }} />
+                                </IconButton>
+                            </Tooltip> : null}
+                </TableCell>
+            </TableRow >
+        );
+    }
 
 
     return (
@@ -226,12 +231,12 @@ function render(props) {
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
                         <col width="10%" />
+                        <col width="15%" />
                         <col width="20%" />
-                        <col width="20%" />
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
-                        <col width="10%" />
+                        <col width="15%" />
                         <col width="10%" />
                     </colgroup>
                     <TableHead>
@@ -242,14 +247,14 @@ function render(props) {
                             <TableCell align="left">Cấp độ</TableCell>
                             <TableCell align="left">Điểm</TableCell>
                             <TableCell align="left">Số điện thoại</TableCell>
-                            <TableCell align="left">Trạng thái</TableCell>
+                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="left">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
                     {props.data.length > 0 ? (
                         <TableBody>
                             {props.data.map((row, i) => (
-                                <RenderRow data={row} key={i} />
+                                <RenderRow row={row} i={i} />
                             ))}
                         </TableBody>
                     ) : (
