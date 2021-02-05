@@ -35,7 +35,7 @@ export const RegionTable = (props) => {
     const [tableData, setTableData] = useState(props.data);
     const [openModal, setOpenModal] = useState(false);
     const [currentEditValue, setCurrentEditValue] = useState(null);
-    console.log(tableData)
+
     useEffect(() => {
         setTableData(props.data);
     }, [props.data]);
