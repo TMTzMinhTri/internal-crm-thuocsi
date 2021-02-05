@@ -188,7 +188,7 @@ export default function VoucherCodeBody(props) {
     return (
         <Grid container>
             <Grid container xs={8} spacing={5}>
-                <Grid item xs={6} className={cssStyle.marginLinePromotion}>
+                <Grid item xs={6} >
                     <h5 className={cssStyle.titleLabel}>Mã khuyến mãi<span style={{color : 'red'}}> *</span></h5>
                     <TextField
                         id="code"
@@ -227,7 +227,7 @@ export default function VoucherCodeBody(props) {
                         required={true}
                     />
                 </Grid>
-                <Grid item xs={3} className={cssStyle.marginLinePromotion}>
+                <Grid item xs={3} >
                         <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu</h5>
                         <TextField
                             id="startTime"
@@ -239,12 +239,14 @@ export default function VoucherCodeBody(props) {
                             InputLabelProps={{
                                 shrink: true,
                             }}
+                            required
                             style={{width: "90%"}}
                             inputRef={register({
+                                required: "Thời gian bắt đầu không được để trống"
                             })}
                         />
                     </Grid>
-                <Grid item xs={3} className={cssStyle.marginLinePromotion} >
+                <Grid item xs={3}  >
                         <h5 className={cssStyle.titleLabel}>Thời gian kết thúc</h5>
                         <TextField
                             id="endTime"
@@ -256,12 +258,14 @@ export default function VoucherCodeBody(props) {
                             InputLabelProps={{
                                 shrink: true,
                             }}
+                            required
                             style={{width: "90%"}}
                             inputRef={register({
+                                required: "Thời gian kết thúc không được để trống"
                             })}
                         />
                     </Grid>
-                <Grid item xs={6} className={cssStyle.marginLinePromotion}>
+                <Grid item xs={6} >
                     <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị
                         <Tooltip title="Tới thời gian này sẽ cho hiển thị trên app/web thuocsi">
                                 <span>
@@ -279,12 +283,14 @@ export default function VoucherCodeBody(props) {
                         InputLabelProps={{
                             shrink: true,
                         }}
+                        required
                         style={{width: "100%"}}
                         inputRef={register({
+                            required: "Thời gian cho hiển thị không được để trống"
                         })}
                     />
                 </Grid>
-                <Grid item xs={6} className={cssStyle.marginLinePromotion}>
+                <Grid item xs={6}>
                     <h5 className={cssStyle.titleLabel}>Tổng số lần sử dụng toàn hệ thống
                         <Tooltip title="Nhập = 0 là không giới hạn">
                                 <span>
@@ -311,7 +317,7 @@ export default function VoucherCodeBody(props) {
                         required
                     />
                 </Grid>
-                <Grid item xs={6} className={cssStyle.marginLinePromotion}>
+                <Grid item xs={6} >
                     <h5 className={cssStyle.titleLabel}>Số lần áp dụng tối đa cho mỗi khách hàng
                         <Tooltip title="Nhập = 0 là không giới hạn">
                                 <span>
@@ -338,7 +344,7 @@ export default function VoucherCodeBody(props) {
                         required
                     />
                 </Grid>
-                <Grid item xs={6} className={cssStyle.marginLinePromotion}>
+                <Grid item xs={6} >
                     <h5 className={cssStyle.titleLabel}>Danh sách khách hàng được sử dụng
                         <Tooltip title="Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi">
                                 <span>
@@ -374,7 +380,7 @@ export default function VoucherCodeBody(props) {
                         onChange={(e, value) => onChangeCustomer(e, value)}
                     />
                 </Grid>
-                <Grid item xs={6} className={cssStyle.marginLinePromotion}>
+                <Grid item xs={6} >
                     <h5 className={cssStyle.titleLabel}>Loại mã</h5>
                     <Select
                         id="type"

@@ -220,13 +220,14 @@ function render(props) {
                                     <TableCell align="left">Mã khuyến mãi</TableCell>
                                     <TableCell align="left">Tên chương trình</TableCell>
                                     <TableCell align="left">Loại mã</TableCell>
-                                    <TableCell align="left">
+                                    <TableCell align="center">
                                         Tổng số lần sử dụng toàn hệ thống
                                     </TableCell>
-                                    <TableCell align="left">
+                                    <TableCell align="center">
                                         Khách được sử dụng tối đa
                                     </TableCell>
-                                    <TableCell align="left">Hạn sử dụng</TableCell>
+                                    <TableCell align="left">Hạn sử dụng</TableCell>
+                                    <TableCell align="left">Thời gian hiển thị trên web</TableCell>
                                     <TableCell align="center">Thao tác</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -246,7 +247,11 @@ function render(props) {
                                                 <div>{displayUsage(row.maxUsagePerCustomer)}</div>
                                             </TableCell>
                                             <TableCell align="left">
-                                                <div>{formatTime(row.expiredDate)}</div>
+                                                <div>Từ : {formatTime(row.startTime)}</div>
+                                                <div>Đến : {formatTime(row.endTime)}</div>
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <div>{formatTime(row.publicTime)}</div>
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Link

@@ -95,7 +95,7 @@ function render(props) {
         let createVoucherResponse = await createVoucherCode(code,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Tạo mã khuyến mãi thành công')
-            router.push(`/crm/promotion?type=${defaultPromotionType.VOUCHER_CODE}`)
+            router.push(`/crm/voucher`)
         }else {
             toast.error(createVoucherResponse.message)
         }
