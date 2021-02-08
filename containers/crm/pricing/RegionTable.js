@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 
 import { ViewType } from "./enum";
 import { TableFeeValueCell } from "./TableFeeValueCell";
+import { TableDeliveryTimeValueCell } from "./TableDeliveryTimeValueCell";
 import { getFeeClient } from "client/fee";
 import { unknownErrorText } from "components/commonErrors";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -79,7 +80,7 @@ export const RegionTable = (props) => {
                     <TableCell>Tên</TableCell>
                     <TableCell>Thời gian giao hàng từ thuốc sỉ</TableCell>
                     <TableCell>Thời gian giao hàng từ DVGH</TableCell>
-                    <TableCell>Tổng thời gian dự kiến</TableCell>
+                    <TableCell align="center">Tổng thời gian dự kiến</TableCell>
                     <TableCell>Giá trị tính phí</TableCell>
                 </TableHead>
                 <TableBody>
@@ -94,9 +95,23 @@ export const RegionTable = (props) => {
                         <TableRow key={`tr_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
-                            <TableCell>{row.estThuocSi} ngày</TableCell>
-                            <TableCell>{row.estLogistic} ngày</TableCell>
-                            <TableCell>{row.estThuocSi + row.estLogistic} ngày</TableCell>
+                            <TableDeliveryTimeValueCell
+                                code={row.code}
+                                initialDeliveryTime={row.estThuocSi}
+                                onUpdate={(values) => {
+                                    setCurrentEditValue(values);
+                                    setOpenModal(true);
+                                }}
+                            />
+                            <TableDeliveryTimeValueCell
+                                code={row.code}
+                                initialDeliveryTime={row.estLogistic}
+                                onUpdate={(values) => {
+                                    setCurrentEditValue(values);
+                                    setOpenModal(true);
+                                }}
+                            />
+                            <TableCell align="center">{row.estThuocSi + row.estLogistic} ngày</TableCell>
                             <TableFeeValueCell
                                 code={row.code}
                                 initialFee={row.feeValue}
