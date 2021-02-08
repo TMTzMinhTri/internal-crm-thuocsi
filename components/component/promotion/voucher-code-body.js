@@ -91,13 +91,11 @@ export default function VoucherCodeBody(props) {
         if (!showPromotionPublic) {
             setPromotionPublic({})
         }
-        console.log(promotion)
         if (promotion.length > 0) {
             promotion[0].scopes.forEach(obj => {
                 switch (obj.scope){
                     case defaultPromotionScope.CUSTOMER:
                         let level =  getCustomerByCodes(obj.customerLevels);
-                        console.log('level',level)
                         if (level && level.status === "OK") {
                             setListRegions(level.data)
                         }else {
@@ -106,7 +104,6 @@ export default function VoucherCodeBody(props) {
                         break;
                     case defaultPromotionScope.AREA:
                         let region =  getRegionByCodes(obj.areaCodes)
-                        console.log('region',region)
                         if (region && region.status === "OK") {
                             setListCustomerPromotion(region.data)
                         }else {
@@ -157,13 +154,11 @@ export default function VoucherCodeBody(props) {
                 }
             })
         }
-        console.log(promotion)
         if (promotion && promotion.scopes?.length > 0) {
             promotion.scopes.forEach(obj => {
                 switch (obj.type){
                     case defaultPromotionScope.CUSTOMER:
                         let level =  getCustomerByCodes(obj.customerLevelCodes);
-                        console.log('level',level)
                         if (level && level.status === "OK") {
                             setListCustomerPromotion(level.data)
                         }else {
@@ -172,7 +167,6 @@ export default function VoucherCodeBody(props) {
                         break;
                     case defaultPromotionScope.AREA:
                         let region =  getRegionByCodes(obj.areaCodes)
-                        console.log('region',region)
                         if (region && region.status === "OK") {
                             setListRegions(region.data)
                         }else {
