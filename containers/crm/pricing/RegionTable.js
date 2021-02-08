@@ -35,7 +35,11 @@ export const RegionTable = (props) => {
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);
     const [openModal, setOpenModal] = useState(false);
+    const [openModal1, setOpenModal1] = useState(false);
+    const [openModal2, setOpenModal2] = useState(false);
     const [currentEditValue, setCurrentEditValue] = useState(null);
+    const [estThuocSi, setEstThuocSi] = useState(null);
+    const [estLogistic, setEstLogistic] = useState(null);
 
     useEffect(() => {
         setTableData(props.data);
@@ -45,7 +49,7 @@ export const RegionTable = (props) => {
         try {
             const { code, fee } = currentEditValue;
             const feeClient = getFeeClient();
-            const res = await feeClient.updateRegionFee(code, fee);
+            const res = await feeClient.updateRegionFee({ code, feeValue: fee });
             if (res.status === "OK") {
                 toast.success("Cập nhật giá trị tính phí thành công.");
                 const data = [...tableData];
@@ -56,6 +60,54 @@ export const RegionTable = (props) => {
                     }
                 });
                 setTableData(data);
+            } else {
+                toast.error(res.message ?? unknownErrorText);
+            }
+        } catch (err) {
+            toast.error(err.message ?? unknownErrorText);
+        }
+    };
+
+    const updateEstThuocSi = async () => {
+        try {
+            const { code, deliveryTime } = estThuocSi;
+            const feeClient = getFeeClient();
+            const res = await feeClient.updateRegionFee({ code, estThuocSi: deliveryTime });
+            if (res.status === "OK") {
+                // toast.success("Cập nhật giá trị tính phí thành công.");
+                // const data = [...tableData];
+                // data.find((v, i) => {
+                //     const found = v.code === code;
+                //     if (found) {
+                //         data[i].feeValue = fee;
+                //     }
+                // });
+                // setTableData(data);
+                window.location.reload()
+            } else {
+                toast.error(res.message ?? unknownErrorText);
+            }
+        } catch (err) {
+            toast.error(err.message ?? unknownErrorText);
+        }
+    };
+
+    const updateEstLogistic = async () => {
+        try {
+            const { code, deliveryTime } = estLogistic;
+            const feeClient = getFeeClient();
+            const res = await feeClient.updateRegionFee({ code, estLogistic: deliveryTime });
+            if (res.status === "OK") {
+                // toast.success("Cập nhật giá trị tính phí thành công.");
+                // const data = [...tableData];
+                // data.find((v, i) => {
+                //     const found = v.code === code;
+                //     if (found) {
+                //         data[i].feeValue = fee;
+                //     }
+                // });
+                // setTableData(data);
+                window.location.reload()
             } else {
                 toast.error(res.message ?? unknownErrorText);
             }
@@ -99,16 +151,16 @@ export const RegionTable = (props) => {
                                 code={row.code}
                                 initialDeliveryTime={row.estThuocSi}
                                 onUpdate={(values) => {
-                                    setCurrentEditValue(values);
-                                    setOpenModal(true);
+                                    setEstThuocSi(values);
+                                    setOpenModal1(true);
                                 }}
                             />
                             <TableDeliveryTimeValueCell
                                 code={row.code}
                                 initialDeliveryTime={row.estLogistic}
                                 onUpdate={(values) => {
-                                    setCurrentEditValue(values);
-                                    setOpenModal(true);
+                                    setEstLogistic(values);
+                                    setOpenModal2(true);
                                 }}
                             />
                             <TableCell align="center">{row.estThuocSi + row.estLogistic} ngày</TableCell>
@@ -139,6 +191,16 @@ export const RegionTable = (props) => {
                 open={openModal}
                 onClose={() => setOpenModal(false)}
                 onConfirm={() => updateFee()}
+            />
+            <ConfirmDialog
+                open={openModal1}
+                onClose={() => setOpenModal1(false)}
+                onConfirm={() => updateEstThuocSi()}
+            />
+            <ConfirmDialog
+                open={openModal2}
+                onClose={() => setOpenModal2(false)}
+                onConfirm={() => updateEstLogistic()}
             />
         </TableContainer>
     );

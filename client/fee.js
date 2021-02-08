@@ -136,13 +136,15 @@ class FeeClient extends APIClient {
         )
     }
 
-    updateRegionFee(code, fee) {
+    updateRegionFee({ code, feeValue, estThuocSi, estLogistic }) {
         return this.callFromClient(
             'PUT',
             `${PREFIX_MASTER}/region/fee`,
             {
                 code,
-                feeValue: fee,
+                feeValue,
+                estThuocSi,
+                estLogistic
             }
         )
     }
