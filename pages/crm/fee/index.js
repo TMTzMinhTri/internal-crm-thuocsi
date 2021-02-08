@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Button,
     ButtonGroup,
@@ -8,6 +8,7 @@ import {
     Paper,
     Table,
     TableBody,
+    Switch,
     TableCell,
     TableContainer,
     TableHead,
@@ -19,6 +20,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
 import AppCMS from "pages/_layout";
 import {
@@ -27,8 +29,10 @@ import {
 } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { ErrorCode, formatUrlSearch } from "components/global";
+import { actionErrorText, unknownErrorText } from "components/commonErrors";
 
 import styles from "./fee.module.css";
+import { ConfirmDialog } from "containers/crm/pricing/ConfirmDialog"
 import { feeLabels } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 
@@ -60,13 +64,45 @@ export async function getServerSideProps(ctx) {
     });
 }
 
-function render({data}) {
+function render({ data }) {
     const router = useRouter();
+    const { error, success } = useToast();
     const [searchText, setSearchText] = useState("");
+    const [openModal, setOpenModal] = useState(false)
+    const [currentEditValue, setCurrentEditValue] = useState()
 
     async function onSearch() {
         const q = formatUrlSearch(searchText);
         router.push(`?q=${q}`);
+    }
+
+    const updateFeeStatus = async () => {
+        try {
+            const { feeCode, isActive } = currentEditValue
+            if (isActive) {
+                const client = getFeeClient()
+                const res = await client.approveFee({ code: feeCode, status: "ACTIVE" })
+                if (res.status === 'OK') {
+                    data.data.filter(fee => fee.code === feeCode)[0].status = isActive ? "ACTIVE" : "INACTIVE"
+                    success("Kích hoạt phí thành công");
+                } else {
+                    error(res.message ?? actionErrorText);
+                }
+            }
+            else {
+                const client = getFeeClient()
+                const res = await client.lockFee({ code: feeCode, status: "INACTIVE" })
+                if (res.status === 'OK') {
+                    data.data.filter(fee => fee.code === feeCode)[0].status = isActive ? "ACTIVE" : "INACTIVE"
+                    success("Khóa phí thành công");
+                } else {
+                    error(res.message ?? actionErrorText);
+                }
+            }
+            setCurrentEditValue(null)
+        } catch (err) {
+            error(err ?? unknownErrorText)
+        }
     }
 
     return (
@@ -123,7 +159,8 @@ function render({data}) {
                         <col width="15%" />
                         <col width="20%" />
                         <col width="15%" />
-                        <col width="30%" />
+                        <col width="25%" />
+                        <col width="15%" />
                         <col width="10%" />
                     </colgroup>
                     <TableHead>
@@ -132,6 +169,7 @@ function render({data}) {
                             <TableCell align="left">Tên phí</TableCell>
                             <TableCell align="left">Loại công thức áp dụng</TableCell>
                             <TableCell align="left">Công thức tính</TableCell>
+                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -149,6 +187,16 @@ function render({data}) {
                                         <TableCell>{row.name}</TableCell>
                                         <TableCell>{feeLabels[row.type]}</TableCell>
                                         <TableCell>{row.formula}</TableCell>
+                                        <TableCell align="center">
+                                            <Switch
+                                                onChange={(event) => {
+                                                    setOpenModal(true)
+                                                    setCurrentEditValue({ feeCode: row.code, isActive: event.target.checked });
+                                                }}
+                                                checked={row.status === "ACTIVE" ? true : false}
+                                                color="primary"
+                                            />
+                                        </TableCell>
                                         <TableCell align="center">
                                             <Link href={`/crm/fee/edit?feeCode=${row.code}`}>
                                                 <a>
@@ -179,6 +227,11 @@ function render({data}) {
                     )}
                 </Table>
             </TableContainer>
+            <ConfirmDialog
+                open={openModal}
+                onClose={() => setOpenModal(false)}
+                onConfirm={() => updateFeeStatus()}
+            />
         </AppCMS>
     );
 }

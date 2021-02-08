@@ -212,6 +212,28 @@ class FeeClient extends APIClient {
             }
         )
     }
+
+    approveFee({ code, status }) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX}/fee/approve`,
+            {
+                code,
+                status
+            }
+        )
+    }
+
+    lockFee({ code, status }) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX}/fee/lock`,
+            {
+                code,
+                status
+            }
+        )
+    }
 }
 
 export function getFeeClient(ctx, data = { props: {} }) {
