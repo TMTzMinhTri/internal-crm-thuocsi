@@ -76,7 +76,14 @@ export const RegionTable = (props) => {
             const res = await feeClient.updateRegionFee({ code, estThuocSi: deliveryTime });
             if (res.status === "OK") {
                 toast.success("Cập nhật thời gian giao hàng thành công");
-                window.location.reload()
+                const data = [...tableData];
+                data.find((v, i) => {
+                    const found = v.code === code;
+                    if (found) {
+                        data[i].estThuocSi = deliveryTime;
+                    }
+                });
+                setTableData(data);
             } else {
                 toast.error(res.message ?? unknownErrorText);
             }
@@ -92,7 +99,14 @@ export const RegionTable = (props) => {
             const res = await feeClient.updateRegionFee({ code, estLogistic: deliveryTime });
             if (res.status === "OK") {
                 toast.success("Cập nhật thời gian giao hàng thành công");
-                window.location.reload()
+                const data = [...tableData];
+                data.find((v, i) => {
+                    const found = v.code === code;
+                    if (found) {
+                        data[i].estLogistic = deliveryTime;
+                    }
+                });
+                setTableData(data);
             } else {
                 toast.error(res.message ?? unknownErrorText);
             }
