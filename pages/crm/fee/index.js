@@ -32,7 +32,7 @@ import { ErrorCode, formatUrlSearch } from "components/global";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
 
 import styles from "./fee.module.css";
-import { ConfirmDialog } from "containers/crm/pricing/ConfirmDialog"
+import { ConfirmDialog } from "containers/crm/fee/ConfirmDialog"
 import { feeLabels } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 

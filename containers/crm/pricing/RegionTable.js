@@ -13,6 +13,7 @@ import { useRouter } from "next/router";
 
 import { ViewType } from "./enum";
 import { TableFeeValueCell } from "./TableFeeValueCell";
+import { ConfirmDeliveryTimeDialog } from "./ConfirmDeliveryTimeDialog";
 import { TableDeliveryTimeValueCell } from "./TableDeliveryTimeValueCell";
 import { getFeeClient } from "client/fee";
 import { unknownErrorText } from "components/commonErrors";
@@ -34,9 +35,9 @@ export const RegionTable = (props) => {
     const router = useRouter();
     const toast = useToast();
     const [tableData, setTableData] = useState(props.data);
-    const [openModal, setOpenModal] = useState(false);
-    const [openModal1, setOpenModal1] = useState(false);
-    const [openModal2, setOpenModal2] = useState(false);
+    const [openEstThuocSiModal, setOpenEstThuocSiModal] = useState(false);
+    const [openEstLogisticModal, setOpenEstLogisticModal] = useState(false);
+    const [openFeeModal, setOpenFeeModal] = useState(false);
     const [currentEditValue, setCurrentEditValue] = useState(null);
     const [estThuocSi, setEstThuocSi] = useState(null);
     const [estLogistic, setEstLogistic] = useState(null);
@@ -74,15 +75,7 @@ export const RegionTable = (props) => {
             const feeClient = getFeeClient();
             const res = await feeClient.updateRegionFee({ code, estThuocSi: deliveryTime });
             if (res.status === "OK") {
-                // toast.success("Cập nhật giá trị tính phí thành công.");
-                // const data = [...tableData];
-                // data.find((v, i) => {
-                //     const found = v.code === code;
-                //     if (found) {
-                //         data[i].feeValue = fee;
-                //     }
-                // });
-                // setTableData(data);
+                toast.success("Cập nhật thời gian giao hàng thành công");
                 window.location.reload()
             } else {
                 toast.error(res.message ?? unknownErrorText);
@@ -98,15 +91,7 @@ export const RegionTable = (props) => {
             const feeClient = getFeeClient();
             const res = await feeClient.updateRegionFee({ code, estLogistic: deliveryTime });
             if (res.status === "OK") {
-                // toast.success("Cập nhật giá trị tính phí thành công.");
-                // const data = [...tableData];
-                // data.find((v, i) => {
-                //     const found = v.code === code;
-                //     if (found) {
-                //         data[i].feeValue = fee;
-                //     }
-                // });
-                // setTableData(data);
+                toast.success("Cập nhật thời gian giao hàng thành công");
                 window.location.reload()
             } else {
                 toast.error(res.message ?? unknownErrorText);
@@ -152,7 +137,7 @@ export const RegionTable = (props) => {
                                 initialDeliveryTime={row.estThuocSi}
                                 onUpdate={(values) => {
                                     setEstThuocSi(values);
-                                    setOpenModal1(true);
+                                    setOpenEstThuocSiModal(true);
                                 }}
                             />
                             <TableDeliveryTimeValueCell
@@ -160,7 +145,7 @@ export const RegionTable = (props) => {
                                 initialDeliveryTime={row.estLogistic}
                                 onUpdate={(values) => {
                                     setEstLogistic(values);
-                                    setOpenModal2(true);
+                                    setOpenEstLogisticModal(true);
                                 }}
                             />
                             <TableCell align="center">{row.estThuocSi + row.estLogistic} ngày</TableCell>
@@ -169,7 +154,7 @@ export const RegionTable = (props) => {
                                 initialFee={row.feeValue}
                                 onUpdate={(values) => {
                                     setCurrentEditValue(values);
-                                    setOpenModal(true);
+                                    setOpenFeeModal(true);
                                 }}
                             />
                         </TableRow>
@@ -188,18 +173,18 @@ export const RegionTable = (props) => {
                 />
             </Table>
             <ConfirmDialog
-                open={openModal}
-                onClose={() => setOpenModal(false)}
+                open={openFeeModal}
+                onClose={() => setOpenFeeModal(false)}
                 onConfirm={() => updateFee()}
             />
-            <ConfirmDialog
-                open={openModal1}
-                onClose={() => setOpenModal1(false)}
+            <ConfirmDeliveryTimeDialog
+                open={openEstThuocSiModal}
+                onClose={() => setOpenEstThuocSiModal(false)}
                 onConfirm={() => updateEstThuocSi()}
             />
-            <ConfirmDialog
-                open={openModal2}
-                onClose={() => setOpenModal2(false)}
+            <ConfirmDeliveryTimeDialog
+                open={openEstLogisticModal}
+                onClose={() => setOpenEstLogisticModal(false)}
                 onConfirm={() => updateEstLogistic()}
             />
         </TableContainer>
