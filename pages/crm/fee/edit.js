@@ -8,7 +8,6 @@ import AppCMS from "pages/_layout";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
-import styles from "./fee.module.css";
 import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 
@@ -149,6 +148,7 @@ function render({ data: { data, status, message } }) {
                                     required
                                     fullWidth
                                     inputRef={register(feeValidation.name)}
+                                    onBlur={e => setValue('name', e.target.value?.trim?.())}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -170,7 +170,7 @@ function render({ data: { data, status, message } }) {
                                     defaultValue={data.type}
                                     onChange={e => setValue("type", e.target.value)}
                                 >
-                                    {feeTypeOptions.map(({ value, label }) => (<MenuItem value={value}>{label}</MenuItem>))}
+                                    {feeTypeOptions.map(({ value, label }, i) => (<MenuItem key={i} value={value}>{label}</MenuItem>))}
                                 </TextField>
                             </Grid>
                             <Grid item xs={12}>

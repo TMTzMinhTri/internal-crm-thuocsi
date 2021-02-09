@@ -26,6 +26,11 @@ export const feeValidation = {
             value: 50,
             message: "Tên phí dịch vụ tối đa 50 kí tự",
         },
+        pattern: {
+            value: /^(?!.*[ ]{2})/,
+            message: "Tên không hợp lệ."
+        },
+        
     },
     formula: {
         required: "Vui lòng nhập công thức",
