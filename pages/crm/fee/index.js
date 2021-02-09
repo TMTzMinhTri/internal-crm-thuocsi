@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
     Button,
     ButtonGroup,
@@ -36,12 +36,8 @@ import { ConfirmDialog } from "containers/crm/fee/ConfirmDialog"
 import { feeLabels } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 
-async function loadFeeData(ctx) {
-    const query = ctx.query;
-    const q = query.q ?? "";
-    const page = query.page || 0;
-    const limit = query.limit || 20;
-    const offset = page * limit;
+async function loadFeeData(ctx, offset, limit, q) {
+
     const feeClient = getFeeClient(ctx);
     const res = await feeClient.getFee(offset, limit, q);
     if (res.status !== 'OK') {
@@ -56,24 +52,33 @@ async function loadFeeData(ctx) {
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, async () => {
+        const query = ctx.query;
+        const q = query.q ?? "";
+        const page = +(query.page ?? 0);
+        const limit = +(query.limit ?? 20);
+        const offset = page * limit;
+
         return {
             props: {
-                data: await loadFeeData(ctx),
+                feeData: await loadFeeData(ctx, offset, limit, q),
+                page,
+                limit,
+                q,
             },
         };
     });
 }
 
-function render({ data }) {
+function render({ feeData, page, limit, q }) {
     const router = useRouter();
     const { error, success } = useToast();
-    const [searchText, setSearchText] = useState("");
-    const [openModal, setOpenModal] = useState(false)
-    const [currentEditValue, setCurrentEditValue] = useState()
+    const [searchText, setSearchText] = useState(q);
+    const [openModal, setOpenModal] = useState(false);
+    const [currentEditValue, setCurrentEditValue] = useState();
 
-    async function onSearch() {
+    async function searchFee() {
         const q = formatUrlSearch(searchText);
-        router.push(`?q=${q}`);
+        router.push(`?limit${limit}&q=${q}`);
     }
 
     const updateFeeStatus = async () => {
@@ -83,7 +88,7 @@ function render({ data }) {
                 const client = getFeeClient()
                 const res = await client.approveFee({ code: feeCode, status: "ACTIVE" })
                 if (res.status === 'OK') {
-                    data.data.filter(fee => fee.code === feeCode)[0].status = isActive ? "ACTIVE" : "INACTIVE"
+                    feeData.data.filter(fee => fee.code === feeCode)[0].status = isActive ? "ACTIVE" : "INACTIVE"
                     success("Kích hoạt phí thành công");
                 } else {
                     error(res.message ?? actionErrorText);
@@ -93,7 +98,7 @@ function render({ data }) {
                 const client = getFeeClient()
                 const res = await client.lockFee({ code: feeCode, status: "INACTIVE" })
                 if (res.status === 'OK') {
-                    data.data.filter(fee => fee.code === feeCode)[0].status = isActive ? "ACTIVE" : "INACTIVE"
+                    feeData.data.filter(fee => fee.code === feeCode)[0].status = isActive ? "ACTIVE" : "INACTIVE"
                     success("Khóa phí thành công");
                 } else {
                     error(res.message ?? actionErrorText);
@@ -102,6 +107,12 @@ function render({ data }) {
             setCurrentEditValue(null)
         } catch (err) {
             error(err ?? unknownErrorText)
+        }
+    }
+
+    const handleSearch = (e) => {
+        if (e.key === "Enter") {
+            searchFee();
         }
     }
 
@@ -126,13 +137,14 @@ function render({ data }) {
                                 className={styles.input}
                                 value={searchText}
                                 onChange={(e) => setSearchText(e.target.value)}
+                                onKeyPress={handleSearch}
                                 autoComplete="off"
                                 placeholder="Nhập tên hoặc mã phí dịch vụ"
                             />
                             <IconButton
                                 className={styles.iconButton}
                                 aria-label="search"
-                                onClick={onSearch}
+                                onClick={searchFee}
                             >
                                 <SearchIcon />
                             </IconButton>
@@ -173,7 +185,7 @@ function render({ data }) {
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {data.count <= 0 ? (
+                    {!feeData.count ? (
                         <TableRow>
                             <TableCell colSpan={5} align="left">
                                 {ErrorCode["NOT_FOUND_TABLE"]}
@@ -181,7 +193,7 @@ function render({ data }) {
                         </TableRow>
                     ) : (
                             <TableBody>
-                                {data.data.map((row, i) => (
+                                {feeData.data.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell>{row.code}</TableCell>
                                         <TableCell>{row.name}</TableCell>
@@ -212,10 +224,10 @@ function render({ data }) {
                                 ))}
                             </TableBody>
                         )}
-                    {data.count > 0 ?? (
+                    {!!feeData.count && (
                         <MyTablePagination
                             labelUnit="phí dịch vụ"
-                            count={data.count}
+                            count={feeData.count}
                             rowsPerPage={limit}
                             page={page}
                             onChangePage={(_, page, rowsPerPage) => {
