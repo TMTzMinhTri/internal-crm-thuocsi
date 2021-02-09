@@ -58,7 +58,7 @@ export const TableDeliveryTimeValueCell = ({
                         )
                     ),
                 }}
-                inputProps={{ min: 0, style: { textAlign: 'right' } }}
+                inputProps={{ step: 0.5, min: 0, style: { textAlign: 'right' } }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 onChange={e => setDeliveryTime(+e.target.value)}
