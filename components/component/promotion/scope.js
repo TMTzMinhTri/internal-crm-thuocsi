@@ -1,43 +1,44 @@
-import { Button, Grid, Paper, TextField } from "@material-ui/core";
-import { Add } from "@material-ui/icons";
+import {
+  Checkbox,
+  FormControlLabel,
+  Grid,
+  Paper,
+  TextField,
+} from "@material-ui/core";
 
 import React from "react";
-import { scopes } from "../constant";
-import { displayLabelBasedOnScope } from "../until";
+import { Fragment } from "react";
+import { defaultScope } from "../constant";
+import { displayLabelBasedOnScope, displayNameBasedOnScope } from "../until";
 import AutoCompleteField from "./autocomplete-field";
-import SelectField from "./select-field";
 
 const Scope = (props) => {
-  const { scopeObject, register, errors } = props;
+  const { scopeObject, register, errors, getValues, control } = props;
 
-  const {
-    handleChangeScopeField,
-    handleChangeScopeList,
-    handleAddScopeSelect,
-  } = props;
+  const { handleChangeScopeList } = props;
+
+  console.log(scopeObject, "scopeObject");
 
   return (
-    <>
-      {scopeObject.map(
-        ({ registeredBefore, registeredAfter, selectField, list }, index) => (
-          <Paper variant="outlined" style={{ padding: 10, margin: "10px 0" }}>
-            <Grid container spacing={2} direction="column">
-              <Grid item container xs={6}>
-                <SelectField
-                  handleChange={handleChangeScopeField(index, "selectField")}
-                  options={scopes}
-                  value={selectField}
-                  title="Loại chương trình"
-                  option="scope"
-                />
-              </Grid>
-              {selectField != "" && (
-                <>
+    <Paper
+      elevation={3}
+      style={{ padding: "0 30px 20px 30px", margin: "20px 0" }}
+    >
+      <Grid container direction="column">
+        <Grid item container>
+          <h4>PHẠM VI ÁP DỤNG</h4>
+        </Grid>
+        <Grid item container xs={12} spacing={2} alignItems="flex-end">
+          {scopeObject.map(
+            ({ registeredBefore, registeredAfter, selectField, list }, index) =>
+              selectField != "" && (
+                <Fragment key={index}>
                   <Grid item container xs={6}>
                     <AutoCompleteField
-                      label={`Danh sách ${displayLabelBasedOnScope(
-                        selectField
-                      )}`}
+                      control={control}
+                      name={displayNameBasedOnScope(selectField)}
+                      label={displayLabelBasedOnScope(selectField)}
+                      required={false}
                       placeholder=""
                       defaultValue={list}
                       options={[{ name: "" }]}
@@ -45,13 +46,13 @@ const Scope = (props) => {
                       handleChange={handleChangeScopeList(index)}
                     />
                   </Grid>
-                  {selectField == "CUSTOMER" && (
-                    <Grid item container spacing={2}>
-                      <Grid item container xs={6}>
+                  {selectField == defaultScope.customerLevel && (
+                    <>
+                      <Grid item container xs={3}>
                         <TextField
-                          id={"registeredBefore" + index}
-                          name={"registeredBefore" + index}
-                          label="Đăng kí trước ngày"
+                          id={"registeredBefore"}
+                          name={"registeredBefore"}
+                          label="Được kích hoạt từ ngày"
                           placeholder=""
                           defaultValue={registeredBefore}
                           helperText={errors.registeredBefore?.message}
@@ -66,11 +67,11 @@ const Scope = (props) => {
                           })}
                         />
                       </Grid>
-                      <Grid item container xs={6}>
+                      <Grid item container xs={3}>
                         <TextField
-                          id={"registeredAfter" + index}
-                          name={"registeredAfter" + index}
-                          label="Đăng kí sau ngày"
+                          id={"registeredAfter"}
+                          name={"registeredAfter"}
+                          label="Được kích hoạt đến ngày"
                           placeholder=""
                           defaultValue={registeredAfter}
                           helperText={errors.registeredAfter?.message}
@@ -82,26 +83,22 @@ const Scope = (props) => {
                           error={!!errors.registeredAfter}
                           inputRef={register({
                             required: "Vui lòng chọn thời gian",
+                            min: {
+                              value: getValues("registeredBefore"),
+                              message:
+                                "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+                            },
                           })}
                         />
                       </Grid>
-                    </Grid>
+                    </>
                   )}
-                </>
-              )}
-            </Grid>
-          </Paper>
-        )
-      )}
-      <Grid>
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<Add />}
-          onClick={handleAddScopeSelect}
-        ></Button>
+                </Fragment>
+              )
+          )}
+        </Grid>
       </Grid>
-    </>
+    </Paper>
   );
 };
 

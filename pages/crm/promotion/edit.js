@@ -207,7 +207,6 @@ function render(props) {
       startTime: formatUTCTime(startTime),
       endTime: formatUTCTime(endTime),
     },
-    mode: "onChange",
   });
 
   const [listDataForAutoComplete, setListDataForAutoComplete] = useState({
@@ -330,6 +329,11 @@ function render(props) {
     setScopeObject([...scopeObject]);
   };
 
+  const handleRemoveScopeSelect = (index) => {
+    scopeObject.splice(index, 1);
+    setScopeObject([...scopeObject]);
+  };
+
   const handleChangeScopeField = (index, key) => (event) => {
     scopeObject[index][key] = event.target.value;
     setScopeObject([...scopeObject]);
@@ -377,7 +381,7 @@ function render(props) {
           typeVariable = "categoryCodes";
           listRes = await getListCategoryByCodesClient(o[typeVariable]);
           break;
-        case defaultScope.customer:
+        case defaultScope.customerLevel:
           typeVariable = "customerLevels";
           arrAll = await getListLevelClient();
           o.customerLevels.map((code) =>
@@ -428,7 +432,7 @@ function render(props) {
             products: o.list.map((product) => product.productID),
           });
           break;
-        case defaultScope.customer:
+        case defaultScope.customerLevel:
           objects.push({
             registeredBefore: new Date(o.registeredBefore).toISOString(),
             registeredAfter: new Date(o.registeredAfter).toISOString(),
@@ -531,6 +535,8 @@ function render(props) {
       objects: objects,
     };
 
+    console.log(JSON.stringify(body));
+
     let res = await updatePromontion(body);
 
     if (res.status == "OK") {
@@ -550,7 +556,7 @@ function render(props) {
       setValue("promotionName", promotionRes.promotionName);
       objects.map((o, index) => {
         scopeObject[index].selectField = o.scope;
-        if (o.scope == defaultScope.customer) {
+        if (o.scope == defaultScope.customerLevel) {
           scopeObject[index].registeredBefore = o.registeredBefore;
           scopeObject[index].registeredAfter = o.registeredAfter;
           scopeObject[index].list = customerLevels;
@@ -651,6 +657,7 @@ function render(props) {
               setValue={setValue}
               object={{ scopeObject, conditionObject, rewardObject }}
               textField={textField}
+              handleRemoveScopeSelect={handleRemoveScopeSelect}
               handleChangeProductListOfCondition={
                 handleChangeProductListOfCondition
               }

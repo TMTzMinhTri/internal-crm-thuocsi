@@ -90,17 +90,15 @@ export const defaultConditionInfo = {
 };
 
 export const defaultScope = {
-  customer: "CUSTOMER",
-  product: "PRODUCT",
-  productCatergory: "PRODUCT_CATEGORY",
-  producer: "PRODUCER",
-  ingredient: "INGREDIENT",
+  customerLevel: "CUSTOMER_LEVEL",
   area: "AREA",
-  productTag: "PRODUCT_TAG",
 };
 
 export const defaultCondition = {
-  orderValue: "ORDER_VALUE",
+  productCatergory: "PRODUCT_CATEGORY",
+  producer: "PRODUCER",
+  ingredient: "INGREDIENT",
+  productTag: "PRODUCT_TAG",
   product: "PRODUCT",
 };
 
@@ -123,8 +121,23 @@ export const scopes = [
     label: "Chọn loại phạm vi",
   },
   {
-    value: "CUSTOMER",
-    label: "Theo khách hàng",
+    value: "PRODUCT",
+    label: "Theo sản phẩm",
+  },
+  {
+    value: "AREA",
+    label: "Theo khu vực",
+  },
+];
+
+export const conditions = [
+  {
+    value: "",
+    label: "Chọn loại điều kiện",
+  },
+  {
+    value: "PRODUCT_TAG",
+    label: "Theo tag sản phẩm",
   },
   {
     value: "PRODUCT",
@@ -135,40 +148,12 @@ export const scopes = [
     label: "Theo danh mục sản phẩm",
   },
   {
-    value: "PRODUCER",
-    label: "Theo nhà sản xuất",
-  },
-  {
     value: "INGREDIENT",
     label: "Theo hoạt chất",
   },
   {
-    value: "AREA",
-    label: "Theo khu vực",
-  },
-  {
-    value: "PRODUCT_TAG",
-    label: "Theo tag sản phẩm",
-  },
-];
-
-export const conditions = [
-  {
-    value: "",
-    label: "Chọn loại điều kiện",
-  },
-
-  {
-    value: "ORDER_VALUE",
-    label: "Theo giá trị đơn hàng",
-  },
-  {
-    value: "PRODUCT",
-    label: "Theo sản phẩm",
-  },
-  {
-    value: "NO_RULE",
-    label: "Không có điều kiện",
+    value: "PRODUCER",
+    label: "Theo nhà sản xuất",
   },
 ];
 

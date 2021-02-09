@@ -4,7 +4,7 @@ import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagin
 import { useRouter } from "next/router";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
-import { ViewType } from ".";
+import { ViewType } from "./enum";
 import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -60,7 +60,7 @@ export const TagTable = (props) => {
 
     return (
         <TableContainer>
-            <Table>
+            <Table  size="small">
                 <colgroup>
                     <col width="16%"></col>
                     <col width="16%"></col>
@@ -99,7 +99,7 @@ export const TagTable = (props) => {
                     ))}
                 </TableBody>
                 <MyTablePagination
-                    labelUnit="phường/xã"
+                    labelUnit="tag"
                     count={props.total}
                     rowsPerPage={props.limit}
                     page={props.page}
