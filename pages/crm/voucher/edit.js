@@ -68,13 +68,19 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props,render)
 }
 
-export async function updateVoucher(voucherId,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
+export async function updateVoucher(voucherId,promotionId,startTime,endTime,publicTime,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
     let data = {voucherId,promotionId,type,maxUsage,maxUsagePerCustomer}
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers=appliedCustomers
     }
-    if (expiredDate) {
-        data.expiredDate = new Date(expiredDate).toISOString()
+    if (startTime) {
+        data.startTime = new Date(startTime).toISOString()
+    }
+    if (endTime) {
+        data.endTime = new Date(endTime).toISOString()
+    }
+    if (publicTime) {
+        data.publicTime = new Date(publicTime).toISOString()
     }
     return getVoucherClient().updateVoucher(data)
 }
@@ -118,15 +124,15 @@ function render(props) {
 
     const onSubmit = async () => {
         let value = getValues()
-        let {code,expiredDate,maxUsage,maxUsagePerCustomer,promotionId} = value
+        let {code,maxUsage,maxUsagePerCustomer,promotionId,startTime,endTime,publicTime} = value
         let {type,customerIds} = dataProps
-        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
+        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Cập nhật mã khuyến mãi thành công')
         }else {
             return toast.error(createVoucherResponse.message)
         }
-        await router.push('/crm/promotion?type=VOUCHERCODE')
+        await router.push('/crm/voucher')
     }
 
     const handleSetShowAutoComplete = (value) => {
@@ -168,6 +174,7 @@ function render(props) {
                         dataProps={dataProps}
                         edit={true}
                         showPromotionPublic={true}
+                        listCustomerDefault={props.listCustomerDefault || []}
                         appliedCustomers={props.customers}
                         onChangeCustomer={handleChangeCustomer}
                         onChangePromotion={handleChangePromotion}

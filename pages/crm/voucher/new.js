@@ -70,7 +70,6 @@ export async function createVoucherCode(code,promotionId,startTime,endTime,publi
     if (publicTime) {
         data.publicTime = new Date(publicTime).toISOString()
     }
-    console.log('data',data)
     return getVoucherClient().createVoucher(data)
 }
 

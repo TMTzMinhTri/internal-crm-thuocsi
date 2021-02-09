@@ -100,7 +100,7 @@ export function formatNumber(num) {
 }
 
 async function updatePromotion(promotionId, status) {
-    return getPromoClient().updatePromotion({promotionId, status});
+    return getPromoClient().updateStatusPromotion({promotionId, status});
 }
 
 function render(props) {

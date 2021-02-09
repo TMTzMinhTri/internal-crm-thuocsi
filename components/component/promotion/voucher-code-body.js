@@ -91,13 +91,11 @@ export default function VoucherCodeBody(props) {
         if (!showPromotionPublic) {
             setPromotionPublic({})
         }
-        console.log(promotion)
         if (promotion.length > 0) {
             promotion[0].scopes.forEach(obj => {
                 switch (obj.scope){
                     case defaultPromotionScope.CUSTOMER:
                         let level =  getCustomerByCodes(obj.customerLevels);
-                        console.log('level',level)
                         if (level && level.status === "OK") {
                             setListRegions(level.data)
                         }else {
@@ -106,7 +104,6 @@ export default function VoucherCodeBody(props) {
                         break;
                     case defaultPromotionScope.AREA:
                         let region =  getRegionByCodes(obj.areaCodes)
-                        console.log('region',region)
                         if (region && region.status === "OK") {
                             setListCustomerPromotion(region.data)
                         }else {
@@ -119,7 +116,6 @@ export default function VoucherCodeBody(props) {
 
 
     const handleSearchPromotion = async (value) => {
-        console.log('1234',value)
         let listPromationResponse = await searchPromotion(value)
         if (listPromationResponse && listPromationResponse.status === "OK") {
             setListPromotionSearch(listPromationResponse.data)
@@ -128,7 +124,9 @@ export default function VoucherCodeBody(props) {
             })
         }else {
             setListPromotionSearch(listPromotionDefault)
-            return listPromotionDefault
+            return listPromotionDefault.map((item) => {
+                return {label: item.promotionName, value: item.promotionId}
+            })
         }
     }
 
@@ -156,32 +154,27 @@ export default function VoucherCodeBody(props) {
                 }
             })
         }
-        console.log('pro',promotion)
         if (promotion && promotion.scopes?.length > 0) {
-            console.log('1234',promotion.scopes)
             promotion.scopes.forEach(obj => {
-                switch (obj.scope){
+                switch (obj.type){
                     case defaultPromotionScope.CUSTOMER:
                         let level =  getCustomerByCodes(obj.customerLevelCodes);
-                        console.log('level',level)
                         if (level && level.status === "OK") {
-                            setListRegions(level.data)
+                            setListCustomerPromotion(level.data)
                         }else {
-                            setListRegions([])
+                            setListCustomerPromotion([])
                         }
                         break;
                     case defaultPromotionScope.AREA:
                         let region =  getRegionByCodes(obj.areaCodes)
-                        console.log('region',region)
                         if (region && region.status === "OK") {
-                            setListCustomerPromotion(region.data)
+                            setListRegions(region.data)
                         }else {
-                            setListCustomerPromotion([])
+                            setListRegions([])
                         }
                 }
             })
         }
-
         return setPromotionPublic(promotion)
     }
 

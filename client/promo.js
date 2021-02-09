@@ -22,6 +22,13 @@ class PromoClient extends APIClient{
         )
     }
 
+    updateStatusPromotion(data) {
+        return this.callFromClient(
+            "PUT",
+            `${constURL.PREFIX_PROMOTION}/promotion/status`,data
+        )
+    }
+
     getPromotionByID(promotionId) {
         return this.callFromNextJS(
             "GET",
