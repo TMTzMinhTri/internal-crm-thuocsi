@@ -204,7 +204,7 @@ export default function renderForm(props, toast) {
     return (
         <AppCRM select="/crm/seller">
             <Head>
-                <title>{props.isUpdate ? 'Cập nhật bán hàng' : 'Thêm nhà bán hàng'}</title>
+                <title>{props.isUpdate ? 'Cập nhật nhà bán hàng' : 'Thêm nhà bán hàng'}</title>
             </Head>
             {
                 props.isUpdate && typeof props.seller === 'undefined' ? (
@@ -247,8 +247,6 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             inputProps={{
-                                                                readOnly: props.isUpdate ? true : false,
-                                                                disabled: props.isUpdate ? true : false,
                                                                 form: {
                                                                     autocomplete: 'off',
                                                                 },
@@ -266,8 +264,8 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Tên nhà bán hàng không thể để trống",
                                                                     maxLength: {
-                                                                        value: 250,
-                                                                        message: "Tên nhà bán hàng có độ dài tối đa 250 kí tự"
+                                                                        value: 50,
+                                                                        message: "Tên nhà bán hàng có độ dài tối đa 50 kí tự"
                                                                     },
                                                                     minLength: {
                                                                         value: 6,
@@ -289,8 +287,6 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             inputProps={{
-                                                                readOnly: props.isUpdate ? true : false,
-                                                                disabled: props.isUpdate ? true : false,
                                                                 form: {
                                                                     autocomplete: 'off',
                                                                 },
@@ -325,8 +321,6 @@ export default function renderForm(props, toast) {
                                                             variant="outlined"
                                                             size="small"
                                                             inputProps={{
-                                                                readOnly: props.isUpdate ? true : false,
-                                                                disabled: props.isUpdate ? true : false,
                                                                 form: {
                                                                     autocomplete: 'off',
                                                                 },
@@ -343,12 +337,8 @@ export default function renderForm(props, toast) {
                                                             inputRef={
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
-                                                                    maxLength: {
-                                                                        value: 12,
-                                                                        message: "Số điện thoại không hợp lệ"
-                                                                    },
                                                                     pattern: {
-                                                                        value: /[0-9]{9,12}/,
+                                                                        value: /^[0-9]{9,12}$/,
                                                                         message: "Số điện thoại không hợp lệ"
                                                                     },
                                                                 })
@@ -366,8 +356,6 @@ export default function renderForm(props, toast) {
                                                             label="Địa chỉ"
                                                             placeholder=""
                                                             inputProps={{
-                                                                readOnly: props.isUpdate ? true : false,
-                                                                disabled: props.isUpdate ? true : false,
                                                                 form: {
                                                                     autocomplete: 'off',
                                                                 },
@@ -399,7 +387,6 @@ export default function renderForm(props, toast) {
                                                             required={true}
                                                             label="Tỉnh/Thành phố"
                                                             control={control}
-                                                            disabled={props.isUpdate ? true : false}
                                                             errors={errors}
                                                             message={'Vui lòng chọn tỉnh thành'}
                                                         />
@@ -411,30 +398,23 @@ export default function renderForm(props, toast) {
                                                             getOptionLabel={(option) => option.name}
                                                             value={district}
                                                             onChange={onDistrictChange}
-                                                            disabled={props.isUpdate ? true : false}
                                                             renderInput={(params) =>
                                                                 <TextField
                                                                     id="districtCode"
                                                                     name="districtCode"
                                                                     variant="outlined"
                                                                     inputProps={{
-                                                                        readOnly: props.isUpdate ? true : false,
-                                                                        disabled: props.isUpdate ? true : false,
                                                                         form: {
                                                                             autocomplete: 'off',
                                                                         },
                                                                     }}
                                                                     label="Quận/Huyện"
-                                                                    // helperText={errors.districtCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{ width: '100%' }}
-                                                                    // error={!!errors.districtCode}
-                                                                    // required
                                                                     inputRef={
                                                                         register({
-                                                                            // required: "Quận/huyện thể để trống",
                                                                         })
                                                                     }
                                                                     {...params} />}
@@ -446,7 +426,6 @@ export default function renderForm(props, toast) {
                                                             options={wards}
                                                             name={"ward"}
                                                             value={ward}
-                                                            disabled={isDisabledWard ? true : props.isUpdate ? true : false}
                                                             onChange={onWardChange}
                                                             getOptionLabel={(option) => option.name}
                                                             renderInput={(params) =>
@@ -456,23 +435,16 @@ export default function renderForm(props, toast) {
                                                                     variant="outlined"
                                                                     label="Phường/Xã"
                                                                     inputProps={{
-                                                                        readOnly: props.isUpdate ? true : false,
-                                                                        disabled: props.isUpdate ? true : false,
                                                                         form: {
                                                                             autocomplete: 'off',
                                                                         },
                                                                     }}
-                                                                    // helperText={errors.wardCode?.message}
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
                                                                     style={{ width: '100%' }}
-                                                                    // error={!!errors.wardCode}
-                                                                    // required
                                                                     inputRef={
-                                                                        register({
-                                                                            // required: "Phường xã không thể để trống",
-                                                                        })
+                                                                        register()
                                                                     }
                                                                     {...params} />}
                                                         />
@@ -497,7 +469,7 @@ export default function renderForm(props, toast) {
                                                                 rules={{ required: true }}
                                                                 error={!!errors.status}
                                                                 as={
-                                                                    <Select label="Trạng thái" disabled={props.isUpdate ? true : false}>
+                                                                    <Select label="Trạng thái">
                                                                         {statuses.map(({ value, label }) => (
                                                                             <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                         ))}
@@ -581,7 +553,6 @@ export default function renderForm(props, toast) {
                                                 variant="contained"
                                                 color="primary"
                                                 onClick={handleSubmit(onSubmit)}
-                                                disabled={props.isUpdate ? true : loading === true ? true : false}
                                                 style={{ margin: 8 }}>
                                                 {loading && <CircularProgress size={20} />}
                                                 Lưu
