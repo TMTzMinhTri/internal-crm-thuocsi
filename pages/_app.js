@@ -1,4 +1,4 @@
-import { faDollarSign, faMoneyBill, faMoneyCheckAlt, faPercentage, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faDollarSign, faPercentage, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { Backdrop, CircularProgress, createMuiTheme, ThemeProvider } from '@material-ui/core';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
 import Loader from '@thuocsi/nextjs-components/loader/loader';
@@ -20,15 +20,21 @@ const menu = [{
         },
         {
             key: "FEE",
-            name: "Phí dịch vụ",
+            name: "Cài đặt phí",
             link: "/crm/fee",
-            icon: faDollarSign
-        },
-        {
-            key: "CONFIGPRICING",
-            name: "Bảng giá",
-            link: "/crm/pricing",
-            icon: faMoneyCheckAlt
+            icon: faDollarSign,
+            subMenu: [
+                {   
+                    key: "FEE",
+                    name: "Công thức phí",
+                    link: "/crm/fee",
+                },
+                {
+                    key: "CONFIGPRICING",
+                    name: "Hệ số phí",
+                    link: "/crm/pricing",
+                },
+            ]
         },
         {
             key:"SELLER",
@@ -46,13 +52,19 @@ const menu = [{
             key: "DISCOUNT",
             name: "Khuyến mãi",
             link: "/crm/promotion",
-            icon: faPercentage
-        },
-        {
-            key: "VOUCHER",
-            name: "Mã khuyến mãi",
-            link: "/crm/voucher",
-            icon: faMoneyBill
+            icon: faPercentage,
+            subMenu: [
+                {
+                    key: "DISCOUNT",
+                    name: "Chương trình khuyến mãi",
+                    link: "/crm/promotion"
+                },
+                {
+                    key: "VOUCHER",
+                    name: "Mã khuyến mãi",
+                    link: "/crm/voucher"
+                }
+            ]
         }]
 
 export var theme = createMuiTheme({
