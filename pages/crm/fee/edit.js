@@ -112,12 +112,12 @@ function render({ data: { data, status, message } }) {
                 <title>Phí dịch vụ và giá bán</title>
             </Head>
             <Box component={Paper} display="block">
-                <Box className={styles.contentPadding}>
+                <Box padding={2} pb={0}>
                     <Typography variant="h5">Phí dịch vụ</Typography>
                 </Box>
-                <Box padding={3} pt={0}>
+                <Box margin={3}>
                     <form noValidate>
-                        <Grid container spacing={6} md={6}>
+                        <Grid container spacing={4} md={6}>
                             <Grid item xs={12}>
                                 <TextField
                                     id="code"
@@ -193,19 +193,18 @@ function render({ data: { data, status, message } }) {
                                     onBlur={e => setValue('formula', e.target.value?.trim?.())}
                                 />
                             </Grid>
+                            <Grid item xs={12}>
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    disabled={loading}
+                                    onClick={handleSubmit(onSubmit)}
+                                >
+                                    {loading && <CircularProgress size={20} />}
+                                Lưu
+                            </Button>
+                            </Grid>
                         </Grid>
-                        <Box>
-                            <Button
-                                variant="contained"
-                                color="primary"
-                                style={{ margin: 8 }}
-                                disabled={loading}
-                                onClick={handleSubmit(onSubmit)}
-                            >
-                                {loading && <CircularProgress size={20} />}
-                            Lưu
-                        </Button>
-                        </Box>
                     </form>
                 </Box>
             </Box>

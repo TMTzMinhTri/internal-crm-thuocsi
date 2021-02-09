@@ -54,9 +54,7 @@ export const TableFeeValueCell = ({
                         )
                     ),
                 }}
-                inputProps={{
-                    min: 0
-                }}
+                inputProps={{ min: 0, style: { textAlign: 'right' } }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 onChange={e => setFee(+e.target.value)}

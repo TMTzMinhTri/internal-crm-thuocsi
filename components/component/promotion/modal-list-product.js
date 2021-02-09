@@ -26,7 +26,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import HighlightOffOutlinedIcon from "@material-ui/icons/HighlightOffOutlined";
 import { getProductClient } from "client/product";
 import { defaultPromotionScope } from "../constant";
-import { limitText } from "../until";
+import { limitText } from "../util";
 import Image from "next/image";
 
 const useStyles = makeStyles((theme) => ({

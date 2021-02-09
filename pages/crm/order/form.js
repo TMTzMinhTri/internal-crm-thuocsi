@@ -226,8 +226,11 @@ export default function renderForm(props, toast) {
 
     const changeQuantityHandler = async () => {
         const { orderNo, orderItemNo, quantity } = currentEditValue
-        let idxChangedItem = orderItem?.map((item, idx) => {
-            if (item.orderItemNo == orderItemNo) return idx
+        let idxChangedItem
+        orderItem?.map((item, idx) => {
+            if (item.orderItemNo == orderItemNo) {
+                idxChangedItem = idx
+            }
         })
 
         let tmpOrderItem = orderItem.map((item, idx) => {
@@ -240,7 +243,6 @@ export default function renderForm(props, toast) {
         props.order.totalPrice = props.order.totalPrice - orderItem[idxChangedItem].totalPrice + tmpOrderItem[idxChangedItem].totalPrice
         setOrderItem(tmpOrderItem)
         await updateOrderItem(tmpOrderItem, idxChangedItem)
-
     }
 
     const ConfirmDeleteOrderItemDialog = () => {

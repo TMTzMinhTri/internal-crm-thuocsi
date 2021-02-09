@@ -14,7 +14,7 @@ export const TableQuantityValueCell = ({ orderNo, orderItemNo, initialQuantity, 
                 size="small"
                 id="quantity"
                 type="number"
-                disabled
+                // disabled
                 placeholder="..."
                 variant="outlined"
                 fullWidth
