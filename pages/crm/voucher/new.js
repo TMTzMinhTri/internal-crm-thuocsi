@@ -10,7 +10,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
 import VoucherCodeBody from "../../../components/component/promotion/voucher-code-body";
 import {getVoucherClient} from "../../../client/voucher";
-import {defaultPromotionType} from "../../../components/component/constant";
+import {getCustomerClient} from "../../../client/customer";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -25,23 +25,51 @@ const useStyles = makeStyles(theme => ({
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
-        return {props : {}}
+        return loadDataPromotion(ctx)
     })
+}
+
+export async function loadDataPromotion(ctx) {
+    let returnObject = {props : {}}
+    let promtoionId = ctx.query.promotionId
+
+    let listCustomerDefaultReponse = await getCustomerClient(ctx,{}).getCustomer(0,5,"")
+    if (listCustomerDefaultReponse && listCustomerDefaultReponse.status === "OK") {
+        returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data
+    }
+
+    let promotionDefaultResponse =  await getPromoClient(ctx,{}).getPromotion('',5,0,false)
+    if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
+        returnObject.props.listPromotionDefault = promotionDefaultResponse.data
+    }
+
+    if (promtoionId) {
+        let promotionResponse =  await getPromoClient(ctx,{}).getPromotionByID(promtoionId)
+        if (promotionResponse && promotionResponse.status === "OK") {
+            returnObject.props.promotion = promotionResponse.data
+        }
+    }
+    return returnObject
 }
 
 export default function NewPage(props) {
     return renderWithLoggedInUser(props,render)
 }
 
-export async function createVoucherCode(code,promotionId,expiredDate,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
+export async function createVoucherCode(code,promotionId,startTime,endTime,publicTime,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
     let data = {code,promotionId,type,maxUsage,maxUsagePerCustomer}
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers=appliedCustomers
     }
-    if (expiredDate) {
-        data.expiredDate = new Date(expiredDate).toISOString()
+    if (startTime) {
+        data.startTime = new Date(startTime).toISOString()
     }
-    console.log('data',data)
+    if (endTime) {
+        data.endTime = new Date(endTime).toISOString()
+    }
+    if (publicTime) {
+        data.publicTime = new Date(publicTime).toISOString()
+    }
     return getVoucherClient().createVoucher(data)
 }
 
@@ -49,7 +77,9 @@ function render(props) {
     const classes = useStyles()
     const toast = useToast();
     const router = useRouter();
-    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm();
+    const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm(
+        {defaultValues : {promotionId: !!router.query.promotionId ? props.promotion?.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0] : {}},mode: "onChange"}
+    );
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
     const [dataProps, setDataprops] = useState({
@@ -59,12 +89,12 @@ function render(props) {
 
     const onSubmit = async () => {
         let value = getValues()
-        let {code,expiredDate,maxUsage,maxUsagePerCustomer,promotionId} = value
+        let {code,maxUsage,maxUsagePerCustomer,promotionId,startTime,endTime,publicTime} = value
         let {type,customerIds} = dataProps
-        let createVoucherResponse = await createVoucherCode(code,parseInt(promotionId.value),expiredDate,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
+        let createVoucherResponse = await createVoucherCode(code,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Tạo mã khuyến mãi thành công')
-            router.push(`/crm/promotion?type=${defaultPromotionType.VOUCHER_CODE}`)
+            router.push(`/crm/voucher`)
         }else {
             toast.error(createVoucherResponse.message)
         }
@@ -90,19 +120,22 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/promotion">
+        <AppCRM select="/crm/voucher">
             <div>
                 <title>Tạo mã khuyến mãi</title>
             </div>
             <MyCard>
                 <MyCardHeader title="THÊM MỚI MÃ KHUYẾN MÃI"/>
-                <MyCardContent style={{margin: "0 2rem"}}>
+                <MyCardContent style={{margin: "0 3rem 3rem 3rem"}}>
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
-                        promotion={[]}
+                        listPromotionDefault={props.listPromotionDefault || []}
                         onChangeCustomer={handleChangeCustomer}
+                        showPromotionPublic={!!router.query.promotionId}
+                        promotion={props.promotion || []}
                         dataProps={dataProps}
+                        listCustomerDefault={props.listCustomerDefault || []}
                         handleChangeType={handleChangeType}
                         register={register}
                     />

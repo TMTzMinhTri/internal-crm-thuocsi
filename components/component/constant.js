@@ -27,6 +27,8 @@ export const defaultPromotionScope = {
   CATEGORY: "CATEGORY",
   PRODUCT: "PRODUCT",
   SKU: "SKU",
+  AREA: "AREA",
+  CUSTOMER: "CUSTOMER_LEVEL"
 };
 
 export const defaultPromotionStatus = {
