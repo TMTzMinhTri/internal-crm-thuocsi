@@ -17,18 +17,18 @@ import React, { useEffect, useState } from "react";
  * @param {Function} props.onUpdate
  * @param {TextFieldProps} props.TextFieldProps
  */
-export const TableFeeValueCell = ({
+export const TableDeliveryTimeValueCell = ({
     code,
-    initialFee,
+    initialDeliveryTime,
     onUpdate,
     TextFieldProps,
     ...others
 }) => {
-    const [fee, setFee] = useState(initialFee);
+    const [deliveryTime, setDeliveryTime] = useState(initialDeliveryTime);
     const [focused, setFocused] = useState(false);
     useEffect(() => {
-        setFee(initialFee);
-    }, [initialFee]);
+        setDeliveryTime(initialDeliveryTime);
+    }, [initialDeliveryTime]);
     return (
         <TableCell {...others}>
             <TextField
@@ -39,26 +39,30 @@ export const TableFeeValueCell = ({
                 fullWidth
                 InputProps={{
                     endAdornment: (
-                        (focused || fee != initialFee) && (
-                            < IconButton
-                                size="small"
-                                color="primary"
-                                disabled={fee == initialFee}
-                                onClick={() => {
-                                    onUpdate?.({ code, fee });
-                                    setFocused(false);
-                                }}
-                            >
-                                <Done />
-                            </IconButton>
+                        // (focused || deliveryTime != initialDeliveryTime) &&
+                        (
+                            <>
+                                <div>ngày</div>
+                                < IconButton
+                                    size="small"
+                                    color="primary"
+                                    disabled={deliveryTime == initialDeliveryTime}
+                                    onClick={() => {
+                                        onUpdate?.({ code, deliveryTime });
+                                        setFocused(false);
+                                    }}
+                                >
+                                    <Done />
+                                </IconButton>
+                            </>
                         )
                     ),
                 }}
                 inputProps={{ min: 0, style: { textAlign: 'right' } }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                onChange={e => setFee(+e.target.value)}
-                value={fee}
+                onChange={e => setDeliveryTime(+e.target.value)}
+                value={deliveryTime}
                 {...TextFieldProps}
             />
         </TableCell>
