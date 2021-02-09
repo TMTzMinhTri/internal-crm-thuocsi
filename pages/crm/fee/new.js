@@ -1,13 +1,24 @@
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
-import { Box, Button, CircularProgress, Grid, MenuItem, Paper, TextField, Typography } from "@material-ui/core";
+import {
+    Box,
+    Button,
+    CircularProgress,
+    Grid,
+    MenuItem,
+    Paper,
+    TextField,
+    Typography,
+} from "@material-ui/core";
 import { useForm } from "react-hook-form";
 
 import AppCMS from "pages/_layout";
-import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import {
+    doWithLoggedInUser,
+    renderWithLoggedInUser,
+} from "@thuocsi/nextjs-components/lib/login";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
-import styles from "./fee.module.css";
 import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
@@ -21,7 +32,7 @@ export async function getServerSideProps(ctx) {
     })
 }
 
-function render({ }) {
+function render() {
     const router = useRouter();
     const { error, warn, info, success } = useToast();
     const [loading, setLoading] = useState(false);
@@ -88,6 +99,7 @@ function render({ }) {
                                     required
                                     fullWidth
                                     inputRef={register(feeValidation.name)}
+                                    onBlur={e => setValue('name', e.target.value?.trim?.())}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -109,7 +121,7 @@ function render({ }) {
                                     defaultValue={defaultFeeType}
                                     onChange={e => setValue('type', e.target.value)}
                                 >
-                                    {feeTypeOptions.map(({ value, label }) => (<MenuItem value={value}>{label}</MenuItem>))}
+                                    {feeTypeOptions.map(({ value, label }, i) => (<MenuItem key={i} value={value}>{label}</MenuItem>))}
                                 </TextField>
                             </Grid>
                             <Grid item xs={12}>
