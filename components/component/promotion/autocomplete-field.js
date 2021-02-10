@@ -7,7 +7,9 @@ import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 import { getTagClient } from "client/tag";
 import React, { useEffect, useState } from "react";
-import { defaultReward, defaultScope } from "../constant";
+import { Controller } from "react-hook-form";
+import { defaultCondition, defaultReward, defaultScope } from "../constant";
+import { displayNameBasedOnCondition } from "../util";
 
 async function searchProductList(q) {
   return await getProductClient().searchProductListFromClient(q, "");
@@ -36,8 +38,12 @@ async function searchAreaList(q) {
   return await getAreaClient().getListArea(q);
 }
 
-async function searchSellerList(q) {
+async function searchProducerList(q) {
   return await getProductClient().getProducerClient(q);
+}
+
+async function searchSellerList(q) {
+  return await getSellerClient().getSellerClient(0, 20, q);
 }
 
 async function searchIngredientList(q) {
@@ -52,6 +58,9 @@ const AutoCompleteField = (props) => {
     placeholder,
     type,
     multiple = true,
+    required,
+    control,
+    name,
   } = props;
 
   const { handleChange } = props;
@@ -60,23 +69,24 @@ const AutoCompleteField = (props) => {
 
   const fetchOptions = async (type, value) => {
     switch (type) {
-      case defaultScope.product:
+      case defaultCondition.product:
         return await searchProductList(value);
-      case defaultScope.customer:
-        return await searchCustomerList();
-      case defaultScope.productCatergory:
-        return await searchCategoryList(value);
-      case defaultScope.productTag:
-        return await searchTagList(value);
       case defaultScope.area:
         return await searchAreaList(value);
-      case defaultScope.producer:
-        return await searchSellerList(value);
-      case defaultScope.ingredient:
+      case defaultScope.customerLevel:
+        return await searchCustomerList();
+      case defaultCondition.productCatergory:
+        return await searchCategoryList(value);
+      case defaultCondition.productTag:
+        return await searchTagList(value);
+      case defaultCondition.producer:
+        return await searchProducerList(value);
+      case defaultCondition.ingredient:
         return await searchIngredientList(value);
       case defaultReward.gift:
         return await searchGiftList(value);
-
+      case "SELLER":
+        return await searchSellerList(value);
       default:
         return { status: "ERROR" };
     }
@@ -87,7 +97,13 @@ const AutoCompleteField = (props) => {
     let value = event.target.value;
     let res = await fetchOptions(type, value);
     if (res?.status == "OK") {
-      setProductList(res.data);
+      console.log(res);
+      let arr = productList.concat(res.data);
+      if (multiple)
+        arr.unshift({
+          name: "Chọn tất cả",
+        });
+      setProductList(arr);
     } else {
       setProductList([]);
     }
@@ -97,28 +113,46 @@ const AutoCompleteField = (props) => {
     handleChangeTextField({ target: { value: "" } });
   }, [type]);
 
-  console.log(defaultValue, "defaultValue");
+  console.log(defaultValue, "defaultValue", type);
 
   return (
-    <Autocomplete
-      fullWidth
-      multiple={multiple}
-      options={productList.length > 0 ? productList : options}
-      onChange={handleChange}
-      getOptionLabel={(option) => option.name}
-      value={defaultValue}
-      defaultValue={defaultValue}
-      filterSelectedOptions
-      renderInput={(params) => (
-        <TextField
-          required
-          {...params}
-          variant="standard"
-          label={label}
-          placeholder={placeholder}
-          onChange={handleChangeTextField}
+    <Controller
+      name={name}
+      render={(props) => (
+        <Autocomplete
+          fullWidth
+          multiple={multiple}
+          options={productList.length > 0 ? productList : options}
+          onChange={(event, value) => {
+            if (multiple) {
+              let isAll = false;
+              isAll = value.filter((o) => o.name == "Chọn tất cả");
+              if (isAll.length > 0) {
+                value = isAll;
+              }
+            }
+            handleChange(event, value);
+            console.log(value, "valuevalue");
+            props.onChange(value);
+          }}
+          getOptionLabel={(option) => option.name}
+          value={defaultValue}
+          defaultValue={defaultValue}
+          filterSelectedOptions
+          renderInput={(params) => (
+            <TextField
+              required={required}
+              {...params}
+              variant="standard"
+              label={label}
+              placeholder={placeholder}
+              onChange={handleChangeTextField}
+            />
+          )}
         />
       )}
+      control={control}
+      defaultValue={defaultValue}
     />
   );
 };

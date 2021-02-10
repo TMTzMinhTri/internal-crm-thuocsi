@@ -1,6 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 
-import { CardContent, Grid, TextField } from "@material-ui/core";
+import {
+  CardContent,
+  FormControlLabel,
+  Grid,
+  Paper,
+  Switch,
+  TextField,
+} from "@material-ui/core";
 import { promotions, promotionTypes } from "../constant";
 import SelectField from "./select-field";
 
@@ -16,9 +23,10 @@ const InfomationFields = (props) => {
     },
     errors,
     register,
-    edit = false,
     textField,
     errorTextField,
+    getValues,
+    control,
   } = props;
 
   const { handleChangeTextField } = props;
@@ -27,11 +35,46 @@ const InfomationFields = (props) => {
 
   const { promotionError, promotionTypeError } = errorTextField;
 
+  const [active, setActive] = useState(false);
+
+  const switchActive = () => {
+    setActive(!active);
+  };
+
+  console.log(getValues("startTime"), "startTime");
+
   return (
-    <>
+    <Paper
+      elevation={3}
+      style={{ padding: "0px 10px 20px 10px", margin: "10px" }}
+    >
       <CardContent>
         <Grid spacing={2} container>
-          <Grid item xs={12} sm={4} md={4}>
+          <Grid item xs={6}>
+            <SelectField
+              name="promotionField"
+              control={control}
+              errors={errors}
+              title="Bên tổ chức"
+              value={promotionField}
+              error={promotionError}
+              options={promotions}
+              handleChange={handleChangeTextField("promotionField")}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <SelectField
+              name="promotionTypeField"
+              control={control}
+              errors={errors}
+              title="Hình thức áp dụng"
+              value={promotionTypeField}
+              error={promotionTypeError}
+              options={promotionTypes}
+              handleChange={handleChangeTextField("promotionTypeField")}
+            />
+          </Grid>
+          <Grid item xs={6}>
             <TextField
               name="promotionName"
               label="Tên khuyến mãi"
@@ -61,29 +104,17 @@ const InfomationFields = (props) => {
               })}
             />
           </Grid>
-          <Grid item xs={12} sm={1} md={1}></Grid>
-          <Grid item xs={12} sm={4} md={4}>
-            <SelectField
-              title="Bên tổ chức"
-              value={promotionField}
-              error={promotionError}
-              options={promotions}
-              handleChange={handleChangeTextField("promotionField")}
+          {/* <Grid item xs={6}>
+            <p style={{ margin: "5px 0", fontSize: 12 }}>Trạng thái</p>
+            <FormControlLabel
+              control={
+                <Switch checked={active} onChange={switchActive} name="gilad" />
+              }
+              label={active ? "Đang hoạt động" : "Chưa kích hoạt"}
             />
-          </Grid>
-          <Grid item xs={12} sm={3} md={3}></Grid>
-          <Grid item xs={12} sm={4} md={4}>
-            <SelectField
-              title="Hình thức áp dụng"
-              value={promotionTypeField}
-              error={promotionTypeError}
-              options={promotionTypes}
-              handleChange={handleChangeTextField("promotionTypeField")}
-            />
-          </Grid>
-          <Grid item xs={12} sm={1} md={1}></Grid>
-          <Grid container item xs={4}>
-            <Grid item xs={5}>
+          </Grid> */}
+          <Grid container item xs={6} spacing={1}>
+            <Grid item xs={6}>
               <TextField
                 name="startTime"
                 id="startTime"
@@ -102,8 +133,7 @@ const InfomationFields = (props) => {
                 })}
               />
             </Grid>
-            <Grid item xs={2}></Grid>
-            <Grid item xs={5}>
+            <Grid item xs={6}>
               <TextField
                 name="endTime"
                 label="Thời gian kết thúc"
@@ -118,13 +148,18 @@ const InfomationFields = (props) => {
                 required
                 inputRef={register({
                   required: "Vui lòng chọn thời gian kết thúc",
+                  min: {
+                    value: getValues("startTime"),
+                    message:
+                      "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+                  },
                 })}
               />
             </Grid>
           </Grid>
         </Grid>
       </CardContent>
-    </>
+    </Paper>
   );
 };
 
