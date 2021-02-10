@@ -5,8 +5,10 @@ import {
   defaultPromotionOrganizer,
   defaultPromotionScope,
   defaultPromotionStatus,
-  defaultPromotionType, defaultReward,
+  defaultPromotionType,
+  defaultReward,
   defaultRulePromotion,
+  defaultScope,
   defaultTypeConditionsRule,
   defaultTypeProduct,
 } from "./constant";
@@ -363,15 +365,23 @@ export function formatTime(time) {
 }
 
 export function formatUTCTime(time) {
-  let result =''
-  let date = new Date(time)
-  let year = date.getUTCFullYear()
-  let month = date.getMonth() + 1 < 10 ? ("0" + (date.getMonth() + 1)).slice(-2) : date.getMonth() + 1
-  let day = date.getDate() < 10 ? ("0" + (date.getDate())).slice(-2) : date.getDate()
-  let hour = date.getHours() < 10 ? ("0" + (date.getHours())).slice(-2) : date.getHours()
-  let minute = date.getMinutes() < 10 ? ("0" + (date.getMinutes())).slice(-2) : date.getMinutes()
-  result = year + '-' + month + '-' + day + "T" + hour + ':' + minute
-  return result
+  let result = "";
+  let date = new Date(time);
+  let year = date.getUTCFullYear();
+  let month =
+    date.getMonth() + 1 < 10
+      ? ("0" + (date.getMonth() + 1)).slice(-2)
+      : date.getMonth() + 1;
+  let day =
+    date.getDate() < 10 ? ("0" + date.getDate()).slice(-2) : date.getDate();
+  let hour =
+    date.getHours() < 10 ? ("0" + date.getHours()).slice(-2) : date.getHours();
+  let minute =
+    date.getMinutes() < 10
+      ? ("0" + date.getMinutes()).slice(-2)
+      : date.getMinutes();
+  result = year + "-" + month + "-" + day + "T" + hour + ":" + minute;
+  return result;
 }
 
 export function getPromotionOrganizer(organizer) {
@@ -434,12 +444,72 @@ export function displayPromotionType(type) {
 
 export function displayLabelBasedOnScope(type) {
   switch (type) {
-    case "CUSTOMER":
-      return "cấp bậc khách hàng";
-    case "AREA":
-      return "khu vực";
+    case defaultScope.customerLevel:
+      return "Áp dụng cho đối tượng khách hàng";
+    case defaultScope.area:
+      return "Khu vực áp dụng";
     default:
       return "";
+  }
+}
+
+export function displayNameBasedOnScope(type) {
+  switch (type) {
+    case defaultScope.customerLevel:
+      return "customerLevel";
+    case defaultScope.area:
+      return "area";
+    default:
+      return "";
+  }
+}
+
+export function displayLabelBasedOnCondition(type) {
+  switch (type) {
+    case "PRODUCT_CATEGORY":
+      return "Danh mục sản phẩm";
+    case "PRODUCT":
+      return "Tên sản phẩm";
+    case "PRODUCER":
+      return "Người bán";
+    case "INGREDIENT":
+      return "Thành phần";
+    case "PRODUCT_TAG":
+      return "Tag sản phẩm";
+    default:
+      return "";
+  }
+}
+
+export function displayNameBasedOnCondition(type) {
+  switch (type) {
+    case "PRODUCT_CATEGORY":
+      return "productCategory";
+    case "PRODUCT":
+      return "product";
+    case "PRODUCER":
+      return "producer";
+    case "INGREDIENT":
+      return "ingredient";
+    case "PRODUCT_TAG":
+      return "productTag";
+    default:
+      return "";
+  }
+}
+
+export function displayNameBasedOnReward(type) {
+  switch (type) {
+    case defaultReward.absolute:
+      return "absolute";
+    case defaultReward.gift:
+      return "gift";
+    case defaultReward.percentage:
+      return "percentage";
+    case defaultReward.point:
+      return "point";
+    default:
+      break;
   }
 }
 
@@ -486,12 +556,12 @@ export function displayUsage(usage) {
 export function displayPromotionReward(type) {
   switch (type) {
     case defaultReward.absolute:
-      return "Giảm giá tuyệt đối"
+      return "Giảm giá tuyệt đối";
     case defaultReward.gift:
-      return "Quà tặng"
+      return "Quà tặng";
     case defaultReward.point:
-      return "Điểm thành viên"
+      return "Điểm thành viên";
     case defaultReward.precentage:
-      return "Giảm giá theo %"
+      return "Giảm giá theo %";
   }
 }
