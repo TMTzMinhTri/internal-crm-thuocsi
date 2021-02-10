@@ -80,7 +80,7 @@ const Condition = (props) => {
                     spacing={2}
                     alignItems="flex-end"
                   >
-                    <Grid item container xs={3}>
+                    <Grid item container xs={4}>
                       <AutoCompleteField
                         control={control}
                         name={"seller" + index}
@@ -95,7 +95,7 @@ const Condition = (props) => {
                         )}
                       />
                     </Grid>
-                    <Grid item container xs={2}>
+                    <Grid item container xs={3}>
                       <AutoCompleteField
                         control={control}
                         name={displayNameBasedOnCondition(selectField) + index}
@@ -111,7 +111,7 @@ const Condition = (props) => {
                         )}
                       />
                     </Grid>
-                    <Grid item container xs={3}>
+                    <Grid item container xs={2}>
                       <TextField
                         type="number"
                         id={"productNumber" + index}
@@ -131,7 +131,7 @@ const Condition = (props) => {
                         })}
                       />
                     </Grid>
-                    <Grid item container xs={3}>
+                    <Grid item container xs={2}>
                       <TextField
                         type="number"
                         id={"productValue" + index}
@@ -175,7 +175,7 @@ const Condition = (props) => {
                     handleChange={handleChangeConditionSeller}
                   />
                 </Grid>
-                <Grid item container xs={4}>
+                <Grid item container xs={3}>
                   <AutoCompleteField
                     name={displayNameBasedOnCondition(selectField)}
                     control={control}
@@ -188,7 +188,7 @@ const Condition = (props) => {
                     handleChange={handleChangeConditionList}
                   />
                 </Grid>
-                <Grid item container xs={3}>
+                <Grid item container xs={2}>
                   <TextField
                     type="number"
                     id={"conditionNumber"}
@@ -207,7 +207,7 @@ const Condition = (props) => {
                     })}
                   />
                 </Grid>
-                <Grid item container xs={3}>
+                <Grid item container xs={2}>
                   <TextField
                     type="number"
                     id={"conditionValue"}
