@@ -1,36 +1,15 @@
-import {
-    IconButton,
-    TableCell,
-    // eslint-disable-next-line no-unused-vars
-    TableCellProps,
-    TextField,
-    // eslint-disable-next-line no-unused-vars
-    TextFieldProps,
-} from "@material-ui/core";
+import { IconButton, TableCell, TextField } from "@material-ui/core";
 import { Done } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
-/**
- * 
- * @param {object} props 
- * @param {string} props.code
- * @param {number} props.initialFee
- * @param {Function} props.onUpdate
- * @param {TextFieldProps} props.TextFieldProps
- */
-export const TableFeeValueCell = ({
-    code,
-    initialFee,
-    onUpdate,
-    TextFieldProps,
-    ...others
-}) => {
-    const [fee, setFee] = useState(initialFee);
+
+export const TableQuantityCell = ({ code, initialQuantity, onUpdate }) => {
+    const [quantity, setQuantity] = useState(initialQuantity);
     const [focused, setFocused] = useState(false);
     useEffect(() => {
-        setFee(initialFee);
-    }, [initialFee]);
+        setFee(setQuantity);
+    }, [initialQuantity]);
     return (
-        <TableCell {...others}>
+        <TableCell>
             <TextField
                 size="small"
                 type="number"
@@ -39,13 +18,13 @@ export const TableFeeValueCell = ({
                 fullWidth
                 InputProps={{
                     endAdornment: (
-                        (focused || fee != initialFee) && (
+                        (focused || quantity != initialQuantity) && (
                             < IconButton
                                 size="small"
                                 color="primary"
-                                disabled={fee == initialFee}
+                                disabled={quantity == initialQuantity}
                                 onClick={() => {
-                                    onUpdate?.({ code, fee });
+                                    onUpdate?.({ code, quantity });
                                     setFocused(false);
                                 }}
                             >
@@ -54,12 +33,10 @@ export const TableFeeValueCell = ({
                         )
                     ),
                 }}
-                inputProps={{ min: 0, style: { textAlign: 'right' } }}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
                 onChange={e => setFee(+e.target.value)}
-                value={fee}
-                {...TextFieldProps}
+                value={quantity}
             />
         </TableCell>
     )

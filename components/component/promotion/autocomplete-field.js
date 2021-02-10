@@ -9,7 +9,7 @@ import { getTagClient } from "client/tag";
 import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { defaultCondition, defaultReward, defaultScope } from "../constant";
-import { displayNameBasedOnCondition } from "../until";
+import { displayNameBasedOnCondition } from "../util";
 
 async function searchProductList(q) {
   return await getProductClient().searchProductListFromClient(q, "");

@@ -1,15 +1,35 @@
-import {Grid, TextField} from "@material-ui/core";
+import {
+    Button,
+    ButtonGroup,
+    Grid,
+    IconButton,
+    Table,
+    TableBody,
+    TableCell,
+    TableRow,
+    TextField
+} from "@material-ui/core";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import cssStyle from "./promotion.module.css";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
 import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
 import {Controller} from "react-hook-form";
+import {Gif} from "@material-ui/icons";
+import {displayPromotionReward, displayPromotionType, formatTime, getPromotionOrganizer} from "../util";
+import Tooltip from "@material-ui/core/Tooltip";
+import {getAreaClient} from "../../../client/area";
+import {defaultPromotionScope} from "../constant";
+import Switch from "@material-ui/core/Switch";
+import WarningIcon from '@material-ui/icons/Warning';
+import Link from "next/link";
+import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 
 const useStyles = makeStyles(theme => ({
@@ -32,15 +52,27 @@ export async function searchCustomer(customerName) {
     return getCustomerClient().getCustomerFromClient(0,10,customerName)
 }
 
+export async function getRegionByCodes(codes) {
+    return await getAreaClient().getListAreaByCodes(codes)
+}
+
+export async function getCustomerByCodes(codes) {
+    return await getCustomerClient().getLevelByCodes(codes)
+}
+
 export default function VoucherCodeBody(props) {
     const classes = useStyles()
     const {
         errors,
+        onChangePromotion,
         dataProps,
+        listPromotionDefault,
         handleChangeType,
         appliedCustomers,
         promotion,
         control,
+        showPromotionPublic,
+        listCustomerDefault,
         edit,
         onChangeCustomer,
         register,
@@ -48,10 +80,39 @@ export default function VoucherCodeBody(props) {
 
 
     const [showAutoComplete, setShowAutoComplete] = useState(false);
-    const [listPromotionSearch,setListPromotionSearch] = useState(promotion || [])
-    const [listCustomer, setListCustomer] = useState(appliedCustomers || [])
+    const [listPromotionSearch,setListPromotionSearch] = useState(listPromotionDefault || [])
+    const [listCustomer, setListCustomer] = useState(appliedCustomers || listCustomerDefault)
     const hasError = typeof errors[`promotionName`] !== 'undefined';
+    const [promotionPublic, setPromotionPublic] = useState(promotion[0] || null)
+    const [listCustomerPromotion,setListCustomerPromotion] = useState([])
+    const [listRegions,setListRegions] = useState([])
 
+    useEffect(() => {
+        if (!showPromotionPublic) {
+            setPromotionPublic({})
+        }
+        if (promotion.length > 0) {
+            promotion[0].scopes.forEach(obj => {
+                switch (obj.scope){
+                    case defaultPromotionScope.CUSTOMER:
+                        let level =  getCustomerByCodes(obj.customerLevels);
+                        if (level && level.status === "OK") {
+                            setListRegions(level.data)
+                        }else {
+                            setListRegions([])
+                        }
+                        break;
+                    case defaultPromotionScope.AREA:
+                        let region =  getRegionByCodes(obj.areaCodes)
+                        if (region && region.status === "OK") {
+                            setListCustomerPromotion(region.data)
+                        }else {
+                            setListCustomerPromotion([])
+                        }
+                }
+            })
+        }
+    }, []);
 
 
     const handleSearchPromotion = async (value) => {
@@ -62,8 +123,10 @@ export default function VoucherCodeBody(props) {
                 return {label: item.promotionName, value: item.promotionId}
             })
         }else {
-            setListPromotionSearch([])
-            return []
+            setListPromotionSearch(listPromotionDefault)
+            return listPromotionDefault.map((item) => {
+                return {label: item.promotionName, value: item.promotionId}
+            })
         }
     }
 
@@ -82,169 +145,301 @@ export default function VoucherCodeBody(props) {
         }
     }
 
+    const handleChangePromotion = async (object) => {
+        let promotion = {}
+        if (object?.value) {
+            listPromotionSearch.forEach(promo => {
+                if (promo.promotionId === object.value) {
+                    return promotion = promo
+                }
+            })
+        }
+        if (promotion && promotion.scopes?.length > 0) {
+            promotion.scopes.forEach(obj => {
+                switch (obj.type){
+                    case defaultPromotionScope.CUSTOMER:
+                        let level =  getCustomerByCodes(obj.customerLevelCodes);
+                        if (level && level.status === "OK") {
+                            setListCustomerPromotion(level.data)
+                        }else {
+                            setListCustomerPromotion([])
+                        }
+                        break;
+                    case defaultPromotionScope.AREA:
+                        let region =  getRegionByCodes(obj.areaCodes)
+                        if (region && region.status === "OK") {
+                            setListRegions(region.data)
+                        }else {
+                            setListRegions([])
+                        }
+                }
+            })
+        }
+        return setPromotionPublic(promotion)
+    }
+
     return (
-        <Grid container spacing={2}>
-            <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Mã khuyến mãi<span style={{color : 'red'}}> *</span></h5>
-                <TextField
-                    id="code"
-                    name="code"
-                    disabled={edit}
-                    helperText={errors.code?.message}
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                    error={!!errors.code}
-                    placeholder="Nhập mã khuyến mãi"
-                    style={{width: "100%"}}
-                    required
-                    inputRef={register({
-                        required: "Mã khuyến mãi không được để trống"
-                    })}
-                />
-            </Grid>
-            <Grid item xs={12} sm={1} md={1}>
-            </Grid>
-            <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng<span style={{color : 'red'}}> *</span></h5>
-                <MuiSingleAuto
-                    id="promotionId"
-                    options={
-                        listPromotionSearch.map((item) => {
-                            return {label: item.promotionName, value: item.promotionId}
-                        })
-                    }
-                    name="promotionId"
-                    variant="standard"
-                    onFieldChange={handleSearchPromotion}
-                    placeholder="Chọn chương trình khuyến mãi áp dụng"
-                    control={control}
-                    errors={errors}
-                    message="Vui lòng chọn chương trình khuyến mãi áp dụng"
-                    required={true}
-                />
-            </Grid>
-            <Grid item xs={12} sm={3} md={3}>
-            </Grid>
-            <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Hạn sử dụng mã khuyến mãi</h5>
-                <TextField
-                    id="expiredDate"
-                    name="expiredDate"
-                    helperText={errors.expiredDate?.message}
-                    error={!!errors.expiredDate}
-                    // label="Hạn sử dụng mã khuyến mãi"
-                    placeholder=""
-                    type="datetime-local"
-                    InputLabelProps={{
-                        shrink: true,
-                    }}
-                    style={{width: "100%"}}
-                    inputRef={register({
-                    })}
-                />
-            </Grid>
-            <Grid item xs={12} sm={1} md={1}>
-            </Grid>
-            <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Loại mã</h5>
-                <Select
-                    id="type"
-                    name="type"
-                    placeholder="chọn loại mã"
-                    value={dataProps.type}
-                    onChange={event => handleChangeType(event.target.value)}
-                    labelId="select-type"
-                    style={{width: "100%"}}>
-                    <MenuItem value="PUBLIC">
-                        <div style={{fontSize : 16, fontWeight : 'bold'}}>Public</div>
-                    </MenuItem>
-                    <MenuItem value="PRIVATE">
-                        <div style={{fontSize : 16, fontWeight : 'bold'}}>Private</div>
-                    </MenuItem>
-                </Select>
-            </Grid>
-            <Grid item xs={12} sm={3} md={3}>
-            </Grid>
-            <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Tổng số lần sử dụng toàn hệ thống</h5>
-                <TextField
-                    id="maxUsage"
-                    name="maxUsage"
-                    type="number"
-                    InputProps={{
-                        className: classes[".MuiInputBase-input"]
-                    }}
-                    helperText={errors.maxUsage?.message}
-                    error={!!errors.maxUsage}
-                    defaultValue={0}
-                    placeholder="Tổng số lần sử dụng toàn hệ thống"
-                    style={{width: "100%", fontWeight : 'normal'}}
-                    inputRef={register({
-                        required: "Tổng số lần sử dụng toàn hệ thống không được để trống",
-                        validate: (value) => validateNumber(value,"Tổng số lần sử dụng toàn hệ thống không được âm")
-                    })}
-                    required
-                />
-                <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
-            </Grid>
-            <Grid item xs={12} sm={1} md={1}>
-            </Grid>
-            <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Số lần áp dụng tối đa cho mỗi khách hàng</h5>
-                <TextField
-                    id="maxUsagePerCustomer"
-                    name="maxUsagePerCustomer"
-                    type="number"
-                    InputProps={{
-                        className: classes[".MuiInputBase-input"]
-                    }}
-                    helperText={errors.maxUsagePerCustomer?.message}
-                    error={!!errors.maxUsagePerCustomer}
-                    defaultValue={0}
-                    placeholder="Số lần áp dụng tối đa cho mỗi khách hàng"
-                    style={{width: "100%", fontWeight : 'normal'}}
-                    inputRef={register({
-                        required: "Số lần áp dụng tối đa cho mỗi khách hàng không được để trống",
-                        validate: (value) => validateNumber(value,"Số lần áp dụng tối đa cho mỗi khách hàng không được âm")
-                    })}
-                    required
-                />
-                <div className={cssStyle.textItalic}>Nhập = 0 là không giới hạn</div>
-            </Grid>
-            <Grid item xs={12} sm={3} md={3}>
-            </Grid>
-            <Grid item xs={12} sm={4} md={4}>
-                <h5 className={cssStyle.titleLabel}>Danh sách khách hàng được sử dụng</h5>
-                <Autocomplete
-                    fullWidth
-                    multiple
-                    id="appliedCustomers"
-                    name="appliedCustomers"
-                    options={listCustomer}
-                    defaultValue={appliedCustomers}
-                    loading={showAutoComplete}
-                    loadingText="Không tìm thấy danh sách khách hàng được sử dụng"
-                    onOpen={() => {
-                        setShowAutoComplete(true);
-                    }}
-                    onClose={() => {
-                        setShowAutoComplete(false);
-                    }}
-                    getOptionLabel={(option) => option.name }
-                    renderInput={(params) => (
+        <Grid container>
+            <Grid container xs={8} spacing={5}>
+                <Grid item xs={6} >
+                    <h5 className={cssStyle.titleLabel}>Mã khuyến mãi<span style={{color : 'red'}}> *</span></h5>
+                    <TextField
+                        id="code"
+                        name="code"
+                        disabled={edit}
+                        helperText={errors.code?.message}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        error={!!errors.code}
+                        placeholder="Nhập mã khuyến mãi"
+                        style={{width: "100%"}}
+                        required
+                        inputRef={register({
+                            required: "Mã khuyến mãi không được để trống"
+                        })}
+                    />
+                </Grid>
+                <Grid item xs={6} className={cssStyle.marginLineAutocompletePromotion}>
+                    <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng<span style={{color : 'red'}}> *</span></h5>
+                    <MuiSingleAuto
+                        id="promotionId"
+                        options={
+                            listPromotionSearch.map((item) => {
+                                return {label: item.promotionName, value: item.promotionId}
+                            })
+                        }
+                        name="promotionId"
+                        variant="standard"
+                        onFieldChange={handleSearchPromotion}
+                        placeholder="Chọn chương trình khuyến mãi áp dụng"
+                        control={control}
+                        onValueChange={handleChangePromotion}
+                        errors={errors}
+                        message="Vui lòng chọn chương trình khuyến mãi áp dụng"
+                        required={true}
+                    />
+                </Grid>
+                <Grid item xs={3} >
+                        <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu</h5>
                         <TextField
-                            {...params}
-                            name="appliedCustomers"
-                            placeholder="Danh sách khách hàng được sử dụng"
+                            id="startTime"
+                            name="startTime"
+                            helperText={errors.startTime?.message}
+                            error={!!errors.startTime}
+                            placeholder=""
+                            type="datetime-local"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
                             required
-                            onChange={(e) => handleSearchCustomer(e.target.value)}
+                            style={{width: "90%"}}
+                            inputRef={register({
+                                required: "Thời gian bắt đầu không được để trống"
+                            })}
                         />
-                    )}
-                    onChange={(e, value) => onChangeCustomer(e, value)}
-                />
-                <div className={cssStyle.textItalic}>Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi</div>
+                    </Grid>
+                <Grid item xs={3}  >
+                        <h5 className={cssStyle.titleLabel}>Thời gian kết thúc</h5>
+                        <TextField
+                            id="endTime"
+                            name="endTime"
+                            helperText={errors.endTime?.message}
+                            error={!!errors.endTime}
+                            placeholder=""
+                            type="datetime-local"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            required
+                            style={{width: "90%"}}
+                            inputRef={register({
+                                required: "Thời gian kết thúc không được để trống"
+                            })}
+                        />
+                    </Grid>
+                <Grid item xs={6} >
+                    <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị
+                        <Tooltip title="Tới thời gian này sẽ cho hiển thị trên app/web thuocsi">
+                                <span>
+                                    <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
+                                </span>
+                        </Tooltip>
+                    </h5>
+                    <TextField
+                        id="publicTime"
+                        name="publicTime"
+                        helperText={errors.publicTime?.message}
+                        error={!!errors.publicTime}
+                        placeholder=""
+                        type="datetime-local"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        required
+                        style={{width: "100%"}}
+                        inputRef={register({
+                            required: "Thời gian cho hiển thị không được để trống"
+                        })}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <h5 className={cssStyle.titleLabel}>Tổng số lần sử dụng toàn hệ thống
+                        <Tooltip title="Nhập = 0 là không giới hạn">
+                                <span>
+                                    <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
+                                </span>
+                        </Tooltip>
+                    </h5>
+                    <TextField
+                        id="maxUsage"
+                        name="maxUsage"
+                        type="number"
+                        InputProps={{
+                            className: classes[".MuiInputBase-input"]
+                        }}
+                        helperText={errors.maxUsage?.message}
+                        error={!!errors.maxUsage}
+                        defaultValue={0}
+                        placeholder="Tổng số lần sử dụng toàn hệ thống"
+                        style={{width: "100%", fontWeight : 'normal'}}
+                        inputRef={register({
+                            required: "Tổng số lần sử dụng toàn hệ thống không được để trống",
+                            validate: (value) => validateNumber(value,"Tổng số lần sử dụng toàn hệ thống không được âm")
+                        })}
+                        required
+                    />
+                </Grid>
+                <Grid item xs={6} >
+                    <h5 className={cssStyle.titleLabel}>Số lần áp dụng tối đa cho mỗi khách hàng
+                        <Tooltip title="Nhập = 0 là không giới hạn">
+                                <span>
+                                    <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
+                                </span>
+                        </Tooltip>
+                    </h5>
+                    <TextField
+                        id="maxUsagePerCustomer"
+                        name="maxUsagePerCustomer"
+                        type="number"
+                        InputProps={{
+                            className: classes[".MuiInputBase-input"]
+                        }}
+                        helperText={errors.maxUsagePerCustomer?.message}
+                        error={!!errors.maxUsagePerCustomer}
+                        defaultValue={0}
+                        placeholder="Số lần áp dụng tối đa cho mỗi khách hàng"
+                        style={{width: "100%", fontWeight : 'normal'}}
+                        inputRef={register({
+                            required: "Số lần áp dụng tối đa cho mỗi khách hàng không được để trống",
+                            validate: (value) => validateNumber(value,"Số lần áp dụng tối đa cho mỗi khách hàng không được âm")
+                        })}
+                        required
+                    />
+                </Grid>
+                <Grid item xs={6} >
+                    <h5 className={cssStyle.titleLabel}>Danh sách khách hàng được sử dụng
+                        <Tooltip title="Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi">
+                                <span>
+                                    <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
+                                </span>
+                        </Tooltip>
+                    </h5>
+                    <Autocomplete
+                        fullWidth
+                        multiple
+                        id="appliedCustomers"
+                        name="appliedCustomers"
+                        options={listCustomer}
+                        defaultValue={appliedCustomers}
+                        loading={showAutoComplete}
+                        loadingText="Không tìm thấy danh sách khách hàng được sử dụng"
+                        onOpen={() => {
+                            setShowAutoComplete(true);
+                        }}
+                        onClose={() => {
+                            setShowAutoComplete(false);
+                        }}
+                        getOptionLabel={(option) => option.name }
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                name="appliedCustomers"
+                                placeholder="Danh sách khách hàng được sử dụng"
+                                required
+                                onChange={(e) => handleSearchCustomer(e.target.value)}
+                            />
+                        )}
+                        onChange={(e, value) => onChangeCustomer(e, value)}
+                    />
+                </Grid>
+                <Grid item xs={6} >
+                    <h5 className={cssStyle.titleLabel}>Loại mã</h5>
+                    <Select
+                        id="type"
+                        name="type"
+                        placeholder="chọn loại mã"
+                        value={dataProps.type}
+                        onChange={event => handleChangeType(event.target.value)}
+                        labelId="select-type"
+                        style={{width: "100%"}}>
+                        <MenuItem value="PUBLIC">
+                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Public</div>
+                        </MenuItem>
+                        <MenuItem value="PRIVATE">
+                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Private</div>
+                        </MenuItem>
+                    </Select>
+                </Grid>
             </Grid>
+            {
+                promotionPublic?.promotionId  && (
+                    <Grid xs={3} style={{background: "#f6f6f6", borderRadius: "1rem",marginLeft: "5rem"}}  container direction={"column"}>
+                        <div style={{padding: "1rem 1rem 1rem 2rem"}}>
+                            <Grid className={cssStyle.marginLinePromotion}>
+                                <span>Tên chương trình khuyến mãi</span>
+                                <div className={cssStyle.textInfoPromotion}>{promotionPublic.promotionName}</div>
+                            </Grid>
+                            <Grid className={cssStyle.marginLinePromotion}>
+                                <span>Bên tổ chức</span>
+                                <div className={cssStyle.textInfoPromotion}>{getPromotionOrganizer(promotionPublic.promotionOrganizer)}</div>
+                            </Grid>
+                            <Grid className={cssStyle.marginLinePromotion}>
+                                <span>Thời gian áp dụng</span>
+                                <div className={cssStyle.textInfoPromotion}>{formatTime(promotionPublic.startTime) + ' - ' + formatTime(promotionPublic.endTime)}</div>
+                            </Grid>
+                            {listCustomerPromotion?.length > 0 && (
+                                <Grid className={cssStyle.marginLinePromotion}>
+                                    {listCustomerPromotion.map((row, index) => (
+                                        <Grid>
+                                            <span>Áp dụng cho đối tượng khách hàng</span>
+                                            <div className={cssStyle.textInfoPromotion}>{row.name}</div>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            )}
+                            {listRegions?.length > 0 && (
+                                <Grid className={cssStyle.marginLinePromotion}>
+                                    {listRegions.map((row, index) => (
+                                        <Grid>
+                                            <span>Khu vực áp dụng</span>
+                                            <div className={cssStyle.textInfoPromotion}>{row.name}</div>
+                                        </Grid>
+                                    ))}
+                                </Grid>
+                            )}
+                            {
+                                promotionPublic["conditions"]["type"] && (
+                                    <Grid className={cssStyle.marginLinePromotion}>
+                                        <span>Loại khuyến mãi</span>
+                                        <div className={cssStyle.textInfoPromotion}>{displayPromotionReward(promotionPublic.rule.type)}</div>
+                                    </Grid>
+                                )
+                            }
+                        </div>
+                    </Grid>
+                )
+            }
         </Grid>
     )
 }

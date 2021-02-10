@@ -9,7 +9,7 @@ import {
 import React from "react";
 import { Fragment } from "react";
 import { defaultScope } from "../constant";
-import { displayLabelBasedOnScope, displayNameBasedOnScope } from "../until";
+import { displayLabelBasedOnScope, displayNameBasedOnScope } from "../util";
 import AutoCompleteField from "./autocomplete-field";
 
 const Scope = (props) => {

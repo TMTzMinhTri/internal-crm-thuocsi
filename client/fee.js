@@ -136,13 +136,15 @@ class FeeClient extends APIClient {
         )
     }
 
-    updateRegionFee(code, fee) {
+    updateRegionFee({ code, feeValue, estThuocSi, estLogistic }) {
         return this.callFromClient(
             'PUT',
             `${PREFIX_MASTER}/region/fee`,
             {
                 code,
-                feeValue: fee,
+                feeValue,
+                estThuocSi,
+                estLogistic
             }
         )
     }
@@ -209,6 +211,28 @@ class FeeClient extends APIClient {
             {
                 code,
                 feeValue: fee,
+            }
+        )
+    }
+
+    approveFee({ code, status }) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX}/fee/approve`,
+            {
+                code,
+                status
+            }
+        )
+    }
+
+    lockFee({ code, status }) {
+        return this.callFromClient(
+            'PUT',
+            `${PREFIX}/fee/lock`,
+            {
+                code,
+                status
             }
         )
     }

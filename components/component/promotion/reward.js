@@ -10,7 +10,7 @@ import {
 import { Add, Delete } from "@material-ui/icons";
 import React from "react";
 import { defaultReward, rewards } from "../constant";
-import { displayNameBasedOnReward } from "../until";
+import { displayNameBasedOnReward } from "../util";
 
 import AutoCompleteField from "./autocomplete-field";
 import SelectField from "./select-field";

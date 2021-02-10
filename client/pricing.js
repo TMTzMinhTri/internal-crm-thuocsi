@@ -49,7 +49,7 @@ class PricingClient extends APIClient {
         })
     }
 
-    updatePriceGenConfig(data){
+    updatePriceGenConfig(data) {
         return this.callFromClient(
             "PUT",
             `${prefix}/product/config`,

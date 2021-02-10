@@ -401,7 +401,7 @@ export function getPromotionScope(objects) {
   let scope = "Không xác định";
   objects?.forEach((obj) => {
     if (obj.scope) {
-      scope = displayPromotionScope(obj.scope);
+      scope = displayLabelBasedOnScope(obj.scope);
       return scope;
     }
   });
@@ -551,4 +551,17 @@ export function displayUsage(usage) {
     return "Không giới hạn";
   }
   return usage;
+}
+
+export function displayPromotionReward(type) {
+  switch (type) {
+    case defaultReward.absolute:
+      return "Giảm giá tuyệt đối";
+    case defaultReward.gift:
+      return "Quà tặng";
+    case defaultReward.point:
+      return "Điểm thành viên";
+    case defaultReward.precentage:
+      return "Giảm giá theo %";
+  }
 }
