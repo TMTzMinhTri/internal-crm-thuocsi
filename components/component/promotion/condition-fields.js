@@ -44,6 +44,8 @@ const ConditionFields = (props) => {
 
   const { scopeObject, conditionObject, rewardObject } = object;
 
+  console.log(errors, "errors");
+
   return (
     <>
       <CardContent>
@@ -110,19 +112,25 @@ const ConditionFields = (props) => {
             <h4>Mô tả</h4>
             <Grid item xs={6}>
               <Controller
-                name="desciption"
-                defaultValue={descriptionField}
+                name="description"
                 control={control}
                 render={(props) => (
                   <TextareaAutosize
+                    style={{
+                      borderColor: errors.description ? "red" : "black",
+                    }}
                     className={classess.textarea}
                     rowsMin={20}
                     rowsMax={20}
                     placeholder="Nhập mô tả"
+                    value={props.value}
                     onChange={props.onChange}
                   />
                 )}
               />
+              {errors.description && (
+                <p style={{ color: "red" }}>{errors.description.message}</p>
+              )}
             </Grid>
           </Grid>
         </Grid>

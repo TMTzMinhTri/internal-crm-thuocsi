@@ -28,7 +28,7 @@ export const defaultPromotionScope = {
   PRODUCT: "PRODUCT",
   SKU: "SKU",
   AREA: "AREA",
-  CUSTOMER: "CUSTOMER_LEVEL"
+  CUSTOMER: "CUSTOMER_LEVEL",
 };
 
 export const defaultPromotionStatus = {
@@ -102,6 +102,7 @@ export const defaultCondition = {
   ingredient: "INGREDIENT",
   productTag: "PRODUCT_TAG",
   product: "PRODUCT",
+  noRule: "NO_RULE",
 };
 
 export const defaultReward = {
@@ -156,6 +157,10 @@ export const conditions = [
   {
     value: "PRODUCER",
     label: "Theo nhà sản xuất",
+  },
+  {
+    value: "NO_RULE",
+    label: "Không điều kiện",
   },
 ];
 

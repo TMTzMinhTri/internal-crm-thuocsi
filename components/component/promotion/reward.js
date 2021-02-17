@@ -161,7 +161,7 @@ const Reward = (props) => {
               ) : (
                 <>
                   {attachedProduct.map((o, index) => (
-                    <Grid item container spacing={2} key={selectField}>
+                    <Grid item container spacing={2} key={index}>
                       <Grid item container xs={6}>
                         <AutoCompleteField
                           name={"gift" + index}
@@ -181,11 +181,11 @@ const Reward = (props) => {
                           name={"number" + index}
                           label={"Số lượng được tặng"}
                           placeholder=""
-                          defaultValue={o.number}
                           helperText={errors["number" + index]?.message}
                           InputLabelProps={{
                             shrink: true,
                           }}
+                          defaultValue={o.number}
                           fullWidth
                           error={!!errors["number" + index]}
                           required

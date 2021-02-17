@@ -18,6 +18,12 @@ class ProducerClient extends APIClient {
       manufacturerCodes,
     });
   }
+
+  getProducerByCodeClient(manufacturerCodes) {
+    return this.callFromClient("POST", `${PREFIX}/manufacturer/list`, {
+      manufacturerCodes,
+    });
+  }
 }
 
 export function getProducerClient(ctx, data) {
