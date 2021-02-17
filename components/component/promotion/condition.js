@@ -88,6 +88,7 @@ const Condition = (props) => {
                         defaultValue={o.seller ? o.seller : []}
                         options={[{ name: "" }]}
                         type="SELLER"
+                        errors={errors}
                         handleChange={handleChangeProductListOfCondition(
                           index,
                           "SELLER"
@@ -104,6 +105,7 @@ const Condition = (props) => {
                         defaultValue={o.product ? o.product : []}
                         options={[{ name: "" }]}
                         type={selectField}
+                        errors={errors}
                         handleChange={handleChangeProductListOfCondition(
                           index,
                           "PRODUCT"
@@ -145,9 +147,7 @@ const Condition = (props) => {
                         fullWidth
                         error={!!errors["productValue" + index]}
                         required
-                        inputRef={register({
-                          required: "Giá trị không được trống",
-                        })}
+                        inputRef={register()}
                       />
                     </Grid>{" "}
                     <Grid item xs={1}>
@@ -161,7 +161,7 @@ const Condition = (props) => {
                 </Paper>
               ))
             ) : (
-              <Grid item container spacing={2} alignItems="center">
+              <Grid item container spacing={2} alignItems="flex-end">
                 <Grid item container xs={4}>
                   <AutoCompleteField
                     control={control}
@@ -171,6 +171,7 @@ const Condition = (props) => {
                     defaultValue={seller}
                     options={[{ name: "" }]}
                     type="SELLER"
+                    errors={errors}
                     handleChange={handleChangeConditionSeller}
                   />
                 </Grid>
@@ -184,6 +185,7 @@ const Condition = (props) => {
                     defaultValue={list}
                     options={[{ name: "" }]}
                     type={selectField}
+                    errors={errors}
                     handleChange={handleChangeConditionList}
                   />
                 </Grid>
@@ -219,10 +221,7 @@ const Condition = (props) => {
                     }}
                     fullWidth
                     error={!!errors["conditionValue"]}
-                    required
-                    inputRef={register({
-                      required: "Giá trị không được trống",
-                    })}
+                    inputRef={register()}
                   />
                 </Grid>
               </Grid>
