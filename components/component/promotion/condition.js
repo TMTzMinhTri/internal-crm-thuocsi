@@ -61,10 +61,9 @@ const Condition = (props) => {
             options={conditions}
             value={selectField}
             title="Loại điều kiện"
-            option="condition"
           />
         </Grid>
-        {selectField != "" && (
+        {selectField != "" && selectField != defaultCondition.noRule && (
           <Grid item container xs={12}>
             {selectField == defaultCondition.product ? (
               productList.map((o, index) => (

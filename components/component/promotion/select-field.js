@@ -32,7 +32,7 @@ const SelectField = (props) => {
         render={(props) => (
           <NativeSelect
             placeholder=""
-            value={value}
+            value={props.value}
             onChange={(event) => {
               handleChange(event);
               props.onChange(event);

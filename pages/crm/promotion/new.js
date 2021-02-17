@@ -74,15 +74,21 @@ function render(props) {
       selectField: defaultScope.customerLevel,
       registeredBefore: new Date(),
       registeredAfter: new Date(),
-      list: [],
+      list: [
+        {
+          name: "Chọn tất cả",
+        },
+      ],
     },
     {
       selectField: defaultScope.area,
-      list: [],
+      list: [
+        {
+          name: "Chọn tất cả",
+        },
+      ],
     },
   ]);
-
-  console.log(getValues(), "getValues()");
 
   const [conditionObject, setConditionObject] = useState({
     selectField: "",
@@ -118,10 +124,20 @@ function render(props) {
         type: "required",
         message: "Chưa chọn hình thức áp dụng",
       });
+    if (value.condition == "")
+      setError("condition", {
+        type: "required",
+        message: "Chưa chọn điều kiện khuyến mãi",
+      });
     if (value.reward == "")
       setError("reward", {
         type: "required",
         message: "Chưa chọn giá trị khuyến mãi",
+      });
+    if (!value.description || value.description == "")
+      setError("description", {
+        type: "required",
+        message: "Mô tả không được trống",
       });
   };
 
@@ -156,7 +172,6 @@ function render(props) {
   };
 
   const handleChangeConditionField = (key) => (event) => {
-    console.log("handleChangeConditionField");
     conditionObject.list = [];
     setConditionObject({ ...conditionObject, [key]: event.target.value });
   };
@@ -210,13 +225,12 @@ function render(props) {
       productValue: 0,
     };
 
-    console.log(conditionObject, "conditionObject");
-
     setConditionObject({ ...conditionObject });
   };
 
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
+    console.log("onSubmit");
     let value = getValues();
     let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
     let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";
@@ -237,61 +251,67 @@ function render(props) {
       },
     ];
 
-    let sellerObject;
-    if (value.condition != defaultCondition.product) {
-      sellerObject = {
-        sellerCodes: value.seller.map((seller) => seller.code),
-        sellerQuantityType:
-          value.seller[0].name == "Chọn tất cả" ? "ALL" : "MANY",
-        minQuantity: parseInt(value.conditionNumber),
-        minTotalValue: parseInt(value.conditionValue),
-      };
+    let conditions;
+
+    if (value.condition == defaultCondition.noRule)
+      conditions = [{ type: value.condition }];
+    else {
+      let sellerObject;
+      if (value.condition != defaultCondition.product) {
+        sellerObject = {
+          sellerCodes: value.seller.map((seller) => seller.code),
+          sellerQuantityType:
+            value.seller[0].name == "Chọn tất cả" ? "ALL" : "MANY",
+          minQuantity: parseInt(value.conditionNumber),
+          minTotalValue: parseInt(value.conditionValue),
+        };
+      }
+      conditions = [
+        {
+          type: value.condition,
+          minOrderValue: parseInt(value.minValue),
+          productConditions: conditionObject.productList.map((o, index) => {
+            switch (value.condition) {
+              case defaultCondition.ingredient:
+                return {
+                  ...sellerObject,
+                  ingredientCode: value.ingredient.code,
+                };
+              case defaultCondition.producer:
+                return {
+                  ...sellerObject,
+                  producerCode: value.producer.code,
+                };
+              case defaultCondition.product:
+                return {
+                  sellerCodes: value["seller" + index].map(
+                    (seller) => seller.code
+                  ),
+                  sellerQuantityType:
+                    value["seller" + index][0].name == "Chọn tất cả"
+                      ? "ALL"
+                      : "MANY",
+                  productId: value["product" + index].productID,
+                  minQuantity: parseInt(value["productNumber" + index]),
+                  minTotalValue: parseInt(value["productValue" + index]),
+                };
+              case defaultCondition.productCatergory:
+                return {
+                  ...sellerObject,
+                  categoryCode: value.productCategory.code,
+                };
+              case defaultCondition.productTag:
+                return {
+                  ...sellerObject,
+                  productTag: value.productTag.code,
+                };
+              default:
+                break;
+            }
+          }),
+        },
+      ];
     }
-    let conditions = [
-      {
-        type: value.condition,
-        minOrderValue: parseInt(value.minValue),
-        productConditions: conditionObject.productList.map((o, index) => {
-          switch (value.condition) {
-            case defaultCondition.ingredient:
-              return {
-                ...sellerObject,
-                ingredientCode: value.ingredient.code,
-              };
-            case defaultCondition.producer:
-              return {
-                ...sellerObject,
-                producerCode: value.producer.code,
-              };
-            case defaultCondition.product:
-              return {
-                sellerCodes: value["seller" + index].map(
-                  (seller) => seller.code
-                ),
-                sellerQuantityType:
-                  value["seller" + index][0].name == "Chọn tất cả"
-                    ? "ALL"
-                    : "MANY",
-                productId: value["product" + index].productID,
-                minQuantity: parseInt(value["productNumber" + index]),
-                minTotalValue: parseInt(value["productValue" + index]),
-              };
-            case defaultCondition.productCatergory:
-              return {
-                ...sellerObject,
-                categoryCode: value.productCategory.code,
-              };
-            case defaultCondition.productTag:
-              return {
-                ...sellerObject,
-                productTag: value.productTag.code,
-              };
-            default:
-              break;
-          }
-        }),
-      },
-    ];
 
     let rewards;
     switch (value.reward) {
@@ -330,7 +350,7 @@ function render(props) {
             pointValue: parseInt(value.pointValue),
           },
         ];
-        return;
+        break;
 
       default:
         break;
@@ -340,7 +360,7 @@ function render(props) {
       promotionName: value.promotionName,
       promotionType: value.promotionTypeField,
       promotionOrganizer: value.promotionField,
-      description: value.desciption,
+      description: value.description,
       startTime: new Date(value.startTime).toISOString(),
       publicTime: new Date(value.startTime).toISOString(),
       endTime: new Date(value.endTime).toISOString(),
@@ -350,22 +370,15 @@ function render(props) {
       rewards,
     };
 
-    console.log(scopes, "scopesss");
-
-    console.log(conditions, "conditions");
-
-    console.log(rewards, "rewards");
-
-    console.log(body, "body");
-
-    console.log(JSON.stringify(body), "bodyStrintify");
-
-    console.log(getValues());
+    console.log(value, "getValues");
 
     let res = await createPromontion(body);
 
+    console.log(res);
+
     if (res.status == "OK") {
-      toast.success("Tạo mã khuyến mãi thành công");
+      toast.success("Tạo chương trình khuyến mãi thành công");
+      router.back();
     } else {
       toast.error("Xảy ra lỗi");
     }
@@ -373,7 +386,7 @@ function render(props) {
     console.log(res, "res");
   }
 
-  console.log(conditionObject, "conditionObject");
+  console.log(getValues(), "getValues()");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -388,7 +401,6 @@ function render(props) {
               getValues={getValues}
               errors={errors}
               control={control}
-              promotionType={router.query?.type}
               textField={textField}
               errorTextField={errorTextField}
               handleChangeTextField={handleChangeTextField}

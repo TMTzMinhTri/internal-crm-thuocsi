@@ -65,7 +65,9 @@ const AutoCompleteField = (props) => {
 
   const { handleChange } = props;
 
-  const [productList, setProductList] = useState(defaultValue);
+  console.log(defaultValue, "defaultValue");
+
+  let [productList, setProductList] = useState(defaultValue);
 
   const fetchOptions = async (type, value) => {
     switch (type) {
@@ -98,7 +100,9 @@ const AutoCompleteField = (props) => {
     let res = await fetchOptions(type, value);
     if (res?.status == "OK") {
       console.log(res);
-      let arr = productList.concat(res.data);
+      let arr = Array.isArray(productList)
+        ? productList.concat(res.data)
+        : [productList].concat(res.data);
       if (multiple)
         arr.unshift({
           name: "Chọn tất cả",
@@ -112,8 +116,6 @@ const AutoCompleteField = (props) => {
   useEffect(() => {
     handleChangeTextField({ target: { value: "" } });
   }, [type]);
-
-  console.log(defaultValue, "defaultValue", type);
 
   return (
     <Controller
@@ -132,7 +134,6 @@ const AutoCompleteField = (props) => {
               }
             }
             handleChange(event, value);
-            console.log(value, "valuevalue");
             props.onChange(value);
           }}
           getOptionLabel={(option) => option.name}
