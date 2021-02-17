@@ -24,7 +24,6 @@ const InfomationFields = (props) => {
     errors,
     register,
     textField,
-    errorTextField,
     getValues,
     control,
   } = props;
@@ -33,15 +32,13 @@ const InfomationFields = (props) => {
 
   const { promotionField, promotionTypeField } = textField;
 
-  const { promotionError, promotionTypeError } = errorTextField;
-
   const [active, setActive] = useState(false);
 
   const switchActive = () => {
     setActive(!active);
   };
 
-  console.log(getValues("startTime"), "startTime");
+  console.log(getValues(), "getValues");
 
   return (
     <Paper
@@ -57,7 +54,6 @@ const InfomationFields = (props) => {
               errors={errors}
               title="Bên tổ chức"
               value={promotionField}
-              error={promotionError}
               options={promotions}
               handleChange={handleChangeTextField("promotionField")}
             />
@@ -69,7 +65,6 @@ const InfomationFields = (props) => {
               errors={errors}
               title="Hình thức áp dụng"
               value={promotionTypeField}
-              error={promotionTypeError}
               options={promotionTypes}
               handleChange={handleChangeTextField("promotionTypeField")}
             />
