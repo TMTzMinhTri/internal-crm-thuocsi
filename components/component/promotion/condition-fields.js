@@ -44,8 +44,6 @@ const ConditionFields = (props) => {
 
   const { scopeObject, conditionObject, rewardObject } = object;
 
-  console.log(errors, "errors");
-
   return (
     <>
       <CardContent>

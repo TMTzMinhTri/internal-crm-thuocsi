@@ -46,60 +46,63 @@ const InfomationFields = (props) => {
       style={{ padding: "0px 10px 20px 10px", margin: "10px" }}
     >
       <CardContent>
-        <Grid spacing={2} container>
-          <Grid item xs={6}>
-            <SelectField
-              name="promotionField"
-              control={control}
-              errors={errors}
-              title="Bên tổ chức"
-              value={promotionField}
-              options={promotions}
-              handleChange={handleChangeTextField("promotionField")}
-            />
+        <Grid spacing={2} container direction="column">
+          <Grid container item xs={12} spacing={2}>
+            <Grid item xs={6}>
+              <SelectField
+                name="promotionField"
+                control={control}
+                errors={errors}
+                title="Bên tổ chức"
+                value={promotionField}
+                options={promotions}
+                handleChange={handleChangeTextField("promotionField")}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <SelectField
+                name="promotionTypeField"
+                control={control}
+                errors={errors}
+                title="Hình thức áp dụng"
+                value={promotionTypeField}
+                options={promotionTypes}
+                handleChange={handleChangeTextField("promotionTypeField")}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <SelectField
-              name="promotionTypeField"
-              control={control}
-              errors={errors}
-              title="Hình thức áp dụng"
-              value={promotionTypeField}
-              options={promotionTypes}
-              handleChange={handleChangeTextField("promotionTypeField")}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <TextField
-              name="promotionName"
-              label="Tên khuyến mãi"
-              placeholder=""
-              defaultValue={dataRender.promotionName}
-              helperText={errors.promotionName?.message}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              fullWidth
-              error={!!errors.promotionName}
-              required
-              inputRef={register({
-                required: "Tên khuyến mãi không được để trống",
-                maxLength: {
-                  value: 250,
-                  message: "Tên khuyến mãi không được vượt quá 250 kí tự",
-                },
-                minLength: {
-                  value: 6,
-                  message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự",
-                },
-                pattern: {
-                  value: /[A-Za-z]/,
-                  message: "Tên khuyến mãi phải có kí tự là chứ số",
-                },
-              })}
-            />
-          </Grid>
-          {/* <Grid item xs={6}>
+          <Grid container item xs={12} spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                name="promotionName"
+                label="Tên khuyến mãi"
+                placeholder=""
+                defaultValue={dataRender.promotionName}
+                helperText={errors.promotionName?.message}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                error={!!errors.promotionName}
+                required
+                inputRef={register({
+                  required: "Tên khuyến mãi không được để trống",
+                  maxLength: {
+                    value: 250,
+                    message: "Tên khuyến mãi không được vượt quá 250 kí tự",
+                  },
+                  minLength: {
+                    value: 6,
+                    message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự",
+                  },
+                  pattern: {
+                    value: /[A-Za-z]/,
+                    message: "Tên khuyến mãi phải có kí tự là chứ số",
+                  },
+                })}
+              />
+            </Grid>
+            {/* <Grid item xs={6}>
             <p style={{ margin: "5px 0", fontSize: 12 }}>Trạng thái</p>
             <FormControlLabel
               control={
@@ -108,7 +111,8 @@ const InfomationFields = (props) => {
               label={active ? "Đang hoạt động" : "Chưa kích hoạt"}
             />
           </Grid> */}
-          <Grid container item xs={6} spacing={1}>
+          </Grid>
+          <Grid container item xs={12} spacing={2}>
             <Grid item xs={6}>
               <TextField
                 name="startTime"
@@ -147,6 +151,36 @@ const InfomationFields = (props) => {
                     value: getValues("startTime"),
                     message:
                       "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+                  },
+                })}
+              />
+            </Grid>
+          </Grid>
+          <Grid container item xs={12} spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                name="publicTime"
+                label="Thời gian cho phép hiển thị"
+                placeholder=""
+                type="datetime-local"
+                helperText={errors.publicTime?.message}
+                error={!!errors.publicTime}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                required
+                inputRef={register({
+                  required: "Vui lòng chọn thời gian hiển thị",
+                  min: {
+                    value: getValues("startTime"),
+                    message:
+                      "Thời gian hiển thị phải lớn hơn thời gian bắt đầu",
+                  },
+                  max: {
+                    value: getValues("endTime"),
+                    message:
+                      "Thời gian hiển thị phải nhỏ hơn thời gian kết thúc",
                   },
                 })}
               />

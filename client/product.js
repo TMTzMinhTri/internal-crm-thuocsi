@@ -124,12 +124,6 @@ class ProductClient extends APIClient {
     });
   }
 
-  getProducerClient(q) {
-    return this.callFromClient("GET", `${PREFIX}/manufacturer/list`, {
-      q: q,
-    });
-  }
-
   getIngredientList(q) {
     return this.callFromClient("GET", `${PREFIX}/ingredient/list`, {
       q: q,
