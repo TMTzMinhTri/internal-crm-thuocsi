@@ -124,6 +124,38 @@ function render(props) {
         type: "required",
         message: "Chưa chọn hình thức áp dụng",
       });
+    if (value.area == "")
+      setError("area", {
+        type: "required",
+        message: "Chưa chọn khu vực áp dụng",
+      });
+    if (value.seller.length == 0)
+      setError("seller", {
+        type: "required",
+        message: "Chưa chọn người bán",
+      });
+    if (value.condition == defaultCondition.product) {
+      conditionObject.list.map((o, index) => {
+        if (getValues("seller" + index).length == 0)
+          setError("seller" + index, {
+            type: "required",
+            message: "Chưa chọn người bán",
+          });
+      });
+    }
+    if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
+      setError(displayNameBasedOnCondition(conditionObject.selectField), {
+        type: "required",
+        message:
+          displayLabelBasedOnCondition(conditionObject.selectField) +
+          " không được bỏ trống",
+      });
+    }
+    if (value.customerLevel == "")
+      setError("customerLevel", {
+        type: "required",
+        message: "Chưa chọn đối tượng áp dụng",
+      });
     if (value.condition == "")
       setError("condition", {
         type: "required",
@@ -230,7 +262,6 @@ function render(props) {
 
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
-    console.log("onSubmit");
     let value = getValues();
     let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
     let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";

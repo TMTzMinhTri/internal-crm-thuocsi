@@ -22,9 +22,19 @@ class TagClient extends APIClient {
     });
   }
 
-  getTagByTagCodeClient(tagCodes) {
-    console.log("tageCodes", tagCodes);
+  getTagByTagCodeClient(tagCode) {
+    return this.callFromClient("GET", `${prefix}/tags`, {
+      tagCode: tagCode,
+    });
+  }
+
+  getTagByTagCode(tagCodes) {
     return this.callFromNextJS("POST", `${prefix}/tags/list`, {
+      tagCodes,
+    });
+  }
+  getTagByTagCodesClient(tagCodes) {
+    return this.callFromClient("POST", `${prefix}/tags/list`, {
       tagCodes,
     });
   }

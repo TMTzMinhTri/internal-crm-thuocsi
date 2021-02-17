@@ -50,28 +50,9 @@ const Scope = (props) => {
                     <>
                       <Grid item container xs={3}>
                         <TextField
-                          id={"registeredBefore"}
-                          name={"registeredBefore"}
-                          label="Được kích hoạt từ ngày"
-                          placeholder=""
-                          defaultValue={registeredBefore}
-                          helperText={errors.registeredBefore?.message}
-                          type="datetime-local"
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
-                          fullWidth
-                          error={!!errors.registeredBefore}
-                          inputRef={register({
-                            required: "Vui lòng chọn thời gian",
-                          })}
-                        />
-                      </Grid>
-                      <Grid item container xs={3}>
-                        <TextField
                           id={"registeredAfter"}
                           name={"registeredAfter"}
-                          label="Được kích hoạt đến ngày"
+                          label="Được kích hoạt từ ngày"
                           placeholder=""
                           defaultValue={registeredAfter}
                           helperText={errors.registeredAfter?.message}
@@ -83,8 +64,27 @@ const Scope = (props) => {
                           error={!!errors.registeredAfter}
                           inputRef={register({
                             required: "Vui lòng chọn thời gian",
+                          })}
+                        />
+                      </Grid>
+                      <Grid item container xs={3}>
+                        <TextField
+                          id={"registeredBefore"}
+                          name={"registeredBefore"}
+                          label="Được kích hoạt đến ngày"
+                          placeholder=""
+                          defaultValue={registeredBefore}
+                          helperText={errors.registeredBefore?.message}
+                          type="datetime-local"
+                          InputLabelProps={{
+                            shrink: true,
+                          }}
+                          fullWidth
+                          error={!!errors.registeredBefore}
+                          inputRef={register({
+                            required: "Vui lòng chọn thời gian",
                             min: {
-                              value: getValues("registeredBefore"),
+                              value: getValues("registeredAfter"),
                               message:
                                 "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
                             },

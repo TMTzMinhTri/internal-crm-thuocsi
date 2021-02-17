@@ -471,7 +471,7 @@ export function displayLabelBasedOnCondition(type) {
     case "PRODUCT":
       return "Tên sản phẩm";
     case "PRODUCER":
-      return "Người bán";
+      return "Nhà sản xuất";
     case "INGREDIENT":
       return "Thành phần";
     case "PRODUCT_TAG":

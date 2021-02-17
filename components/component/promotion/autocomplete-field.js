@@ -3,6 +3,7 @@ import { Autocomplete } from "@material-ui/lab";
 import { getAreaClient } from "client/area";
 import { getCategoryClient } from "client/category";
 import { getCustomerClient } from "client/customer";
+import { getProducerClient } from "client/producer";
 import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 import { getTagClient } from "client/tag";
@@ -39,7 +40,7 @@ async function searchAreaList(q) {
 }
 
 async function searchProducerList(q) {
-  return await getProductClient().getProducerClient(q);
+  return await getProducerClient().getProducerClient(q);
 }
 
 async function searchSellerList(q) {
@@ -61,13 +62,14 @@ const AutoCompleteField = (props) => {
     required,
     control,
     name,
+    errors,
   } = props;
 
   const { handleChange } = props;
 
-  console.log(defaultValue, "defaultValue");
-
-  let [productList, setProductList] = useState(defaultValue);
+  let [productList, setProductList] = useState(
+    defaultValue ? defaultValue : []
+  );
 
   const fetchOptions = async (type, value) => {
     switch (type) {
@@ -99,7 +101,6 @@ const AutoCompleteField = (props) => {
     let value = event.target.value;
     let res = await fetchOptions(type, value);
     if (res?.status == "OK") {
-      console.log(res);
       let arr = Array.isArray(productList)
         ? productList.concat(res.data)
         : [productList].concat(res.data);
@@ -142,6 +143,8 @@ const AutoCompleteField = (props) => {
           filterSelectedOptions
           renderInput={(params) => (
             <TextField
+              error={!!errors?.[name]}
+              helperText={errors?.[name]?.message}
               required={required}
               {...params}
               variant="standard"
