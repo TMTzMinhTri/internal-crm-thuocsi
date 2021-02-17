@@ -11,6 +11,7 @@ import {getPromoClient} from "../../../client/promo";
 import VoucherCodeBody from "../../../components/component/promotion/voucher-code-body";
 import {getVoucherClient} from "../../../client/voucher";
 import {getCustomerClient} from "../../../client/customer";
+import {formatUTCTime} from "../../../components/component/util";
 
 const useStyles = makeStyles(theme => ({
     root: {
@@ -77,8 +78,11 @@ function render(props) {
     const classes = useStyles()
     const toast = useToast();
     const router = useRouter();
+
+    console.log('props',props.promotion)
+
     const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm(
-        {defaultValues : {promotionId: !!router.query.promotionId ? props.promotion?.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0] : {}},mode: "onChange"}
+        {defaultValues : {startTime: router.query.promotionId ? formatUTCTime(props.promotion[0].startTime) : "",endTime: router.query.promotionId ? formatUTCTime(props.promotion[0].endTime) : "",promotionId: !!router.query.promotionId ? props.promotion?.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0] : {}},mode: "onChange"}
     );
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
