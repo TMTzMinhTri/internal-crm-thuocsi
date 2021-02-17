@@ -419,9 +419,9 @@ function render(props) {
           if (ob.sellerQuantityType == "ALL") {
             conditionObject.productList[i].seller = [{ name: "Chọn tất cả" }];
           } else {
-            let response = await getListSellerByCodesClient(
-              o.productConditions[0].sellerCodes
-            );
+            console.log();
+            let response = await getListSellerByCodesClient(ob.sellerCodes);
+            console.log(response, "response");
             if (response?.status == "OK") {
               conditionObject.productList[i].seller = response.data;
               setConditionObject({ ...conditionObject });
