@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from "react";
+import { Button, CircularProgress, Grid, MenuItem, TextField } from "@material-ui/core";
+import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getFeeClient } from "client/fee";
+import globalStyles from "components/css-global.module.css";
 import Head from "next/head";
 import Link from "next/link";
-import { Box, Button, CircularProgress, Grid, MenuItem, Paper, TextField, Typography } from "@material-ui/core";
+import AppCRM from "pages/_layout";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
-import AppCMS from "pages/_layout";
-import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-
-import styles from "./fee.module.css";
 import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
-import { getFeeClient } from "client/fee";
-
-import globalStyles from "components/css-global.module.css";
 
 const defaultFeeType = FeeType.FIXED_REVENUE;
 
@@ -49,7 +46,7 @@ export async function getServerSideProps(ctx) {
 }
 
 function FeeNotFound({ message = "Không tìm thấy kết quả phù hợp" }) {
-    return (<AppCMS select="/crm/fee">
+    return (<AppCRM select="/crm/fee">
         <Head>
             <title>Phí dịch vụ và giá bán</title>
         </Head>
@@ -61,7 +58,7 @@ function FeeNotFound({ message = "Không tìm thấy kết quả phù hợp" }) 
             </Link>
             </div>
         </div>
-    </AppCMS>)
+    </AppCRM>)
 }
 
 const defaultFormValues = {
@@ -106,17 +103,31 @@ function render({ data: { data, status, message } }) {
         setLoading(false);
     }
 
+    let breadcrumb = [
+        {
+            name: "Trang chủ",
+            link: "/crm"
+        },
+        {
+            name: "Phí dịch vụ",
+            link: "/crm/fee"
+        },
+        {
+            name: "Cập nhật phí dịch vụ"
+        }
+    ]
+
     return (
-        <AppCMS select="/crm/fee">
+        <AppCRM select="/crm/fee" breadcrumb={breadcrumb}>
             <Head>
                 <title>Phí dịch vụ và giá bán</title>
             </Head>
-            <Box component={Paper} display="block">
-                <Box padding={2} pb={0}>
-                    <Typography variant="h5">Phí dịch vụ</Typography>
-                </Box>
-                <Box margin={3}>
-                    <form noValidate>
+            <MyCard>
+                <MyCardHeader title={'Công thức phí #' + data.code }/>
+            </MyCard>
+            <MyCard>
+                <form noValidate>
+                    <MyCardContent>
                         <Grid container spacing={4} md={6}>
                             <Grid item xs={12}>
                                 <TextField
@@ -205,10 +216,10 @@ function render({ data: { data, status, message } }) {
                             </Button>
                             </Grid>
                         </Grid>
-                    </form>
-                </Box>
-            </Box>
-        </AppCMS>
+                    </MyCardContent>
+                </form>
+            </MyCard>
+        </AppCRM>
     )
 }
 
