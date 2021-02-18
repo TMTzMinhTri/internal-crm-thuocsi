@@ -99,7 +99,7 @@ export default function VoucherCodeBody(props) {
                         if (level && level.status === "OK") {
                             let listCustomerPromotion = []
                             level.data.forEach(l => {
-                                if (scope.customerLevelCodes.includes(l.code)) {
+                                if (scope.customerLevelCodes?.includes(l.code)) {
                                     listCustomerPromotion.push(l)
                                 }
                             })
@@ -168,7 +168,7 @@ export default function VoucherCodeBody(props) {
                         if (level && level.status === "OK") {
                             let listCustomerPromotion = []
                             level.data.forEach(l => {
-                                if (scope.customerLevelCodes.includes(l.code)) {
+                                if (scope.customerLevelCodes?.includes(l.code)) {
                                     listCustomerPromotion.push(l)
                                 }
                             })
@@ -233,7 +233,7 @@ export default function VoucherCodeBody(props) {
                     />
                 </Grid>
                 <Grid item xs={3} >
-                        <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu</h5>
+                        <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu <span style={{color : 'red'}}> *</span></h5>
                         <TextField
                             id="startTime"
                             name="startTime"
@@ -252,7 +252,7 @@ export default function VoucherCodeBody(props) {
                         />
                     </Grid>
                 <Grid item xs={3}  >
-                        <h5 className={cssStyle.titleLabel}>Thời gian kết thúc</h5>
+                        <h5 className={cssStyle.titleLabel}>Thời gian kết thúc <span style={{color : 'red'}}> *</span></h5>
                         <TextField
                             id="endTime"
                             name="endTime"
@@ -271,7 +271,7 @@ export default function VoucherCodeBody(props) {
                         />
                     </Grid>
                 <Grid item xs={6} >
-                    <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị
+                    <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị <span style={{color : 'red'}}> *</span>
                         <Tooltip title="Tới thời gian này sẽ cho hiển thị trên app/web thuocsi">
                                 <span>
                                     <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
