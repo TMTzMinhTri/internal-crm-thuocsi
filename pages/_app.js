@@ -1,11 +1,13 @@
 import { faDollarSign, faPercentage, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { Backdrop, CircularProgress, createMuiTheme, ThemeProvider } from '@material-ui/core';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
 import Loader from '@thuocsi/nextjs-components/loader/loader';
 import { ToastProvider } from "@thuocsi/nextjs-components/toast/providers/ToastProvider";
 import { useRouter } from "next/router";
 import React, { useEffect } from 'react';
 import styles from "./global.css";
+
 const menu = [{
             key: "CUSTOMER",
             name: "Khách hàng",
@@ -104,6 +106,7 @@ export default function App(props) {
     if (pageProps.loggedIn) {
         return (
             <ThemeProvider theme={theme}>
+                <CssBaseline />
                 <ToastProvider>
                     <Layout className={styles.blank} loggedInUserInfo={pageProps.loggedInUserInfo} menu={menu} title="CRM">
                         <Component {...pageProps} />
