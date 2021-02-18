@@ -11,6 +11,7 @@ import { getPromoClient } from "../../../client/promo";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import {
   defaultCondition,
+  defaultPromotionStatus,
   defaultReward,
   defaultScope,
 } from "../../../components/component/constant";
@@ -98,8 +99,8 @@ function render(props) {
     selectField: "",
     minValue: 0,
     seller: [],
-    productList: [{ productName: "", productNumber: 0, productValue: 0 }],
-    list: [],
+    productList: [{ productName: "", minQuantity: 0, minTotalValue: 0 }],
+    item: {},
   });
 
   const [rewardObject, setRewardObject] = useState({
@@ -133,20 +134,16 @@ function render(props) {
         type: "required",
         message: "Chưa chọn khu vực áp dụng",
       });
-    if (value.seller?.length == 0)
-      setError("seller", {
-        type: "required",
-        message: "Chưa chọn người bán",
-      });
-    if (value.condition == defaultCondition.product) {
-      conditionObject.list.map((o, index) => {
-        if (getValues("seller" + index).length == 0)
-          setError("seller" + index, {
-            type: "required",
-            message: "Chưa chọn người bán",
-          });
-      });
-    }
+    conditionObject.productList.map((o, index) => {
+      if (
+        !getValues("seller" + index) ||
+        getValues("seller" + index).length == 0
+      )
+        setError("seller" + index, {
+          type: "required",
+          message: "Chưa chọn người bán",
+        });
+    });
     if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
       setError(displayNameBasedOnCondition(conditionObject.selectField), {
         type: "required",
@@ -208,15 +205,16 @@ function render(props) {
   };
 
   const handleChangeConditionField = (key) => (event) => {
-    conditionObject.list = [];
+    conditionObject.item = {};
+    conditionObject.seller = [];
     setConditionObject({ ...conditionObject, [key]: event.target.value });
   };
 
   const handleAddProductOfProductList = () => {
     conditionObject.productList.push({
       productName: "",
-      productNumber: 0,
-      productValue: 0,
+      minQuantity: 0,
+      minTotalValue: 0,
     });
     setConditionObject({ ...conditionObject });
   };
@@ -224,8 +222,8 @@ function render(props) {
   const handleRemoveProductOfProductList = (index) => {
     let value = getValues();
     for (let i = index; i < conditionObject.productList.length - 1; i++) {
-      setValue("productNumber" + i, value["productNumber" + (i + 1)]);
-      setValue("productValue" + i, value["productValue" + (i + 1)]);
+      setValue("minQuantity" + i, value["minQuantity" + (i + 1)]);
+      setValue("minTotalValue" + i, value["minTotalValue" + (i + 1)]);
     }
 
     conditionObject.productList.splice(index, 1);
@@ -239,7 +237,7 @@ function render(props) {
   };
 
   const handleChangeConditionList = (event, value) => {
-    conditionObject.list = value;
+    conditionObject.item = value;
     setConditionObject({ ...conditionObject });
   };
 
@@ -257,8 +255,8 @@ function render(props) {
         type != "SELLER" ? conditionObject.productList[index]?.seller : value,
       product:
         type == "SELLER" ? conditionObject.productList[index]?.product : value,
-      productNumber: 0,
-      productValue: 0,
+      minQuantity: 0,
+      minTotalValue: 0,
     };
 
     setConditionObject({ ...conditionObject });
@@ -313,11 +311,11 @@ function render(props) {
       let sellerObject;
       if (value.condition != defaultCondition.product) {
         sellerObject = {
-          sellerCodes: value.seller.map((seller) => seller.code),
+          sellerCodes: value.seller0.map((seller) => seller.code),
           sellerQuantityType:
-            value.seller[0].name == "Chọn tất cả" ? "ALL" : "MANY",
-          minQuantity: parseInt(value.conditionNumber),
-          minTotalValue: parseInt(value.conditionValue),
+            value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
+          minQuantity: parseInt(value.minQuantity),
+          minTotalValue: parseInt(value.minTotalValue),
         };
       }
       conditions = [
@@ -346,10 +344,10 @@ function render(props) {
                       ? "ALL"
                       : "MANY",
                   productId: value["product" + index].productID,
-                  minQuantity: parseInt(value["productNumber" + index]),
-                  minTotalValue: parseInt(value["productValue" + index]),
+                  minQuantity: parseInt(value["minQuantity" + index]),
+                  minTotalValue: parseInt(value["minTotalValue" + index]),
                 };
-              case defaultCondition.productCatergory:
+              case defaultCondition.productCategory:
                 return {
                   ...sellerObject,
                   categoryCode: value.productCategory.code,
@@ -416,9 +414,11 @@ function render(props) {
       promotionOrganizer: value.promotionField,
       description: value.description,
       startTime: new Date(value.startTime).toISOString(),
-      publicTime: new Date(value.startTime).toISOString(),
+      publicTime: new Date(value.publicTime).toISOString(),
       endTime: new Date(value.endTime).toISOString(),
-      status: "ACTIVE",
+      status: value.status
+        ? defaultPromotionStatus.ACTIVE
+        : defaultPromotionStatus.EXPIRED,
       scopes,
       conditions,
       rewards,
@@ -434,11 +434,7 @@ function render(props) {
     } else {
       toast.error(res.message);
     }
-
-    console.log(res, "res");
   }
-
-  console.log(getValues(), "getValues()");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -453,6 +449,7 @@ function render(props) {
               getValues={getValues}
               errors={errors}
               control={control}
+              setValue={setValue}
               textField={textField}
               errorTextField={errorTextField}
               handleChangeTextField={handleChangeTextField}

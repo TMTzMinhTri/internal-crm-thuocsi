@@ -97,7 +97,7 @@ export const defaultScope = {
 };
 
 export const defaultCondition = {
-  productCatergory: "PRODUCT_CATEGORY",
+  productCategory: "PRODUCT_CATEGORY",
   producer: "PRODUCER",
   ingredient: "INGREDIENT",
   productTag: "PRODUCT_TAG",

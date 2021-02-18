@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import {
   CardContent,
@@ -15,6 +15,7 @@ import {
 } from "../constant";
 import SelectField from "./select-field";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { Controller } from "react-hook-form";
 
 const InfomationFields = (props) => {
   const {
@@ -34,24 +35,38 @@ const InfomationFields = (props) => {
     edit = false,
     status,
     promotionId,
+    setValue,
   } = props;
 
   const { handleChangeTextField, updateStatusPromotion } = props;
 
   const toast = useToast();
 
+  let value = getValues();
+
   const { promotionField, promotionTypeField } = textField;
 
-  const [active, setActive] = useState(status == "ACTIVE" ? true : false);
+  const [active, setActive] = useState(true);
 
   const switchActive = async () => {
-    let res = await updateStatusPromotion(
-      promotionId,
-      !active ? defaultPromotionStatus.EXPIRED : defaultPromotionStatus.ACTIVE
-    );
-    if (res?.status == "OK") setActive(!active);
-    else toast.error(res.message);
+    if (edit) {
+      let res = await updateStatusPromotion(
+        promotionId,
+        active ? defaultPromotionStatus.EXPIRED : defaultPromotionStatus.ACTIVE
+      );
+      if (res?.status == "OK") setActive(!active);
+      else toast.error(res.message);
+    } else {
+      setActive(!active);
+      setValue("status", !active);
+    }
   };
+
+  useEffect(() => {
+    setActive(edit ? value.status : true);
+  }, [value.status]);
+
+  console.log(active, "active");
 
   return (
     <Paper
@@ -191,21 +206,26 @@ const InfomationFields = (props) => {
                   })}
                 />
               </Grid>
-              {edit && (
-                <Grid item xs={5}>
-                  <p style={{ margin: "0px 5px", fontSize: 12 }}>Trạng thái</p>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={active}
-                        onChange={switchActive}
-                        name="gilad"
-                      />
-                    }
-                    label={active ? "Đang hoạt động" : "Chưa kích hoạt"}
-                  />
-                </Grid>
-              )}
+              <Grid item xs={5}>
+                <p style={{ margin: "0px 5px", fontSize: 12 }}>Trạng thái</p>
+                <Controller
+                  name="status"
+                  defaultValue={active}
+                  control={control}
+                  render={(props) => (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={active}
+                          onChange={switchActive}
+                          name="gilad"
+                        />
+                      }
+                      label={active ? "Đang hoạt động" : "Chưa kích hoạt"}
+                    />
+                  )}
+                />
+              </Grid>
             </Grid>
           </Grid>
         </Grid>
