@@ -83,7 +83,7 @@ const Scope = (props) => {
                             min: {
                               value: getValues("registeredAfter"),
                               message:
-                                "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+                                "Thời gian sau phải lớn hơn thời gian trước",
                             },
                           })}
                         />

@@ -301,8 +301,6 @@ function render(props) {
       },
     ];
 
-    console.log(scopes, "SCOPES");
-
     let conditions;
 
     if (value.condition == defaultCondition.noRule)
