@@ -9,9 +9,10 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { getCommonAPI } from 'client/common';
 import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
-import { unknownErrorText, actionErrorText } from "components/commonErrors";
+import { unknownErrorText } from "components/commonErrors";
 import { NotFound } from "components/components-global";
 import { scopes, statuses } from "components/global";
 import MuiSingleAuto from "components/muiauto/single";
@@ -22,7 +23,6 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import { getCommonAPI } from 'client/common';
 
 export async function loadData(ctx) {
     let data = {
@@ -310,7 +310,7 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
                                                                     pattern: {
-                                                                        value: /^([a-z0-9])+([\._][a-z0-9]+)*@([a-z0-9]+\.)+[a-z0-9]+$/,
+                                                                        value: /^([a-z0-9])+([\._+][a-z0-9]+)*@([a-z0-9]+\.)+[a-z0-9]+$/,
                                                                         message: "Email không hợp lệ",
                                                                     }
                                                                 })
