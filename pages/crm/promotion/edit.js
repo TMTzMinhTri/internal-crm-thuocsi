@@ -383,10 +383,11 @@ function render(props) {
           case defaultScope.customerLevel:
             arrAll = await getListLevelClient();
             o.customerLevelCodes.map((code) =>
-              scopeObject[index].list.push(
+              scopeObject[index].list.unshift(
                 arrAll.data.find((v) => v.code == code)
               )
             );
+            setValue("customerLevel", scopeObject[index].list);
             break;
           case defaultScope.area:
             arrAll = await getListAreaClient();
@@ -395,6 +396,7 @@ function render(props) {
                 arrAll.data.find((v) => v.code == code)
               )
             );
+            setValue("area", scopeObject[index].list);
             break;
           default:
             break;
@@ -469,9 +471,8 @@ function render(props) {
         switch (o.type) {
           case defaultCondition.productTag:
             o.productConditions.map(async (ob) => {
-              console.log("here", [ob.productTag]);
               res = await getProductTagByCodeClient([ob.productTag]);
-              console.log(res, "info");
+
               if (res?.status == "OK") {
                 setConditionObject({ ...conditionObject, item: res.data[0] });
                 setValue("productTag", res.data[0]);
@@ -510,15 +511,24 @@ function render(props) {
     });
 
     if (rewards[0].type == defaultReward.gift) {
+      rewards[0].gifts.map((o) => {
+        rewardObject.attachedProduct.unshift({
+          product: [],
+          number: o.quantity,
+        });
+        setRewardObject({ ...rewardObject });
+      });
       rewards[0].gifts.map(async (gift, index) => {
+        setValue("number" + index, gift.quantiy);
         let res = await getListProductByIdsClient([gift.productId]);
-        if (res?.status == "OK")
-          rewardObject.attachedProduct.push({
+        if (res?.status == "OK") {
+          rewardObject.attachedProduct[index] = {
             product: res.data[0],
             number: gift.quantity,
-          });
-        setValue("number" + index, gift.quantiy);
-        setRewardObject({ ...rewardObject });
+          };
+          setValue("gift" + index, res.data[0]);
+          setRewardObject({ ...rewardObject });
+        }
       });
     }
   };
@@ -541,7 +551,7 @@ function render(props) {
     return;
   };
 
-  console.log(conditionObject, "conditionObject");
+  console.log(rewardObject, "rewardObject");
 
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {

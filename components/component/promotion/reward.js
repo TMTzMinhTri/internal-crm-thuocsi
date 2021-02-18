@@ -190,7 +190,7 @@ const Reward = (props) => {
                           error={!!errors["number" + index]}
                           required
                           inputRef={register({
-                            required: "Vui lòng chọn thời gian kết thúc",
+                            required: "Vui lòng chọn số lượng",
                           })}
                         />
                       </Grid>
