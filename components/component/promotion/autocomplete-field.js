@@ -79,7 +79,7 @@ const AutoCompleteField = (props) => {
         return await searchAreaList(value);
       case defaultScope.customerLevel:
         return await searchCustomerList();
-      case defaultCondition.productCatergory:
+      case defaultCondition.productCategory:
         return await searchCategoryList(value);
       case defaultCondition.productTag:
         return await searchTagList(value);
@@ -121,7 +121,7 @@ const AutoCompleteField = (props) => {
   return (
     <Controller
       name={name}
-      render={(props) => (
+      render={(render) => (
         <Autocomplete
           fullWidth
           multiple={multiple}
@@ -134,8 +134,10 @@ const AutoCompleteField = (props) => {
                 value = isAll;
               }
             }
+            console.log(value, "value");
             handleChange(event, value);
-            props.onChange(value);
+            render.onChange(value);
+            console.log(render.value, "render.value");
           }}
           getOptionLabel={(option) => option.name}
           value={defaultValue}
@@ -156,7 +158,7 @@ const AutoCompleteField = (props) => {
         />
       )}
       control={control}
-      defaultValue={defaultValue}
+      // defaultValue={defaultValue}
     />
   );
 };
