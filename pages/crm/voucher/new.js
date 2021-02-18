@@ -79,8 +79,6 @@ function render(props) {
     const toast = useToast();
     const router = useRouter();
 
-    console.log('props',props.promotion)
-
     const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm(
         {defaultValues : {startTime: router.query.promotionId ? formatUTCTime(props.promotion[0].startTime) : "",endTime: router.query.promotionId ? formatUTCTime(props.promotion[0].endTime) : "",promotionId: !!router.query.promotionId ? props.promotion?.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0] : {}},mode: "onChange"}
     );
