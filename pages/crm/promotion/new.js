@@ -23,6 +23,10 @@ import {
   MyCardContent,
   MyCardHeader,
 } from "@thuocsi/nextjs-components/my-card/my-card";
+import {
+  displayLabelBasedOnCondition,
+  displayNameBasedOnCondition,
+} from "components/component/util";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
@@ -129,7 +133,7 @@ function render(props) {
         type: "required",
         message: "Chưa chọn khu vực áp dụng",
       });
-    if (value.seller.length == 0)
+    if (value.seller?.length == 0)
       setError("seller", {
         type: "required",
         message: "Chưa chọn người bán",
@@ -260,6 +264,24 @@ function render(props) {
     setConditionObject({ ...conditionObject });
   };
 
+  const checkRegisterdTime = (value) => {
+    if (value.registeredAfter != "" && value.registeredBefore != "") {
+      return {
+        registeredBefore: new Date(value.registeredBefore).toISOString(),
+        registeredAfter: new Date(value.registeredAfter).toISOString(),
+      };
+    }
+    if (value.registeredAfter != "") {
+      return { registeredAfter: new Date(value.registeredAfter).toISOString() };
+    }
+    if (value.registeredBefore != "") {
+      return {
+        registeredBefore: new Date(value.registeredBefore).toISOString(),
+      };
+    }
+    return;
+  };
+
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
     let value = getValues();
@@ -272,8 +294,7 @@ function render(props) {
         customerLevelCodes: isCustomerLevelAll
           ? []
           : value.customerLevel.map((o) => o.code),
-        registeredBefore: new Date(value.registeredBefore).toISOString(),
-        registeredAfter: new Date(value.registeredAfter).toISOString(),
+        ...checkRegisterdTime(value),
       },
       {
         type: defaultScope.area,
@@ -281,6 +302,8 @@ function render(props) {
         areaCodes: isAreaAll ? [] : value.area.map((o) => o.code),
       },
     ];
+
+    console.log(scopes, "SCOPES");
 
     let conditions;
 
@@ -401,8 +424,6 @@ function render(props) {
       rewards,
     };
 
-    console.log(value, "getValues");
-
     let res = await createPromontion(body);
 
     console.log(res);
@@ -411,7 +432,7 @@ function render(props) {
       toast.success("Tạo chương trình khuyến mãi thành công");
       router.back();
     } else {
-      toast.error("Xảy ra lỗi");
+      toast.error(res.message);
     }
 
     console.log(res, "res");

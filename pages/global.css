@@ -21,3 +21,7 @@ body {
 .backdrop {
     color: #fff;
 }
+
+.MuiFormLabel-asterisk {
+    color: red
+}
