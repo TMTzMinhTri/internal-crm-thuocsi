@@ -165,8 +165,8 @@ function render(props) {
       startTime: formatUTCTime(startTime),
       publicTime: formatUTCTime(publicTime),
       promotionName: promotionName,
-      promotionField: promotionOrganizer,
-      promotionTypeField: promotionType,
+      promotionOrganizer: promotionOrganizer,
+      promotionType: promotionType,
       status: status == "ACTIVE" ? true : false,
     },
   });
@@ -177,8 +177,8 @@ function render(props) {
 
   const [textField, setTextField] = useState({
     descriptionField: "",
-    promotionField: "",
-    promotionTypeField: "",
+    promotionOrganizer: "",
+    promotionType: "",
   });
 
   const [scopeObject, setScopeObject] = useState([
@@ -221,13 +221,13 @@ function render(props) {
 
   const validate = () => {
     let value = getValues();
-    if (value.promotionField == "")
-      setError("promotionField", {
+    if (value.promotionOrganizer == "")
+      setError("promotionOrganizer", {
         type: "required",
         message: "Chưa chọn bên tổ chức",
       });
-    if (value.promotionTypeField == "")
-      setError("promotionTypeField", {
+    if (value.promotionType == "")
+      setError("promotionType", {
         type: "required",
         message: "Chưa chọn hình thức áp dụng",
       });
@@ -690,8 +690,8 @@ function render(props) {
     let body = {
       promotionId: promotionId,
       promotionName: value.promotionName,
-      promotionType: value.promotionTypeField,
-      promotionOrganizer: value.promotionField,
+      promotionType: value.promotionType,
+      promotionOrganizer: value.promotionOrganizer,
       description: value.description,
       startTime: new Date(value.startTime).toISOString(),
       publicTime: new Date(value.publicTime).toISOString(),

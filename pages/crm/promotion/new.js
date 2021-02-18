@@ -65,7 +65,7 @@ function render(props) {
   const [textField, setTextField] = useState({
     descriptionField: "",
     promotionField: "",
-    promotionTypeField: "",
+    promotionType: "",
   });
 
   const [errorTextField, setErrorTextField] = useState({
@@ -124,8 +124,8 @@ function render(props) {
         type: "required",
         message: "Chưa chọn bên tổ chức",
       });
-    if (value.promotionTypeField == "")
-      setError("promotionTypeField", {
+    if (value.promotionType == "")
+      setError("promotionType", {
         type: "required",
         message: "Chưa chọn hình thức áp dụng",
       });
@@ -410,8 +410,8 @@ function render(props) {
 
     let body = {
       promotionName: value.promotionName,
-      promotionType: value.promotionTypeField,
-      promotionOrganizer: value.promotionField,
+      promotionType: value.promotionType,
+      promotionOrganizer: value.promotionOrganizer,
       description: value.description,
       startTime: new Date(value.startTime).toISOString(),
       publicTime: new Date(value.publicTime).toISOString(),

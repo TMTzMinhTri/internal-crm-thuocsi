@@ -44,7 +44,7 @@ const InfomationFields = (props) => {
 
   let value = getValues();
 
-  const { promotionField, promotionTypeField } = textField;
+  const { promotionOrganizer, promotionType } = textField;
 
   const [active, setActive] = useState(true);
 
@@ -110,24 +110,24 @@ const InfomationFields = (props) => {
           <Grid container item xs={6} spacing={2}>
             <Grid item xs={6}>
               <SelectField
-                name="promotionField"
+                name="promotionOrganizer"
                 control={control}
                 errors={errors}
                 title="Bên tổ chức"
-                value={promotionField}
+                value={promotionOrganizer}
                 options={promotions}
-                handleChange={handleChangeTextField("promotionField")}
+                handleChange={handleChangeTextField("promotionOrganizer")}
               />
             </Grid>
             <Grid item xs={6}>
               <SelectField
-                name="promotionTypeField"
+                name="promotionType"
                 control={control}
                 errors={errors}
                 title="Hình thức áp dụng"
-                value={promotionTypeField}
+                value={promotionType}
                 options={promotionTypes}
-                handleChange={handleChangeTextField("promotionTypeField")}
+                handleChange={handleChangeTextField("promotionType")}
               />
             </Grid>
           </Grid>
