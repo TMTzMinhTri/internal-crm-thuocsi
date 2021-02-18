@@ -285,7 +285,7 @@ function render(props) {
   const handleRemoveAttachedProduct = (index) => {
     let value = getValues();
     for (let i = index; i < rewardObject.attachedProduct.length - 1; i++) {
-      setValue("number" + i, value["number" + (i + 1)]);
+      setValue("quantity" + i, value["quantity" + (i + 1)]);
     }
     rewardObject.attachedProduct.splice(index, 1);
     setRewardObject({ ...rewardObject });
@@ -519,7 +519,7 @@ function render(props) {
         setRewardObject({ ...rewardObject });
       });
       rewards[0].gifts.map(async (gift, index) => {
-        setValue("number" + index, gift.quantiy);
+        setValue("quantity" + index, gift.quantiy);
         let res = await getListProductByIdsClient([gift.productId]);
         if (res?.status == "OK") {
           rewardObject.attachedProduct[index] = {
@@ -660,7 +660,7 @@ function render(props) {
             type: value.reward,
             gifts: rewardObject.attachedProduct.map((o, index) => ({
               productId: value["gift" + index].productID,
-              quantity: parseInt(value["number" + index]),
+              quantity: parseInt(value["quantity" + index]),
             })),
           },
         ];
