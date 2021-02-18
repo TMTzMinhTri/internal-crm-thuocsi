@@ -161,7 +161,13 @@ const Condition = (props) => {
                 </Paper>
               ))
             ) : (
-              <Grid item container spacing={2} alignItems="flex-end">
+              <Grid
+                key={selectField}
+                item
+                container
+                spacing={2}
+                alignItems="flex-end"
+              >
                 <Grid item container xs={4}>
                   <AutoCompleteField
                     control={control}

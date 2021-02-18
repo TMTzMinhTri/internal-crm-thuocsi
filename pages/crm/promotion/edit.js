@@ -109,6 +109,10 @@ async function getListIngredientByCodesClient(q) {
   return getIngredientClient().getIngredientByCodesClient(q);
 }
 
+async function updateStatusPromotion(promotionId, status) {
+  return getPromoClient().updateStatusPromotion({ promotionId, status });
+}
+
 function render(props) {
   const toast = useToast();
 
@@ -128,6 +132,7 @@ function render(props) {
     conditions,
     rewards,
     scopes,
+    status,
   } = promotionRes
     ? promotionRes
     : {
@@ -142,6 +147,7 @@ function render(props) {
         scopes: null,
         conditions: null,
         rewards: null,
+        status: "",
       };
 
   const {
@@ -519,8 +525,14 @@ function render(props) {
         customerLevelCodes: isCustomerLevelAll
           ? []
           : value.customerLevel.map((o) => o.code),
-        registeredBefore: new Date(value.registeredBefore).toISOString(),
-        registeredAfter: new Date(value.registeredAfter).toISOString(),
+        registeredBefore:
+          value.registeredBefore != ""
+            ? new Date(value.registeredBefore).toISOString()
+            : "",
+        registeredAfter:
+          value.registeredAfter != ""
+            ? new Date(value.registeredAfter).toISOString()
+            : "",
       },
       {
         type: defaultScope.area,
@@ -599,10 +611,6 @@ function render(props) {
       ];
     }
 
-    console.log(conditionObject, "conditionObject");
-
-    console.log(conditions, "conditionssss");
-
     let rewards;
     switch (value.reward) {
       case defaultReward.absolute:
@@ -640,7 +648,7 @@ function render(props) {
             pointValue: parseInt(value.pointValue),
           },
         ];
-        return;
+        break;
 
       default:
         break;
@@ -670,7 +678,7 @@ function render(props) {
       toast.success("Cập nhật chương trình khuyến mãi thành công");
       // router.back();
     } else {
-      toast.error("Xảy ra lỗi");
+      toast.error(res.message);
     }
   }
 
@@ -691,6 +699,10 @@ function render(props) {
               getValues={getValues}
               errors={errors}
               control={control}
+              updateStatusPromotion={updateStatusPromotion}
+              promotionId={promotionId}
+              status={status}
+              edit
               promotionType={router.query?.type}
               textField={textField}
               handleChangeTextField={handleChangeTextField}
