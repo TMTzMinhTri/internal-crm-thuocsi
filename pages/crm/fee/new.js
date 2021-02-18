@@ -1,28 +1,25 @@
-import React, { useState, useEffect } from "react";
-import Head from "next/head";
 import {
-    Box,
     Button,
     CircularProgress,
     Grid,
     MenuItem,
-    Paper,
-    TextField,
-    Typography,
+    TextField
 } from "@material-ui/core";
-import { useForm } from "react-hook-form";
-
-import AppCMS from "pages/_layout";
 import {
     doWithLoggedInUser,
-    renderWithLoggedInUser,
+    renderWithLoggedInUser
 } from "@thuocsi/nextjs-components/lib/login";
+import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-
-import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
+import Head from "next/head";
 import { useRouter } from "next/router";
+import AppCRM from "pages/_layout";
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
+
 
 const defaultFeeType = FeeType.FIXED_REVENUE;
 
@@ -72,18 +69,32 @@ function render() {
         setLoading(false);
     }
 
+    let breadcrumb = [
+        {
+            name: "Trang chủ",
+            link: "/crm"
+        },
+        {
+            name: "Phí dịch vụ",
+            link: "/crm/fee"
+        },
+        {
+            name: "Thêm mới"
+        }
+    ]
+
     return (
-        <AppCMS select="/crm/fee">
+        <AppCRM select="/crm/fee" breadcrumb={breadcrumb}>
             <Head>
                 <title>Phí dịch vụ và giá bán</title>
             </Head>
-            <Box component={Paper} display="block">
-                <Box padding={2} pb={0}>
-                    <Typography variant="h5">Phí dịch vụ</Typography>
-                </Box>
-                <Box margin={3}>
-                    <form noValidate>
-                        <Grid container spacing={4} md={6}>
+            <MyCard>
+                <MyCardHeader title="Phí dịch vụ và giá bán"/>
+            </MyCard>
+            <MyCard>
+                <form noValidate>
+                    <MyCardContent>
+                        <Grid container spacing={4} md={6} style={{marginTop: '5px'}}>
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     id="name"
@@ -156,10 +167,10 @@ function render() {
                                 </Button>
                             </Grid>
                         </Grid>
-                    </form>
-                </Box>
-            </Box>
-        </AppCMS>
+                    </MyCardContent>
+                </form>
+            </MyCard>
+        </AppCRM>
     )
 }
 
