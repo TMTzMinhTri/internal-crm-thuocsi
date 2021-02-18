@@ -147,7 +147,7 @@ function render(props) {
         scopes: null,
         conditions: null,
         rewards: null,
-        status: "",
+        status: true,
       };
 
   const {
@@ -167,6 +167,7 @@ function render(props) {
       promotionName: promotionName,
       promotionField: promotionOrganizer,
       promotionTypeField: promotionType,
+      status: status == "ACTIVE" ? true : false,
     },
   });
 
@@ -202,7 +203,7 @@ function render(props) {
     minValue: conditions[0].minOrderValue ? conditions[0].minOrderValue : 0,
     seller: [],
     productList: [],
-    list: [],
+    item: {},
   });
 
   const [rewardObject, setRewardObject] = useState({
@@ -235,13 +236,8 @@ function render(props) {
         type: "required",
         message: "Chưa chọn khu vực áp dụng",
       });
-    if (value.seller?.length == 0)
-      setError("seller", {
-        type: "required",
-        message: "Chưa chọn người bán",
-      });
     if (value.condition == defaultCondition.product) {
-      conditionObject.list.map((o, index) => {
+      conditionObject.productList.map((o, index) => {
         if (getValues("seller" + index).length == 0)
           setError("seller" + index, {
             type: "required",
@@ -316,11 +312,12 @@ function render(props) {
   };
 
   const handleChangeConditionField = (key) => (event) => {
-    conditionObject.list = [];
+    conditionObject.item = [];
+    conditionObject.seller = [];
     if (event.target.value == defaultCondition.product) {
       setConditionObject({
         ...conditionObject,
-        productList: [{ productName: "", productNumber: 0, productValue: 0 }],
+        productList: [{ productName: "", minQuantity: 0, minTotalValue: 0 }],
       });
     }
     setConditionObject({ ...conditionObject, [key]: event.target.value });
@@ -329,8 +326,8 @@ function render(props) {
   const handleAddProductOfProductList = () => {
     conditionObject.productList.push({
       productName: "",
-      productNumber: 0,
-      productValue: 0,
+      minQuantity: 0,
+      minTotalValue: 0,
     });
     setConditionObject({ ...conditionObject });
   };
@@ -338,8 +335,8 @@ function render(props) {
   const handleRemoveProductOfProductList = (index) => {
     let value = getValues();
     for (let i = index; i < conditionObject.productList.length - 1; i++) {
-      setValue("productNumber" + i, value["productNumber" + (i + 1)]);
-      setValue("productValue" + i, value["productValue" + (i + 1)]);
+      setValue("minQuantity" + i, value["minQuantity" + (i + 1)]);
+      setValue("minTotalValue" + i, value["minTotalValue" + (i + 1)]);
     }
 
     conditionObject.productList.splice(index, 1);
@@ -353,7 +350,7 @@ function render(props) {
   };
 
   const handleChangeConditionList = (event, value) => {
-    conditionObject.list = value;
+    conditionObject.item = value;
     setConditionObject({ ...conditionObject });
   };
 
@@ -371,8 +368,8 @@ function render(props) {
         type != "SELLER" ? conditionObject.productList[index]?.seller : value,
       product:
         type == "SELLER" ? conditionObject.productList[index]?.product : value,
-      productNumber: 0,
-      productValue: 0,
+      minQuantity: 0,
+      minTotalValue: 0,
     };
 
     setConditionObject({ ...conditionObject });
@@ -409,38 +406,53 @@ function render(props) {
       setScopeObject([...scopeObject]);
     });
 
+    conditions[0].productConditions?.map((o) => {
+      conditionObject.productList.push({
+        product: [],
+        minQuantity: "",
+        minTotalValue: "",
+        seller: [],
+      });
+      setConditionObject({ ...conditionObject });
+    });
+
     conditions.map(async (o) => {
-      let info = "";
-      let sellers = [];
       let code;
-      let res;
       if (o.type == defaultCondition.product) {
         o.productConditions.map(async (ob, i) => {
-          res = await getListProductByIdsClient([ob.productId]);
-          conditionObject.productList.push({
-            product: res.data[0],
-            productNumber: ob.minQuantity,
-            productValue: ob.minTotalValue,
-          });
-          if (ob.sellerQuantityType == "ALL") {
-            conditionObject.productList[i].seller = [{ name: "Chọn tất cả" }];
-          } else {
-            console.log();
-            let response = await getListSellerByCodesClient(ob.sellerCodes);
-            console.log(response, "response");
-            if (response?.status == "OK") {
-              conditionObject.productList[i].seller = response.data;
-              setConditionObject({ ...conditionObject });
-              setValue("seller" + i, response.data);
+          let seller = [];
+          let res = await getListProductByIdsClient([ob.productId]);
+          if (res?.status == "OK") {
+            if (ob.sellerQuantityType == "ALL") {
+              seller = [{ name: "Chọn tất cả" }];
+            } else {
+              let response = await getListSellerByCodesClient(ob.sellerCodes);
+
+              if (response?.status == "OK") {
+                seller = response.data;
+              }
             }
+
+            let productInfo = {
+              product: res.data[0],
+              ["minQuantity" + i]: ob.minQuantity,
+              ["minTotalValue" + i]: ob.minTotalValue,
+              seller: seller,
+            };
+            conditionObject.productList[i] = productInfo;
+            setConditionObject({ ...conditionObject });
+            setValue("minQuantity" + i, ob.minQuantity);
+            setValue("minTotalValue" + i, ob.minTotalValue);
+            setValue("product" + i, res.data[0]);
+            setValue("seller" + i, seller);
           }
-          if (res?.status == "OK") setConditionObject({ ...conditionObject });
         });
       } else if (o.type != defaultCondition.noRule) {
+        let res;
         if (o.productConditions[0].sellerQuantityType == "ALL") {
           conditionObject.seller = [{ name: "Chọn tất cả" }];
           setConditionObject({ ...conditionObject });
-          setValue("seller", [{ name: "Chọn tất cả" }]);
+          setValue("seller0", [{ name: "Chọn tất cả" }]);
         } else {
           let response = await getListSellerByCodesClient(
             o.productConditions[0].sellerCodes
@@ -448,12 +460,12 @@ function render(props) {
           if (response?.status == "OK") {
             conditionObject.seller = response.data;
             setConditionObject({ ...conditionObject });
-            setValue("seller", response.data);
+            setValue("seller0", response.data);
           }
         }
 
-        setValue("conditionNumber", o.productConditions[0].minQuantity);
-        setValue("conditionValue", o.productConditions[0].minTotalValue);
+        setValue("minQuantity", o.productConditions[0].minQuantity);
+        setValue("minTotalValue", o.productConditions[0].minTotalValue);
         switch (o.type) {
           case defaultCondition.productTag:
             o.productConditions.map(async (ob) => {
@@ -461,25 +473,25 @@ function render(props) {
               res = await getProductTagByCodeClient([ob.productTag]);
               console.log(res, "info");
               if (res?.status == "OK") {
-                setConditionObject({ ...conditionObject, list: res.data[0] });
+                setConditionObject({ ...conditionObject, item: res.data[0] });
                 setValue("productTag", res.data[0]);
               }
             });
             break;
 
-          case defaultCondition.productCatergory:
+          case defaultCondition.productCategory:
             code = o.productConditions[0].categoryCode;
             res = await getListCategoryByCodesClient([code]);
             if (res?.status == "OK") {
-              setConditionObject({ ...conditionObject, list: res.data[0] });
-              setValue("productCatergory", res.data[0]);
+              setConditionObject({ ...conditionObject, item: res.data[0] });
+              setValue("productCategory", res.data[0]);
             }
             break;
           case defaultCondition.ingredient:
             code = o.productConditions[0].ingredientCode;
             res = await getListIngredientByCodesClient([code]);
             if (res?.status == "OK") {
-              setConditionObject({ ...conditionObject, list: res.data[0] });
+              setConditionObject({ ...conditionObject, item: res.data[0] });
               setValue("ingredient", res.data[0]);
             }
             break;
@@ -487,7 +499,7 @@ function render(props) {
             code = o.productConditions[0].producerCode;
             res = await getListProducerByCodesClient([code]);
             if (res?.status == "OK") {
-              setConditionObject({ ...conditionObject, list: res.data[0] });
+              setConditionObject({ ...conditionObject, item: res.data[0] });
               setValue("producer", res.data[0]);
             }
             break;
@@ -511,6 +523,24 @@ function render(props) {
     }
   };
 
+  const checkRegisterdTime = (value) => {
+    if (value.registeredAfter != "" && value.registeredBefore != "") {
+      return {
+        registeredBefore: new Date(value.registeredBefore).toISOString(),
+        registeredAfter: new Date(value.registeredAfter).toISOString(),
+      };
+    }
+    if (value.registeredAfter != "") {
+      return { registeredAfter: new Date(value.registeredAfter).toISOString() };
+    }
+    if (value.registeredBefore != "") {
+      return {
+        registeredBefore: new Date(value.registeredBefore).toISOString(),
+      };
+    }
+    return;
+  };
+
   console.log(conditionObject, "conditionObject");
 
   // func onSubmit used because useForm not working with some fields
@@ -525,14 +555,7 @@ function render(props) {
         customerLevelCodes: isCustomerLevelAll
           ? []
           : value.customerLevel.map((o) => o.code),
-        registeredBefore:
-          value.registeredBefore != ""
-            ? new Date(value.registeredBefore).toISOString()
-            : "",
-        registeredAfter:
-          value.registeredAfter != ""
-            ? new Date(value.registeredAfter).toISOString()
-            : "",
+        ...checkRegisterdTime(value),
       },
       {
         type: defaultScope.area,
@@ -549,13 +572,13 @@ function render(props) {
       if (value.condition != defaultCondition.product) {
         sellerObject = {
           sellerCodes:
-            value.seller[0].name == "Chọn tất cả"
+            value.seller0[0].name == "Chọn tất cả"
               ? []
-              : value.seller.map((seller) => seller.code),
+              : value.seller0.map((seller) => seller.code),
           sellerQuantityType:
-            value.seller[0].name == "Chọn tất cả" ? "ALL" : "MANY",
-          minQuantity: parseInt(value.conditionNumber),
-          minTotalValue: parseInt(value.conditionValue),
+            value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
+          minQuantity: parseInt(value.minQuantity),
+          minTotalValue: parseInt(value.minTotalValue),
         };
       }
 
@@ -590,10 +613,10 @@ function render(props) {
                       ? "ALL"
                       : "MANY",
                   productId: value["product" + index].productID,
-                  minQuantity: parseInt(value["productNumber" + index]),
-                  minTotalValue: parseInt(value["productValue" + index]),
+                  minQuantity: parseInt(value["minQuantity" + index]),
+                  minTotalValue: parseInt(value["minTotalValue" + index]),
                 };
-              case defaultCondition.productCatergory:
+              case defaultCondition.productCategory:
                 return {
                   ...sellerObject,
                   categoryCode: value.productCategory.code,
@@ -663,7 +686,6 @@ function render(props) {
       startTime: new Date(value.startTime).toISOString(),
       publicTime: new Date(value.publicTime).toISOString(),
       endTime: new Date(value.endTime).toISOString(),
-      status: "ACTIVE",
       scopes,
       conditions,
       rewards,
@@ -699,9 +721,9 @@ function render(props) {
               getValues={getValues}
               errors={errors}
               control={control}
+              setValue={setValue}
               updateStatusPromotion={updateStatusPromotion}
               promotionId={promotionId}
-              status={status}
               edit
               promotionType={router.query?.type}
               textField={textField}

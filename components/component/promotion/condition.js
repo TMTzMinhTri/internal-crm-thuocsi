@@ -20,7 +20,9 @@ const Condition = (props) => {
     handleChangeConditionSeller,
   } = props;
 
-  const { minValue, productList, list, selectField, seller } = condition;
+  const { minValue, productList, item, selectField, seller } = condition;
+
+  let value = getValues();
 
   return (
     <Paper
@@ -85,6 +87,9 @@ const Condition = (props) => {
                         name={"seller" + index}
                         label="Người bán"
                         placeholder=""
+                        // defaultValue={
+                        //   value["seller" + index] ? value["seller" + index] : []
+                        // }
                         defaultValue={o.seller ? o.seller : []}
                         options={[{ name: "" }]}
                         type="SELLER"
@@ -115,17 +120,16 @@ const Condition = (props) => {
                     <Grid item container xs={2}>
                       <TextField
                         type="number"
-                        id={"productNumber" + index}
-                        name={"productNumber" + index}
+                        name={"minQuantity" + index}
                         label="Số lượng sản phẩm yêu cầu"
                         placeholder=""
-                        defaultValue={o.productNumber}
-                        helperText={errors["productNumber" + index]?.message}
+                        defaultValue={o.minQuantity}
+                        helperText={errors["minQuantity" + index]?.message}
                         InputLabelProps={{
                           shrink: true,
                         }}
                         fullWidth
-                        error={!!errors["productNumber" + index]}
+                        error={!!errors["minQuantity" + index]}
                         required
                         inputRef={register({
                           required: "Số lượng không được trống",
@@ -135,18 +139,16 @@ const Condition = (props) => {
                     <Grid item container xs={2}>
                       <TextField
                         type="number"
-                        id={"productValue" + index}
-                        name={"productValue" + index}
+                        name={"minTotalValue" + index}
                         label="Giá trị sản phẩm yêu cầu"
                         placeholder=""
-                        defaultValue={o.productValue}
-                        helperText={errors["productValue" + index]?.message}
+                        defaultValue={o.minTotalValue}
+                        helperText={errors["minTotalValue" + index]?.message}
                         InputLabelProps={{
                           shrink: true,
                         }}
                         fullWidth
-                        error={!!errors["productValue" + index]}
-                        required
+                        error={!!errors["minTotalValue" + index]}
                         inputRef={register()}
                       />
                     </Grid>{" "}
@@ -171,7 +173,7 @@ const Condition = (props) => {
                 <Grid item container xs={4}>
                   <AutoCompleteField
                     control={control}
-                    name={"seller"}
+                    name="seller0"
                     label="Người bán"
                     placeholder=""
                     defaultValue={seller}
@@ -188,7 +190,7 @@ const Condition = (props) => {
                     label={displayLabelBasedOnCondition(selectField)}
                     placeholder=""
                     multiple={false}
-                    defaultValue={list}
+                    defaultValue={item}
                     options={[{ name: "" }]}
                     type={selectField}
                     errors={errors}
@@ -198,16 +200,15 @@ const Condition = (props) => {
                 <Grid item container xs={2}>
                   <TextField
                     type="number"
-                    id={"conditionNumber"}
-                    name={"conditionNumber"}
+                    name="minQuantity"
                     label="Số lượng sản phẩm yêu cầu"
                     placeholder=""
-                    helperText={errors["conditionNumber"]?.message}
+                    helperText={errors.minQuantity?.message}
                     InputLabelProps={{
                       shrink: true,
                     }}
                     fullWidth
-                    error={!!errors["conditionNumber"]}
+                    error={!!errors.minQuantity}
                     required
                     inputRef={register({
                       required: "Số lượng không được trống",
@@ -217,16 +218,15 @@ const Condition = (props) => {
                 <Grid item container xs={2}>
                   <TextField
                     type="number"
-                    id={"conditionValue"}
-                    name={"conditionValue"}
+                    name="minTotalValue"
                     label="Giá trị sản phẩm yêu cầu"
                     placeholder=""
-                    helperText={errors["conditionValue"]?.message}
+                    helperText={errors.minTotalValue?.message}
                     InputLabelProps={{
                       shrink: true,
                     }}
                     fullWidth
-                    error={!!errors["conditionValue"]}
+                    error={!!errors.minTotalValue}
                     inputRef={register()}
                   />
                 </Grid>
