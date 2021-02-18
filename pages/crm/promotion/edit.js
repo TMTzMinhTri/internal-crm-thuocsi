@@ -17,6 +17,7 @@ import {
   defaultReward,
   defaultScope,
 } from "../../../components/component/constant";
+import { validatePromotion } from "./new";
 import {
   displayNameBasedOnCondition,
   displayLabelBasedOnCondition,
@@ -218,57 +219,6 @@ function render(props) {
     attachedProduct: [],
     pointValue: rewards[0].pointValue ? rewards[0].pointValue : 0,
   });
-
-  const validate = () => {
-    let value = getValues();
-    if (value.promotionOrganizer == "")
-      setError("promotionOrganizer", {
-        type: "required",
-        message: "Chưa chọn bên tổ chức",
-      });
-    if (value.promotionType == "")
-      setError("promotionType", {
-        type: "required",
-        message: "Chưa chọn hình thức áp dụng",
-      });
-    if (value.area == "")
-      setError("area", {
-        type: "required",
-        message: "Chưa chọn khu vực áp dụng",
-      });
-    if (value.condition == defaultCondition.product) {
-      conditionObject.productList.map((o, index) => {
-        if (getValues("seller" + index).length == 0)
-          setError("seller" + index, {
-            type: "required",
-            message: "Chưa chọn người bán",
-          });
-      });
-    }
-    if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
-      setError(displayNameBasedOnCondition(conditionObject.selectField), {
-        type: "required",
-        message:
-          displayLabelBasedOnCondition(conditionObject.selectField) +
-          " không được bỏ trống",
-      });
-    }
-    if (value.customerLevel == "")
-      setError("customerLevel", {
-        type: "required",
-        message: "Chưa chọn đối tượng áp dụng",
-      });
-    if (value.reward == "")
-      setError("reward", {
-        type: "required",
-        message: "Chưa chọn giá trị khuyến mãi",
-      });
-    if (value.description == "")
-      setError("description", {
-        type: "required",
-        message: "Mô tả không được trống",
-      });
-  };
 
   const handleChangeTextField = (key) => (event) => {
     setTextField({ ...textField, [key]: event.target.value });
@@ -771,7 +721,9 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmit, validate)}
+                onClick={handleSubmit(onSubmit, () =>
+                  validatePromotion(getValues, setError, conditionObject)
+                )}
                 style={{ margin: 8 }}
               >
                 cập nhật
