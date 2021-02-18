@@ -8,8 +8,13 @@ import {
   Switch,
   TextField,
 } from "@material-ui/core";
-import { promotions, promotionTypes } from "../constant";
+import {
+  defaultPromotionStatus,
+  promotions,
+  promotionTypes,
+} from "../constant";
 import SelectField from "./select-field";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
 const InfomationFields = (props) => {
   const {
@@ -26,19 +31,27 @@ const InfomationFields = (props) => {
     textField,
     getValues,
     control,
+    edit = false,
+    status,
+    promotionId,
   } = props;
 
-  const { handleChangeTextField } = props;
+  const { handleChangeTextField, updateStatusPromotion } = props;
+
+  const toast = useToast();
 
   const { promotionField, promotionTypeField } = textField;
 
-  const [active, setActive] = useState(false);
+  const [active, setActive] = useState(status == "ACTIVE" ? true : false);
 
-  const switchActive = () => {
-    setActive(!active);
+  const switchActive = async () => {
+    let res = await updateStatusPromotion(
+      promotionId,
+      !active ? defaultPromotionStatus.EXPIRED : defaultPromotionStatus.ACTIVE
+    );
+    if (res?.status == "OK") setActive(!active);
+    else toast.error(res.message);
   };
-
-  console.log(getValues(), "getValues");
 
   return (
     <Paper
@@ -46,33 +59,9 @@ const InfomationFields = (props) => {
       style={{ padding: "0px 10px 20px 10px", margin: "10px" }}
     >
       <CardContent>
-        <Grid spacing={2} container direction="column">
-          <Grid container item xs={12} spacing={2}>
-            <Grid item xs={6}>
-              <SelectField
-                name="promotionField"
-                control={control}
-                errors={errors}
-                title="Bên tổ chức"
-                value={promotionField}
-                options={promotions}
-                handleChange={handleChangeTextField("promotionField")}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <SelectField
-                name="promotionTypeField"
-                control={control}
-                errors={errors}
-                title="Hình thức áp dụng"
-                value={promotionTypeField}
-                options={promotionTypes}
-                handleChange={handleChangeTextField("promotionTypeField")}
-              />
-            </Grid>
-          </Grid>
-          <Grid container item xs={12} spacing={2}>
-            <Grid item xs={6}>
+        <Grid spacing={2} container>
+          <Grid container item xs={6} spacing={2}>
+            <Grid item xs={12}>
               <TextField
                 name="promotionName"
                 label="Tên khuyến mãi"
@@ -102,88 +91,121 @@ const InfomationFields = (props) => {
                 })}
               />
             </Grid>
-            {/* <Grid item xs={6}>
-            <p style={{ margin: "5px 0", fontSize: 12 }}>Trạng thái</p>
-            <FormControlLabel
-              control={
-                <Switch checked={active} onChange={switchActive} name="gilad" />
-              }
-              label={active ? "Đang hoạt động" : "Chưa kích hoạt"}
-            />
-          </Grid> */}
           </Grid>
-          <Grid container item xs={12} spacing={2}>
+          <Grid container item xs={6} spacing={2}>
             <Grid item xs={6}>
-              <TextField
-                name="startTime"
-                id="startTime"
-                label="Thời gian bắt đầu"
-                placeholder=""
-                helperText={errors.startTime?.message}
-                type="datetime-local"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                fullWidth
-                error={!!errors.startTime}
-                required
-                inputRef={register({
-                  required: "Vui lòng chọn thời gian bắt đầu",
-                })}
+              <SelectField
+                name="promotionField"
+                control={control}
+                errors={errors}
+                title="Bên tổ chức"
+                value={promotionField}
+                options={promotions}
+                handleChange={handleChangeTextField("promotionField")}
               />
             </Grid>
             <Grid item xs={6}>
-              <TextField
-                name="endTime"
-                label="Thời gian kết thúc"
-                placeholder=""
-                type="datetime-local"
-                helperText={errors.endTime?.message}
-                error={!!errors.endTime}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                fullWidth
-                required
-                inputRef={register({
-                  required: "Vui lòng chọn thời gian kết thúc",
-                  min: {
-                    value: getValues("startTime"),
-                    message:
-                      "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
-                  },
-                })}
+              <SelectField
+                name="promotionTypeField"
+                control={control}
+                errors={errors}
+                title="Hình thức áp dụng"
+                value={promotionTypeField}
+                options={promotionTypes}
+                handleChange={handleChangeTextField("promotionTypeField")}
               />
             </Grid>
           </Grid>
+
           <Grid container item xs={12} spacing={2}>
-            <Grid item xs={6}>
-              <TextField
-                name="publicTime"
-                label="Thời gian cho phép hiển thị"
-                placeholder=""
-                type="datetime-local"
-                helperText={errors.publicTime?.message}
-                error={!!errors.publicTime}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                fullWidth
-                required
-                inputRef={register({
-                  required: "Vui lòng chọn thời gian hiển thị",
-                  min: {
-                    value: getValues("startTime"),
-                    message:
-                      "Thời gian hiển thị phải lớn hơn thời gian bắt đầu",
-                  },
-                  max: {
-                    value: getValues("endTime"),
-                    message:
-                      "Thời gian hiển thị phải nhỏ hơn thời gian kết thúc",
-                  },
-                })}
-              />
+            <Grid container item xs={6} spacing={1}>
+              <Grid item xs={5}>
+                <TextField
+                  name="startTime"
+                  id="startTime"
+                  label="Thời gian bắt đầu"
+                  placeholder=""
+                  helperText={errors.startTime?.message}
+                  type="datetime-local"
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  fullWidth
+                  error={!!errors.startTime}
+                  required
+                  inputRef={register({
+                    required: "Vui lòng chọn thời gian bắt đầu",
+                  })}
+                />
+              </Grid>
+              <Grid item xs={5}>
+                <TextField
+                  name="endTime"
+                  label="Thời gian kết thúc"
+                  placeholder=""
+                  type="datetime-local"
+                  helperText={errors.endTime?.message}
+                  error={!!errors.endTime}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  fullWidth
+                  required
+                  inputRef={register({
+                    required: "Vui lòng chọn thời gian kết thúc",
+                    min: {
+                      value: getValues("startTime"),
+                      message:
+                        "Thời gian kết thúc phải lớn hơn thời gian bắt đầu",
+                    },
+                  })}
+                />
+              </Grid>
+            </Grid>
+            <Grid container item xs={6} spacing={1}>
+              <Grid item xs={5}>
+                <TextField
+                  name="publicTime"
+                  label="Thời gian cho phép hiển thị"
+                  placeholder=""
+                  type="datetime-local"
+                  helperText={errors.publicTime?.message}
+                  error={!!errors.publicTime}
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                  fullWidth
+                  required
+                  inputRef={register({
+                    required: "Vui lòng chọn thời gian hiển thị",
+                    min: {
+                      value: getValues("startTime"),
+                      message:
+                        "Thời gian hiển thị phải lớn hơn thời gian bắt đầu",
+                    },
+                    max: {
+                      value: getValues("endTime"),
+                      message:
+                        "Thời gian hiển thị phải nhỏ hơn thời gian kết thúc",
+                    },
+                  })}
+                />
+              </Grid>
+              {edit && (
+                <Grid item xs={5}>
+                  <p style={{ margin: "0px 5px", fontSize: 12 }}>Trạng thái</p>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={active}
+                        onChange={switchActive}
+                        name="gilad"
+                      />
+                    }
+                    label={active ? "Đang hoạt động" : "Chưa kích hoạt"}
+                  />
+                </Grid>
+              )}
             </Grid>
           </Grid>
         </Grid>

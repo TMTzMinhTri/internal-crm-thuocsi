@@ -104,7 +104,7 @@ const AutoCompleteField = (props) => {
       let arr = Array.isArray(productList)
         ? productList.concat(res.data)
         : [productList].concat(res.data);
-      if (multiple)
+      if (multiple && arr[0].name != "Chọn tất cả")
         arr.unshift({
           name: "Chọn tất cả",
         });

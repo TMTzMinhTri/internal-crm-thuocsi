@@ -62,9 +62,7 @@ const Scope = (props) => {
                           }}
                           fullWidth
                           error={!!errors.registeredAfter}
-                          inputRef={register({
-                            required: "Vui lòng chọn thời gian",
-                          })}
+                          inputRef={register()}
                         />
                       </Grid>
                       <Grid item container xs={3}>
@@ -82,7 +80,6 @@ const Scope = (props) => {
                           fullWidth
                           error={!!errors.registeredBefore}
                           inputRef={register({
-                            required: "Vui lòng chọn thời gian",
                             min: {
                               value: getValues("registeredAfter"),
                               message:
