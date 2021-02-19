@@ -17,7 +17,7 @@ import {
   defaultReward,
   defaultScope,
 } from "../../../components/component/constant";
-import { validatePromotion } from "./new";
+import { onSubmitPromotion, validatePromotion } from "./new";
 import {
   displayNameBasedOnCondition,
   displayLabelBasedOnCondition,
@@ -72,10 +72,6 @@ export async function loadDataBefore(ctx) {
 
 export default function NewPage(props) {
   return renderWithLoggedInUser(props, render);
-}
-
-async function updatePromontion(data) {
-  return getPromoClient().updatePromotion(data);
 }
 
 async function getListProductByIdsClient(q) {
@@ -200,7 +196,9 @@ function render(props) {
   ]);
 
   const [conditionObject, setConditionObject] = useState({
-    selectField: conditions[0].type ? conditions[0].type : "",
+    selectField: conditions[0].type
+      ? conditions[0].type
+      : defaultCondition.noRule,
     minValue: conditions[0].minOrderValue ? conditions[0].minOrderValue : 0,
     seller: [],
     productList: [],
@@ -505,163 +503,173 @@ function render(props) {
 
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
-    let value = getValues();
-    let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
-    let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";
-    let scopes = [
-      {
-        type: defaultScope.customerLevel,
-        quantityType: isCustomerLevelAll ? "ALL" : "MANY",
-        customerLevelCodes: isCustomerLevelAll
-          ? []
-          : value.customerLevel.map((o) => o.code),
-        ...checkRegisterdTime(value),
-      },
-      {
-        type: defaultScope.area,
-        quantityType: isAreaAll ? "ALL" : "MANY",
-        areaCodes: isAreaAll ? [] : value.area.map((o) => o.code),
-      },
-    ];
-    let conditions;
+    onSubmitPromotion(
+      getValues,
+      toast,
+      router,
+      scopeObject,
+      conditionObject,
+      rewardObject,
+      false,
+      promotionId
+    );
+    // let value = getValues();
+    // let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
+    // let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";
+    // let scopes = [
+    //   {
+    //     type: defaultScope.customerLevel,
+    //     quantityType: isCustomerLevelAll ? "ALL" : "MANY",
+    //     customerLevelCodes: isCustomerLevelAll
+    //       ? []
+    //       : value.customerLevel.map((o) => o.code),
+    //     ...checkRegisterdTime(value),
+    //   },
+    //   {
+    //     type: defaultScope.area,
+    //     quantityType: isAreaAll ? "ALL" : "MANY",
+    //     areaCodes: isAreaAll ? [] : value.area.map((o) => o.code),
+    //   },
+    // ];
+    // let conditions;
 
-    if (value.condition == defaultCondition.noRule)
-      conditions = [{ type: value.condition }];
-    else {
-      let sellerObject;
-      if (value.condition != defaultCondition.product) {
-        sellerObject = {
-          sellerCodes:
-            value.seller0[0].name == "Chọn tất cả"
-              ? []
-              : value.seller0.map((seller) => seller.code),
-          sellerQuantityType:
-            value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
-          minQuantity: parseInt(value.minQuantity),
-          minTotalValue: parseInt(value.minTotalValue),
-        };
-      }
+    // if (value.condition == defaultCondition.noRule)
+    //   conditions = [{ type: value.condition }];
+    // else {
+    //   let sellerObject;
+    //   if (value.condition != defaultCondition.product) {
+    //     sellerObject = {
+    //       sellerCodes:
+    //         value.seller0[0].name == "Chọn tất cả"
+    //           ? []
+    //           : value.seller0.map((seller) => seller.code),
+    //       sellerQuantityType:
+    //         value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
+    //       minQuantity: parseInt(value.minQuantity),
+    //       minTotalValue: parseInt(value.minTotalValue),
+    //     };
+    //   }
 
-      let tmpArr =
-        value.condition == defaultCondition.product
-          ? conditionObject.productList
-          : [""];
+    //   let tmpArr =
+    //     value.condition == defaultCondition.product
+    //       ? conditionObject.productList
+    //       : [""];
 
-      conditions = [
-        {
-          type: value.condition,
-          minOrderValue: parseInt(value.minValue),
-          productConditions: tmpArr.map((o, index) => {
-            switch (value.condition) {
-              case defaultCondition.ingredient:
-                return {
-                  ...sellerObject,
-                  ingredientCode: value.ingredient.code,
-                };
-              case defaultCondition.producer:
-                return {
-                  ...sellerObject,
-                  producerCode: value.producer.code,
-                };
-              case defaultCondition.product:
-                return {
-                  sellerCodes: value["seller" + index].map(
-                    (seller) => seller.code
-                  ),
-                  sellerQuantityType:
-                    value["seller" + index][0].name == "Chọn tất cả"
-                      ? "ALL"
-                      : "MANY",
-                  productId: value["product" + index].productID,
-                  minQuantity: parseInt(value["minQuantity" + index]),
-                  minTotalValue: parseInt(value["minTotalValue" + index]),
-                };
-              case defaultCondition.productCategory:
-                return {
-                  ...sellerObject,
-                  categoryCode: value.productCategory.code,
-                };
-              case defaultCondition.productTag:
-                return {
-                  ...sellerObject,
-                  productTag: value.productTag.code,
-                };
-              default:
-                break;
-            }
-          }),
-        },
-      ];
-    }
+    //   conditions = [
+    //     {
+    //       type: value.condition,
+    //       minOrderValue: parseInt(value.minValue),
+    //       productConditions: tmpArr.map((o, index) => {
+    //         switch (value.condition) {
+    //           case defaultCondition.ingredient:
+    //             return {
+    //               ...sellerObject,
+    //               ingredientCode: value.ingredient.code,
+    //             };
+    //           case defaultCondition.producer:
+    //             return {
+    //               ...sellerObject,
+    //               producerCode: value.producer.code,
+    //             };
+    //           case defaultCondition.product:
+    //             return {
+    //               sellerCodes: value["seller" + index].map(
+    //                 (seller) => seller.code
+    //               ),
+    //               sellerQuantityType:
+    //                 value["seller" + index][0].name == "Chọn tất cả"
+    //                   ? "ALL"
+    //                   : "MANY",
+    //               productId: value["product" + index].productID,
+    //               minQuantity: parseInt(value["minQuantity" + index]),
+    //               minTotalValue: parseInt(value["minTotalValue" + index]),
+    //             };
+    //           case defaultCondition.productCategory:
+    //             return {
+    //               ...sellerObject,
+    //               categoryCode: value.productCategory.code,
+    //             };
+    //           case defaultCondition.productTag:
+    //             return {
+    //               ...sellerObject,
+    //               productTag: value.productTag.code,
+    //             };
+    //           default:
+    //             break;
+    //         }
+    //       }),
+    //     },
+    //   ];
+    // }
 
-    let rewards;
-    switch (value.reward) {
-      case defaultReward.absolute:
-        rewards = [
-          {
-            type: value.reward,
-            absoluteDiscount: parseInt(value.absoluteDiscount),
-          },
-        ];
-        break;
-      case defaultReward.gift:
-        rewards = [
-          {
-            type: value.reward,
-            gifts: rewardObject.attachedProduct.map((o, index) => ({
-              productId: value["gift" + index].productID,
-              quantity: parseInt(value["quantity" + index]),
-            })),
-          },
-        ];
-        break;
-      case defaultReward.percentage:
-        rewards = [
-          {
-            type: value.reward,
-            percentageDiscount: parseInt(value.percentageDiscount),
-            maxDiscount: parseInt(value.maxDiscount),
-          },
-        ];
-        break;
-      case defaultReward.point:
-        rewards = [
-          {
-            type: value.reward,
-            pointValue: parseInt(value.pointValue),
-          },
-        ];
-        break;
+    // let rewards;
+    // switch (value.reward) {
+    //   case defaultReward.absolute:
+    //     rewards = [
+    //       {
+    //         type: value.reward,
+    //         absoluteDiscount: parseInt(value.absoluteDiscount),
+    //       },
+    //     ];
+    //     break;
+    //   case defaultReward.gift:
+    //     rewards = [
+    //       {
+    //         type: value.reward,
+    //         gifts: rewardObject.attachedProduct.map((o, index) => ({
+    //           productId: value["gift" + index].productID,
+    //           quantity: parseInt(value["quantity" + index]),
+    //         })),
+    //       },
+    //     ];
+    //     break;
+    //   case defaultReward.percentage:
+    //     rewards = [
+    //       {
+    //         type: value.reward,
+    //         percentageDiscount: parseInt(value.percentageDiscount),
+    //         maxDiscount: parseInt(value.maxDiscount),
+    //       },
+    //     ];
+    //     break;
+    //   case defaultReward.point:
+    //     rewards = [
+    //       {
+    //         type: value.reward,
+    //         pointValue: parseInt(value.pointValue),
+    //       },
+    //     ];
+    //     break;
 
-      default:
-        break;
-    }
+    //   default:
+    //     break;
+    // }
 
-    let body = {
-      promotionId: promotionId,
-      promotionName: value.promotionName,
-      promotionType: value.promotionType,
-      promotionOrganizer: value.promotionOrganizer,
-      description: value.description,
-      startTime: new Date(value.startTime).toISOString(),
-      publicTime: new Date(value.publicTime).toISOString(),
-      endTime: new Date(value.endTime).toISOString(),
-      scopes,
-      conditions,
-      rewards,
-    };
+    // let body = {
+    //   promotionId: promotionId,
+    //   promotionName: value.promotionName,
+    //   promotionType: value.promotionType,
+    //   promotionOrganizer: value.promotionOrganizer,
+    //   description: value.description,
+    //   startTime: new Date(value.startTime).toISOString(),
+    //   publicTime: new Date(value.publicTime).toISOString(),
+    //   endTime: new Date(value.endTime).toISOString(),
+    //   scopes,
+    //   conditions,
+    //   rewards,
+    // };
 
-    console.log(body, "bdoy");
+    // console.log(body, "bdoy");
 
-    let res = await updatePromontion(body);
-    console.log(res, "res");
+    // let res = await updatePromontion(body);
+    // console.log(res, "res");
 
-    if (res.status == "OK") {
-      toast.success("Cập nhật chương trình khuyến mãi thành công");
-      // router.back();
-    } else {
-      toast.error(res.message);
-    }
+    // if (res.status == "OK") {
+    //   toast.success("Cập nhật chương trình khuyến mãi thành công");
+    //   // router.back();
+    // } else {
+    //   toast.error(res.message);
+    // }
   }
 
   useEffect(() => {

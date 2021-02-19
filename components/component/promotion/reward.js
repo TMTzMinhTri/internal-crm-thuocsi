@@ -13,6 +13,7 @@ import { defaultReward, rewards } from "../constant";
 import { displayNameBasedOnReward } from "../util";
 
 import AutoCompleteField from "./autocomplete-field";
+import { textfieldProps } from "./infomation-fields";
 import SelectField from "./select-field";
 
 const Reward = (props) => {
@@ -117,9 +118,7 @@ const Reward = (props) => {
                       label={"Giá trị giảm giá theo %"}
                       placeholder=""
                       helperText={errors.percentageDiscount?.message}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
+                      {...textfieldProps}
                       fullWidth
                       defaultValue={percentageDiscount}
                       error={!!errors.percentageDiscount}
@@ -145,9 +144,7 @@ const Reward = (props) => {
                       label={"Giá trị giảm tối đa"}
                       placeholder=""
                       helperText={errors.maxDiscount?.message}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
+                      {...textfieldProps}
                       defaultValue={maxDiscount}
                       fullWidth
                       error={!!errors.maxDiscount}
@@ -182,9 +179,7 @@ const Reward = (props) => {
                           label={"Số lượng được tặng"}
                           placeholder=""
                           helperText={errors["quantity" + index]?.message}
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
+                          {...textfieldProps}
                           defaultValue={o.number}
                           fullWidth
                           error={!!errors["quantity" + index]}

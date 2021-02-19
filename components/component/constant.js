@@ -135,10 +135,6 @@ export const scopes = [
 
 export const conditions = [
   {
-    value: "",
-    label: "Chọn loại điều kiện",
-  },
-  {
     value: "PRODUCT_TAG",
     label: "Theo tag sản phẩm",
   },
