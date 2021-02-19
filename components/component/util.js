@@ -387,8 +387,12 @@ export async function onSubmitPromotion(
   promotionId
 ) {
   let value = getValues();
-  let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
-  let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";
+  let isCustomerLevelAll =
+    scopeObject[0].list.length == 0 ||
+    scopeObject[0].list[0].name == "Chọn tất cả";
+  let isAreaAll =
+    scopeObject[1].list.length == 0 ||
+    scopeObject[1].list[0].name == "Chọn tất cả";
   let scopes = [
     {
       type: defaultScope.customerLevel,
