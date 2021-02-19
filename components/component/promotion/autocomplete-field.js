@@ -113,7 +113,7 @@ const AutoCompleteField = (props) => {
           Array.isArray(defaultValue) &&
           defaultValue.length > 0 &&
           defaultValue[0].name != "Chọn tất cả") ||
-        defaultValue.length == 0
+        (multiple && defaultValue.length == 0)
       )
         arr.unshift({
           name: "Chọn tất cả",
@@ -136,6 +136,8 @@ const AutoCompleteField = (props) => {
         codeList.push(name == "Chọn tất cả" ? null : code);
       });
       newArr = productList.filter((val) => !codeList.includes(val.code));
+      if (defaultValue.length > 0 && defaultValue[0].name == "Chọn tất cả")
+        newArr = newArr.filter((o) => o.name != "Chọn tất cả");
       return newArr;
     }
     return productList;
