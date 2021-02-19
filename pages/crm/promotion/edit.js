@@ -569,7 +569,7 @@ function render(props) {
               <Button
                 variant="contained"
                 style={{ margin: 8 }}
-                onClick={handleSubmit(onSubmitCreate)}
+                onClick={() => router.reload()}
               >
                 Làm mới
               </Button>
