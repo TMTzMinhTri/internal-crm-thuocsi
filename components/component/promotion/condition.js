@@ -6,6 +6,7 @@ import {
   displayNameBasedOnCondition,
 } from "../util";
 import AutoCompleteField from "./autocomplete-field";
+import { textfieldProps } from "./infomation-fields";
 import SelectField from "./select-field";
 
 const Condition = (props) => {
@@ -33,7 +34,7 @@ const Condition = (props) => {
         <Grid item container>
           <h4>GIÁ TRỊ ĐƠN HÀNG</h4>
         </Grid>
-        <Grid item container xs={6}>
+        <Grid item container xs={5}>
           <TextField
             type="number"
             id="minValue"
@@ -42,9 +43,7 @@ const Condition = (props) => {
             placeholder=""
             defaultValue={minValue}
             helperText={errors.minValue?.message}
-            InputLabelProps={{
-              shrink: true,
-            }}
+            {...textfieldProps}
             fullWidth
             error={!!errors.minValue}
             inputRef={register()}
@@ -53,7 +52,7 @@ const Condition = (props) => {
         <Grid item container>
           <h4>ĐIỀU KIỆN THEO ĐƠN HÀNG</h4>
         </Grid>
-        <Grid item container xs={6}>
+        <Grid item container xs={5}>
           <SelectField
             name="condition"
             control={control}
@@ -87,9 +86,6 @@ const Condition = (props) => {
                         name={"seller" + index}
                         label="Người bán"
                         placeholder=""
-                        // defaultValue={
-                        //   value["seller" + index] ? value["seller" + index] : []
-                        // }
                         defaultValue={o.seller ? o.seller : []}
                         options={[{ name: "" }]}
                         type="SELLER"
@@ -125,9 +121,7 @@ const Condition = (props) => {
                         placeholder=""
                         defaultValue={o.minQuantity}
                         helperText={errors["minQuantity" + index]?.message}
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
+                        {...textfieldProps}
                         fullWidth
                         error={!!errors["minQuantity" + index]}
                         required
@@ -144,15 +138,13 @@ const Condition = (props) => {
                         placeholder=""
                         defaultValue={o.minTotalValue}
                         helperText={errors["minTotalValue" + index]?.message}
-                        InputLabelProps={{
-                          shrink: true,
-                        }}
+                        {...textfieldProps}
                         fullWidth
                         error={!!errors["minTotalValue" + index]}
                         inputRef={register()}
                       />
                     </Grid>{" "}
-                    <Grid item xs={1}>
+                    <Grid item xs={1} container justify="center">
                       <IconButton
                         onClick={() => handleRemoveProductOfProductList(index)}
                       >
@@ -170,7 +162,7 @@ const Condition = (props) => {
                 spacing={2}
                 alignItems="flex-end"
               >
-                <Grid item container xs={4}>
+                <Grid item container xs={5}>
                   <AutoCompleteField
                     control={control}
                     name="seller0"
@@ -204,9 +196,7 @@ const Condition = (props) => {
                     label="Số lượng sản phẩm yêu cầu"
                     placeholder=""
                     helperText={errors.minQuantity?.message}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
+                    {...textfieldProps}
                     fullWidth
                     error={!!errors.minQuantity}
                     required
@@ -222,9 +212,7 @@ const Condition = (props) => {
                     label="Giá trị sản phẩm yêu cầu"
                     placeholder=""
                     helperText={errors.minTotalValue?.message}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
+                    {...textfieldProps}
                     fullWidth
                     error={!!errors.minTotalValue}
                     inputRef={register()}

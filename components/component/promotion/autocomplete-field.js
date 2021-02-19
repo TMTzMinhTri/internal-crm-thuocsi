@@ -1,4 +1,4 @@
-import { TextField } from "@material-ui/core";
+import { makeStyles, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { getAreaClient } from "client/area";
 import { getCategoryClient } from "client/category";
@@ -10,7 +10,6 @@ import { getTagClient } from "client/tag";
 import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { defaultCondition, defaultReward, defaultScope } from "../constant";
-import { displayNameBasedOnCondition } from "../util";
 
 async function searchProductList(q) {
   return await getProductClient().searchProductListFromClient(q, "");
@@ -51,7 +50,14 @@ async function searchIngredientList(q) {
   return await getProductClient().getIngredientList(q);
 }
 
+const useStyles = makeStyles({
+  inputRoot: {
+    marginTop: "30px !important",
+  },
+});
+
 const AutoCompleteField = (props) => {
+  const classes = useStyles();
   const {
     label,
     options,
@@ -101,10 +107,14 @@ const AutoCompleteField = (props) => {
     let value = event.target.value;
     let res = await fetchOptions(type, value);
     if (res?.status == "OK") {
-      let arr = Array.isArray(productList)
-        ? productList.concat(res.data)
-        : [productList].concat(res.data);
-      if (multiple && arr[0].name != "Chọn tất cả")
+      let arr = res.data;
+      if (
+        (multiple &&
+          Array.isArray(defaultValue) &&
+          defaultValue.length > 0 &&
+          defaultValue[0].name != "Chọn tất cả") ||
+        defaultValue.length == 0
+      )
         arr.unshift({
           name: "Chọn tất cả",
         });
@@ -118,6 +128,19 @@ const AutoCompleteField = (props) => {
     handleChangeTextField({ target: { value: "" } });
   }, [type]);
 
+  const renderOptions = () => {
+    let codeList = [];
+    let newArr = [];
+    if (Array.isArray(defaultValue)) {
+      defaultValue.map(({ code, name }) => {
+        codeList.push(name == "Chọn tất cả" ? null : code);
+      });
+      newArr = productList.filter((val) => !codeList.includes(val.code));
+      return newArr;
+    }
+    return productList;
+  };
+
   return (
     <Controller
       name={name}
@@ -125,7 +148,10 @@ const AutoCompleteField = (props) => {
         <Autocomplete
           fullWidth
           multiple={multiple}
-          options={productList.length > 0 ? productList : options}
+          classes={{
+            inputRoot: classes.inputRoot,
+          }}
+          options={productList.length > 0 ? renderOptions() : options}
           onChange={(event, value) => {
             if (multiple) {
               let isAll = false;
@@ -149,6 +175,13 @@ const AutoCompleteField = (props) => {
               helperText={errors?.[name]?.message}
               required={required}
               {...params}
+              InputLabelProps={{
+                shrink: true,
+                style: {
+                  color: "#353434",
+                  fontSize: "20px",
+                },
+              }}
               variant="standard"
               label={label}
               placeholder={placeholder}
@@ -158,7 +191,7 @@ const AutoCompleteField = (props) => {
         />
       )}
       control={control}
-      // defaultValue={defaultValue}
+      defaultValue={defaultValue}
     />
   );
 };

@@ -27,7 +27,16 @@ const SelectField = (props) => {
       required={required}
       error={errors[name] && !!errors[name]}
     >
-      <InputLabel shrink>{title}</InputLabel>
+      <InputLabel
+        shrink
+        style={{
+          color: "#353434",
+          fontSize: "20px",
+        }}
+      >
+        {title}
+      </InputLabel>
+      <div style={{ height: 30 }}></div>
       <Controller
         render={(props) => (
           <NativeSelect
