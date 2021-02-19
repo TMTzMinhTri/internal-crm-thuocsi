@@ -190,7 +190,9 @@ function render(props) {
     selectField: conditions[0].type
       ? conditions[0].type
       : defaultCondition.noRule,
-    minValue: conditions[0].minOrderValue ? conditions[0].minOrderValue : 0,
+    minTotalValue: conditions[0].minOrderValue
+      ? conditions[0].minOrderValue
+      : "",
     seller: [],
     productList: [],
     item: {},
@@ -256,7 +258,7 @@ function render(props) {
     if (event.target.value == defaultCondition.product) {
       setConditionObject({
         ...conditionObject,
-        productList: [{ productName: "", minQuantity: 0, minTotalValue: 0 }],
+        productList: [{ productName: "", minQuantity: 0, minTotalValue: "" }],
       });
     }
     setConditionObject({ ...conditionObject, [key]: event.target.value });
@@ -266,7 +268,7 @@ function render(props) {
     conditionObject.productList.push({
       productName: "",
       minQuantity: 0,
-      minTotalValue: 0,
+      minTotalValue: "",
     });
     setConditionObject({ ...conditionObject });
   };
@@ -451,7 +453,7 @@ function render(props) {
 
     if (rewards[0].type == defaultReward.gift) {
       rewards[0].gifts.map((o) => {
-        rewardObject.attachedProduct.unshift({
+        rewardObject.attachedProduct.push({
           product: [],
           number: o.quantity,
         });
@@ -472,22 +474,39 @@ function render(props) {
     }
   };
 
-  async function onSubmit() {
-    onSubmitPromotion(
-      getValues,
-      toast,
-      router,
-      scopeObject,
-      conditionObject,
-      rewardObject,
-      false,
-      promotionId
-    );
+  async function onSubmitUpdate() {
+    if (validatePromotion(getValues, setError, conditionObject))
+      onSubmitPromotion(
+        getValues,
+        toast,
+        router,
+        scopeObject,
+        conditionObject,
+        rewardObject,
+        false,
+        promotionId
+      );
+  }
+
+  async function onSubmitCreate() {
+    if (validatePromotion(getValues, setError, conditionObject))
+      onSubmitPromotion(
+        getValues,
+        toast,
+        router,
+        scopeObject,
+        conditionObject,
+        rewardObject,
+        true,
+        null
+      );
   }
 
   useEffect(() => {
     fillDefaultData();
   }, []);
+
+  console.log(errors, "errors");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -542,9 +561,7 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmit, () =>
-                  validatePromotion(getValues, setError, conditionObject)
-                )}
+                onClick={handleSubmit(onSubmitUpdate)}
                 style={{ margin: 8 }}
               >
                 cập nhật

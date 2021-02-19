@@ -115,6 +115,9 @@ const ConditionFields = (props) => {
                 render={(props) => (
                   <TextareaAutosize
                     style={{
+                      font: "inherit",
+                      padding: 10,
+                      fontSize: 16,
                       borderColor: errors.description ? "red" : "black",
                     }}
                     className={classess.textarea}
