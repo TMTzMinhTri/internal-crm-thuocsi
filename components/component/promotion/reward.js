@@ -13,6 +13,7 @@ import { defaultReward, rewards } from "../constant";
 import { displayNameBasedOnReward } from "../util";
 
 import AutoCompleteField from "./autocomplete-field";
+import { textfieldProps } from "./infomation-fields";
 import SelectField from "./select-field";
 
 const Reward = (props) => {
@@ -117,9 +118,7 @@ const Reward = (props) => {
                       label={"Giá trị giảm giá theo %"}
                       placeholder=""
                       helperText={errors.percentageDiscount?.message}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
+                      {...textfieldProps}
                       fullWidth
                       defaultValue={percentageDiscount}
                       error={!!errors.percentageDiscount}
@@ -145,15 +144,13 @@ const Reward = (props) => {
                       label={"Giá trị giảm tối đa"}
                       placeholder=""
                       helperText={errors.maxDiscount?.message}
-                      InputLabelProps={{
-                        shrink: true,
-                      }}
+                      {...textfieldProps}
                       defaultValue={maxDiscount}
                       fullWidth
                       error={!!errors.maxDiscount}
                       required
                       inputRef={register({
-                        required: "Vui lòng chọn thời gian kết thúc",
+                        required: "Giá trị giảm giá tối đa không được trống",
                       })}
                     />
                   </Grid>
@@ -178,16 +175,14 @@ const Reward = (props) => {
                       <Grid item container xs={5}>
                         <TextField
                           type="number"
-                          name={"number" + index}
+                          name={"quantity" + index}
                           label={"Số lượng được tặng"}
                           placeholder=""
-                          helperText={errors["number" + index]?.message}
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
+                          helperText={errors["quantity" + index]?.message}
+                          {...textfieldProps}
                           defaultValue={o.number}
                           fullWidth
-                          error={!!errors["number" + index]}
+                          error={!!errors["quantity" + index]}
                           required
                           inputRef={register({
                             required: "Vui lòng chọn số lượng",

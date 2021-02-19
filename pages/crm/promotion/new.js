@@ -48,6 +48,262 @@ async function createPromontion(data) {
   return getPromoClient().createPromotion(data);
 }
 
+async function updatePromontion(data) {
+  return getPromoClient().updatePromotion(data);
+}
+
+export const validatePromotion = (getValues, setError, conditionObject) => {
+  let value = getValues();
+  if (value.promotionField == "")
+    setError("promotionField", {
+      type: "required",
+      message: "Chưa chọn bên tổ chức",
+    });
+  if (value.promotionType == "")
+    setError("promotionType", {
+      type: "required",
+      message: "Chưa chọn hình thức áp dụng",
+    });
+  if (value.area == "")
+    setError("area", {
+      type: "required",
+      message: "Chưa chọn khu vực áp dụng",
+    });
+  conditionObject.productList.map((o, index) => {
+    if (!value["seller" + index] || value["seller" + index].length == 0)
+      setError("seller" + index, {
+        type: "required",
+        message: "Chưa chọn người bán",
+      });
+  });
+  if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
+    setError(displayNameBasedOnCondition(conditionObject.selectField), {
+      type: "required",
+      message:
+        displayLabelBasedOnCondition(conditionObject.selectField) +
+        " không được bỏ trống",
+    });
+  }
+  if (value.customerLevel == "")
+    setError("customerLevel", {
+      type: "required",
+      message: "Chưa chọn đối tượng áp dụng",
+    });
+  if (value.condition == "")
+    setError("condition", {
+      type: "required",
+      message: "Chưa chọn điều kiện khuyến mãi",
+    });
+  if (value.reward == "")
+    setError("reward", {
+      type: "required",
+      message: "Chưa chọn giá trị khuyến mãi",
+    });
+  if (!value.description || value.description == "")
+    setError("description", {
+      type: "required",
+      message: "Mô tả không được trống",
+    });
+};
+
+export const checkRegisterdTime = (value) => {
+  if (value.registeredAfter != "" && value.registeredBefore != "") {
+    return {
+      registeredBefore: new Date(value.registeredBefore).toISOString(),
+      registeredAfter: new Date(value.registeredAfter).toISOString(),
+    };
+  }
+  if (value.registeredAfter != "") {
+    return { registeredAfter: new Date(value.registeredAfter).toISOString() };
+  }
+  if (value.registeredBefore != "") {
+    return {
+      registeredBefore: new Date(value.registeredBefore).toISOString(),
+    };
+  }
+  return;
+};
+
+export async function onSubmitPromotion(
+  getValues,
+  toast,
+  router,
+  scopeObject,
+  conditionObject,
+  rewardObject,
+  isCreate,
+  promotionId
+) {
+  let value = getValues();
+  let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
+  let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";
+  let scopes = [
+    {
+      type: defaultScope.customerLevel,
+      quantityType: isCustomerLevelAll ? "ALL" : "MANY",
+      customerLevelCodes: isCustomerLevelAll
+        ? []
+        : value.customerLevel.map((o) => o.code),
+      ...checkRegisterdTime(value),
+    },
+    {
+      type: defaultScope.area,
+      quantityType: isAreaAll ? "ALL" : "MANY",
+      areaCodes: isAreaAll ? [] : value.area.map((o) => o.code),
+    },
+  ];
+
+  let conditions;
+
+  if (value.condition == defaultCondition.noRule)
+    conditions = [{ type: value.condition }];
+  else {
+    let sellerObject;
+    if (value.condition != defaultCondition.product) {
+      sellerObject = {
+        sellerCodes: value.seller0.map((seller) => seller.code),
+        sellerQuantityType:
+          value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
+        minQuantity: parseInt(value.minQuantity),
+        minTotalValue: parseInt(value.minTotalValue),
+      };
+    }
+    let tmpArr =
+      value.condition == defaultCondition.product
+        ? conditionObject.productList
+        : [""];
+
+    conditions = [
+      {
+        type: value.condition,
+        minOrderValue: parseInt(value.minValue),
+        productConditions: tmpArr.map((o, index) => {
+          switch (value.condition) {
+            case defaultCondition.ingredient:
+              return {
+                ...sellerObject,
+                ingredientCode: value.ingredient.code,
+              };
+            case defaultCondition.producer:
+              return {
+                ...sellerObject,
+                producerCode: value.producer.code,
+              };
+            case defaultCondition.product:
+              return {
+                sellerCodes: value["seller" + index].map(
+                  (seller) => seller.code
+                ),
+                sellerQuantityType:
+                  value["seller" + index][0].name == "Chọn tất cả"
+                    ? "ALL"
+                    : "MANY",
+                productId: value["product" + index].productID,
+                minQuantity: parseInt(value["minQuantity" + index]),
+                minTotalValue: parseInt(value["minTotalValue" + index]),
+              };
+            case defaultCondition.productCategory:
+              return {
+                ...sellerObject,
+                categoryCode: value.productCategory.code,
+              };
+            case defaultCondition.productTag:
+              return {
+                ...sellerObject,
+                productTag: value.productTag.code,
+              };
+            default:
+              break;
+          }
+        }),
+      },
+    ];
+  }
+
+  let rewards;
+  switch (value.reward) {
+    case defaultReward.absolute:
+      rewards = [
+        {
+          type: value.reward,
+          absoluteDiscount: parseInt(value.absoluteDiscount),
+        },
+      ];
+      break;
+    case defaultReward.gift:
+      rewards = [
+        {
+          type: value.reward,
+          gifts: rewardObject.attachedProduct.map((o, index) => ({
+            productId: value["gift" + index].productID,
+            quantity: parseInt(value["quantity" + index]),
+          })),
+        },
+      ];
+      break;
+    case defaultReward.percentage:
+      rewards = [
+        {
+          type: value.reward,
+          percentageDiscount: parseInt(value.percentageDiscount),
+          maxDiscount: parseInt(value.maxDiscount),
+        },
+      ];
+      break;
+    case defaultReward.point:
+      rewards = [
+        {
+          type: value.reward,
+          pointValue: parseInt(value.pointValue),
+        },
+      ];
+      break;
+    default:
+      break;
+  }
+
+  let checkTypeSubmit;
+  if (!isCreate) {
+    checkTypeSubmit = {
+      promotionId: promotionId,
+    };
+  }
+
+  let body = {
+    ...checkTypeSubmit,
+    promotionName: value.promotionName,
+    promotionType: value.promotionType,
+    promotionOrganizer: value.promotionOrganizer,
+    description: value.description,
+    startTime: new Date(value.startTime).toISOString(),
+    publicTime: new Date(value.publicTime).toISOString(),
+    endTime: new Date(value.endTime).toISOString(),
+    status: value.status
+      ? defaultPromotionStatus.ACTIVE
+      : defaultPromotionStatus.EXPIRED,
+    scopes,
+    conditions,
+    rewards,
+  };
+
+  console.log(body, "bdoy");
+
+  let res;
+
+  if (isCreate) res = await createPromontion(body);
+  else res = await updatePromontion(body);
+
+  console.log(res);
+
+  if (res.status == "OK") {
+    if (isCreate) toast.success("Tạo chương trình khuyến mãi thành công");
+    else toast.success("Cập nhật chương trình khuyến mãi thành công");
+    router.back();
+  } else {
+    toast.error(res.message);
+  }
+}
+
 function render(props) {
   const toast = useToast();
   const router = useRouter();
@@ -65,7 +321,7 @@ function render(props) {
   const [textField, setTextField] = useState({
     descriptionField: "",
     promotionField: "",
-    promotionTypeField: "",
+    promotionType: "",
   });
 
   const [errorTextField, setErrorTextField] = useState({
@@ -96,7 +352,7 @@ function render(props) {
   ]);
 
   const [conditionObject, setConditionObject] = useState({
-    selectField: "",
+    selectField: defaultCondition.noRule,
     minValue: 0,
     seller: [],
     productList: [{ productName: "", minQuantity: 0, minTotalValue: 0 }],
@@ -117,63 +373,6 @@ function render(props) {
     pointValue: 0,
   });
 
-  const validate = () => {
-    let value = getValues();
-    if (value.promotionField == "")
-      setError("promotionField", {
-        type: "required",
-        message: "Chưa chọn bên tổ chức",
-      });
-    if (value.promotionTypeField == "")
-      setError("promotionTypeField", {
-        type: "required",
-        message: "Chưa chọn hình thức áp dụng",
-      });
-    if (value.area == "")
-      setError("area", {
-        type: "required",
-        message: "Chưa chọn khu vực áp dụng",
-      });
-    conditionObject.productList.map((o, index) => {
-      if (
-        !getValues("seller" + index) ||
-        getValues("seller" + index).length == 0
-      )
-        setError("seller" + index, {
-          type: "required",
-          message: "Chưa chọn người bán",
-        });
-    });
-    if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
-      setError(displayNameBasedOnCondition(conditionObject.selectField), {
-        type: "required",
-        message:
-          displayLabelBasedOnCondition(conditionObject.selectField) +
-          " không được bỏ trống",
-      });
-    }
-    if (value.customerLevel == "")
-      setError("customerLevel", {
-        type: "required",
-        message: "Chưa chọn đối tượng áp dụng",
-      });
-    if (value.condition == "")
-      setError("condition", {
-        type: "required",
-        message: "Chưa chọn điều kiện khuyến mãi",
-      });
-    if (value.reward == "")
-      setError("reward", {
-        type: "required",
-        message: "Chưa chọn giá trị khuyến mãi",
-      });
-    if (!value.description || value.description == "")
-      setError("description", {
-        type: "required",
-        message: "Mô tả không được trống",
-      });
-  };
-
   const handleChangeTextField = (key) => (event) => {
     setTextField({ ...textField, [key]: event.target.value });
   };
@@ -189,7 +388,7 @@ function render(props) {
   const handleRemoveAttachedProduct = (index) => {
     let value = getValues();
     for (let i = index; i < rewardObject.attachedProduct.length - 1; i++) {
-      setValue("number" + i, value["number" + (i + 1)]);
+      setValue("quantity" + i, value["quantity" + (i + 1)]);
     }
     rewardObject.attachedProduct.splice(index, 1);
     setRewardObject({ ...rewardObject });
@@ -262,178 +461,18 @@ function render(props) {
     setConditionObject({ ...conditionObject });
   };
 
-  const checkRegisterdTime = (value) => {
-    if (value.registeredAfter != "" && value.registeredBefore != "") {
-      return {
-        registeredBefore: new Date(value.registeredBefore).toISOString(),
-        registeredAfter: new Date(value.registeredAfter).toISOString(),
-      };
-    }
-    if (value.registeredAfter != "") {
-      return { registeredAfter: new Date(value.registeredAfter).toISOString() };
-    }
-    if (value.registeredBefore != "") {
-      return {
-        registeredBefore: new Date(value.registeredBefore).toISOString(),
-      };
-    }
-    return;
-  };
-
   // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
-    let value = getValues();
-    let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
-    let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";
-    let scopes = [
-      {
-        type: defaultScope.customerLevel,
-        quantityType: isCustomerLevelAll ? "ALL" : "MANY",
-        customerLevelCodes: isCustomerLevelAll
-          ? []
-          : value.customerLevel.map((o) => o.code),
-        ...checkRegisterdTime(value),
-      },
-      {
-        type: defaultScope.area,
-        quantityType: isAreaAll ? "ALL" : "MANY",
-        areaCodes: isAreaAll ? [] : value.area.map((o) => o.code),
-      },
-    ];
-
-    console.log(scopes, "SCOPES");
-
-    let conditions;
-
-    if (value.condition == defaultCondition.noRule)
-      conditions = [{ type: value.condition }];
-    else {
-      let sellerObject;
-      if (value.condition != defaultCondition.product) {
-        sellerObject = {
-          sellerCodes: value.seller0.map((seller) => seller.code),
-          sellerQuantityType:
-            value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
-          minQuantity: parseInt(value.minQuantity),
-          minTotalValue: parseInt(value.minTotalValue),
-        };
-      }
-      conditions = [
-        {
-          type: value.condition,
-          minOrderValue: parseInt(value.minValue),
-          productConditions: conditionObject.productList.map((o, index) => {
-            switch (value.condition) {
-              case defaultCondition.ingredient:
-                return {
-                  ...sellerObject,
-                  ingredientCode: value.ingredient.code,
-                };
-              case defaultCondition.producer:
-                return {
-                  ...sellerObject,
-                  producerCode: value.producer.code,
-                };
-              case defaultCondition.product:
-                return {
-                  sellerCodes: value["seller" + index].map(
-                    (seller) => seller.code
-                  ),
-                  sellerQuantityType:
-                    value["seller" + index][0].name == "Chọn tất cả"
-                      ? "ALL"
-                      : "MANY",
-                  productId: value["product" + index].productID,
-                  minQuantity: parseInt(value["minQuantity" + index]),
-                  minTotalValue: parseInt(value["minTotalValue" + index]),
-                };
-              case defaultCondition.productCategory:
-                return {
-                  ...sellerObject,
-                  categoryCode: value.productCategory.code,
-                };
-              case defaultCondition.productTag:
-                return {
-                  ...sellerObject,
-                  productTag: value.productTag.code,
-                };
-              default:
-                break;
-            }
-          }),
-        },
-      ];
-    }
-
-    let rewards;
-    switch (value.reward) {
-      case defaultReward.absolute:
-        rewards = [
-          {
-            type: value.reward,
-            absoluteDiscount: parseInt(value.absoluteDiscount),
-          },
-        ];
-        break;
-      case defaultReward.gift:
-        rewards = [
-          {
-            type: value.reward,
-            gifts: rewardObject.attachedProduct.map((o, index) => ({
-              productId: value["gift" + index].productID,
-              quantity: parseInt(value["number" + index]),
-            })),
-          },
-        ];
-        break;
-      case defaultReward.percentage:
-        rewards = [
-          {
-            type: value.reward,
-            percentageDiscount: parseInt(value.percentageDiscount),
-            maxDiscount: parseInt(value.maxDiscount),
-          },
-        ];
-        break;
-      case defaultReward.point:
-        rewards = [
-          {
-            type: value.reward,
-            pointValue: parseInt(value.pointValue),
-          },
-        ];
-        break;
-
-      default:
-        break;
-    }
-
-    let body = {
-      promotionName: value.promotionName,
-      promotionType: value.promotionTypeField,
-      promotionOrganizer: value.promotionField,
-      description: value.description,
-      startTime: new Date(value.startTime).toISOString(),
-      publicTime: new Date(value.publicTime).toISOString(),
-      endTime: new Date(value.endTime).toISOString(),
-      status: value.status
-        ? defaultPromotionStatus.ACTIVE
-        : defaultPromotionStatus.EXPIRED,
-      scopes,
-      conditions,
-      rewards,
-    };
-
-    let res = await createPromontion(body);
-
-    console.log(res);
-
-    if (res.status == "OK") {
-      toast.success("Tạo chương trình khuyến mãi thành công");
-      router.back();
-    } else {
-      toast.error(res.message);
-    }
+    onSubmitPromotion(
+      getValues,
+      toast,
+      router,
+      scopeObject,
+      conditionObject,
+      rewardObject,
+      true,
+      null
+    );
   }
 
   return (
@@ -486,7 +525,9 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmit, validate)}
+                onClick={handleSubmit(onSubmit, () =>
+                  validatePromotion(getValues, setError, conditionObject)
+                )}
                 style={{ margin: 8 }}
               >
                 thêm chương trình khuyến mãi
