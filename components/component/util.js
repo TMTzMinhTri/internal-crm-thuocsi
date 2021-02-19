@@ -530,6 +530,12 @@ export async function onSubmitPromotion(
     checkTypeSubmit = {
       promotionId: promotionId,
     };
+  } else {
+    checkTypeSubmit = {
+      status: value.status
+        ? defaultPromotionStatus.ACTIVE
+        : defaultPromotionStatus.EXPIRED,
+    };
   }
 
   let body = {
@@ -541,9 +547,7 @@ export async function onSubmitPromotion(
     startTime: new Date(value.startTime).toISOString(),
     publicTime: new Date(value.publicTime).toISOString(),
     endTime: new Date(value.endTime).toISOString(),
-    status: value.status
-      ? defaultPromotionStatus.ACTIVE
-      : defaultPromotionStatus.EXPIRED,
+
     scopes,
     conditions,
     rewards,
