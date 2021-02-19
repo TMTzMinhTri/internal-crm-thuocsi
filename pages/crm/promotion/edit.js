@@ -3,7 +3,6 @@ import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import styles from "./promotion.module.css";
 import {
   doWithLoggedInUser,
   renderWithLoggedInUser,
@@ -17,11 +16,10 @@ import {
   defaultReward,
   defaultScope,
 } from "../../../components/component/constant";
-import { onSubmitPromotion, validatePromotion } from "./new";
 import {
-  displayNameBasedOnCondition,
-  displayLabelBasedOnCondition,
   formatUTCTime,
+  onSubmitPromotion,
+  validatePromotion,
 } from "../../../components/component/util";
 import { useRouter } from "next/router";
 import InfomationFields from "components/component/promotion/infomation-fields";
@@ -48,22 +46,15 @@ export async function getServerSideProps(ctx) {
 export async function loadDataBefore(ctx) {
   let returnObject = {
     props: {
-      gifts: [],
-      productConditions: [],
       promotionRes: null,
     },
   };
-
   let promotionId = ctx.query.promotionId;
-
   let _promotionClient = getPromoClient(ctx, {});
   let promotionRes = await _promotionClient.getPromotionByID(promotionId);
 
   if (promotionRes && promotionRes.status === "OK") {
     let data = promotionRes.data[0];
-
-    console.log(promotionRes, "promotionRes");
-
     returnObject.props.promotionRes = data;
   }
 
@@ -481,27 +472,6 @@ function render(props) {
     }
   };
 
-  const checkRegisterdTime = (value) => {
-    if (value.registeredAfter != "" && value.registeredBefore != "") {
-      return {
-        registeredBefore: new Date(value.registeredBefore).toISOString(),
-        registeredAfter: new Date(value.registeredAfter).toISOString(),
-      };
-    }
-    if (value.registeredAfter != "") {
-      return { registeredAfter: new Date(value.registeredAfter).toISOString() };
-    }
-    if (value.registeredBefore != "") {
-      return {
-        registeredBefore: new Date(value.registeredBefore).toISOString(),
-      };
-    }
-    return;
-  };
-
-  console.log(rewardObject, "rewardObject");
-
-  // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
     onSubmitPromotion(
       getValues,
@@ -513,163 +483,6 @@ function render(props) {
       false,
       promotionId
     );
-    // let value = getValues();
-    // let isCustomerLevelAll = scopeObject[0].list[0].name == "Chọn tất cả";
-    // let isAreaAll = scopeObject[1].list[0].name == "Chọn tất cả";
-    // let scopes = [
-    //   {
-    //     type: defaultScope.customerLevel,
-    //     quantityType: isCustomerLevelAll ? "ALL" : "MANY",
-    //     customerLevelCodes: isCustomerLevelAll
-    //       ? []
-    //       : value.customerLevel.map((o) => o.code),
-    //     ...checkRegisterdTime(value),
-    //   },
-    //   {
-    //     type: defaultScope.area,
-    //     quantityType: isAreaAll ? "ALL" : "MANY",
-    //     areaCodes: isAreaAll ? [] : value.area.map((o) => o.code),
-    //   },
-    // ];
-    // let conditions;
-
-    // if (value.condition == defaultCondition.noRule)
-    //   conditions = [{ type: value.condition }];
-    // else {
-    //   let sellerObject;
-    //   if (value.condition != defaultCondition.product) {
-    //     sellerObject = {
-    //       sellerCodes:
-    //         value.seller0[0].name == "Chọn tất cả"
-    //           ? []
-    //           : value.seller0.map((seller) => seller.code),
-    //       sellerQuantityType:
-    //         value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
-    //       minQuantity: parseInt(value.minQuantity),
-    //       minTotalValue: parseInt(value.minTotalValue),
-    //     };
-    //   }
-
-    //   let tmpArr =
-    //     value.condition == defaultCondition.product
-    //       ? conditionObject.productList
-    //       : [""];
-
-    //   conditions = [
-    //     {
-    //       type: value.condition,
-    //       minOrderValue: parseInt(value.minValue),
-    //       productConditions: tmpArr.map((o, index) => {
-    //         switch (value.condition) {
-    //           case defaultCondition.ingredient:
-    //             return {
-    //               ...sellerObject,
-    //               ingredientCode: value.ingredient.code,
-    //             };
-    //           case defaultCondition.producer:
-    //             return {
-    //               ...sellerObject,
-    //               producerCode: value.producer.code,
-    //             };
-    //           case defaultCondition.product:
-    //             return {
-    //               sellerCodes: value["seller" + index].map(
-    //                 (seller) => seller.code
-    //               ),
-    //               sellerQuantityType:
-    //                 value["seller" + index][0].name == "Chọn tất cả"
-    //                   ? "ALL"
-    //                   : "MANY",
-    //               productId: value["product" + index].productID,
-    //               minQuantity: parseInt(value["minQuantity" + index]),
-    //               minTotalValue: parseInt(value["minTotalValue" + index]),
-    //             };
-    //           case defaultCondition.productCategory:
-    //             return {
-    //               ...sellerObject,
-    //               categoryCode: value.productCategory.code,
-    //             };
-    //           case defaultCondition.productTag:
-    //             return {
-    //               ...sellerObject,
-    //               productTag: value.productTag.code,
-    //             };
-    //           default:
-    //             break;
-    //         }
-    //       }),
-    //     },
-    //   ];
-    // }
-
-    // let rewards;
-    // switch (value.reward) {
-    //   case defaultReward.absolute:
-    //     rewards = [
-    //       {
-    //         type: value.reward,
-    //         absoluteDiscount: parseInt(value.absoluteDiscount),
-    //       },
-    //     ];
-    //     break;
-    //   case defaultReward.gift:
-    //     rewards = [
-    //       {
-    //         type: value.reward,
-    //         gifts: rewardObject.attachedProduct.map((o, index) => ({
-    //           productId: value["gift" + index].productID,
-    //           quantity: parseInt(value["quantity" + index]),
-    //         })),
-    //       },
-    //     ];
-    //     break;
-    //   case defaultReward.percentage:
-    //     rewards = [
-    //       {
-    //         type: value.reward,
-    //         percentageDiscount: parseInt(value.percentageDiscount),
-    //         maxDiscount: parseInt(value.maxDiscount),
-    //       },
-    //     ];
-    //     break;
-    //   case defaultReward.point:
-    //     rewards = [
-    //       {
-    //         type: value.reward,
-    //         pointValue: parseInt(value.pointValue),
-    //       },
-    //     ];
-    //     break;
-
-    //   default:
-    //     break;
-    // }
-
-    // let body = {
-    //   promotionId: promotionId,
-    //   promotionName: value.promotionName,
-    //   promotionType: value.promotionType,
-    //   promotionOrganizer: value.promotionOrganizer,
-    //   description: value.description,
-    //   startTime: new Date(value.startTime).toISOString(),
-    //   publicTime: new Date(value.publicTime).toISOString(),
-    //   endTime: new Date(value.endTime).toISOString(),
-    //   scopes,
-    //   conditions,
-    //   rewards,
-    // };
-
-    // console.log(body, "bdoy");
-
-    // let res = await updatePromontion(body);
-    // console.log(res, "res");
-
-    // if (res.status == "OK") {
-    //   toast.success("Cập nhật chương trình khuyến mãi thành công");
-    //   // router.back();
-    // } else {
-    //   toast.error(res.message);
-    // }
   }
 
   useEffect(() => {
