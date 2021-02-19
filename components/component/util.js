@@ -3,7 +3,7 @@ import {
   defaultCondition,
   defaultNameRulesQuantity,
   defaultNameRulesValue,
-  defaultPromotionOrganizer,
+  defaultPromotion,
   defaultPromotionStatus,
   defaultPromotionType,
   defaultReward,
@@ -125,11 +125,11 @@ export function formatUTCTime(time) {
 export function getPromotionOrganizer(organizer) {
   let scope = "Không xác định";
   switch (organizer) {
-    case defaultPromotionOrganizer.COORPORATE:
+    case defaultPromotion.COORPORATE:
       return "Chương trình hợp tác của 2 bên";
-    case defaultPromotionOrganizer.MARKETPLACE:
+    case defaultPromotion.MARKETPLACE:
       return "Chương trình của riêng sàn";
-    case defaultPromotionOrganizer.SELLER:
+    case defaultPromotion.SELLER:
       return "Chương trình của riêng nhà bán hàng";
   }
   return scope;
