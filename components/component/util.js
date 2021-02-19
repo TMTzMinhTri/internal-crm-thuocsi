@@ -292,30 +292,35 @@ export function displayUsage(usage) {
 }
 
 export const validatePromotion = (getValues, setError, conditionObject) => {
+  console.timeLog("validatePromotion");
+  let isError = true;
   let value = getValues();
-  if (value.promotionField == "")
-    setError("promotionField", {
+  if (value.promotionOrganizer == "") {
+    isError = false;
+    setError("promotionOrganizer", {
       type: "required",
       message: "Chưa chọn bên tổ chức",
     });
-  if (value.promotionType == "")
+  }
+  if (value.promotionType == "") {
+    isError = false;
     setError("promotionType", {
       type: "required",
       message: "Chưa chọn hình thức áp dụng",
     });
-  if (value.area == "")
-    setError("area", {
-      type: "required",
-      message: "Chưa chọn khu vực áp dụng",
+  }
+  if (value.condition != defaultCondition.noRule)
+    conditionObject.productList.map((o, index) => {
+      if (!value["seller" + index] || value["seller" + index].length == 0) {
+        isError = false;
+        setError("seller" + index, {
+          type: "required",
+          message: "Chưa chọn người bán",
+        });
+      }
     });
-  conditionObject.productList.map((o, index) => {
-    if (!value["seller" + index] || value["seller" + index].length == 0)
-      setError("seller" + index, {
-        type: "required",
-        message: "Chưa chọn người bán",
-      });
-  });
   if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
+    isError = false;
     setError(displayNameBasedOnCondition(conditionObject.selectField), {
       type: "required",
       message:
@@ -323,26 +328,28 @@ export const validatePromotion = (getValues, setError, conditionObject) => {
         " không được bỏ trống",
     });
   }
-  if (value.customerLevel == "")
-    setError("customerLevel", {
-      type: "required",
-      message: "Chưa chọn đối tượng áp dụng",
-    });
-  if (value.condition == "")
+  if (value.condition == "") {
+    isError = false;
     setError("condition", {
       type: "required",
       message: "Chưa chọn điều kiện khuyến mãi",
     });
-  if (value.reward == "")
+  }
+  if (value.reward == "") {
+    isError = false;
     setError("reward", {
       type: "required",
       message: "Chưa chọn giá trị khuyến mãi",
     });
-  if (!value.description || value.description == "")
+  }
+  if (!value.description || value.description == "") {
+    isError = false;
     setError("description", {
       type: "required",
       message: "Mô tả không được trống",
     });
+  }
+  return isError;
 };
 
 export function displayPromotionReward(type) {

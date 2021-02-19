@@ -57,7 +57,7 @@ function render(props) {
 
   const [textField, setTextField] = useState({
     descriptionField: "",
-    promotionField: "",
+    promotionOrganizer: "",
     promotionType: "",
   });
 
@@ -86,7 +86,7 @@ function render(props) {
     selectField: defaultCondition.noRule,
     minValue: 0,
     seller: [],
-    productList: [{ productName: "", minQuantity: 0, minTotalValue: 0 }],
+    productList: [{ productName: "", minQuantity: 0, minTotalValue: "" }],
     item: {},
   });
 
@@ -144,7 +144,7 @@ function render(props) {
     conditionObject.productList.push({
       productName: "",
       minQuantity: 0,
-      minTotalValue: 0,
+      minTotalValue: "",
     });
     setConditionObject({ ...conditionObject });
   };
@@ -193,17 +193,22 @@ function render(props) {
   };
 
   async function onSubmit() {
-    onSubmitPromotion(
-      getValues,
-      toast,
-      router,
-      scopeObject,
-      conditionObject,
-      rewardObject,
-      true,
-      null
-    );
+    if (validatePromotion(getValues, setError, conditionObject))
+      onSubmitPromotion(
+        getValues,
+        toast,
+        router,
+        scopeObject,
+        conditionObject,
+        rewardObject,
+        true,
+        null
+      );
   }
+
+  console.log(getValues(), "getValues");
+
+  console.log(errors, "errors");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -254,9 +259,7 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmit, () =>
-                  validatePromotion(getValues, setError, conditionObject)
-                )}
+                onClick={handleSubmit(onSubmit)}
                 style={{ margin: 8 }}
               >
                 thêm chương trình khuyến mãi
