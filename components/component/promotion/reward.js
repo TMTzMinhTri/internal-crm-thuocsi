@@ -82,9 +82,7 @@ const Reward = (props) => {
                     ? errors.absoluteDiscount?.message
                     : errors.pointValue?.message
                 }
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                {...textfieldProps}
                 fullWidth
                 error={
                   selectField == "ABSOLUTE"
