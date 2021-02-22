@@ -18,23 +18,28 @@ const Scope = (props) => {
 
   const { handleChangeScopeList } = props;
 
-  console.log(scopeObject, "scopeObject");
-
   return (
     <Paper
       elevation={3}
       style={{ padding: "0 30px 20px 30px", margin: "20px 0" }}
     >
-      <Grid container direction="column">
+      <Grid container direction="column" spacing={2}>
         <Grid item container>
           <h4>PHẠM VI ÁP DỤNG</h4>
         </Grid>
-        <Grid item container xs={12} spacing={4} alignItems="flex-end">
+        <Grid item container spacing={4}>
           {scopeObject.map(
             ({ registeredBefore, registeredAfter, selectField, list }, index) =>
               selectField != "" && (
-                <Fragment key={index}>
-                  <Grid item container xs={6} spacing={3}>
+                <Grid
+                  item
+                  container
+                  justify="space-between"
+                  alignItems="flex-end"
+                  xs={12}
+                  key={index}
+                >
+                  <Grid item xs={6} container spacing={3}>
                     <Grid item xs={12}>
                       <AutoCompleteField
                         control={control}
@@ -50,10 +55,15 @@ const Scope = (props) => {
                     </Grid>
                   </Grid>
                   {selectField == defaultScope.customerLevel && (
-                    <Grid container item xs={6} spacing={3}>
-                      <Grid item container xs={6}>
+                    <Grid
+                      container
+                      item
+                      xs={6}
+                      spacing={3}
+                      justify="space-between"
+                    >
+                      <Grid item xs={6}>
                         <TextField
-                          id={"registeredAfter"}
                           name={"registeredAfter"}
                           label="Được kích hoạt từ ngày"
                           placeholder=""
@@ -66,9 +76,8 @@ const Scope = (props) => {
                           inputRef={register()}
                         />
                       </Grid>
-                      <Grid item container xs={6}>
+                      <Grid item xs={6}>
                         <TextField
-                          id={"registeredBefore"}
                           name={"registeredBefore"}
                           label="Được kích hoạt đến ngày"
                           placeholder=""
@@ -89,7 +98,7 @@ const Scope = (props) => {
                       </Grid>
                     </Grid>
                   )}
-                </Fragment>
+                </Grid>
               )
           )}
         </Grid>

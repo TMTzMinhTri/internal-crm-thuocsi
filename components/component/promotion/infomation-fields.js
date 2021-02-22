@@ -92,11 +92,11 @@ const InfomationFields = (props) => {
   return (
     <Paper
       elevation={3}
-      style={{ padding: "0px 10px 20px 10px", margin: "10px" }}
+      style={{ padding: "0px 10px 0px 10px", margin: "10px" }}
     >
       <CardContent>
         <Grid spacing={4} container>
-          <Grid container item xs={12} spacing={4}>
+          <Grid container item xs={12} justify="space-between">
             <Grid container item xs={6} spacing={3}>
               <Grid item xs={12}>
                 <TextField
@@ -153,8 +153,8 @@ const InfomationFields = (props) => {
             </Grid>
           </Grid>
 
-          <Grid container item xs={12} spacing={4}>
-            <Grid container item xs={6} spacing={3}>
+          <Grid container item xs={12} justify="space-between">
+            <Grid container item xs={6} spacing={3} justify="space-between">
               <Grid item xs={6}>
                 <TextField
                   name="startTime"
