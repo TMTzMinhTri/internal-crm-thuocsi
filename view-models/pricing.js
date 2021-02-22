@@ -1,9 +1,22 @@
 export const PriceLevelValidator = {
     name: {
         required: "Vui lòng nhập tên.",
-        patterm: {
-            value: "",
-            message: "Vui lòng nhập tên không bao gồm ký tự đặc biệt."
+        validate: (value) => {
+            const validators = [
+                {
+                    value: new RegExp("[\\p{P}\\p{S}]", "ug"),
+                    message: "Vui lòng nhập tên không bao gồm ký tự đặc biệt."
+                },
+                {
+                    value: /^(.*[ ]{2})|^ /,
+                    message: "Tên không hợp lệ (dư ký tự khoảng trắng).",
+                }
+            ]
+            for (let i = 0; i < validators.length; i++) {
+                if (validators[i].value?.test(value)) {
+                    return validators[i].message;
+                }
+            }
         },
         min: {
             value: 6,
