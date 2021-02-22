@@ -45,7 +45,7 @@ const Reward = (props) => {
         <Grid item container>
           <h4>GIÁ TRỊ KHUYẾN MÃI</h4>
         </Grid>
-        <Grid item container xs={6}>
+        <Grid item container xs={5}>
           <SelectField
             control={control}
             errors={errors}
@@ -59,53 +59,47 @@ const Reward = (props) => {
         </Grid>
         {selectField != "" &&
           (selectField == "ABSOLUTE" || selectField == "POINT" ? (
-            <>
-              <Grid item container xs={6} key={selectField}>
-                <TextField
-                  type="number"
-                  id={
+            <Grid item container xs={5} key={selectField}>
+              <TextField
+                type="number"
+                id={
+                  selectField == "ABSOLUTE" ? "absoluteDiscount" : "pointValue"
+                }
+                name={
+                  selectField == "ABSOLUTE" ? "absoluteDiscount" : "pointValue"
+                }
+                label={
+                  selectField == "ABSOLUTE"
+                    ? "Giá trị giảm tuyệt đối"
+                    : "Số điểm tặng"
+                }
+                placeholder=""
+                defaultValue={
+                  selectField == "ABSOLUTE" ? absoluteDiscount : pointValue
+                }
+                helperText={
+                  selectField == "ABSOLUTE"
+                    ? errors.absoluteDiscount?.message
+                    : errors.pointValue?.message
+                }
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                fullWidth
+                error={
+                  selectField == "ABSOLUTE"
+                    ? !!errors.absoluteDiscount
+                    : !!errors.pointValue
+                }
+                required
+                inputRef={register({
+                  required:
                     selectField == "ABSOLUTE"
-                      ? "absoluteDiscount"
-                      : "pointValue"
-                  }
-                  name={
-                    selectField == "ABSOLUTE"
-                      ? "absoluteDiscount"
-                      : "pointValue"
-                  }
-                  label={
-                    selectField == "ABSOLUTE"
-                      ? "Giá trị giảm tuyệt đối"
-                      : "Số điểm tặng"
-                  }
-                  placeholder=""
-                  defaultValue={
-                    selectField == "ABSOLUTE" ? absoluteDiscount : pointValue
-                  }
-                  helperText={
-                    selectField == "ABSOLUTE"
-                      ? errors.absoluteDiscount?.message
-                      : errors.pointValue?.message
-                  }
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  fullWidth
-                  error={
-                    selectField == "ABSOLUTE"
-                      ? !!errors.absoluteDiscount
-                      : !!errors.pointValue
-                  }
-                  required
-                  inputRef={register({
-                    required:
-                      selectField == "ABSOLUTE"
-                        ? "Giá trị không được trống"
-                        : "Số điểm tặng không được trống",
-                  })}
-                />
-              </Grid>
-            </>
+                      ? "Giá trị không được trống"
+                      : "Số điểm tặng không được trống",
+                })}
+              />
+            </Grid>
           ) : (
             <>
               {selectField == "PERCENTAGE" ? (
@@ -189,23 +183,24 @@ const Reward = (props) => {
                           })}
                         />
                       </Grid>
-                      <Grid item xs={1}>
+                      <Grid item xs={1} container justify="center">
                         <IconButton
                           onClick={() => handleRemoveAttachedProduct(index)}
                         >
-                          <Delete />
+                          <Delete color="secondary" />
                         </IconButton>
                       </Grid>
                     </Grid>
                   ))}
                   <Grid item xs={2}>
-                    <Fab
+                    <Button
+                      variant="contained"
+                      startIcon={<Add />}
                       color="primary"
-                      size="small"
                       onClick={handleAddAttachedProduct}
                     >
-                      <Add />
-                    </Fab>
+                      Thêm sản phẩm
+                    </Button>
                   </Grid>
                 </>
               )}

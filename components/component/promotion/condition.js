@@ -148,7 +148,7 @@ const Condition = (props) => {
                       <IconButton
                         onClick={() => handleRemoveProductOfProductList(index)}
                       >
-                        <Delete />
+                        <Delete color="secondary" />
                       </IconButton>
                     </Grid>
                   </Grid>

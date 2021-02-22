@@ -563,9 +563,13 @@ export async function onSubmitPromotion(
   console.log(res);
 
   if (res.status == "OK") {
-    if (isCreate) toast.success("Tạo chương trình khuyến mãi thành công");
-    else toast.success("Cập nhật chương trình khuyến mãi thành công");
-    router.back();
+    if (isCreate) {
+      toast.success("Tạo chương trình khuyến mãi thành công");
+      return res;
+    } else {
+      toast.success("Cập nhật chương trình khuyến mãi thành công");
+      router.back();
+    }
   } else {
     toast.error(res.message);
   }

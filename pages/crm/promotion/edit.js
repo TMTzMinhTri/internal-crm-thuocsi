@@ -561,7 +561,9 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmitUpdate)}
+                onClick={handleSubmit(onSubmitUpdate, () =>
+                  validatePromotion(getValues, setError, conditionObject)
+                )}
                 style={{ margin: 8 }}
               >
                 cập nhật

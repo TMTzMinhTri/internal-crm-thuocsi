@@ -211,6 +211,6 @@ export const promotionTypes = [
   },
   {
     value: defaultPromotionType.COMBO,
-    label: "Combo",
+    label: "Combo linh hoạt",
   },
 ];
