@@ -291,7 +291,12 @@ export function displayUsage(usage) {
   return usage;
 }
 
-export const validatePromotion = (getValues, setError, conditionObject) => {
+export const validatePromotion = (
+  getValues,
+  setError,
+  conditionObject,
+  rewardObject
+) => {
   console.timeLog("validatePromotion");
   let isError = true;
   let value = getValues();
@@ -340,6 +345,17 @@ export const validatePromotion = (getValues, setError, conditionObject) => {
     setError("reward", {
       type: "required",
       message: "Chưa chọn giá trị khuyến mãi",
+    });
+  }
+  if (value.reward == defaultReward.gift) {
+    rewardObject.attachedProduct.map((o, index) => {
+      if (!value["gift" + index] || value["gift" + index].length == 0) {
+        isError = false;
+        setError("gift" + index, {
+          type: "required",
+          message: "Chưa chọn sản phẩm",
+        });
+      }
     });
   }
   if (!value.description || value.description == "") {

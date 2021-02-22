@@ -199,7 +199,7 @@ function render(props) {
   };
 
   async function onSubmit() {
-    if (validatePromotion(getValues, setError, conditionObject)) {
+    if (validatePromotion(getValues, setError, conditionObject, rewardObject)) {
       let res = await onSubmitPromotion(
         getValues,
         toast,
@@ -221,6 +221,10 @@ function render(props) {
       }
     }
   }
+
+  console.log(getValues(), "getValues()");
+
+  console.log(errors, "errors");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -286,7 +290,12 @@ function render(props) {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit(onSubmit, () =>
-                  validatePromotion(getValues, setError, conditionObject)
+                  validatePromotion(
+                    getValues,
+                    setError,
+                    conditionObject,
+                    rewardObject
+                  )
                 )}
                 style={{ margin: 8 }}
               >
