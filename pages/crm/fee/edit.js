@@ -3,7 +3,6 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
-import { FeeType, feeTypeOptions, feeValidation } from "view-models/fee";
 import { getFeeClient } from "client/fee";
 import globalStyles from "components/css-global.module.css";
 import Head from "next/head";
