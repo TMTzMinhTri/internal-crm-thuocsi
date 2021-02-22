@@ -125,7 +125,6 @@ function render(props) {
     const onSubmit = async () => {
         let value = getValues()
         let {code,maxUsage,maxUsagePerCustomer,promotionId,startTime,endTime,publicTime} = value
-        console.log('1234',promotionId)
         let {type,customerIds} = dataProps
         let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds,promotionId.label)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
