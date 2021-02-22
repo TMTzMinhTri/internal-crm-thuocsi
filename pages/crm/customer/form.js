@@ -344,7 +344,7 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
                                                                     pattern: {
-                                                                        value: /^[0-9]{9,12}$/,
+                                                                        value: /^[0-9]{10,12}$/,
                                                                         message: "Số điện thoại không hợp lệ"
                                                                     },
                                                                 })
