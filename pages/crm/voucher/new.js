@@ -121,7 +121,7 @@ function render(props) {
                 ? props.promotion?.map((item) => {
                     return {label: item.promotionName, value: item.promotionId};
                 })[0]
-                : {},
+                : "",
         },
         mode: "onChange",
     });
