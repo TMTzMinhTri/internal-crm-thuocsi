@@ -15,12 +15,6 @@ export const defaultPromotionType = {
   PROMOTION: "PROMOTOTION",
 };
 
-export const defaultPromotionOrganizer = {
-  MARKETPLACE: "MARKETPLACE",
-  SELLER: "SELLER",
-  COORPORATE: "COORPORATE ",
-};
-
 export const defaultPromotionScope = {
   GLOBAL: "GLOBAL",
   SELLER: "SELLER",
@@ -113,9 +107,9 @@ export const defaultReward = {
 };
 
 export const defaultPromotion = {
-  marketPlace: "MARKETPLACE",
-  seller: "SELLER",
-  coorporate: "COORPORATE",
+  MARKETPLACE: "MARKETPLACE",
+  SELLER: "SELLER",
+  COORPORATE: "COORPORATE",
 };
 
 export const scopes = [
@@ -134,10 +128,6 @@ export const scopes = [
 ];
 
 export const conditions = [
-  {
-    value: "",
-    label: "Chọn loại điều kiện",
-  },
   {
     value: "PRODUCT_TAG",
     label: "Theo tag sản phẩm",
@@ -193,15 +183,15 @@ export const promotions = [
     label: "Chọn ...",
   },
   {
-    value: defaultPromotion.marketPlace,
+    value: defaultPromotion.MARKETPLACE,
     label: "Chương trình riêng của sàn",
   },
   {
-    value: defaultPromotion.coorporate,
+    value: defaultPromotion.COORPORATE,
     label: "Chương trình hợp tác của 2 bên",
   },
   {
-    value: defaultPromotion.seller,
+    value: defaultPromotion.SELLER,
     label: "Chương trình của riêng nhà bán hàng",
   },
 ];

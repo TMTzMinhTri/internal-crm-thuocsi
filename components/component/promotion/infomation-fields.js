@@ -4,6 +4,7 @@ import {
   CardContent,
   FormControlLabel,
   Grid,
+  makeStyles,
   Paper,
   Switch,
   TextField,
@@ -17,7 +18,29 @@ import SelectField from "./select-field";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { Controller } from "react-hook-form";
 
+export const textfieldProps = {
+  InputLabelProps: {
+    shrink: true,
+    style: {
+      color: "#353434",
+      fontSize: "20px",
+    },
+  },
+  InputProps: {
+    style: {
+      marginTop: "30px",
+    },
+  },
+};
+
+const useStyles = makeStyles({
+  root: {
+    marginTop: 10,
+  },
+});
+
 const InfomationFields = (props) => {
+  const classes = useStyles();
   const {
     dataRender = {
       promotionName: "",
@@ -44,7 +67,7 @@ const InfomationFields = (props) => {
 
   let value = getValues();
 
-  const { promotionField, promotionTypeField } = textField;
+  const { promotionOrganizer, promotionType } = textField;
 
   const [active, setActive] = useState(true);
 
@@ -66,85 +89,81 @@ const InfomationFields = (props) => {
     setActive(edit ? value.status : true);
   }, [value.status]);
 
-  console.log(active, "active");
-
   return (
     <Paper
       elevation={3}
       style={{ padding: "0px 10px 20px 10px", margin: "10px" }}
     >
       <CardContent>
-        <Grid spacing={2} container>
-          <Grid container item xs={6} spacing={2}>
-            <Grid item xs={12}>
-              <TextField
-                name="promotionName"
-                label="Tên khuyến mãi"
-                placeholder=""
-                defaultValue={dataRender.promotionName}
-                helperText={errors.promotionName?.message}
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                fullWidth
-                error={!!errors.promotionName}
-                required
-                inputRef={register({
-                  required: "Tên khuyến mãi không được để trống",
-                  maxLength: {
-                    value: 250,
-                    message: "Tên khuyến mãi không được vượt quá 250 kí tự",
-                  },
-                  minLength: {
-                    value: 6,
-                    message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự",
-                  },
-                  pattern: {
-                    value: /[A-Za-z]/,
-                    message: "Tên khuyến mãi phải có kí tự là chứ số",
-                  },
-                })}
-              />
+        <Grid spacing={4} container>
+          <Grid container item xs={12} spacing={4}>
+            <Grid container item xs={6} spacing={3}>
+              <Grid item xs={12}>
+                <TextField
+                  name="promotionName"
+                  label="Tên khuyến mãi"
+                  placeholder=""
+                  defaultValue={dataRender.promotionName}
+                  helperText={errors.promotionName?.message}
+                  {...textfieldProps}
+                  fullWidth
+                  error={!!errors.promotionName}
+                  required
+                  inputRef={register({
+                    required: "Tên khuyến mãi không được để trống",
+                    maxLength: {
+                      value: 250,
+                      message: "Tên khuyến mãi không được vượt quá 250 kí tự",
+                    },
+                    minLength: {
+                      value: 6,
+                      message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự",
+                    },
+                    pattern: {
+                      value: /[A-Za-z]/,
+                      message: "Tên khuyến mãi phải có kí tự là chứ số",
+                    },
+                  })}
+                />
+              </Grid>
             </Grid>
-          </Grid>
-          <Grid container item xs={6} spacing={2}>
-            <Grid item xs={6}>
-              <SelectField
-                name="promotionField"
-                control={control}
-                errors={errors}
-                title="Bên tổ chức"
-                value={promotionField}
-                options={promotions}
-                handleChange={handleChangeTextField("promotionField")}
-              />
-            </Grid>
-            <Grid item xs={6}>
-              <SelectField
-                name="promotionTypeField"
-                control={control}
-                errors={errors}
-                title="Hình thức áp dụng"
-                value={promotionTypeField}
-                options={promotionTypes}
-                handleChange={handleChangeTextField("promotionTypeField")}
-              />
+            <Grid container item xs={6} spacing={3}>
+              <Grid item xs={6}>
+                <SelectField
+                  name="promotionOrganizer"
+                  control={control}
+                  errors={errors}
+                  title="Bên tổ chức"
+                  value={promotionOrganizer}
+                  options={promotions}
+                  handleChange={handleChangeTextField("promotionOrganizer")}
+                />
+              </Grid>
+              <Grid item xs={6}>
+                <SelectField
+                  name="promotionType"
+                  control={control}
+                  errors={errors}
+                  title="Hình thức áp dụng"
+                  value={promotionType}
+                  options={promotionTypes}
+                  handleChange={handleChangeTextField("promotionType")}
+                />
+              </Grid>
             </Grid>
           </Grid>
 
-          <Grid container item xs={12} spacing={2}>
-            <Grid container item xs={6} spacing={1}>
-              <Grid item xs={5}>
+          <Grid container item xs={12} spacing={4}>
+            <Grid container item xs={6} spacing={3}>
+              <Grid item xs={6}>
                 <TextField
                   name="startTime"
                   id="startTime"
                   label="Thời gian bắt đầu"
                   placeholder=""
                   helperText={errors.startTime?.message}
+                  {...textfieldProps}
                   type="datetime-local"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
                   fullWidth
                   error={!!errors.startTime}
                   required
@@ -153,7 +172,7 @@ const InfomationFields = (props) => {
                   })}
                 />
               </Grid>
-              <Grid item xs={5}>
+              <Grid item xs={6}>
                 <TextField
                   name="endTime"
                   label="Thời gian kết thúc"
@@ -161,9 +180,7 @@ const InfomationFields = (props) => {
                   type="datetime-local"
                   helperText={errors.endTime?.message}
                   error={!!errors.endTime}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                  {...textfieldProps}
                   fullWidth
                   required
                   inputRef={register({
@@ -177,8 +194,8 @@ const InfomationFields = (props) => {
                 />
               </Grid>
             </Grid>
-            <Grid container item xs={6} spacing={1}>
-              <Grid item xs={5}>
+            <Grid container item xs={6} spacing={3}>
+              <Grid item xs={6}>
                 <TextField
                   name="publicTime"
                   label="Thời gian cho phép hiển thị"
@@ -186,9 +203,7 @@ const InfomationFields = (props) => {
                   type="datetime-local"
                   helperText={errors.publicTime?.message}
                   error={!!errors.publicTime}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                  {...textfieldProps}
                   fullWidth
                   required
                   inputRef={register({
@@ -206,16 +221,22 @@ const InfomationFields = (props) => {
                   })}
                 />
               </Grid>
-              <Grid item xs={5}>
-                <p style={{ margin: "0px 5px", fontSize: 12 }}>Trạng thái</p>
+              <Grid item xs={6}>
+                <p style={{ margin: "0px 5px", fontSize: 15 }}>Trạng thái</p>
                 <Controller
                   name="status"
                   defaultValue={active}
                   control={control}
                   render={(props) => (
                     <FormControlLabel
+                      classes={{
+                        label: classes.root,
+                      }}
                       control={
                         <Switch
+                          classes={{
+                            root: classes.root,
+                          }}
                           checked={active}
                           onChange={switchActive}
                           name="gilad"
