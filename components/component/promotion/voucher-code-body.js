@@ -197,7 +197,7 @@ export default function VoucherCodeBody(props) {
         }).then(() => {
             setValue("startTime",formatUTCTime(promotion.startTime),{ shouldValidate: true })
             setValue("endTime",formatUTCTime(promotion.endTime),{ shouldValidate: true })
-            setValue("endTime",formatUTCTime(promotion.publicTime),{ shouldValidate: true })
+            setValue("publicTime",formatUTCTime(promotion.publicTime),{ shouldValidate: true })
             setPromotionPublic(promotion)
         })
     }
