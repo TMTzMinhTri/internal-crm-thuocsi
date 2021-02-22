@@ -143,6 +143,8 @@ const AutoCompleteField = (props) => {
     return productList;
   };
 
+  console.log("name", name, errors);
+
   return (
     <Controller
       name={name}

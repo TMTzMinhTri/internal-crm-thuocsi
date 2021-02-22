@@ -475,7 +475,7 @@ function render(props) {
   };
 
   async function onSubmitUpdate() {
-    if (validatePromotion(getValues, setError, conditionObject))
+    if (validatePromotion(getValues, setError, conditionObject, rewardObject))
       onSubmitPromotion(
         getValues,
         toast,
@@ -485,20 +485,6 @@ function render(props) {
         rewardObject,
         false,
         promotionId
-      );
-  }
-
-  async function onSubmitCreate() {
-    if (validatePromotion(getValues, setError, conditionObject))
-      onSubmitPromotion(
-        getValues,
-        toast,
-        router,
-        scopeObject,
-        conditionObject,
-        rewardObject,
-        true,
-        null
       );
   }
 
@@ -562,7 +548,12 @@ function render(props) {
                 variant="contained"
                 color="primary"
                 onClick={handleSubmit(onSubmitUpdate, () =>
-                  validatePromotion(getValues, setError, conditionObject)
+                  validatePromotion(
+                    getValues,
+                    setError,
+                    conditionObject,
+                    rewardObject
+                  )
                 )}
                 style={{ margin: 8 }}
               >
