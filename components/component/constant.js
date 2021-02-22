@@ -15,12 +15,6 @@ export const defaultPromotionType = {
   PROMOTION: "PROMOTOTION",
 };
 
-export const defaultPromotionOrganizer = {
-  MARKETPLACE: "MARKETPLACE",
-  SELLER: "SELLER",
-  COORPORATE: "COORPORATE ",
-};
-
 export const defaultPromotionScope = {
   GLOBAL: "GLOBAL",
   SELLER: "SELLER",
@@ -28,7 +22,7 @@ export const defaultPromotionScope = {
   PRODUCT: "PRODUCT",
   SKU: "SKU",
   AREA: "AREA",
-  CUSTOMER: "CUSTOMER_LEVEL"
+  CUSTOMER: "CUSTOMER_LEVEL",
 };
 
 export const defaultPromotionStatus = {
@@ -92,18 +86,17 @@ export const defaultConditionInfo = {
 };
 
 export const defaultScope = {
-  customer: "CUSTOMER",
-  product: "PRODUCT",
-  productCatergory: "PRODUCT_CATEGORY",
-  producer: "PRODUCER",
-  ingredient: "INGREDIENT",
+  customerLevel: "CUSTOMER_LEVEL",
   area: "AREA",
-  productTag: "PRODUCT_TAG",
 };
 
 export const defaultCondition = {
-  orderValue: "ORDER_VALUE",
+  productCategory: "PRODUCT_CATEGORY",
+  producer: "PRODUCER",
+  ingredient: "INGREDIENT",
+  productTag: "PRODUCT_TAG",
   product: "PRODUCT",
+  noRule: "NO_RULE",
 };
 
 export const defaultReward = {
@@ -114,9 +107,9 @@ export const defaultReward = {
 };
 
 export const defaultPromotion = {
-  marketPlace: "MARKETPLACE",
-  seller: "SELLER",
-  coorporate: "COORPORATE",
+  MARKETPLACE: "MARKETPLACE",
+  SELLER: "SELLER",
+  COORPORATE: "COORPORATE",
 };
 
 export const scopes = [
@@ -125,8 +118,19 @@ export const scopes = [
     label: "Chọn loại phạm vi",
   },
   {
-    value: "CUSTOMER",
-    label: "Theo khách hàng",
+    value: "PRODUCT",
+    label: "Theo sản phẩm",
+  },
+  {
+    value: "AREA",
+    label: "Theo khu vực",
+  },
+];
+
+export const conditions = [
+  {
+    value: "PRODUCT_TAG",
+    label: "Theo tag sản phẩm",
   },
   {
     value: "PRODUCT",
@@ -137,40 +141,16 @@ export const scopes = [
     label: "Theo danh mục sản phẩm",
   },
   {
-    value: "PRODUCER",
-    label: "Theo nhà sản xuất",
-  },
-  {
     value: "INGREDIENT",
     label: "Theo hoạt chất",
   },
   {
-    value: "AREA",
-    label: "Theo khu vực",
-  },
-  {
-    value: "PRODUCT_TAG",
-    label: "Theo tag sản phẩm",
-  },
-];
-
-export const conditions = [
-  {
-    value: "",
-    label: "Chọn loại điều kiện",
-  },
-
-  {
-    value: "ORDER_VALUE",
-    label: "Theo giá trị đơn hàng",
-  },
-  {
-    value: "PRODUCT",
-    label: "Theo sản phẩm",
+    value: "PRODUCER",
+    label: "Theo nhà sản xuất",
   },
   {
     value: "NO_RULE",
-    label: "Không có điều kiện",
+    label: "Không điều kiện",
   },
 ];
 
@@ -203,15 +183,15 @@ export const promotions = [
     label: "Chọn ...",
   },
   {
-    value: defaultPromotion.marketPlace,
+    value: defaultPromotion.MARKETPLACE,
     label: "Chương trình riêng của sàn",
   },
   {
-    value: defaultPromotion.coorporate,
+    value: defaultPromotion.COORPORATE,
     label: "Chương trình hợp tác của 2 bên",
   },
   {
-    value: defaultPromotion.seller,
+    value: defaultPromotion.SELLER,
     label: "Chương trình của riêng nhà bán hàng",
   },
 ];

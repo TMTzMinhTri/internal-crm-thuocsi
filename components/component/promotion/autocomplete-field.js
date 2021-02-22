@@ -1,13 +1,15 @@
-import { TextField } from "@material-ui/core";
+import { makeStyles, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
 import { getAreaClient } from "client/area";
 import { getCategoryClient } from "client/category";
 import { getCustomerClient } from "client/customer";
+import { getProducerClient } from "client/producer";
 import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 import { getTagClient } from "client/tag";
 import React, { useEffect, useState } from "react";
-import { defaultReward, defaultScope } from "../constant";
+import { Controller } from "react-hook-form";
+import { defaultCondition, defaultReward, defaultScope } from "../constant";
 
 async function searchProductList(q) {
   return await getProductClient().searchProductListFromClient(q, "");
@@ -36,15 +38,26 @@ async function searchAreaList(q) {
   return await getAreaClient().getListArea(q);
 }
 
+async function searchProducerList(q) {
+  return await getProducerClient().getProducerClient(q);
+}
+
 async function searchSellerList(q) {
-  return await getProductClient().getProducerClient(q);
+  return await getSellerClient().getSellerClient(0, 20, q);
 }
 
 async function searchIngredientList(q) {
   return await getProductClient().getIngredientList(q);
 }
 
+const useStyles = makeStyles({
+  inputRoot: {
+    marginTop: "30px !important",
+  },
+});
+
 const AutoCompleteField = (props) => {
+  const classes = useStyles();
   const {
     label,
     options,
@@ -52,31 +65,38 @@ const AutoCompleteField = (props) => {
     placeholder,
     type,
     multiple = true,
+    required,
+    control,
+    name,
+    errors,
   } = props;
 
   const { handleChange } = props;
 
-  const [productList, setProductList] = useState(defaultValue);
+  let [productList, setProductList] = useState(
+    defaultValue ? defaultValue : []
+  );
 
   const fetchOptions = async (type, value) => {
     switch (type) {
-      case defaultScope.product:
+      case defaultCondition.product:
         return await searchProductList(value);
-      case defaultScope.customer:
-        return await searchCustomerList();
-      case defaultScope.productCatergory:
-        return await searchCategoryList(value);
-      case defaultScope.productTag:
-        return await searchTagList(value);
       case defaultScope.area:
         return await searchAreaList(value);
-      case defaultScope.producer:
-        return await searchSellerList(value);
-      case defaultScope.ingredient:
+      case defaultScope.customerLevel:
+        return await searchCustomerList();
+      case defaultCondition.productCategory:
+        return await searchCategoryList(value);
+      case defaultCondition.productTag:
+        return await searchTagList(value);
+      case defaultCondition.producer:
+        return await searchProducerList(value);
+      case defaultCondition.ingredient:
         return await searchIngredientList(value);
       case defaultReward.gift:
         return await searchGiftList(value);
-
+      case "SELLER":
+        return await searchSellerList(value);
       default:
         return { status: "ERROR" };
     }
@@ -87,7 +107,18 @@ const AutoCompleteField = (props) => {
     let value = event.target.value;
     let res = await fetchOptions(type, value);
     if (res?.status == "OK") {
-      setProductList(res.data);
+      let arr = res.data;
+      if (
+        (multiple &&
+          Array.isArray(defaultValue) &&
+          defaultValue.length > 0 &&
+          defaultValue[0].name != "Chọn tất cả") ||
+        (multiple && defaultValue.length == 0)
+      )
+        arr.unshift({
+          name: "Chọn tất cả",
+        });
+      setProductList(arr);
     } else {
       setProductList([]);
     }
@@ -97,28 +128,72 @@ const AutoCompleteField = (props) => {
     handleChangeTextField({ target: { value: "" } });
   }, [type]);
 
-  console.log(defaultValue, "defaultValue");
+  const renderOptions = () => {
+    let codeList = [];
+    let newArr = [];
+    if (Array.isArray(defaultValue)) {
+      defaultValue.map(({ code, name }) => {
+        codeList.push(name == "Chọn tất cả" ? null : code);
+      });
+      newArr = productList.filter((val) => !codeList.includes(val.code));
+      if (defaultValue.length > 0 && defaultValue[0].name == "Chọn tất cả")
+        newArr = newArr.filter((o) => o.name != "Chọn tất cả");
+      return newArr;
+    }
+    return productList;
+  };
 
   return (
-    <Autocomplete
-      fullWidth
-      multiple={multiple}
-      options={productList.length > 0 ? productList : options}
-      onChange={handleChange}
-      getOptionLabel={(option) => option.name}
-      value={defaultValue}
-      defaultValue={defaultValue}
-      filterSelectedOptions
-      renderInput={(params) => (
-        <TextField
-          required
-          {...params}
-          variant="standard"
-          label={label}
-          placeholder={placeholder}
-          onChange={handleChangeTextField}
+    <Controller
+      name={name}
+      render={(render) => (
+        <Autocomplete
+          fullWidth
+          multiple={multiple}
+          classes={{
+            inputRoot: classes.inputRoot,
+          }}
+          options={productList.length > 0 ? renderOptions() : options}
+          onChange={(event, value) => {
+            if (multiple) {
+              let isAll = false;
+              isAll = value.filter((o) => o.name == "Chọn tất cả");
+              if (isAll.length > 0) {
+                value = isAll;
+              }
+            }
+            console.log(value, "value");
+            handleChange(event, value);
+            render.onChange(value);
+            console.log(render.value, "render.value");
+          }}
+          getOptionLabel={(option) => option.name}
+          value={defaultValue}
+          defaultValue={defaultValue}
+          filterSelectedOptions
+          renderInput={(params) => (
+            <TextField
+              error={!!errors?.[name]}
+              helperText={errors?.[name]?.message}
+              required={required}
+              {...params}
+              InputLabelProps={{
+                shrink: true,
+                style: {
+                  color: "#353434",
+                  fontSize: "20px",
+                },
+              }}
+              variant="standard"
+              label={label}
+              placeholder={placeholder}
+              onChange={handleChangeTextField}
+            />
+          )}
         />
       )}
+      control={control}
+      defaultValue={defaultValue}
     />
   );
 };

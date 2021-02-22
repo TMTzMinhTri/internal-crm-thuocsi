@@ -1,55 +1,30 @@
-import {
-  Box,
-  Button,
-  FormGroup,
-  Paper,
-  Grid,
-  Divider,
-  ButtonGroup,
-} from "@material-ui/core";
+import { Box, Button, FormGroup, Paper, ButtonGroup } from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import styles from "./promotion.module.css";
 import {
   doWithLoggedInUser,
   renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
-import { getPromoClient } from "../../../client/promo";
-import ArrowBackIcon from "@material-ui/icons/ArrowBack";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { getProductClient } from "../../../client/product";
-import { getCategoryClient } from "../../../client/category";
 import {
   defaultCondition,
-  defaultNameRulesValue,
-  defaultPromotionScope,
-  defaultPromotionType,
-  defaultReward,
-  defaultRulePromotion,
   defaultScope,
-  defaultTypeConditionsRule,
-  defaultUseTypePromotion,
-  queryParamGetProductGift,
 } from "../../../components/component/constant";
-import {
-  displayNameRule,
-  setRulesPromotion,
-  setScopeObjectPromontion,
-} from "../../../components/component/util";
 import { useRouter } from "next/router";
 import InfomationFields from "components/component/promotion/infomation-fields";
 import ConditionFields from "components/component/promotion/condition-fields";
-import dynamic from "next";
-import Link from "@material-ui/core/Link";
-import TitleLink from "../../../components/component/promotion/title";
 import {
   MyCard,
   MyCardActions,
   MyCardContent,
   MyCardHeader,
 } from "@thuocsi/nextjs-components/my-card/my-card";
+import {
+  onSubmitPromotion,
+  validatePromotion,
+} from "components/component/util";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
@@ -66,26 +41,6 @@ export default function NewPage(props) {
   return renderWithLoggedInUser(props, render);
 }
 
-async function createPromontion(data) {
-  return getPromoClient().createPromotion(data);
-}
-
-async function getProduct(offset, limit, q) {
-  return getProductClient().getProductListFromClient(offset, limit, q);
-}
-
-async function getListProductGift(productName) {
-  return await getProductClient().getProductListFromClient(productName);
-}
-
-async function searchProductList(q, categoryCode) {
-  return await getProductClient().searchProductListFromClient(q, categoryCode);
-}
-
-async function getListCategory() {
-  return await getCategoryClient().getListCategoryFromClient("", "", "");
-}
-
 function render(props) {
   const toast = useToast();
   const router = useRouter();
@@ -94,38 +49,45 @@ function render(props) {
     register,
     getValues,
     handleSubmit,
-    setError,
     setValue,
-    reset,
     errors,
     control,
+    setError,
   } = useForm();
 
   const [textField, setTextField] = useState({
     descriptionField: "",
-    promotionField: "",
-    promotionTypeField: "",
-  });
-
-  const [errorTextField, setErrorTextField] = useState({
-    descriptionError: "",
-    promotionError: "",
-    promotionTypeError: "",
+    promotionOrganizer: "",
+    promotionType: "",
   });
 
   const [scopeObject, setScopeObject] = useState([
     {
-      selectField: "",
+      selectField: defaultScope.customerLevel,
       registeredBefore: new Date(),
       registeredAfter: new Date(),
-      list: [],
+      list: [
+        {
+          name: "Chọn tất cả",
+        },
+      ],
+    },
+    {
+      selectField: defaultScope.area,
+      list: [
+        {
+          name: "Chọn tất cả",
+        },
+      ],
     },
   ]);
 
   const [conditionObject, setConditionObject] = useState({
-    selectField: "",
+    selectField: defaultCondition.noRule,
     minValue: 0,
-    productList: [{ productName: "", productNumber: 0, productValue: 0 }],
+    seller: [],
+    productList: [{ productName: "", minQuantity: 0, minTotalValue: "" }],
+    item: {},
   });
 
   const [rewardObject, setRewardObject] = useState({
@@ -155,6 +117,10 @@ function render(props) {
   };
 
   const handleRemoveAttachedProduct = (index) => {
+    let value = getValues();
+    for (let i = index; i < rewardObject.attachedProduct.length - 1; i++) {
+      setValue("quantity" + i, value["quantity" + (i + 1)]);
+    }
     rewardObject.attachedProduct.splice(index, 1);
     setRewardObject({ ...rewardObject });
   };
@@ -168,196 +134,81 @@ function render(props) {
     setRewardObject({ ...rewardObject, [key]: event.target.value });
   };
 
-  const handleChangeFieldOfProductList = (index, key) => (event) => {
-    conditionObject.productList[index][key] = event.target.value;
-    setConditionObject({ ...conditionObject });
-  };
-
   const handleChangeConditionField = (key) => (event) => {
+    conditionObject.item = {};
+    conditionObject.seller = [];
     setConditionObject({ ...conditionObject, [key]: event.target.value });
   };
 
   const handleAddProductOfProductList = () => {
     conditionObject.productList.push({
       productName: "",
-      productNumber: 0,
-      productValue: 0,
+      minQuantity: 0,
+      minTotalValue: "",
     });
     setConditionObject({ ...conditionObject });
   };
 
   const handleRemoveProductOfProductList = (index) => {
+    let value = getValues();
+    for (let i = index; i < conditionObject.productList.length - 1; i++) {
+      setValue("minQuantity" + i, value["minQuantity" + (i + 1)]);
+      setValue("minTotalValue" + i, value["minTotalValue" + (i + 1)]);
+    }
+
     conditionObject.productList.splice(index, 1);
+
     setConditionObject({ ...conditionObject });
-  };
-
-  const handleAddScopeSelect = () => {
-    scopeObject.push({
-      selectField: "",
-      registeredBefore: new Date(),
-      registeredAfter: new Date(),
-      list: [],
-    });
-    setScopeObject([...scopeObject]);
-  };
-
-  const handleChangeScopeField = (index, key) => (event) => {
-    scopeObject[index][key] = event.target.value;
-    setScopeObject([...scopeObject]);
   };
 
   const handleChangeScopeList = (index) => (event, value) => {
     scopeObject[index].list = value;
-    if (scopeObject[index].selectField == defaultScope.product) {
-      conditionObject.productList = [];
-      value.map((product, i) => {
-        conditionObject.productList.push({
-          product,
-          productNumber: 0,
-          productValue: 0,
-        });
-        setConditionObject({ ...conditionObject });
-      });
-    }
     setScopeObject([...scopeObject]);
   };
 
-  const handleChangeProductListOfCondition = (index) => (event, value) => {
+  const handleChangeConditionList = (event, value) => {
+    conditionObject.item = value;
+    setConditionObject({ ...conditionObject });
+  };
+
+  const handleChangeConditionSeller = (event, value) => {
+    conditionObject.seller = value;
+    setConditionObject({ ...conditionObject });
+  };
+
+  const handleChangeProductListOfCondition = (index, type) => (
+    event,
+    value
+  ) => {
     conditionObject.productList[index] = {
-      product: value,
-      productNumber: 0,
-      productValue: 0,
+      seller:
+        type != "SELLER" ? conditionObject.productList[index]?.seller : value,
+      product:
+        type == "SELLER" ? conditionObject.productList[index]?.product : value,
+      minQuantity: 0,
+      minTotalValue: 0,
     };
 
     setConditionObject({ ...conditionObject });
   };
 
-  // func onSubmit used because useForm not working with some fields
   async function onSubmit() {
-    let value = getValues();
-    let objects = [];
-    scopeObject.map((o, index) => {
-      switch (o.selectField) {
-        case defaultScope.product:
-          objects.push({
-            products: o.list.map((product) => product.productID),
-          });
-          break;
-        case defaultScope.customer:
-          objects.push({
-            registeredBefore: new Date(o.registeredBefore).toISOString(),
-            registeredAfter: new Date(o.registeredAfter).toISOString(),
-            customerLevels: o.list.map((level) => level.code),
-          });
-          break;
-        case defaultScope.area:
-          objects.push({
-            areaCodes: o.list.map((area) => area.code),
-          });
-          break;
-        case defaultScope.producer:
-          objects.push({
-            sellerCodes: o.list.map((seller) => seller.code),
-          });
-          break;
-        case defaultScope.productCatergory:
-          objects.push({
-            categoryCodes: o.list.map((category) => category.code),
-          });
-          break;
-        case defaultScope.ingredient:
-          objects.push({
-            ingredients: o.list.map((ingredient) => ingredient.code),
-          });
-          break;
-        case defaultScope.productTag:
-          objects.push({
-            productTags: o.list.map((tag) => tag.code),
-          });
-          break;
-        default:
-          break;
-      }
-      objects[index].scope = o.selectField;
-      objects[index].type = "MANY";
-    });
-
-    let rules = {
-      field: conditionObject.selectField,
-      type: rewardObject.selectField,
-      conditions: [{}],
-    };
-
-    let productConditions = [];
-    let minOrderValue = 0;
-
-    if (conditionObject.selectField == defaultCondition.product) {
-      conditionObject.productList.map((o, index) => {
-        productConditions.push({
-          productId: o.product.productID,
-          minQuantity: parseInt(value["productNumber" + index]),
-          minTotalValue: parseInt(value["productValue" + index]),
-        });
-      });
-      rules.conditions[0].productConditions = productConditions;
-    }
-    if (conditionObject.selectField == defaultCondition.orderValue) {
-      minOrderValue = parseInt(value.minValue);
-      rules.conditions[0].minOrderValue = parseInt(minOrderValue);
-    }
-
-    if (rewardObject.selectField == defaultReward.absolute) {
-      rules.conditions[0].discountValue = parseInt(value.absoluteDiscount);
-    }
-
-    if (rewardObject.selectField == defaultReward.percentage) {
-      rules.conditions[0].percent = value.percentageDiscount;
-      rules.conditions[0].maxDiscountValue = value.maxDiscount;
-    }
-
-    if (rewardObject.selectField == defaultReward.point) {
-      rules.conditions[0].pointValue = value.pointValue;
-    }
-
-    if (rewardObject.selectField == defaultReward.gift) {
-      let gifts = [];
-      rewardObject.attachedProduct.map((o, index) =>
-        gifts.push({
-          productId: o.product.productID,
-          quantity: parseInt(value["number" + index]),
-        })
+    if (validatePromotion(getValues, setError, conditionObject))
+      onSubmitPromotion(
+        getValues,
+        toast,
+        router,
+        scopeObject,
+        conditionObject,
+        rewardObject,
+        true,
+        null
       );
-      rules.conditions[0].gifts = gifts;
-    }
-
-    let fromDate = "";
-    let toDate = "";
-    if (value.startTime) {
-      fromDate = new Date(value.startTime).toISOString();
-    }
-    if (value.endTime) {
-      toDate = new Date(value.endTime).toISOString();
-    }
-
-    let body = {
-      promotionName: value.promotionName,
-      promotionType: textField.promotionTypeField,
-      promotionOrganizer: textField.promotionField,
-      startTime: fromDate,
-      endTime: toDate,
-      description: textField.descriptionField,
-      rule: rules,
-      objects: objects,
-    };
-
-    let res = await createPromontion(body);
-
-    if (res.status == "OK") {
-      toast.success("Tạo chương trình khuyến mãi thành công");
-    } else {
-      toast.error(res.message);
-    }
   }
+
+  console.log(getValues(), "getValues");
+
+  console.log(errors, "errors");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -369,10 +220,11 @@ function render(props) {
           <MyCardHeader title="TẠO CHƯƠNG TRÌNH KHUYẾN MÃI"></MyCardHeader>
           <MyCardContent>
             <InfomationFields
+              getValues={getValues}
               errors={errors}
-              promotionType={router.query?.type}
+              control={control}
+              setValue={setValue}
               textField={textField}
-              errorTextField={errorTextField}
               handleChangeTextField={handleChangeTextField}
               register={register}
             />
@@ -380,9 +232,12 @@ function render(props) {
               register={register}
               errors={errors}
               setValue={setValue}
+              getValues={getValues}
               control={control}
               object={{ scopeObject, conditionObject, rewardObject }}
               textField={textField}
+              handleChangeConditionSeller={handleChangeConditionSeller}
+              handleChangeConditionList={handleChangeConditionList}
               handleChangeProductListOfCondition={
                 handleChangeProductListOfCondition
               }
@@ -390,10 +245,7 @@ function render(props) {
               handleRemoveAttachedProduct={handleRemoveAttachedProduct}
               handleChangeTextField={handleChangeTextField}
               handleChangeScopeList={handleChangeScopeList}
-              handleChangeScopeField={handleChangeScopeField}
-              handleAddScopeSelect={handleAddScopeSelect}
               handleChangeConditionField={handleChangeConditionField}
-              handleChangeFieldOfProductList={handleChangeFieldOfProductList}
               handleChangeRewardField={handleChangeRewardField}
               handleChangeListReward={handleChangeListReward}
               handleAddProductOfProductList={handleAddProductOfProductList}
@@ -410,7 +262,7 @@ function render(props) {
                 onClick={handleSubmit(onSubmit)}
                 style={{ margin: 8 }}
               >
-                Lưu
+                thêm chương trình khuyến mãi
               </Button>
               <Button
                 variant="contained"

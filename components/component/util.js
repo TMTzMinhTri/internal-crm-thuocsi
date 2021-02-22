@@ -1,276 +1,16 @@
+import { getPromoClient } from "client/promo";
 import {
-  defaultConditionInfo,
+  defaultCondition,
   defaultNameRulesQuantity,
   defaultNameRulesValue,
-  defaultPromotionOrganizer,
-  defaultPromotionScope,
+  defaultPromotion,
   defaultPromotionStatus,
-  defaultPromotionType, defaultReward,
+  defaultPromotionType,
+  defaultReward,
   defaultRulePromotion,
+  defaultScope,
   defaultTypeConditionsRule,
-  defaultTypeProduct,
 } from "./constant";
-
-export function setRulesPromotion(
-  typePromotion,
-  typeRule,
-  value,
-  index,
-  listGiftPromotion,
-  listGiftProductPromotion
-) {
-  let result = {};
-  let conditions = [];
-  switch (typePromotion) {
-    case defaultRulePromotion.MIN_QUANTITY:
-      result = {
-        ...result,
-        field: defaultRulePromotion.MIN_QUANTITY,
-      };
-      if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-        for (let i = 0; i < index; i++) {
-          conditions.push({
-            minQuantity: parseInt(
-              value[defaultNameRulesQuantity.priceMinValue + i]
-            ),
-            discountValue: parseInt(
-              value[defaultNameRulesQuantity.priceDiscountValue + i]
-            ),
-          });
-        }
-        result = {
-          ...result,
-          type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
-          conditions: conditions,
-        };
-      } else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
-        for (let i = 0; i < index; i++) {
-          conditions.push({
-            minQuantity: parseInt(
-              value[defaultNameRulesQuantity.priceMinValuePercent + i]
-            ),
-            maxDiscountValue: parseInt(
-              value[defaultNameRulesQuantity.priceMaxDiscountValue + i]
-            ),
-            percent: parseInt(value[defaultNameRulesQuantity.percentValue + i]),
-          });
-        }
-        result = {
-          ...result,
-          type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
-          conditions: conditions,
-        };
-      } else if (typeRule === defaultTypeConditionsRule.GIFT) {
-      }
-      break;
-    case defaultRulePromotion.MIN_ORDER_VALUE:
-      result = {
-        ...result,
-        field: defaultRulePromotion.MIN_ORDER_VALUE,
-      };
-      if (typeRule === defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE) {
-        for (let i = 0; i < index; i++) {
-          conditions.push({
-            minOrderValue: parseInt(
-              value[defaultNameRulesValue.priceMinValue + i]
-            ),
-            discountValue: parseInt(
-              value[defaultNameRulesValue.priceDiscountValue + i]
-            ),
-          });
-        }
-        result = {
-          ...result,
-          type: defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE,
-          conditions: conditions,
-        };
-      } else if (typeRule === defaultTypeConditionsRule.DISCOUNT_PERCENT) {
-        for (let i = 0; i < index; i++) {
-          conditions.push({
-            minOrderValue: parseInt(
-              value[defaultNameRulesValue.priceMinValuePercent + i]
-            ),
-            maxDiscountValue: parseInt(
-              value[defaultNameRulesValue.priceMaxDiscountValue + i]
-            ),
-            percent: parseInt(value[defaultNameRulesValue.percentValue + i]),
-          });
-        }
-        result = {
-          ...result,
-          type: defaultTypeConditionsRule.DISCOUNT_PERCENT,
-          conditions: conditions,
-        };
-      }
-      break;
-  }
-  return result;
-}
-
-export function setScopeObjectPromontion(
-  promotionScope,
-  listProducts,
-  categoryCodes
-) {
-  let result = [
-    {
-      scope: promotionScope,
-      type:
-        listProducts?.length > 0 || categoryCodes?.length > 0
-          ? defaultTypeProduct.MANY
-          : defaultTypeProduct.ALL,
-    },
-  ];
-  if (listProducts?.length > 0) {
-    result[0].products = listProducts;
-  }
-  if (categoryCodes?.length > 0) {
-    result[0].categoryCodes = categoryCodes;
-  }
-  return result;
-}
-
-export function parseRuleToObject(promotion) {
-  let result = {
-    promotionOption: "",
-    promotionTypeRule: "",
-    promotionScope: promotion.objects[0].scope,
-    listGiftPromotion: [
-      {
-        gift: {},
-        quantity: 0,
-      },
-    ],
-    promotionRulesLine: [],
-    listProductPromotion: [],
-    listProductIDs: [],
-    listProductDefault: [],
-    listCategoryCodes: [],
-    promotionUseType: promotion.useType,
-    listCategoryPromotion: [],
-    conditions: [],
-  };
-  let rule = promotion.rule;
-  if (rule.field === defaultRulePromotion.MIN_QUANTITY) {
-    result.promotionOption = defaultRulePromotion.MIN_QUANTITY;
-    result.promotionTypeRule = rule.type;
-  } else {
-    result.promotionOption = defaultRulePromotion.MIN_ORDER_VALUE;
-    result.promotionTypeRule = rule.type;
-  }
-  let { conditions } = rule;
-  conditions?.forEach((condition, index) => {
-    result.promotionRulesLine.push({ id: index });
-  });
-  result = {
-    ...result,
-    conditions: conditions,
-    listProductIDs: promotion.objects[0].products || [],
-    listCategoryCodes: promotion.objects[0].categoryCodes || [],
-  };
-  return result;
-}
-
-export function parseConditionValue(
-  conditions,
-  typePromotion,
-  promotionTypeCondition,
-  conditionInfo,
-  index
-) {
-  switch (typePromotion) {
-    case defaultRulePromotion.MIN_ORDER_VALUE:
-      if (
-        promotionTypeCondition ===
-        defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE
-      ) {
-        if (conditionInfo === defaultNameRulesValue.priceMinValue + index) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.minOrderValue]
-            : "";
-        }
-        if (
-          conditionInfo ===
-          defaultNameRulesValue.priceDiscountValue + index
-        ) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.discountValue]
-            : "";
-        }
-      }
-      if (
-        promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_PERCENT
-      ) {
-        if (
-          conditionInfo ===
-          defaultNameRulesValue.priceMinValuePercent + index
-        ) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.minOrderValue]
-            : "";
-        }
-        if (conditionInfo === defaultNameRulesValue.percentValue + index) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.percent]
-            : "";
-        }
-        if (
-          conditionInfo ===
-          defaultNameRulesValue.priceMaxDiscountValue + index
-        ) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.maxDiscountValue]
-            : "";
-        }
-      }
-      break;
-    case defaultRulePromotion.MIN_QUANTITY:
-      if (
-        promotionTypeCondition ===
-        defaultTypeConditionsRule.DISCOUNT_ORDER_VALUE
-      ) {
-        if (conditionInfo === defaultNameRulesQuantity.priceMinValue + index) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.minQuantity]
-            : "";
-        }
-        if (
-          conditionInfo ===
-          defaultNameRulesQuantity.priceDiscountValue + index
-        ) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.discountValue]
-            : "";
-        }
-      }
-      if (
-        promotionTypeCondition === defaultTypeConditionsRule.DISCOUNT_PERCENT
-      ) {
-        if (
-          conditionInfo ===
-          defaultNameRulesQuantity.priceMinValuePercent + index
-        ) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.minQuantity]
-            : "";
-        }
-        if (conditionInfo === defaultNameRulesQuantity.percentValue + index) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.percent]
-            : "";
-        }
-        if (
-          conditionInfo ===
-          defaultNameRulesQuantity.priceMaxDiscountValue + index
-        ) {
-          return conditions[index]
-            ? conditions[index][defaultConditionInfo.maxDiscountValue]
-            : "";
-        }
-      }
-      break;
-  }
-}
 
 export function currencyFormat(num) {
   return formatNumber(num) + "đ";
@@ -363,25 +103,33 @@ export function formatTime(time) {
 }
 
 export function formatUTCTime(time) {
-  let result =''
-  let date = new Date(time)
-  let year = date.getUTCFullYear()
-  let month = date.getMonth() + 1 < 10 ? ("0" + (date.getMonth() + 1)).slice(-2) : date.getMonth() + 1
-  let day = date.getDate() < 10 ? ("0" + (date.getDate())).slice(-2) : date.getDate()
-  let hour = date.getHours() < 10 ? ("0" + (date.getHours())).slice(-2) : date.getHours()
-  let minute = date.getMinutes() < 10 ? ("0" + (date.getMinutes())).slice(-2) : date.getMinutes()
-  result = year + '-' + month + '-' + day + "T" + hour + ':' + minute
-  return result
+  let result = "";
+  let date = new Date(time);
+  let year = date.getUTCFullYear();
+  let month =
+    date.getMonth() + 1 < 10
+      ? ("0" + (date.getMonth() + 1)).slice(-2)
+      : date.getMonth() + 1;
+  let day =
+    date.getDate() < 10 ? ("0" + date.getDate()).slice(-2) : date.getDate();
+  let hour =
+    date.getHours() < 10 ? ("0" + date.getHours()).slice(-2) : date.getHours();
+  let minute =
+    date.getMinutes() < 10
+      ? ("0" + date.getMinutes()).slice(-2)
+      : date.getMinutes();
+  result = year + "-" + month + "-" + day + "T" + hour + ":" + minute;
+  return result;
 }
 
 export function getPromotionOrganizer(organizer) {
   let scope = "Không xác định";
   switch (organizer) {
-    case defaultPromotionOrganizer.COORPORATE:
+    case defaultPromotion.COORPORATE:
       return "Chương trình hợp tác của 2 bên";
-    case defaultPromotionOrganizer.MARKETPLACE:
+    case defaultPromotion.MARKETPLACE:
       return "Chương trình của riêng sàn";
-    case defaultPromotionOrganizer.SELLER:
+    case defaultPromotion.SELLER:
       return "Chương trình của riêng nhà bán hàng";
   }
   return scope;
@@ -434,12 +182,72 @@ export function displayPromotionType(type) {
 
 export function displayLabelBasedOnScope(type) {
   switch (type) {
-    case "CUSTOMER":
-      return "cấp bậc khách hàng";
-    case "AREA":
-      return "khu vực";
+    case defaultScope.customerLevel:
+      return "Áp dụng cho đối tượng khách hàng";
+    case defaultScope.area:
+      return "Khu vực áp dụng";
     default:
       return "";
+  }
+}
+
+export function displayNameBasedOnScope(type) {
+  switch (type) {
+    case defaultScope.customerLevel:
+      return "customerLevel";
+    case defaultScope.area:
+      return "area";
+    default:
+      return "";
+  }
+}
+
+export function displayLabelBasedOnCondition(type) {
+  switch (type) {
+    case "PRODUCT_CATEGORY":
+      return "Danh mục sản phẩm";
+    case "PRODUCT":
+      return "Tên sản phẩm";
+    case "PRODUCER":
+      return "Nhà sản xuất";
+    case "INGREDIENT":
+      return "Thành phần";
+    case "PRODUCT_TAG":
+      return "Tag sản phẩm";
+    default:
+      return "";
+  }
+}
+
+export function displayNameBasedOnCondition(type) {
+  switch (type) {
+    case "PRODUCT_CATEGORY":
+      return "productCategory";
+    case "PRODUCT":
+      return "product";
+    case "PRODUCER":
+      return "producer";
+    case "INGREDIENT":
+      return "ingredient";
+    case "PRODUCT_TAG":
+      return "productTag";
+    default:
+      return "";
+  }
+}
+
+export function displayNameBasedOnReward(type) {
+  switch (type) {
+    case defaultReward.absolute:
+      return "absolute";
+    case defaultReward.gift:
+      return "gift";
+    case defaultReward.percentage:
+      return "percentage";
+    case defaultReward.point:
+      return "point";
+    default:
+      break;
   }
 }
 
@@ -483,15 +291,282 @@ export function displayUsage(usage) {
   return usage;
 }
 
+export const validatePromotion = (getValues, setError, conditionObject) => {
+  console.timeLog("validatePromotion");
+  let isError = true;
+  let value = getValues();
+  if (value.promotionOrganizer == "") {
+    isError = false;
+    setError("promotionOrganizer", {
+      type: "required",
+      message: "Chưa chọn bên tổ chức",
+    });
+  }
+  if (value.promotionType == "") {
+    isError = false;
+    setError("promotionType", {
+      type: "required",
+      message: "Chưa chọn hình thức áp dụng",
+    });
+  }
+  if (value.condition != defaultCondition.noRule)
+    conditionObject.productList.map((o, index) => {
+      if (!value["seller" + index] || value["seller" + index].length == 0) {
+        isError = false;
+        setError("seller" + index, {
+          type: "required",
+          message: "Chưa chọn người bán",
+        });
+      }
+    });
+  if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
+    isError = false;
+    setError(displayNameBasedOnCondition(conditionObject.selectField), {
+      type: "required",
+      message:
+        displayLabelBasedOnCondition(conditionObject.selectField) +
+        " không được bỏ trống",
+    });
+  }
+  if (value.condition == "") {
+    isError = false;
+    setError("condition", {
+      type: "required",
+      message: "Chưa chọn điều kiện khuyến mãi",
+    });
+  }
+  if (value.reward == "") {
+    isError = false;
+    setError("reward", {
+      type: "required",
+      message: "Chưa chọn giá trị khuyến mãi",
+    });
+  }
+  if (!value.description || value.description == "") {
+    isError = false;
+    setError("description", {
+      type: "required",
+      message: "Mô tả không được trống",
+    });
+  }
+  return isError;
+};
+
 export function displayPromotionReward(type) {
   switch (type) {
     case defaultReward.absolute:
-      return "Giảm giá tuyệt đối"
+      return "Giảm giá tuyệt đối";
     case defaultReward.gift:
-      return "Quà tặng"
+      return "Quà tặng";
     case defaultReward.point:
-      return "Điểm thành viên"
+      return "Điểm thành viên";
     case defaultReward.precentage:
-      return "Giảm giá theo %"
+      return "Giảm giá theo %";
+  }
+}
+
+export const checkRegisterdTime = (value) => {
+  if (value.registeredAfter != "" && value.registeredBefore != "") {
+    return {
+      registeredBefore: new Date(value.registeredBefore).toISOString(),
+      registeredAfter: new Date(value.registeredAfter).toISOString(),
+    };
+  }
+  if (value.registeredAfter != "") {
+    return { registeredAfter: new Date(value.registeredAfter).toISOString() };
+  }
+  if (value.registeredBefore != "") {
+    return {
+      registeredBefore: new Date(value.registeredBefore).toISOString(),
+    };
+  }
+  return;
+};
+
+export async function onSubmitPromotion(
+  getValues,
+  toast,
+  router,
+  scopeObject,
+  conditionObject,
+  rewardObject,
+  isCreate,
+  promotionId
+) {
+  let value = getValues();
+  let isCustomerLevelAll =
+    scopeObject[0].list.length == 0 ||
+    scopeObject[0].list[0].name == "Chọn tất cả";
+  let isAreaAll =
+    scopeObject[1].list.length == 0 ||
+    scopeObject[1].list[0].name == "Chọn tất cả";
+  let scopes = [
+    {
+      type: defaultScope.customerLevel,
+      quantityType: isCustomerLevelAll ? "ALL" : "MANY",
+      customerLevelCodes: isCustomerLevelAll
+        ? []
+        : value.customerLevel.map((o) => o.code),
+      ...checkRegisterdTime(value),
+    },
+    {
+      type: defaultScope.area,
+      quantityType: isAreaAll ? "ALL" : "MANY",
+      areaCodes: isAreaAll ? [] : value.area.map((o) => o.code),
+    },
+  ];
+
+  let conditions;
+
+  if (value.condition == defaultCondition.noRule)
+    conditions = [{ type: value.condition }];
+  else {
+    let sellerObject;
+    if (value.condition != defaultCondition.product) {
+      sellerObject = {
+        sellerCodes: value.seller0.map((seller) => seller.code),
+        sellerQuantityType:
+          value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
+        minQuantity: parseInt(value.minQuantity),
+        minTotalValue: parseInt(value.minTotalValue),
+      };
+    }
+    let tmpArr =
+      value.condition == defaultCondition.product
+        ? conditionObject.productList
+        : [""];
+
+    conditions = [
+      {
+        type: value.condition,
+        minOrderValue: parseInt(value.minValue),
+        productConditions: tmpArr.map((o, index) => {
+          switch (value.condition) {
+            case defaultCondition.ingredient:
+              return {
+                ...sellerObject,
+                ingredientCode: value.ingredient.code,
+              };
+            case defaultCondition.producer:
+              return {
+                ...sellerObject,
+                producerCode: value.producer.code,
+              };
+            case defaultCondition.product:
+              return {
+                sellerCodes: value["seller" + index].map(
+                  (seller) => seller.code
+                ),
+                sellerQuantityType:
+                  value["seller" + index][0].name == "Chọn tất cả"
+                    ? "ALL"
+                    : "MANY",
+                productId: value["product" + index].productID,
+                minQuantity: parseInt(value["minQuantity" + index]),
+                minTotalValue: parseInt(value["minTotalValue" + index]),
+              };
+            case defaultCondition.productCategory:
+              return {
+                ...sellerObject,
+                categoryCode: value.productCategory.code,
+              };
+            case defaultCondition.productTag:
+              return {
+                ...sellerObject,
+                productTag: value.productTag.code,
+              };
+            default:
+              break;
+          }
+        }),
+      },
+    ];
+  }
+
+  let rewards;
+  switch (value.reward) {
+    case defaultReward.absolute:
+      rewards = [
+        {
+          type: value.reward,
+          absoluteDiscount: parseInt(value.absoluteDiscount),
+        },
+      ];
+      break;
+    case defaultReward.gift:
+      rewards = [
+        {
+          type: value.reward,
+          gifts: rewardObject.attachedProduct.map((o, index) => ({
+            productId: value["gift" + index].productID,
+            quantity: parseInt(value["quantity" + index]),
+          })),
+        },
+      ];
+      break;
+    case defaultReward.percentage:
+      rewards = [
+        {
+          type: value.reward,
+          percentageDiscount: parseInt(value.percentageDiscount),
+          maxDiscount: parseInt(value.maxDiscount),
+        },
+      ];
+      break;
+    case defaultReward.point:
+      rewards = [
+        {
+          type: value.reward,
+          pointValue: parseInt(value.pointValue),
+        },
+      ];
+      break;
+    default:
+      break;
+  }
+
+  let checkTypeSubmit;
+  if (!isCreate) {
+    checkTypeSubmit = {
+      promotionId: promotionId,
+    };
+  } else {
+    checkTypeSubmit = {
+      status: value.status
+        ? defaultPromotionStatus.ACTIVE
+        : defaultPromotionStatus.EXPIRED,
+    };
+  }
+
+  let body = {
+    ...checkTypeSubmit,
+    promotionName: value.promotionName,
+    promotionType: value.promotionType,
+    promotionOrganizer: value.promotionOrganizer,
+    description: value.description,
+    startTime: new Date(value.startTime).toISOString(),
+    publicTime: new Date(value.publicTime).toISOString(),
+    endTime: new Date(value.endTime).toISOString(),
+
+    scopes,
+    conditions,
+    rewards,
+  };
+
+  console.log(body, "bdoy");
+
+  let res;
+
+  if (isCreate) res = await getPromoClient().createPromotion(body);
+  else res = await getPromoClient().updatePromotion(body);
+
+  console.log(res);
+
+  if (res.status == "OK") {
+    if (isCreate) toast.success("Tạo chương trình khuyến mãi thành công");
+    else toast.success("Cập nhật chương trình khuyến mãi thành công");
+    router.back();
+  } else {
+    toast.error(res.message);
   }
 }

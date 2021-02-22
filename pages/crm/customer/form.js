@@ -9,8 +9,10 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
+import { getCommonAPI } from 'client/common';
 import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
+import { unknownErrorText } from "components/commonErrors";
 import { NotFound } from "components/components-global";
 import { scopes, statuses } from "components/global";
 import MuiSingleAuto from "components/muiauto/single";
@@ -21,7 +23,6 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import { getCommonAPI } from 'client/common';
 
 export async function loadData(ctx) {
     let data = {
@@ -178,23 +179,31 @@ export default function renderForm(props, toast) {
     }
 
     async function createCustomer(formData) {
-        let customerClient = getCustomerClient()
-        let resp = await customerClient.createNewCustomer(formData)
-        if (resp.status !== 'OK') {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
-        } else {
-            success('Thêm khách hàng thành công')
-            router.push(`/crm/customer`)
+        try {
+            let customerClient = getCustomerClient()
+            let resp = await customerClient.createNewCustomer(formData)
+            if (resp.status !== 'OK') {
+                error(resp.message ?? unknownErrorText)
+            } else {
+                success('Thêm khách hàng thành công')
+                router.push(`/crm/customer`)
+            }
+        } catch (err) {
+            error(err ?? unknownErrorText)
         }
     }
 
     async function updateCustomer(formData) {
-        let customerClient = getCustomerClient()
-        let resp = await customerClient.updateCustomer(formData)
-        if (resp.status !== 'OK') {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
-        } else {
-            success(titlePage + ' thành công')
+        try {
+            let customerClient = getCustomerClient()
+            let resp = await customerClient.updateCustomer(formData)
+            if (resp.status !== 'OK') {
+                error(resp.message ?? unknownErrorText)
+            } else {
+                success(titlePage + ' thành công')
+            }
+        } catch (err) {
+            error(err ?? unknownErrorText)
         }
     }
 
@@ -249,6 +258,11 @@ export default function renderForm(props, toast) {
                                                             InputLabelProps={{
                                                                 shrink: true,
                                                             }}
+                                                            inputProps={{
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
+                                                            }}
                                                             style={{ width: '100%' }}
                                                             error={!!errors.name}
                                                             required
@@ -284,6 +298,11 @@ export default function renderForm(props, toast) {
                                                             InputLabelProps={{
                                                                 shrink: true,
                                                             }}
+                                                            inputProps={{
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
+                                                            }}
                                                             style={{ width: '100%' }}
                                                             error={!!errors.email}
                                                             required
@@ -291,7 +310,7 @@ export default function renderForm(props, toast) {
                                                                 register({
                                                                     required: "Email khách hàng không thể để trống",
                                                                     pattern: {
-                                                                        value: /^([a-z0-9])+([\._][a-z0-9]+)*@([a-z0-9]+\.)+[a-z0-9]+$/,
+                                                                        value: /^([a-z0-9])+([\._+][a-z0-9]+)*@([a-z0-9]+\.)+[a-z0-9]+$/,
                                                                         message: "Email không hợp lệ",
                                                                     }
                                                                 })
@@ -313,18 +332,19 @@ export default function renderForm(props, toast) {
                                                             InputLabelProps={{
                                                                 shrink: true,
                                                             }}
+                                                            inputProps={{
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
+                                                            }}
                                                             style={{ width: '100%' }}
                                                             error={!!errors.phone}
                                                             required
                                                             inputRef={
                                                                 register({
                                                                     required: "Số điện thoại không thể để trống",
-                                                                    maxLength: {
-                                                                        value: 12,
-                                                                        message: "Số điện thoại không hợp lệ"
-                                                                    },
                                                                     pattern: {
-                                                                        value: /[0-9]{9,12}/,
+                                                                        value: /^[0-9]{9,12}$/,
                                                                         message: "Số điện thoại không hợp lệ"
                                                                     },
                                                                 })
@@ -344,6 +364,11 @@ export default function renderForm(props, toast) {
                                                             helperText={errors.address?.message}
                                                             InputLabelProps={{
                                                                 shrink: true,
+                                                            }}
+                                                            inputProps={{
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
                                                             }}
                                                             style={{ width: '100%' }}
                                                             error={!!errors.address}
@@ -428,6 +453,11 @@ export default function renderForm(props, toast) {
                                                                     InputLabelProps={{
                                                                         shrink: true,
                                                                     }}
+                                                                    inputProps={{
+                                                                        form: {
+                                                                            autocomplete: 'off',
+                                                                        },
+                                                                    }}
                                                                     style={{ width: '100%' }}
                                                                     inputRef={
                                                                         register
@@ -443,7 +473,7 @@ export default function renderForm(props, toast) {
                                                 <Typography variant="h6" component="h6"
                                                     style={{ marginBottom: '10px', fontSize: 18 }}>
                                                     Thông tin pháp lý
-                                    </Typography>
+                                              </Typography>
                                                 <Grid spacing={3} container>
                                                     <Grid item xs={12} sm={4} md={4}>
                                                         <TextField
@@ -456,6 +486,11 @@ export default function renderForm(props, toast) {
                                                             helperText={errors.legalRepresentative?.message}
                                                             InputLabelProps={{
                                                                 shrink: true,
+                                                            }}
+                                                            inputProps={{
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
                                                             }}
                                                             style={{ width: '100%' }}
                                                             error={!!errors.legalRepresentative}
@@ -490,6 +525,11 @@ export default function renderForm(props, toast) {
                                                             helperText={errors.mst?.message}
                                                             InputLabelProps={{
                                                                 shrink: true,
+                                                            }}
+                                                            inputProps={{
+                                                                form: {
+                                                                    autocomplete: 'off',
+                                                                },
                                                             }}
                                                             style={{ width: '100%' }}
                                                             error={!!errors.mst}
@@ -606,7 +646,10 @@ export default function renderForm(props, toast) {
                                                                         type="password"
                                                                         helperText={errors.password?.message}
                                                                         inputProps={{
-                                                                            autoComplete: 'new-password'
+                                                                            autoComplete: 'new-password',
+                                                                            form: {
+                                                                                autocomplete: 'off',
+                                                                            },
                                                                         }}
                                                                         InputLabelProps={{
                                                                             shrink: true,
@@ -635,8 +678,10 @@ export default function renderForm(props, toast) {
                                                                         type="password"
                                                                         placeholder=""
                                                                         helperText={errors.passwordConfirm?.message}
-                                                                        InputProps={{
-                                                                            autocomplete: 'off'
+                                                                        inputProps={{
+                                                                            form: {
+                                                                                autocomplete: 'off',
+                                                                            },
                                                                         }}
                                                                         InputLabelProps={{
                                                                             shrink: true,

@@ -56,8 +56,8 @@ export async function getRegionByCodes(codes) {
     return await getAreaClient().getListAreaByCodes(codes)
 }
 
-export async function getCustomerByCodes(codes) {
-    return await getCustomerClient().getLevelByCodes(codes)
+export async function getCustomers() {
+    return await getCustomerClient().getLevel()
 }
 
 export default function VoucherCodeBody(props) {
@@ -92,22 +92,28 @@ export default function VoucherCodeBody(props) {
             setPromotionPublic({})
         }
         if (promotion.length > 0) {
-            promotion[0].scopes.forEach(obj => {
-                switch (obj.scope){
+            promotion[0].scopes.forEach( async scope => {
+                switch (scope.type){
                     case defaultPromotionScope.CUSTOMER:
-                        let level =  getCustomerByCodes(obj.customerLevels);
+                        let level =  await getCustomers();
                         if (level && level.status === "OK") {
-                            setListRegions(level.data)
+                            let listCustomerPromotion = []
+                            level.data.forEach(l => {
+                                if (scope.customerLevelCodes?.includes(l.code)) {
+                                    listCustomerPromotion.push(l)
+                                }
+                            })
+                            setListCustomerPromotion(listCustomerPromotion)
                         }else {
-                            setListRegions([])
+                            setListCustomerPromotion([])
                         }
                         break;
                     case defaultPromotionScope.AREA:
-                        let region =  getRegionByCodes(obj.areaCodes)
+                        let region =  await getRegionByCodes(scope.areaCodes)
                         if (region && region.status === "OK") {
-                            setListCustomerPromotion(region.data)
+                            setListRegions(region.data)
                         }else {
-                            setListCustomerPromotion([])
+                            setListRegions([])
                         }
                 }
             })
@@ -155,25 +161,31 @@ export default function VoucherCodeBody(props) {
             })
         }
         if (promotion && promotion.scopes?.length > 0) {
-            promotion.scopes.forEach(obj => {
-                switch (obj.type){
+            for (const scope of promotion.scopes) {
+                switch (scope.type){
                     case defaultPromotionScope.CUSTOMER:
-                        let level =  getCustomerByCodes(obj.customerLevelCodes);
+                        let level =  await getCustomers();
                         if (level && level.status === "OK") {
-                            setListCustomerPromotion(level.data)
+                            let listCustomerPromotion = []
+                            level.data.forEach(l => {
+                                if (scope.customerLevelCodes?.includes(l.code)) {
+                                    listCustomerPromotion.push(l)
+                                }
+                            })
+                            setListCustomerPromotion(listCustomerPromotion)
                         }else {
                             setListCustomerPromotion([])
                         }
                         break;
                     case defaultPromotionScope.AREA:
-                        let region =  getRegionByCodes(obj.areaCodes)
+                        let region =  await getRegionByCodes(scope.areaCodes)
                         if (region && region.status === "OK") {
                             setListRegions(region.data)
                         }else {
                             setListRegions([])
                         }
                 }
-            })
+            }
         }
         return setPromotionPublic(promotion)
     }
@@ -221,7 +233,7 @@ export default function VoucherCodeBody(props) {
                     />
                 </Grid>
                 <Grid item xs={3} >
-                        <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu</h5>
+                        <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu <span style={{color : 'red'}}> *</span></h5>
                         <TextField
                             id="startTime"
                             name="startTime"
@@ -240,7 +252,7 @@ export default function VoucherCodeBody(props) {
                         />
                     </Grid>
                 <Grid item xs={3}  >
-                        <h5 className={cssStyle.titleLabel}>Thời gian kết thúc</h5>
+                        <h5 className={cssStyle.titleLabel}>Thời gian kết thúc <span style={{color : 'red'}}> *</span></h5>
                         <TextField
                             id="endTime"
                             name="endTime"
@@ -259,7 +271,7 @@ export default function VoucherCodeBody(props) {
                         />
                     </Grid>
                 <Grid item xs={6} >
-                    <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị
+                    <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị <span style={{color : 'red'}}> *</span>
                         <Tooltip title="Tới thời gian này sẽ cho hiển thị trên app/web thuocsi">
                                 <span>
                                     <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
@@ -410,9 +422,9 @@ export default function VoucherCodeBody(props) {
                             </Grid>
                             {listCustomerPromotion?.length > 0 && (
                                 <Grid className={cssStyle.marginLinePromotion}>
+                                    <span>Áp dụng cho đối tượng khách hàng</span>
                                     {listCustomerPromotion.map((row, index) => (
                                         <Grid>
-                                            <span>Áp dụng cho đối tượng khách hàng</span>
                                             <div className={cssStyle.textInfoPromotion}>{row.name}</div>
                                         </Grid>
                                     ))}
@@ -420,9 +432,9 @@ export default function VoucherCodeBody(props) {
                             )}
                             {listRegions?.length > 0 && (
                                 <Grid className={cssStyle.marginLinePromotion}>
+                                    <span>Khu vực áp dụng</span>
                                     {listRegions.map((row, index) => (
                                         <Grid>
-                                            <span>Khu vực áp dụng</span>
                                             <div className={cssStyle.textInfoPromotion}>{row.name}</div>
                                         </Grid>
                                     ))}
