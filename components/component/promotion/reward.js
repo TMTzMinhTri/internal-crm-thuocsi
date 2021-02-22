@@ -82,9 +82,7 @@ const Reward = (props) => {
                     ? errors.absoluteDiscount?.message
                     : errors.pointValue?.message
                 }
-                InputLabelProps={{
-                  shrink: true,
-                }}
+                {...textfieldProps}
                 fullWidth
                 error={
                   selectField == "ABSOLUTE"
@@ -93,6 +91,13 @@ const Reward = (props) => {
                 }
                 required
                 inputRef={register({
+                  min: {
+                    value: selectField == "ABSOLUTE" ? 1000 : 1,
+                    message:
+                      selectField == "ABSOLUTE"
+                        ? "Giá trị giảm tuyệt đối tối thiếu 1000"
+                        : "Số điểm tặng tối thiếu 1",
+                  },
                   required:
                     selectField == "ABSOLUTE"
                       ? "Giá trị không được trống"
@@ -144,6 +149,10 @@ const Reward = (props) => {
                       error={!!errors.maxDiscount}
                       required
                       inputRef={register({
+                        min: {
+                          value: 1000,
+                          message: "Giá trị tối thiếu 1000",
+                        },
                         required: "Giá trị giảm giá tối đa không được trống",
                       })}
                     />
@@ -159,10 +168,12 @@ const Reward = (props) => {
                           control={control}
                           label="Sản phẩm tặng kèm"
                           placeholder=""
+                          required
                           multiple={false}
                           defaultValue={o.product ? o.product : []}
                           options={[{ name: "" }]}
                           handleChange={handleChangeListReward(index)}
+                          errors={errors}
                           type={selectField}
                         />
                       </Grid>
@@ -179,6 +190,10 @@ const Reward = (props) => {
                           error={!!errors["quantity" + index]}
                           required
                           inputRef={register({
+                            min: {
+                              value: 1,
+                              message: "Số lượng tặng tối thiếu 1",
+                            },
                             required: "Vui lòng chọn số lượng",
                           })}
                         />
