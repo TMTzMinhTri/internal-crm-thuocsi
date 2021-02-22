@@ -53,8 +53,6 @@ const render = () => {
 
     }
 
-    console.log({isDirty, isValid});
-
     return (
         <AppCRM select="/crm/pricing">
             <Head>
