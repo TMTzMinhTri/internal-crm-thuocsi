@@ -107,7 +107,9 @@ const ConditionFields = (props) => {
             </Grid>
           </Grid>
           <Grid item xs={12}>
-            <h4>Mô tả</h4>
+            <h4>
+              Mô tả<span style={{ color: "red" }}> *</span>
+            </h4>
             <Grid item xs={6}>
               <Controller
                 name="description"
