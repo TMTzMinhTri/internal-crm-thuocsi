@@ -220,8 +220,16 @@ export default function VoucherCodeBody(props) {
                         placeholder="Nhập mã khuyến mãi"
                         style={{width: "100%"}}
                         required
+                        onChange={e => {
+                            setValue("code", e.target.value.trim().toUpperCase());
+                        }}
                         inputRef={register({
-                            required: "Mã khuyến mãi không được để trống"
+                            validate: {
+                                required: val => {
+                                    return val.trim().length > 0;
+                                }
+                            },
+                            required: "Mã khuyến mãi không được để trống",
                         })}
                     />
                 </Grid>
