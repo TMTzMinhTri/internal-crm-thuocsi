@@ -10,6 +10,7 @@ import {
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import {
   defaultCondition,
+  defaultPromotionType,
   defaultScope,
 } from "../../../components/component/constant";
 import { useRouter } from "next/router";
@@ -25,6 +26,7 @@ import {
   onSubmitPromotion,
   validatePromotion,
 } from "components/component/util";
+import ModalCustom from "components/modal/dialogs";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
@@ -54,6 +56,8 @@ function render(props) {
     control,
     setError,
   } = useForm();
+
+  const [promotionId, setPromotionId] = useState("");
 
   const [textField, setTextField] = useState({
     descriptionField: "",
@@ -103,6 +107,8 @@ function render(props) {
     ],
     pointValue: 0,
   });
+
+  const [openModal, setOpenModal] = useState(false);
 
   const handleChangeTextField = (key) => (event) => {
     setTextField({ ...textField, [key]: event.target.value });
@@ -193,8 +199,8 @@ function render(props) {
   };
 
   async function onSubmit() {
-    if (validatePromotion(getValues, setError, conditionObject))
-      onSubmitPromotion(
+    if (validatePromotion(getValues, setError, conditionObject)) {
+      let res = await onSubmitPromotion(
         getValues,
         toast,
         router,
@@ -204,17 +210,37 @@ function render(props) {
         true,
         null
       );
+      console.log(res, "res create");
+      if (res?.status == "OK") {
+        if (getValues().promotionType == defaultPromotionType.VOUCHER_CODE) {
+          setPromotionId(res.data[0].promotionId);
+          setOpenModal(true);
+        } else {
+          router.back();
+        }
+      }
+    }
   }
-
-  console.log(getValues(), "getValues");
-
-  console.log(errors, "errors");
 
   return (
     <AppCRM select="/crm/promotion">
       <Head>
         <title>Tạo khuyến mãi</title>
       </Head>
+      <ModalCustom
+        title="Thông báo"
+        open={openModal}
+        onClose={(val) => setOpenModal(val)}
+        primaryText="Đồng ý"
+        onExcute={() =>
+          router.push(`/crm/voucher/new?promotionId=${promotionId}`)
+        }
+      >
+        <p>
+          Bạn có muốn tiếp tục tạo Mã khuyến mãi cho chương trình{" "}
+          <b>{getValues().promotionName}</b> này không?
+        </p>
+      </ModalCustom>
       <MyCard component={Paper} style={{ padding: "0 3rem", height: "100%" }}>
         <FormGroup style={{ width: "100%" }}>
           <MyCardHeader title="TẠO CHƯƠNG TRÌNH KHUYẾN MÃI"></MyCardHeader>
@@ -259,7 +285,9 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmit)}
+                onClick={handleSubmit(onSubmit, () =>
+                  validatePromotion(getValues, setError, conditionObject)
+                )}
                 style={{ margin: 8 }}
               >
                 thêm chương trình khuyến mãi
