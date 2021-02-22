@@ -80,7 +80,7 @@ function render(props) {
     const router = useRouter();
 
     const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm(
-        {defaultValues : {startTime: router.query.promotionId ? formatUTCTime(props.promotion[0].startTime) : "",endTime: router.query.promotionId ? formatUTCTime(props.promotion[0].endTime) : "",promotionId: !!router.query.promotionId ? props.promotion?.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0] : {}},mode: "onChange"}
+        {defaultValues : {startTime: router.query.promotionId ? formatUTCTime(props.promotion[0].startTime) : "",endTime: router.query.promotionId ? formatUTCTime(props.promotion[0].endTime) : "",publicTime: router.query.promotionId ? formatUTCTime(props.promotion[0].publicTime) : "",promotionId: !!router.query.promotionId ? props.promotion?.map((item) => {return {label: item.promotionName, value: item.promotionId}})[0] : {}},mode: "onChange"}
     );
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState([])
@@ -132,6 +132,7 @@ function render(props) {
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
+                        setValue={setValue}
                         listPromotionDefault={props.listPromotionDefault || []}
                         onChangeCustomer={handleChangeCustomer}
                         showPromotionPublic={!!router.query.promotionId}
