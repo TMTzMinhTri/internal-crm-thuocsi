@@ -21,7 +21,7 @@ import {getCustomerClient} from "../../../client/customer";
 import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
 import {Controller} from "react-hook-form";
 import {Gif} from "@material-ui/icons";
-import {displayPromotionReward, displayPromotionType, formatTime, getPromotionOrganizer} from "../util";
+import {displayPromotionReward, displayPromotionType, formatTime, formatUTCTime, getPromotionOrganizer} from "../util";
 import Tooltip from "@material-ui/core/Tooltip";
 import {getAreaClient} from "../../../client/area";
 import {defaultPromotionScope} from "../constant";
@@ -30,6 +30,7 @@ import WarningIcon from '@material-ui/icons/Warning';
 import Link from "next/link";
 import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {useRouter} from "next/router";
 
 
 const useStyles = makeStyles(theme => ({
@@ -61,6 +62,7 @@ export async function getCustomers() {
 }
 
 export default function VoucherCodeBody(props) {
+    const router = useRouter()
     const classes = useStyles()
     const {
         errors,
@@ -71,6 +73,7 @@ export default function VoucherCodeBody(props) {
         appliedCustomers,
         promotion,
         control,
+        setValue,
         showPromotionPublic,
         listCustomerDefault,
         edit,
@@ -187,7 +190,15 @@ export default function VoucherCodeBody(props) {
                 }
             }
         }
-        return setPromotionPublic(promotion)
+
+        router.push({
+            pathname: router.pathname,
+            query: {promotionId : promotion.promotionId || ""}
+        }).then(() => {
+            setValue("startTime",formatUTCTime(promotion.startTime),{ shouldValidate: true })
+            setValue("endTime",formatUTCTime(promotion.endTime),{ shouldValidate: true })
+            setPromotionPublic(promotion)
+        })
     }
 
     return (

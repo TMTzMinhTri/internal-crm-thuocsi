@@ -132,6 +132,7 @@ function render(props) {
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
+                        setValue={setValue}
                         listPromotionDefault={props.listPromotionDefault || []}
                         onChangeCustomer={handleChangeCustomer}
                         showPromotionPublic={!!router.query.promotionId}

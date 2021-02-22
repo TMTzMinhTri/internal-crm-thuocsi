@@ -68,8 +68,8 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props,render)
 }
 
-export async function updateVoucher(voucherId,promotionId,startTime,endTime,publicTime,type,maxUsage,maxUsagePerCustomer,appliedCustomers) {
-    let data = {voucherId,promotionId,type,maxUsage,maxUsagePerCustomer}
+export async function updateVoucher(voucherId,promotionId,startTime,endTime,publicTime,type,maxUsage,maxUsagePerCustomer,appliedCustomers,promotionName) {
+    let data = {voucherId,promotionId,type,maxUsage,maxUsagePerCustomer,promotionName}
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers=appliedCustomers
     }
@@ -125,8 +125,9 @@ function render(props) {
     const onSubmit = async () => {
         let value = getValues()
         let {code,maxUsage,maxUsagePerCustomer,promotionId,startTime,endTime,publicTime} = value
+        console.log('1234',promotionId)
         let {type,customerIds} = dataProps
-        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds)
+        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds,promotionId.label)
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Cập nhật mã khuyến mãi thành công')
         }else {
@@ -167,6 +168,7 @@ function render(props) {
                 <MyCardContent style={{margin: "0 3rem 3rem 3rem"}}>
                     <VoucherCodeBody
                         errors={errors}
+                        setValue={setValue}
                         promotion={props.promotion}
                         listPromotionDefault = {props.listPromotionDefault || []}
                         control={control}
