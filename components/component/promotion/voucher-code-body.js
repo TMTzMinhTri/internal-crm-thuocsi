@@ -81,10 +81,11 @@ export default function VoucherCodeBody(props) {
         register,
     }=props
 
+    let customer = appliedCustomers?.length > 0 ? appliedCustomers : listCustomerDefault
 
     const [showAutoComplete, setShowAutoComplete] = useState(false);
     const [listPromotionSearch,setListPromotionSearch] = useState(listPromotionDefault || [])
-    const [listCustomer, setListCustomer] = useState(appliedCustomers || listCustomerDefault)
+    const [listCustomer, setListCustomer] = useState(customer)
     const hasError = typeof errors[`promotionName`] !== 'undefined';
     const [promotionPublic, setPromotionPublic] = useState(promotion[0] || null)
     const [listCustomerPromotion,setListCustomerPromotion] = useState([])
@@ -144,7 +145,7 @@ export default function VoucherCodeBody(props) {
         if (listCustomerResponse && listCustomerResponse.status === "OK") {
             setListCustomer(listCustomerResponse.data)
         }else {
-            setListCustomer([])
+            setListCustomer(listCustomerDefault)
         }
     }
 

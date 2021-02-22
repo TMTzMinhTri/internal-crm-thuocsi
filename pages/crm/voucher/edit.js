@@ -56,9 +56,9 @@ export async function loadVoucherCode(ctx) {
         returnObject.props.listPromotionDefault = promotionDefaultResponse.data
     }
 
-    let listCustomerDefaultReponse = getCustomerClient(ctx,{}).getCustomer(0,5)
+    let listCustomerDefaultReponse = await getCustomerClient(ctx, {}).getCustomer(0, 5, "");
     if (listCustomerDefaultReponse && listCustomerDefaultReponse.status === "OK") {
-        returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data
+        returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data;
     }
 
     return returnObject
