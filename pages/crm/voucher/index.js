@@ -187,7 +187,7 @@ function render(props) {
                                                 });
                                             }
                                         }}
-                                        placeholder="Tìm kiếm khuyến mãi"
+                                        placeholder="Tìm kiếm mã khuyến mãi"
                                         inputProps={{ "aria-label": "Tìm kiếm khuyến mãi" }}
                                     />
                                     <IconButton
