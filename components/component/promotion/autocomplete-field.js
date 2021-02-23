@@ -103,6 +103,7 @@ const AutoCompleteField = (props) => {
   };
 
   const handleChangeTextField = async (event) => {
+    console.log(defaultValue);
     setProductList([]);
     let value = event.target.value;
     let res = await fetchOptions(type, value);
@@ -129,21 +130,32 @@ const AutoCompleteField = (props) => {
   }, [type]);
 
   const renderOptions = () => {
+    console.log("renderOptions");
+    console.log("defaultValue", defaultValue, name);
     let codeList = [];
     let newArr = [];
+
     if (Array.isArray(defaultValue)) {
       defaultValue.map(({ code, name }) => {
         codeList.push(name == "Chọn tất cả" ? null : code);
       });
       newArr = productList.filter((val) => !codeList.includes(val.code));
+      console.log(newArr, "newArr Before");
+      if (multiple && defaultValue.length == 0) {
+        console.log("reAdd");
+        newArr.unshift({
+          name: "Chọn tất cả",
+        });
+      }
+      console.log(newArr, "newArr After");
       if (defaultValue.length > 0 && defaultValue[0].name == "Chọn tất cả")
         newArr = newArr.filter((o) => o.name != "Chọn tất cả");
+      console.log(newArr, "newArr Final");
       return newArr;
     }
+
     return productList;
   };
-
-  console.log("name", name, errors);
 
   return (
     <Controller
