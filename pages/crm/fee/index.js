@@ -226,7 +226,7 @@ function render({ feeData, page, limit, q }) {
                                 page={page}
                                 onChangePage={(_, page, rowsPerPage) => {
                                     Router.push(
-                                        `/cms/fee?page=${page}&limit=${rowsPerPage}&q=${searchText}`
+                                        `/crm/fee?page=${page}&limit=${rowsPerPage}&q=${searchText}`
                                     );
                                 }}
                             />
