@@ -773,14 +773,16 @@ export default function renderForm(props, toast) {
                                             }
                                             <Button
                                                 variant="contained"
+                                                color="secondary"
                                                 onClick={() => setOpenLockAccountDialog(true)}
-                                                style={{ margin: 8, backgroundColor: 'red', color: 'white', display: props.isUpdate && props.customer.isActive == 1 ? null : 'none' }}>
+                                                style={{ margin: 8, display: props.isUpdate && props.customer.isActive == 1 ? null : 'none' }}>
                                                 Khóa
                                             </Button>
                                             <Button
                                                 variant="contained"
+                                                color="secondary"
                                                 onClick={() => setOpenApproveAccountDialog(true)}
-                                                style={{ margin: 8, backgroundColor: 'yellowgreen', color: 'black', display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}>
+                                                style={{ margin: 8, display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}>
                                                 Kích Hoạt
                                             </Button>
                                             <Button
