@@ -371,7 +371,7 @@ export default function renderForm(props, toast) {
         formData.productCode = code
         formData.tags = [];
         formData.tagsName?.forEach((tag) => {
-            formData.tags.push(tag.value)
+            formData.tags.push(tag.label)
         })
         let wholesale = formData.wholesalePrice?.filter((item) => item && item.type !== "")
         formData.wholesalePrice = wholesale
@@ -395,7 +395,7 @@ export default function renderForm(props, toast) {
         formData.categoryCodes = categoryCode;
         formData.tags = [];
         formData.tagsName?.forEach((tag) => {
-            formData.tags.push(tag.value)
+            formData.tags.push(tag.label)
         })
 
         let wholesale = formData.wholesalePrice?.filter((item) => item && item.type !== "")
