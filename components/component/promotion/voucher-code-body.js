@@ -194,7 +194,7 @@ export default function VoucherCodeBody(props) {
 
         router.push({
             pathname: router.pathname,
-            query: {promotionId : promotion.promotionId || ""}
+            query: {...router.query,promotionId : promotion.promotionId || ""}
         }).then(() => {
             setValue("startTime",formatUTCTime(promotion.startTime),{ shouldValidate: true })
             setValue("endTime",formatUTCTime(promotion.endTime),{ shouldValidate: true })
