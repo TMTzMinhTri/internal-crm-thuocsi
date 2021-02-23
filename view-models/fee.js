@@ -26,13 +26,35 @@ export const feeValidation = {
             value: 50,
             message: "Tên phí dịch vụ tối đa 50 kí tự",
         },
-        pattern: {
-            value: /^(?!.*[ ]{2})/,
-            message: "Tên không hợp lệ."
-        },
+        validate: (value) => {
+            const validators = [
+                {
+                    value: /^(.*[ ]{2})|^ /,
+                    message: "Tên không hợp lệ (dư ký tự khoảng trắng).",
+                }
+            ]
+            for (let i = 0; i < validators.length; i++) {
+                if (validators[i].value?.test(value)) {
+                    return validators[i].message;
+                }
+            }
+        }
         
     },
     formula: {
         required: "Vui lòng nhập công thức",
+        validate: (value) => {
+            const validators = [
+                {
+                    value: /^(.*[ ]{2})|^ /,
+                    message: "Tên không hợp lệ (dư ký tự khoảng trắng).",
+                }
+            ]
+            for (let i = 0; i < validators.length; i++) {
+                if (validators[i].value?.test(value)) {
+                    return validators[i].message;
+                }
+            }
+        }
     },
 }
