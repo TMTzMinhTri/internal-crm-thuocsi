@@ -86,6 +86,7 @@ const Condition = (props) => {
                         name={"seller" + index}
                         label="Người bán"
                         placeholder=""
+                        required
                         defaultValue={o.seller ? o.seller : []}
                         options={[{ name: "" }]}
                         type="SELLER"
@@ -103,6 +104,7 @@ const Condition = (props) => {
                         label={displayLabelBasedOnCondition(selectField)}
                         placeholder=""
                         multiple={false}
+                        required
                         defaultValue={o.product ? o.product : []}
                         options={[{ name: "" }]}
                         type={selectField}
@@ -126,6 +128,10 @@ const Condition = (props) => {
                         error={!!errors["minQuantity" + index]}
                         required
                         inputRef={register({
+                          min: {
+                            value: 1,
+                            message: "Số lượng tối thiểu 1",
+                          },
                           required: "Số lượng không được trống",
                         })}
                       />
@@ -171,6 +177,7 @@ const Condition = (props) => {
                     defaultValue={seller}
                     options={[{ name: "" }]}
                     type="SELLER"
+                    required
                     errors={errors}
                     handleChange={handleChangeConditionSeller}
                   />
@@ -182,6 +189,7 @@ const Condition = (props) => {
                     label={displayLabelBasedOnCondition(selectField)}
                     placeholder=""
                     multiple={false}
+                    required
                     defaultValue={item}
                     options={[{ name: "" }]}
                     type={selectField}

@@ -193,8 +193,23 @@ function render(props) {
     minTotalValue: conditions[0].minOrderValue
       ? conditions[0].minOrderValue
       : "",
-    seller: [],
-    productList: [],
+    seller: [
+      {
+        name: "Chọn tất cả",
+      },
+    ],
+    productList: [
+      {
+        seller: [
+          {
+            name: "Chọn tất cả",
+          },
+        ],
+        productName: "",
+        minQuantity: 0,
+        minTotalValue: "",
+      },
+    ],
     item: {},
   });
 
@@ -254,7 +269,11 @@ function render(props) {
 
   const handleChangeConditionField = (key) => (event) => {
     conditionObject.item = [];
-    conditionObject.seller = [];
+    conditionObject.seller = [
+      {
+        name: "Chọn tất cả",
+      },
+    ];
     if (event.target.value == defaultCondition.product) {
       setConditionObject({
         ...conditionObject,
@@ -266,6 +285,11 @@ function render(props) {
 
   const handleAddProductOfProductList = () => {
     conditionObject.productList.push({
+      seller: [
+        {
+          name: "Chọn tất cả",
+        },
+      ],
       productName: "",
       minQuantity: 0,
       minTotalValue: "",
