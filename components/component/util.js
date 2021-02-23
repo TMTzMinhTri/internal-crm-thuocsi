@@ -323,8 +323,16 @@ export const validatePromotion = (
           message: "Chưa chọn người bán",
         });
       }
+      if (value.condition == defaultCondition.product)
+        if (!value["product" + index] || value["product" + index].length == 0) {
+          isError = false;
+          setError("product" + index, {
+            type: "required",
+            message: "Sản phẩm không được bỏ trống",
+          });
+        }
     });
-  if (value[displayNameBasedOnCondition(conditionObject.selectField)]) {
+  if (value[displayNameBasedOnCondition(conditionObject.selectField)] == "") {
     isError = false;
     setError(displayNameBasedOnCondition(conditionObject.selectField), {
       type: "required",

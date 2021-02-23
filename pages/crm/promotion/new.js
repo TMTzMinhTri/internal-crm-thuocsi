@@ -89,8 +89,23 @@ function render(props) {
   const [conditionObject, setConditionObject] = useState({
     selectField: defaultCondition.noRule,
     minValue: 0,
-    seller: [],
-    productList: [{ productName: "", minQuantity: 0, minTotalValue: "" }],
+    seller: [
+      {
+        name: "Chọn tất cả",
+      },
+    ],
+    productList: [
+      {
+        seller: [
+          {
+            name: "Chọn tất cả",
+          },
+        ],
+        productName: "",
+        minQuantity: 0,
+        minTotalValue: "",
+      },
+    ],
     item: {},
   });
 
@@ -142,12 +157,26 @@ function render(props) {
 
   const handleChangeConditionField = (key) => (event) => {
     conditionObject.item = {};
-    conditionObject.seller = [];
+    conditionObject.seller = [
+      {
+        name: "Chọn tất cả",
+      },
+    ];
     setConditionObject({ ...conditionObject, [key]: event.target.value });
   };
 
   const handleAddProductOfProductList = () => {
+    conditionObject.seller = [
+      {
+        name: "Chọn tất cả",
+      },
+    ];
     conditionObject.productList.push({
+      seller: [
+        {
+          name: "Chọn tất cả",
+        },
+      ],
       productName: "",
       minQuantity: 0,
       minTotalValue: "",
@@ -223,6 +252,8 @@ function render(props) {
   }
 
   console.log(getValues(), "getValues()");
+
+  console.log(conditionObject, "conditionObject");
 
   console.log(errors, "errors");
 
