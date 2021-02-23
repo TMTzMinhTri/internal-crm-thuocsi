@@ -137,7 +137,7 @@ export const RegionTable = (props) => {
                 <TableBody>
                     {!tableData?.length && (
                         <TableRow>
-                            <TableCell colSpan={3} align="left">
+                            <TableCell colSpan={6} align="left">
                                 {props.message}
                             </TableCell>
                         </TableRow>
@@ -174,17 +174,19 @@ export const RegionTable = (props) => {
                         </TableRow>
                     ))}
                 </TableBody>
-                <MyTablePagination
-                    labelUnit="vùng"
-                    count={props.total}
-                    rowsPerPage={props.limit}
-                    page={props.page}
-                    onChangePage={(_, page, rowsPerPage) => {
-                        router.push(
-                            `/crm/pricing?v=${ViewType.REGION}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
-                        );
-                    }}
-                />
+                {props.total && (
+                    <MyTablePagination
+                        labelUnit="vùng"
+                        count={props.total}
+                        rowsPerPage={props.limit}
+                        page={props.page}
+                        onChangePage={(_, page, rowsPerPage) => {
+                            router.push(
+                                `/crm/pricing?v=${ViewType.REGION}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
+                            );
+                        }}
+                    />
+                )}
             </Table>
             <ConfirmDialog
                 open={openFeeModal}

@@ -64,7 +64,7 @@ export const ProvinceTable = (props) => {
 
     return (
         <TableContainer>
-            <Table  size="small">
+            <Table size="small">
                 <colgroup>
                     <col width="25%"></col>
                     <col width="25%"></col>
@@ -80,7 +80,7 @@ export const ProvinceTable = (props) => {
                 <TableBody>
                     {!tableData?.length && (
                         <TableRow>
-                            <TableCell colSpan={3} align="left">
+                            <TableCell colSpan={4} align="left">
                                 {props.message}
                             </TableCell>
                         </TableRow>
@@ -101,17 +101,19 @@ export const ProvinceTable = (props) => {
                         </TableRow>
                     ))}
                 </TableBody>
-                <MyTablePagination
-                    labelUnit="tỉnh thành"
-                    count={props.total}
-                    rowsPerPage={props.limit}
-                    page={props.page}
-                    onChangePage={(_, page, rowsPerPage) => {
-                        router.push(
-                            `/crm/pricing?v=${ViewType.PROVINCE}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
-                        );
-                    }}
-                />
+                {props.total && (
+                    <MyTablePagination
+                        labelUnit="tỉnh thành"
+                        count={props.total}
+                        rowsPerPage={props.limit}
+                        page={props.page}
+                        onChangePage={(_, page, rowsPerPage) => {
+                            router.push(
+                                `/crm/pricing?v=${ViewType.PROVINCE}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
+                            );
+                        }}
+                    />
+                )}
             </Table>
             <ConfirmDialog
                 open={openModal}
