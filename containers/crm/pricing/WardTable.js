@@ -64,7 +64,7 @@ export const WardTable = (props) => {
 
     return (
         <TableContainer>
-            <Table  size="small">
+            <Table size="small">
                 <colgroup>
                     <col width="16%"></col>
                     <col width="16%"></col>
@@ -84,7 +84,7 @@ export const WardTable = (props) => {
                 <TableBody>
                     {!tableData?.length && (
                         <TableRow>
-                            <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                            <TableCell colSpan={6} align="left">{props.message}</TableCell>
                         </TableRow>
                     )}
                     {tableData?.map((row, i) => (
@@ -95,21 +95,23 @@ export const WardTable = (props) => {
                             <TableCell>{row.districtCode}</TableCell>
                             <TableCell>{row.districtName}</TableCell>
                             <TableFeeValueCell code={row.code} initialFee={row.feeValue} onUpdate={(values) => {
-                                        setCurrentEditValue(values);
-                                        setOpenModal(true);
-                                    }} />
+                                setCurrentEditValue(values);
+                                setOpenModal(true);
+                            }} />
                         </TableRow>
                     ))}
                 </TableBody>
-                <MyTablePagination
-                    labelUnit="phường/xã"
-                    count={props.total}
-                    rowsPerPage={props.limit}
-                    page={props.page}
-                    onChangePage={(_, page, rowsPerPage) => {
-                        router.push(`/crm/pricing?v=${ViewType.WARD}&page=${page}&limit=${rowsPerPage}&q=${props.q}`)
-                    }}
-                />
+                {props.total && (
+                    <MyTablePagination
+                        labelUnit="phường/xã"
+                        count={props.total}
+                        rowsPerPage={props.limit}
+                        page={props.page}
+                        onChangePage={(_, page, rowsPerPage) => {
+                            router.push(`/crm/pricing?v=${ViewType.WARD}&page=${page}&limit=${rowsPerPage}&q=${props.q}`)
+                        }}
+                    />
+                )}
             </Table>
             <ConfirmDialog
                 open={openModal}

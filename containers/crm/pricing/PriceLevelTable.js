@@ -90,7 +90,7 @@ export const PriceLevelTable = (props) => {
                 <TableBody>
                     {!tableData?.length && (
                         <TableRow>
-                            <TableCell colSpan={3} align="left">
+                            <TableCell colSpan={6} align="left">
                                 {props.message}
                             </TableCell>
                         </TableRow>
@@ -122,17 +122,19 @@ export const PriceLevelTable = (props) => {
                         </TableRow>
                     ))}
                 </TableBody>
-                <MyTablePagination
-                    labelUnit="ngưỡng giá"
-                    count={props.total}
-                    rowsPerPage={props.limit}
-                    page={props.page}
-                    onChangePage={(_, page, rowsPerPage) => {
-                        router.push(
-                            `/crm/pricing?v=${ViewType.PRICE_LEVEL}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
-                        );
-                    }}
-                />
+                {props.total && (
+                    <MyTablePagination
+                        labelUnit="ngưỡng giá"
+                        count={props.total}
+                        rowsPerPage={props.limit}
+                        page={props.page}
+                        onChangePage={(_, page, rowsPerPage) => {
+                            router.push(
+                                `/crm/pricing?v=${ViewType.PRICE_LEVEL}&page=${page}&limit=${rowsPerPage}&q=${props.q}`
+                            );
+                        }}
+                    />
+                )}
             </Table>
             <ConfirmDialog
                 open={openModal}
