@@ -205,10 +205,10 @@ export const promotionTypes = [
     value: defaultPromotionType.VOUCHER_CODE,
     label: "Mã khuyến mãi (Voucher)",
   },
-  {
-    value: defaultPromotionType.FREESHIP,
-    label: "Miễn phí vận chuyển",
-  },
+  // {
+  //   value: defaultPromotionType.FREESHIP,
+  //   label: "Miễn phí vận chuyển",
+  // },
   {
     value: defaultPromotionType.COMBO,
     label: "Combo linh hoạt",
