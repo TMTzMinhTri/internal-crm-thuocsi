@@ -772,7 +772,7 @@ export default function renderForm(props, toast) {
                                                 color="secondary"
                                                 onClick={() => setOpenApproveAccountDialog(true)}
                                                 style={{ margin: 8, display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}>
-                                                Kích Hoạt
+                                                Mở khoá
                                             </Button>
                                             <Button
                                                 variant="contained"
