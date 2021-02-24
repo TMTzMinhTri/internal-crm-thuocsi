@@ -1,7 +1,6 @@
 import { Box, Button, ButtonGroup, CardContent, FormGroup, Paper, TextField } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import Divider from "@material-ui/core/Divider";
 import FormControl from "@material-ui/core/FormControl";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -202,7 +201,7 @@ export default function renderForm(props, toast) {
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success("Kích hoạt tài khoản thành công")
+            success("Mở khoá tài khoản thành công")
             window.location.reload()
         }
     }
