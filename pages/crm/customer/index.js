@@ -153,12 +153,12 @@ function render(props) {
                     </Link>
                     {row.isActive == '1' ? <Tooltip title="Khóa">
                         <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row) }}>
-                            <LockOpenIcon fontSize="small" />
+                            <LockIcon fontSize="small" />
                         </IconButton>
                     </Tooltip> :
                         <Tooltip title="Mở khoá">
                             <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
-                                <LockIcon fontSize="small" />
+                                <LockOpenIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>}
                 </TableCell>
