@@ -1,12 +1,12 @@
-import React from "react";
 import {
     Button,
     Dialog,
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle,
+    DialogTitle
 } from "@material-ui/core";
+import React from "react";
 
 /**
  * @param {object} props
@@ -21,10 +21,10 @@ export const ConfirmApproveDialog = ({ open, onConfirm, onClose }) => {
     };
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Kích hoạt tài khoản</DialogTitle>
+            <DialogTitle>Mở khoá tài khoản</DialogTitle>
             <DialogContent dividers>
                 <DialogContentText>
-                    Bạn có chắc muốn kích hoạt tài khoản này không?
+                    Bạn có chắc muốn mở khoá tài khoản này không?
                 </DialogContentText>
             </DialogContent>
             <DialogActions>
