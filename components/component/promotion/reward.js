@@ -17,7 +17,7 @@ import { textfieldProps } from "./infomation-fields";
 import SelectField from "./select-field";
 
 const Reward = (props) => {
-  const { reward, register, errors, control } = props;
+  const { reward, register, errors, control, getValues } = props;
 
   const {
     handleChangeRewardField,
@@ -172,7 +172,8 @@ const Reward = (props) => {
                           multiple={false}
                           defaultValue={o.product ? o.product : []}
                           options={[{ name: "" }]}
-                          handleChange={handleChangeListReward(index)}
+                          getValues={getValues}
+                          // handleChange={handleChangeListReward(index)}
                           errors={errors}
                           type={selectField}
                         />

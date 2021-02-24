@@ -50,7 +50,8 @@ const Scope = (props) => {
                         defaultValue={list}
                         options={[{ name: "" }]}
                         type={selectField}
-                        handleChange={handleChangeScopeList(index)}
+                        getValues={getValues}
+                        // handleChange={handleChangeScopeList(index)}
                       />
                     </Grid>
                   </Grid>

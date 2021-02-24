@@ -98,6 +98,7 @@ const ConditionFields = (props) => {
                 control={control}
                 register={register}
                 errors={errors}
+                getValues={getValues}
                 handleChangeRewardField={handleChangeRewardField}
                 handleChangeListReward={handleChangeListReward}
                 handleAddAttachedProduct={handleAddAttachedProduct}

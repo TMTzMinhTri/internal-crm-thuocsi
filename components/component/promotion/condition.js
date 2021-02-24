@@ -91,6 +91,7 @@ const Condition = (props) => {
                         options={[{ name: "" }]}
                         type="SELLER"
                         errors={errors}
+                        getValues={getValues}
                         handleChange={handleChangeProductListOfCondition(
                           index,
                           "SELLER"
@@ -109,6 +110,7 @@ const Condition = (props) => {
                         options={[{ name: "" }]}
                         type={selectField}
                         errors={errors}
+                        getValues={getValues}
                         handleChange={handleChangeProductListOfCondition(
                           index,
                           "PRODUCT"
@@ -179,7 +181,8 @@ const Condition = (props) => {
                     type="SELLER"
                     required
                     errors={errors}
-                    handleChange={handleChangeConditionSeller}
+                    getValues={getValues}
+                    // handleChange={handleChangeConditionSeller}
                   />
                 </Grid>
                 <Grid item container xs={3}>
@@ -194,7 +197,8 @@ const Condition = (props) => {
                     options={[{ name: "" }]}
                     type={selectField}
                     errors={errors}
-                    handleChange={handleChangeConditionList}
+                    getValues={getValues}
+                    // handleChange={handleChangeConditionList}
                   />
                 </Grid>
                 <Grid item container xs={2}>

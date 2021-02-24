@@ -373,6 +373,10 @@ function render(props) {
       setScopeObject([...scopeObject]);
     });
 
+    if (conditions[0].type == defaultCondition.product) {
+      conditionObject.productList.pop();
+    }
+
     conditions[0].productConditions?.map((o) => {
       conditionObject.productList.push({
         product: [],
@@ -516,7 +520,7 @@ function render(props) {
     fillDefaultData();
   }, []);
 
-  console.log(errors, "errors");
+  console.log(conditionObject, "conditionObject");
 
   return (
     <AppCRM select="/crm/promotion">
