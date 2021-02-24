@@ -738,15 +738,15 @@ export default function renderForm(props, toast) {
                                 </ButtonGroup>
                             </Link>
                         ) : (
-                            <Button
-                                variant="contained"
-                                type="reset"
-                                style={{ margin: 8 }}
-                                disabled={loading}
-                            >
-                                {loading && <CircularProgress size={20} />}
-                                    Làm mới
-                            </Button>
+                                <Button
+                                    variant="contained"
+                                    type="reset"
+                                    style={{ margin: 8 }}
+                                    disabled={loading}
+                                >
+                                    {loading && <CircularProgress size={20} />}
+                                Làm mới
+                                </Button>
                             )}
                         <Button
                             variant="contained"
@@ -755,7 +755,7 @@ export default function renderForm(props, toast) {
                             style={{ margin: 8, display: props.isUpdate && props.customer.isActive == 1 ? null : 'none' }}
                         >
                             Khóa
-                            </Button>
+                        </Button>
                         <Button
                             variant="contained"
                             color="secondary"
@@ -763,7 +763,7 @@ export default function renderForm(props, toast) {
                             style={{ margin: 8, display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}
                         >
                             Mở khoá
-                            </Button>
+                        </Button>
                         <Button
                             variant="contained"
                             color="primary"
@@ -772,8 +772,8 @@ export default function renderForm(props, toast) {
                             style={{ margin: 8 }}
                         >
                             {loading && <CircularProgress size={20} />}
-                                    Lưu
-                            </Button>
+                            Lưu
+                        </Button>
                     </Box>
                 </MyCardContent>
             </MyCard>
