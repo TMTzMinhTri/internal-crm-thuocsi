@@ -103,29 +103,15 @@ export const orderStatus = [
 ]
 
 export const statuses = [
-    // {
-    //     value: "ACTIVE",
-    //     label: "Đang hoạt động",
-    // },
-    {
-        value: "DRAFT",
-        label: "Nháp",
-        color: "grey",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-        color: "blue"
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-        color: "grey",
-    },
     {
         value: "ACTIVE",
-        label: "Đã kích hoạt",
+        label: "Đang hoạt động",
         color: "green"
+    },
+    {
+        value: "INACTIVE",
+        label: "Chưa kích hoạt",
+        color: "grey"
     }
 ]
 

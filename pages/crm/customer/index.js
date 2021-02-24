@@ -10,13 +10,11 @@ import {
     TableRow
 } from "@material-ui/core";
 import Grid from "@material-ui/core/Grid";
-import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog"
-import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog"
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
-import EditIcon from "@material-ui/icons/Edit";
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import EditIcon from "@material-ui/icons/Edit";
 import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
 import SearchIcon from "@material-ui/icons/Search";
 import {
@@ -25,8 +23,11 @@ import {
 } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getCommonAPI } from 'client/common';
 import { getCustomerClient } from "client/customer";
 import { formatUrlSearch, statuses } from 'components/global';
+import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
+import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -34,7 +35,6 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./customer.module.css";
-import { getCommonAPI } from 'client/common';
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -139,8 +139,7 @@ function render(props) {
                 <TableCell align="left">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
                 <TableCell align="center">
-                    {row.isActive == -1 && row.status == 'ACTIVE' ? <Button size="small" variant="outlined" style={{ color: 'red', borderColor: 'red' }}>Bị Khóa</Button> :
-                        <Button size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>}
+                    <Button size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>
                 </TableCell>
                 <TableCell align="left">
                     <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
@@ -157,16 +156,11 @@ function render(props) {
                             <CheckCircleIcon fontSize="small" style={{ color: 'green' }} />
                         </IconButton>
                     </Tooltip> :
-                        row.isActive == '-1' ? <Tooltip title="Kích hoạt tài khoản">
+                        <Tooltip title="Kích hoạt tài khoản">
                             <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
                                 <RemoveCircleIcon fontSize="small" style={{ color: 'red' }} />
                             </IconButton>
-                        </Tooltip> :
-                            row.status !== 'DRAFT' ? <Tooltip title="Kích hoạt tài khoản">
-                                <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
-                                    <CheckCircleIcon fontSize="small" style={{ color: 'grey' }} />
-                                </IconButton>
-                            </Tooltip> : null}
+                        </Tooltip>}
                 </TableCell>
             </TableRow >
         );
