@@ -13,14 +13,15 @@ import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import EditIcon from "@material-ui/icons/Edit";
-import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import LockIcon from '@material-ui/icons/Lock';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from "@material-ui/icons/Search";
 import {
     doWithLoggedInUser,
     renderWithLoggedInUser
 } from "@thuocsi/nextjs-components/lib/login";
+import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCommonAPI } from 'client/common';
@@ -125,11 +126,11 @@ function render(props) {
         }
     }
 
-    const RenderRow = ({ row, i }) => {
+    const RenderRow = ({ row }) => {
         let mainColor = statuses.find((e) => e.value === row.status)?.color || "grey"
         let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định"
         return (
-            <TableRow key={i}>
+            <TableRow>
                 <TableCell component="th" scope="row">
                     {row.code}
                 </TableCell>
@@ -151,21 +152,20 @@ function render(props) {
                             </Tooltip>
                         </a>
                     </Link>
-                    {row.isActive == '1' ? <Tooltip title="Khóa tài khoản">
-                        <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row) }}>
-                            <CheckCircleIcon fontSize="small" style={{ color: 'green' }} />
+                    {row.isActive == '-1' ? <Tooltip title="Nhấp vào để mở khóa">
+                        <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
+                            <LockIcon fontSize="small" />
                         </IconButton>
                     </Tooltip> :
-                        <Tooltip title="Kích hoạt tài khoản">
-                            <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
-                                <RemoveCircleIcon fontSize="small" style={{ color: 'red' }} />
+                        <Tooltip title="Nhấp vào để khoá">
+                            <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row) }}>
+                                <LockOpenIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>}
                 </TableCell>
             </TableRow >
         );
     }
-
 
     return (
         <AppCRM select="/crm/customer">
@@ -182,96 +182,96 @@ function render(props) {
                 onClose={() => setOpenLockAccountDialog(false)}
                 onConfirm={() => lockAccount()}
             />
-            <div className={styles.grid}>
-                <Grid container spacing={3} direction="row"
-                    justify="space-between"
-                    alignItems="center"
-                >
-                    <Grid item xs={12} sm={4} md={4}>
-                        <Paper className={styles.search}>
-                            <InputBase
-                                id="q"
-                                name="q"
-                                className={styles.input}
-                                value={search}
-                                onChange={handleChange}
-                                inputRef={register}
-                                onKeyPress={event => {
-                                    if (event.key === 'Enter' || event.keyCode === 13) {
-                                        onSearch()
-                                    }
-                                }}
-                                placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
-                                inputProps={{ 'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại' }}
-                            />
-                            <IconButton className={styles.iconButton} aria-label="search"
-                                onClick={handleSubmit(onSearch)}>
-                                <SearchIcon />
-                            </IconButton>
-                        </Paper>
+            <MyCard>
+                <MyCardHeader title="Danh sách khách hàng">
+                    <Link href="/crm/customer/new">
+                        <ButtonGroup color="primary" aria-label="contained primary button group"
+                            className={styles.rightGroup}>
+                            <Button variant="contained" color="primary">Thêm khách hàng</Button>
+                        </ButtonGroup>
+                    </Link>
+                </MyCardHeader>
+                <MyCardContent>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} sm={4}>
+                            <Paper className={styles.search}>
+                                <InputBase
+                                    id="q"
+                                    name="q"
+                                    className={styles.input}
+                                    value={search}
+                                    onChange={handleChange}
+                                    inputRef={register}
+                                    onKeyPress={event => {
+                                        if (event.key === 'Enter' || event.keyCode === 13) {
+                                            onSearch()
+                                        }
+                                    }}
+                                    placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
+                                    inputProps={{ 'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại' }}
+                                />
+                                <IconButton className={styles.iconButton} aria-label="search"
+                                    onClick={handleSubmit(onSearch)}>
+                                    <SearchIcon />
+                                </IconButton>
+                            </Paper>
+                        </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/customer/new">
-                            <ButtonGroup color="primary" aria-label="contained primary button group"
-                                className={styles.rightGroup}>
-                                <Button variant="contained" color="primary">Thêm khách hàng</Button>
-                            </ButtonGroup>
-                        </Link>
-                    </Grid>
-                </Grid>
-            </div>
-
-            <TableContainer component={Paper}>
-                <Table size="small" aria-label="a dense table">
-                    <colgroup>
-                        <col width="10%" />
-                        <col width="15%" />
-                        <col width="20%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="15%" />
-                        <col width="10%" />
-                    </colgroup>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="left">Mã khách hàng</TableCell>
-                            <TableCell align="left">Tên khách hàng</TableCell>
-                            <TableCell align="left">Email</TableCell>
-                            <TableCell align="left">Cấp độ</TableCell>
-                            <TableCell align="left">Điểm</TableCell>
-                            <TableCell align="left">Số điện thoại</TableCell>
-                            <TableCell align="center">Trạng thái</TableCell>
-                            <TableCell align="left">Thao tác</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    {props.data.length > 0 ? (
-                        <TableBody>
-                            {props.data.map((row, i) => (
-                                <RenderRow row={row} i={i} />
-                            ))}
-                        </TableBody>
-                    ) : (
+                </MyCardContent>
+            </MyCard>
+            <MyCard>
+                <TableContainer>
+                    <Table size="small" aria-label="a dense table">
+                        <colgroup>
+                            <col width="10%" />
+                            <col width="15%" />
+                            <col width="20%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="15%" />
+                            <col width="10%" />
+                        </colgroup>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="left">Mã khách hàng</TableCell>
+                                <TableCell align="left">Tên khách hàng</TableCell>
+                                <TableCell align="left">Email</TableCell>
+                                <TableCell align="left">Cấp độ</TableCell>
+                                <TableCell align="left">Điểm</TableCell>
+                                <TableCell align="left">Số điện thoại</TableCell>
+                                <TableCell align="center">Trạng thái</TableCell>
+                                <TableCell align="left">Thao tác</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        {props.data.length > 0 ? (
                             <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                </TableRow>
+                                {props.data.map((row, i) => (
+                                    <RenderRow key={i} row={row} i={i} />
+                                ))}
                             </TableBody>
-                        )}
+                        ) : (
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
 
-                    <MyTablePagination
-                        labelUnit="khách hàng"
-                        count={props.count}
-                        rowsPerPage={limit}
-                        page={page}
-                        onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(
-                                `/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`
-                            );
-                        }}
-                    />
-                </Table>
-            </TableContainer>
+                        <MyTablePagination
+                            labelUnit="khách hàng"
+                            count={props.count}
+                            rowsPerPage={limit}
+                            page={page}
+                            onChangePage={(event, page, rowsPerPage) => {
+                                Router.push(
+                                    `/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`
+                                );
+                            }}
+                        />
+                    </Table>
+                </TableContainer>
+            </MyCard>
         </AppCRM>
     );
 }

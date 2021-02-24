@@ -373,6 +373,10 @@ function render(props) {
       setScopeObject([...scopeObject]);
     });
 
+    if (conditions[0].type == defaultCondition.product) {
+      conditionObject.productList.pop();
+    }
+
     conditions[0].productConditions?.map((o) => {
       conditionObject.productList.push({
         product: [],
