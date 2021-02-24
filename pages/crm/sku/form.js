@@ -4,8 +4,7 @@ import {
     AccordionSummary,
     Box, Button, ButtonGroup, Divider,
     FormControl, Grid,
-    InputAdornment, MenuItem, Paper,
-    Select, TextField, Card, CardContent,
+    InputAdornment, MenuItem, Select, TextField, Card, CardContent,
     Tooltip,
     Typography
 } from "@material-ui/core";
@@ -17,6 +16,7 @@ import AddIcon from "@material-ui/icons/Add";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import HelpOutlinedIcon from "@material-ui/icons/HelpOutlined";
+import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { getPriceClient } from "client/price";
 import { NotFound } from "components/components-global";
 import { Brand, SellPrices } from "components/global";
@@ -30,7 +30,7 @@ import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
 
-const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, errors, index, getValues, defaultIds, setValue, maxQuantity, absoluteDiscount, setAbsoluteDiscount ,minQuantitys}) => {
+const RenderPriceConfig = ({ name, control, register, hidden, errors, index, defaultIds, maxQuantity, absoluteDiscount, setAbsoluteDiscount }) => {
 
     let arrName = name + `[${index}]`
     if (typeof hidden === 'undefined') {
@@ -39,13 +39,9 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
 
     let currentIdx = defaultIds.indexOf(index)
 
-    let downIdx = -1
-    let upIdx = -1
     if (currentIdx > 0) {
-        downIdx = defaultIds[currentIdx - 1]
     }
     if (currentIdx < defaultIds.length - 1) {
-        upIdx = defaultIds[currentIdx + 1]
     }
 
 
@@ -57,7 +53,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                         <Grid item xs={12} sm={6} md={3}>
                             <Typography gutterBottom>
                                 <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                Loại cài đặt<span style={{color: 'red'}}>*</span>:
+                                    Loại cài đặt<span style={{ color: 'red' }}>*</span>:
                                 </FormLabel>
                             </Typography>
                             <FormControl className={styles.formControl} size="small"
@@ -83,7 +79,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                         <Grid item xs={12} sm={6} md={3}>
                             <Typography gutterBottom>
                                 <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                    Giá bán<span style={{color: 'red'}}>*</span>:
+                                    Giá bán<span style={{ color: 'red' }}>*</span>:
                                 </FormLabel>
                             </Typography>
                             <TextField
@@ -95,7 +91,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                 disabled={hidden}
                                 placeholder=""
                                 defaultValue={1000}
-                                onChange={(e)=>{setAbsoluteDiscount(parseInt(e.target.value, 0) / 2)}}
+                                onChange={(e) => { setAbsoluteDiscount(parseInt(e.target.value, 0) / 2) }}
                                 helperText={errors[name] ? errors[name]?.price?.message : ''}
                                 InputLabelProps={{
                                     shrink: true,
@@ -130,7 +126,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                    Loại cài đặt<span style={{color: 'red'}}>*</span>:
+                                        Loại cài đặt<span style={{ color: 'red' }}>*</span>:
                                     </FormLabel>
                                 </Typography>
                                 <FormControl className={styles.formControl} size="small"
@@ -156,7 +152,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                        Giá bán<span style={{color: 'red'}}>*</span>:
+                                        Giá bán<span style={{ color: 'red' }}>*</span>:
                                     </FormLabel>
                                 </Typography>
                                 <TextField
@@ -191,7 +187,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                                 message: "Vui lòng nhập giá trị giá bán nhỏ hơn hoặc bằng 100000000"
                                             },
                                             valueAsNumber: true, // important
-    
+
                                         })
                                     }
                                 />
@@ -200,7 +196,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                    Số lượng đặt tối thiểu trên một đơn hàng<span style={{color: 'red'}}>*</span>:
+                                        Số lượng đặt tối thiểu trên một đơn hàng<span style={{ color: 'red' }}>*</span>:
                                     </FormLabel>
                                 </Typography>
                                 <TextField
@@ -239,12 +235,12 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                     }
                                 />
                             </Grid>
-                            
+
                             <Grid item xs={12} sm={12} md={12} />
                             <Grid item xs={12} sm={6} md={3}>
                                 <Typography gutterBottom>
                                     <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                    Tỉ lệ phần trăm giảm giá:
+                                        Tỉ lệ phần trăm giảm giá:
                                     </FormLabel>
                                 </Typography>
                                 <TextField
@@ -287,7 +283,7 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                         Giảm giá tuyệt đối:
                                     </FormLabel>
                                 </Typography>
-                                
+
                                 <TextField
                                     id={`${arrName}.absoluteDiscount`}
                                     name={`${arrName}.absoluteDiscount`}
@@ -297,7 +293,6 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
                                     disabled={hidden}
                                     placeholder=""
                                     defaultValue={500}
-                                    helperText={errors.name?.message}
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
@@ -330,14 +325,28 @@ const RenderPriceConfig = ({ name, control, register, clearErrors, hidden, error
     )
 }
 
+const breadcrumbEdit = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách sku",
+        link: "/crm/seller",
+    },
+    {
+        name: "Cập nhật cài đặt sku",
+    },
+];
+
 export default function renderForm(props, toast) {
     if (props.status && props.status !== "OK") {
         return (
-            <NotFound link='/crm/sku' titlePage="Thông tin cài đặt giá" labelLink="sản phẩm" />
+            <NotFound link='/crm/sku' titlePage="Cập nhật cài đặt sku" labelLink="sản phẩm" />
         )
     }
 
-    const { register, handleSubmit, errors, reset, control, getValues, setValue, clearErrors, setError } = useForm({
+    const { register, handleSubmit, errors, reset, control, getValues, setValue, clearErrors } = useForm({
         mode: 'onSubmit', defaultValues: props.price || {
             productCode: [],
             tagsName: [],
@@ -357,7 +366,7 @@ export default function renderForm(props, toast) {
     const [hidden, setHidden] = useState(true);
     const [maxQuantity, setMaxQuantity] = useState(props.price?.maxQuantity || 10);
     const [absoluteDiscount, setAbsoluteDiscount] = useState((props.price?.retailPrice.price) / 2 || 500);
-    const [minQuantitys, setMinQuantitys] = useState(props.price?.wholesalePrice?.map(v => {v.minNumber})|| [])
+    const [minQuantitys] = useState(props.price?.wholesalePrice?.map(v => { v.minNumber }) || [])
     const router = useRouter();
     let sellerCode = "MedX";
     // tamnt
@@ -438,17 +447,15 @@ export default function renderForm(props, toast) {
     }
 
     return (
-        <AppCRM select="/crm/sku">
+        <AppCRM select="/crm/sku" breadcrumb={breadcrumbEdit}>
             <Head>
-                <title>{typeof props.product === "undefined" ? 'Thêm cài đặt giá' : 'Cập nhật cài đặt giá'}</title>
+                <title>Cập nhật cài đặt sku</title>
             </Head>
-            <Box component={Paper} display="block">
-                <form noValidate>
-                    <Box className={styles.contentPadding}>
-                        <Box style={{ fontSize: 30, margin: 5 }}>
-                            Thông tin cài đặt giá
-                        </Box>
-                        <Box style={{ margin: 10 }}>
+            <MyCard>
+                <MyCardHeader title={`Cài đặt sku #${props.price.sku}`} />
+                <MyCardContent>
+                    <form noValidate>
+                        <CardContent>
                             <Grid container spacing={3}>
                                 <Grid item xs={12} sm={6} md={6}>
                                     {
@@ -460,10 +467,10 @@ export default function renderForm(props, toast) {
                                         ) : (
                                                 // Case 2: Select product
                                                 <div>
-                                                   <FormControl style={{width: '100%'}} size="small">
+                                                    <FormControl style={{ width: '100%' }} size="small">
                                                         <Typography gutterBottom>
                                                             <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                                Sản phẩm<span style={{color: 'red'}}>*</span>:
+                                                                Sản phẩm<span style={{ color: 'red' }}>*</span>:
                                                             </FormLabel>
                                                         </Typography>
                                                         <MuiSingleAuto
@@ -478,107 +485,107 @@ export default function renderForm(props, toast) {
                                                     </FormControl>
                                                 </div>
                                             )
-                                        }
-                                    </Grid>
+                                    }
                                 </Grid>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} sm={12} md={6}>
-                                        <FormControl style={{width: '100%'}} size="small">
-                                            <Typography gutterBottom>
-                                                <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                    Tag:
+                            </Grid>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <FormControl style={{ width: '100%' }} size="small">
+                                        <Typography gutterBottom>
+                                            <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                                Tag:
                                                 </FormLabel>
-                                            </Typography>
-                                            <MuiMultipleAuto
-                                                name="tagsName"
-                                                control={control}
-                                                errors={errors}
-                                                message="Vui lòng nhập"
-                                                placeholder="Chọn"
-                                                options={listTag}
-                                            />
-                                        </FormControl>
-                                    </Grid>
+                                        </Typography>
+                                        <MuiMultipleAuto
+                                            name="tagsName"
+                                            control={control}
+                                            errors={errors}
+                                            message="Vui lòng nhập"
+                                            placeholder="Chọn"
+                                            options={listTag}
+                                        />
+                                    </FormControl>
                                 </Grid>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} sm={12} md={6}>
-                                        <FormControl style={{width: '100%'}} size="small">
-                                            <Typography gutterBottom>
-                                                <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                    Brand<span style={{color: 'red'}}>*</span>:
+                            </Grid>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} sm={12} md={6}>
+                                    <FormControl style={{ width: '100%' }} size="small">
+                                        <Typography gutterBottom>
+                                            <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                                Brand<span style={{ color: 'red' }}>*</span>:
                                                 </FormLabel>
-                                            </Typography>
-                                            <Controller
-                                                rules={{ required: true }}
-                                                control={control}
-                                                defaultValue={brand}
-                                                name="brand"
-                                                as={
-                                                    <RadioGroup
-                                                        aria-label="brand"
-                                                        value={brand}
-                                                        onChange={(e) => setBrand(e.target.value)}
-                                                        className={styles.displayFlex}
-                                                    >
-                                                        <FormControlLabel
-                                                            value="LOCAL"
-                                                            control={<Radio color="primary" />}
-                                                            label={Brand.LOCAL.value}
-                                                        />
-                                                        <FormControlLabel
-                                                            value="FOREIGN"
-                                                            control={<Radio color="primary" />}
-                                                            label={Brand.FOREIGN.value}
-                                                        />
-                                                    </RadioGroup>
-                                                }
-                                            />
-                                        </FormControl>
-                                    </Grid>
+                                        </Typography>
+                                        <Controller
+                                            rules={{ required: true }}
+                                            control={control}
+                                            defaultValue={brand}
+                                            name="brand"
+                                            as={
+                                                <RadioGroup
+                                                    aria-label="brand"
+                                                    value={brand}
+                                                    onChange={(e) => setBrand(e.target.value)}
+                                                    className={styles.displayFlex}
+                                                >
+                                                    <FormControlLabel
+                                                        value="LOCAL"
+                                                        control={<Radio color="primary" />}
+                                                        label={Brand.LOCAL.value}
+                                                    />
+                                                    <FormControlLabel
+                                                        value="FOREIGN"
+                                                        control={<Radio color="primary" />}
+                                                        label={Brand.FOREIGN.value}
+                                                    />
+                                                </RadioGroup>
+                                            }
+                                        />
+                                    </FormControl>
                                 </Grid>
-                                <Grid container spacing={3}>
-                                    <Grid item xs={12} sm={12} md={3}>
-                                        <FormControl style={{width: '100%'}} size="small">
-                                            <Typography gutterBottom>
-                                                <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                    Số lượng đặt tối đa trên một đơn hàng<span style={{color: 'red'}}>*</span>:
+                            </Grid>
+                            <Grid container spacing={3}>
+                                <Grid item xs={12} sm={12} md={3}>
+                                    <FormControl style={{ width: '100%' }} size="small">
+                                        <Typography gutterBottom>
+                                            <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                                Số lượng đặt tối đa trên một đơn hàng<span style={{ color: 'red' }}>*</span>:
                                                 </FormLabel>
-                                            </Typography>
-                                            <TextField
-                                                id="maxQuantity"
-                                                name="maxQuantity"
-                                                variant="outlined"
-                                                size="small"
-                                                type="number"
-                                                placeholder=""
-                                                disabled={hidden === true && !props.isUpdate}
-                                                defaultValue={maxQuantity}
-                                                onChange={(e)=>{setMaxQuantity(e.target.value)}}
-                                                helperText={errors?.maxQuantity ? "Vui lòng nhập" : null}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                style={{ width: '100%' }}
-                                                error={!!errors.maxQuantity}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        required: true,
-                                                        min: {
-                                                            value: 2,
-                                                            message: "Vui lòng nhập số lượng đặt tối đa áp dụng lớn hơn hoặc bằng 2"
-                                                        },
-                                                        valueAsNumber: true, // important,
-                                                    })
-                                                }
-                                            />
-                                        </FormControl>
-                                    </Grid>
+                                        </Typography>
+                                        <TextField
+                                            id="maxQuantity"
+                                            name="maxQuantity"
+                                            variant="outlined"
+                                            size="small"
+                                            type="number"
+                                            placeholder=""
+                                            disabled={hidden === true && !props.isUpdate}
+                                            defaultValue={maxQuantity}
+                                            onChange={(e) => { setMaxQuantity(e.target.value) }}
+                                            helperText={errors?.maxQuantity ? "Vui lòng nhập" : null}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            style={{ width: '100%' }}
+                                            error={!!errors.maxQuantity}
+                                            required
+                                            inputRef={
+                                                register({
+                                                    required: true,
+                                                    min: {
+                                                        value: 2,
+                                                        message: "Vui lòng nhập số lượng đặt tối đa áp dụng lớn hơn hoặc bằng 2"
+                                                    },
+                                                    valueAsNumber: true, // important,
+                                                })
+                                            }
+                                        />
+                                    </FormControl>
                                 </Grid>
-                                <Grid container spacing={3}>
+                            </Grid>
+                            <Grid container spacing={3}>
                                 <Grid item xs={12} sm={12} md={12}>
                                     <Typography gutterBottom variant={'h6'} style={{ fontWeight: 'bold', color: 'black' }}>
-                                            Cài đặt giá bán lẻ:
+                                        Cài đặt giá bán lẻ:
                                         <Tooltip title="Cài đặt bán lẻ, bắt buộc nhập" placement="right-start">
                                             <HelpOutlinedIcon fontSize="small" />
                                         </Tooltip>
@@ -586,7 +593,7 @@ export default function renderForm(props, toast) {
                                     <Card>
                                         <CardContent>
                                             <RenderPriceConfig name={'retailPrice'} control={control} register={register} clearErrors={clearErrors} setValue={setValue} maxQuantity={maxQuantity} setAbsoluteDiscount={setAbsoluteDiscount}
-                                            hidden={hidden === true && !props.isUpdate} errors={errors} index={0} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
+                                                hidden={hidden === true && !props.isUpdate} errors={errors} index={0} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                         </CardContent>
                                     </Card>
                                 </Grid>
@@ -600,13 +607,15 @@ export default function renderForm(props, toast) {
                                     {
                                         defaultIds.length > 0 ? defaultIds.map((num, idx) => (
                                             <div key={num} style={{ marginTop: 10 }}>
-                                                <Accordion style={{ backgroundColor: '#f8faf8', paddingTop: '5px' }} expanded={expandeds ? expandeds[idx] : false} onChange={() => {
-                                                    {
-                                                        let tmpExpandeds = [...expandeds]
-                                                        tmpExpandeds[idx] = !tmpExpandeds[idx]
-                                                        setExpandeds(tmpExpandeds)
-                                                    };
-                                                }}>
+                                                <Accordion
+                                                    style={{ backgroundColor: '#f8faf8', paddingTop: '5px' }}
+                                                    expanded={expandeds ? expandeds[idx] : false}
+                                                    onChange={() => {
+                                                        let tmpExpandeds = [...expandeds];
+                                                        tmpExpandeds[idx] = !tmpExpandeds[idx];
+                                                        setExpandeds(tmpExpandeds);
+                                                    }}
+                                                >
                                                     <AccordionSummary
                                                         expandIcon={<ExpandMoreIcon />}
                                                         aria-controls="panel1bh-content"
@@ -615,13 +624,13 @@ export default function renderForm(props, toast) {
                                                     >
                                                         <Typography gutterBottom>
                                                             <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                            Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
+                                                                Cài đặt giá bán buôn (bán sỉ) thứ {idx + 1}
                                                             </FormLabel>
                                                         </Typography>
                                                     </AccordionSummary>
                                                     <AccordionDetails>
                                                         <RenderPriceConfig name={`wholesalePrice`} control={control} clearErrors={clearErrors} setValue={setValue}
-                                                         maxQuantity={maxQuantity} absoluteDiscount={absoluteDiscount} minQuantitys={minQuantitys}
+                                                            maxQuantity={maxQuantity} absoluteDiscount={absoluteDiscount} minQuantitys={minQuantitys}
                                                             register={register} errors={errors} index={num} getValues={getValues} limitQty={limitQty} ids={ids} defaultIds={defaultIds} idDeleteds={idDeleteds} />
                                                     </AccordionDetails>
                                                     <AccordionActions>
@@ -669,7 +678,7 @@ export default function renderForm(props, toast) {
 
                                 </Grid>
                             </Grid>
-                        </Box>
+                        </CardContent>
                         <Divider style={{ margin: '10px' }} />
                         <Box>
                             <Button
@@ -692,9 +701,9 @@ export default function renderForm(props, toast) {
                                     )
                             }
                         </Box>
-                    </Box>
-                </form>
-            </Box>
+                    </form>
+                </MyCardContent>
+            </MyCard>
         </AppCRM>
     )
 }
