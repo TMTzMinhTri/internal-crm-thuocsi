@@ -103,7 +103,7 @@ const AutoCompleteField = (props) => {
   };
 
   const handleChangeTextField = async (event) => {
-    console.log(defaultValue);
+    console.log("defaultValue", name);
     setProductList([]);
     let value = event.target.value;
     let res = await fetchOptions(type, value);
@@ -119,6 +119,7 @@ const AutoCompleteField = (props) => {
         arr.unshift({
           name: "Chọn tất cả",
         });
+      console.log(arr, "arr");
       setProductList(arr);
     } else {
       setProductList([]);
@@ -130,8 +131,6 @@ const AutoCompleteField = (props) => {
   }, [type]);
 
   const renderOptions = () => {
-    console.log("renderOptions");
-    console.log("defaultValue", defaultValue, name);
     let codeList = [];
     let newArr = [];
 
@@ -140,23 +139,24 @@ const AutoCompleteField = (props) => {
         codeList.push(name == "Chọn tất cả" ? null : code);
       });
       newArr = productList.filter((val) => !codeList.includes(val.code));
-      console.log(newArr, "newArr Before");
-      if (multiple && defaultValue.length == 0) {
-        console.log("reAdd");
+      // console.log(newArr, "newArr Before");
+      if (
+        multiple &&
+        defaultValue.length == 0 &&
+        productList[0].name != "Chọn tất cả"
+      ) {
         newArr.unshift({
           name: "Chọn tất cả",
         });
       }
-      console.log(newArr, "newArr After");
       if (defaultValue.length > 0 && defaultValue[0].name == "Chọn tất cả")
         newArr = newArr.filter((o) => o.name != "Chọn tất cả");
-      console.log(newArr, "newArr Final");
+      // console.log(newArr, "newArr Final");
       return newArr;
     }
 
     return productList;
   };
-
   return (
     <Controller
       name={name}
@@ -176,10 +176,8 @@ const AutoCompleteField = (props) => {
                 value = isAll;
               }
             }
-            console.log(value, "value");
             handleChange(event, value);
             render.onChange(value);
-            console.log(render.value, "render.value");
           }}
           getOptionLabel={(option) => option.name}
           value={defaultValue}
