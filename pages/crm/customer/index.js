@@ -151,7 +151,7 @@ function render(props) {
                             </Tooltip>
                         </a>
                     </Link>
-                    {row.isActive == '1' ? <Tooltip title="Nhấp vào để mở khóa">
+                    {row.isActive == '-1' ? <Tooltip title="Nhấp vào để mở khóa">
                         <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
                             <LockIcon fontSize="small" />
                         </IconButton>
