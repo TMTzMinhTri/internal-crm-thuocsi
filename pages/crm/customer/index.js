@@ -13,9 +13,9 @@ import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
-import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import EditIcon from "@material-ui/icons/Edit";
-import RemoveCircleIcon from '@material-ui/icons/RemoveCircle';
+import LockIcon from '@material-ui/icons/Lock';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from "@material-ui/icons/Search";
 import {
     doWithLoggedInUser,
@@ -151,14 +151,14 @@ function render(props) {
                             </Tooltip>
                         </a>
                     </Link>
-                    {row.isActive == '1' ? <Tooltip title="Khóa tài khoản">
+                    {row.isActive == '1' ? <Tooltip title="Khóa">
                         <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row) }}>
-                            <CheckCircleIcon fontSize="small" style={{ color: 'green' }} />
+                            <LockOpenIcon fontSize="small" />
                         </IconButton>
                     </Tooltip> :
-                        <Tooltip title="Kích hoạt tài khoản">
+                        <Tooltip title="Mở khoá">
                             <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
-                                <RemoveCircleIcon fontSize="small" style={{ color: 'red' }} />
+                                <LockIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>}
                 </TableCell>
