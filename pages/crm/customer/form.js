@@ -201,7 +201,7 @@ export default function renderForm(props, toast) {
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
         } else {
-            success("Mở khoa tài khoản thành công")
+            success("Mở khoá tài khoản thành công")
             window.location.reload()
         }
     }
