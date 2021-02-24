@@ -64,17 +64,13 @@ const AutoCompleteField = (props) => {
     defaultValue,
     placeholder,
     type,
-    multiple = true,
+    multiple,
     required,
-    control,
     name,
-    errors,
-    getValues,
+    useForm,
   } = props;
 
-  const { handleChange } = props;
-
-  let value = getValues();
+  const { control, errors, getValues } = useForm;
 
   let [productList, setProductList] = useState(
     defaultValue ? defaultValue : []
@@ -106,8 +102,6 @@ const AutoCompleteField = (props) => {
   };
 
   const handleChangeTextField = async (event) => {
-    console.log("defaultValue", name);
-    // setProductList([]);
     let value = event.target.value;
     let res = await fetchOptions(type, value);
     if (res?.status == "OK") {
@@ -122,7 +116,6 @@ const AutoCompleteField = (props) => {
         arr.unshift({
           name: "Chọn tất cả",
         });
-      console.log(arr, "arr");
       setProductList(arr);
     } else {
       setProductList([]);
@@ -143,7 +136,7 @@ const AutoCompleteField = (props) => {
         codeList.push(name == "Chọn tất cả" ? null : code);
       });
       newArr = productList.filter((val) => !codeList.includes(val.code));
-      // console.log(newArr, "newArr Before");
+
       if (multiple && productList[0].name != "Chọn tất cả") {
         newArr.unshift({
           name: "Chọn tất cả",
@@ -151,7 +144,7 @@ const AutoCompleteField = (props) => {
       }
       if (_value[name].length > 0 && _value[name][0].name == "Chọn tất cả")
         newArr = newArr.filter((o) => o.name != "Chọn tất cả");
-      // console.log(newArr, "newArr Final");
+
       return newArr;
     }
 
@@ -177,11 +170,9 @@ const AutoCompleteField = (props) => {
                 value = isAll;
               }
             }
-            // handleChange(event, value);
             render.onChange(value);
           }}
-          getOptionLabel={(option) => option.name}
-          // value={defaultValue}
+          getOptionLabel={(option) => (option.name ? option.name : "")}
           value={render.value}
           defaultValue={defaultValue}
           filterSelectedOptions

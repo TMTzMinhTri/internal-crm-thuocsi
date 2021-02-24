@@ -411,7 +411,6 @@ export async function onSubmitPromotion(
   getValues,
   toast,
   router,
-  scopeObject,
   conditionObject,
   rewardObject,
   isCreate,
@@ -461,7 +460,7 @@ export async function onSubmitPromotion(
     conditions = [
       {
         type: value.condition,
-        minOrderValue: parseInt(value.minValue),
+        minOrderValue: parseInt(value.minOrderValue),
         productConditions: tmpArr.map((o, index) => {
           switch (value.condition) {
             case defaultCondition.ingredient:
@@ -590,7 +589,7 @@ export async function onSubmitPromotion(
       return res;
     } else {
       toast.success("Cập nhật chương trình khuyến mãi thành công");
-      router.back();
+      router.push("/crm/promotion");
     }
   } else {
     toast.error(res.message);

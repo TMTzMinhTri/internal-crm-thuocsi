@@ -10,20 +10,17 @@ import { textfieldProps } from "./infomation-fields";
 import SelectField from "./select-field";
 
 const Condition = (props) => {
-  const { condition, register, errors, control, getValues } = props;
+  const { condition, useForm } = props;
 
   const {
     handleChangeConditionField,
     handleAddProductOfProductList,
     handleRemoveProductOfProductList,
-    handleChangeProductListOfCondition,
-    handleChangeConditionList,
-    handleChangeConditionSeller,
   } = props;
 
-  const { minValue, productList, item, selectField, seller } = condition;
+  const { register, errors, control, getValues } = useForm;
 
-  let value = getValues();
+  const { minOrderValue, productList, item, selectField, seller } = condition;
 
   return (
     <Paper
@@ -37,15 +34,14 @@ const Condition = (props) => {
         <Grid item container xs={5}>
           <TextField
             type="number"
-            id="minValue"
-            name="minValue"
+            name="minOrderValue"
             label="Giá trị nhỏ nhất của đơn hàng"
             placeholder=""
-            defaultValue={minValue}
-            helperText={errors.minValue?.message}
+            defaultValue=""
+            helperText={errors.minOrderValue?.message}
             {...textfieldProps}
             fullWidth
-            error={!!errors.minValue}
+            error={!!errors.minOrderValue}
             inputRef={register()}
           />
         </Grid>
@@ -82,39 +78,27 @@ const Condition = (props) => {
                   >
                     <Grid item container xs={4}>
                       <AutoCompleteField
-                        control={control}
+                        useForm={useForm}
                         name={"seller" + index}
                         label="Người bán"
                         placeholder=""
                         required
-                        defaultValue={o.seller ? o.seller : []}
+                        multiple
+                        defaultValue={[]}
                         options={[{ name: "" }]}
                         type="SELLER"
-                        errors={errors}
-                        getValues={getValues}
-                        handleChange={handleChangeProductListOfCondition(
-                          index,
-                          "SELLER"
-                        )}
                       />
                     </Grid>
                     <Grid item container xs={3}>
                       <AutoCompleteField
-                        control={control}
                         name={displayNameBasedOnCondition(selectField) + index}
                         label={displayLabelBasedOnCondition(selectField)}
                         placeholder=""
-                        multiple={false}
                         required
-                        defaultValue={o.product ? o.product : []}
+                        defaultValue={[]}
                         options={[{ name: "" }]}
                         type={selectField}
-                        errors={errors}
-                        getValues={getValues}
-                        handleChange={handleChangeProductListOfCondition(
-                          index,
-                          "PRODUCT"
-                        )}
+                        useForm={useForm}
                       />
                     </Grid>
                     <Grid item container xs={2}>
@@ -123,7 +107,7 @@ const Condition = (props) => {
                         name={"minQuantity" + index}
                         label="Số lượng sản phẩm yêu cầu"
                         placeholder=""
-                        defaultValue={o.minQuantity}
+                        defaultValue=""
                         helperText={errors["minQuantity" + index]?.message}
                         {...textfieldProps}
                         fullWidth
@@ -144,7 +128,7 @@ const Condition = (props) => {
                         name={"minTotalValue" + index}
                         label="Giá trị sản phẩm yêu cầu"
                         placeholder=""
-                        defaultValue={o.minTotalValue}
+                        defaultValue=""
                         helperText={errors["minTotalValue" + index]?.message}
                         {...textfieldProps}
                         fullWidth
@@ -172,33 +156,27 @@ const Condition = (props) => {
               >
                 <Grid item container xs={5}>
                   <AutoCompleteField
-                    control={control}
                     name="seller0"
                     label="Người bán"
                     placeholder=""
-                    defaultValue={seller}
+                    defaultValue={[]}
                     options={[{ name: "" }]}
                     type="SELLER"
+                    multiple
                     required
-                    errors={errors}
-                    getValues={getValues}
-                    // handleChange={handleChangeConditionSeller}
+                    useForm={useForm}
                   />
                 </Grid>
                 <Grid item container xs={3}>
                   <AutoCompleteField
                     name={displayNameBasedOnCondition(selectField)}
-                    control={control}
                     label={displayLabelBasedOnCondition(selectField)}
                     placeholder=""
-                    multiple={false}
                     required
-                    defaultValue={item}
+                    defaultValue={[]}
                     options={[{ name: "" }]}
                     type={selectField}
-                    errors={errors}
-                    getValues={getValues}
-                    // handleChange={handleChangeConditionList}
+                    useForm={useForm}
                   />
                 </Grid>
                 <Grid item container xs={2}>

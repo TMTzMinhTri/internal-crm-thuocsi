@@ -41,27 +41,11 @@ const useStyles = makeStyles({
 
 const InfomationFields = (props) => {
   const classes = useStyles();
-  const {
-    dataRender = {
-      promotionName: "",
-      totalCode: "",
-      applyPerUser: 1,
-      promotionCode: "",
-      totalUsed: 0,
-      totalCollect: 0,
-    },
-    errors,
-    register,
-    textField,
-    getValues,
-    control,
-    edit = false,
-    status,
-    promotionId,
-    setValue,
-  } = props;
+  const { useForm, textField, edit, promotionId } = props;
 
   const { handleChangeTextField, updateStatusPromotion } = props;
+
+  const { errors, register, getValues, control, setValue } = useForm;
 
   const toast = useToast();
 
@@ -86,7 +70,7 @@ const InfomationFields = (props) => {
   };
 
   useEffect(() => {
-    setActive(edit ? value.status : true);
+    setActive(edit ? (value.status ? value.status : false) : true);
   }, [value.status]);
 
   return (
@@ -103,7 +87,7 @@ const InfomationFields = (props) => {
                   name="promotionName"
                   label="Tên khuyến mãi"
                   placeholder=""
-                  defaultValue={dataRender.promotionName}
+                  defaultValue=""
                   helperText={errors.promotionName?.message}
                   {...textfieldProps}
                   fullWidth

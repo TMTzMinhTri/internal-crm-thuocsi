@@ -11,6 +11,7 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import {
   defaultCondition,
   defaultPromotionType,
+  defaultReward,
   defaultScope,
 } from "../../../components/component/constant";
 import { useRouter } from "next/router";
@@ -55,7 +56,12 @@ function render(props) {
     errors,
     control,
     setError,
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      customerLevel: [{ name: "Chọn tất cả" }],
+      area: [{ name: "Chọn tất cả" }],
+    },
+  });
 
   const [promotionId, setPromotionId] = useState("");
 
@@ -70,42 +76,19 @@ function render(props) {
       selectField: defaultScope.customerLevel,
       registeredBefore: new Date(),
       registeredAfter: new Date(),
-      list: [
-        {
-          name: "Chọn tất cả",
-        },
-      ],
+      list: [""],
     },
     {
       selectField: defaultScope.area,
-      list: [
-        {
-          name: "Chọn tất cả",
-        },
-      ],
+      list: [""],
     },
   ]);
 
   const [conditionObject, setConditionObject] = useState({
     selectField: defaultCondition.noRule,
-    minValue: 0,
-    seller: [
-      {
-        name: "Chọn tất cả",
-      },
-    ],
-    productList: [
-      {
-        seller: [
-          {
-            name: "Chọn tất cả",
-          },
-        ],
-        productName: "",
-        minQuantity: 0,
-        minTotalValue: "",
-      },
-    ],
+    minOrderValue: 0,
+    seller: [""],
+    productList: [""],
     item: {},
   });
 
@@ -130,100 +113,47 @@ function render(props) {
   };
 
   const handleAddAttachedProduct = () => {
-    rewardObject.attachedProduct.push({
-      product: "",
-      number: 0,
-    });
+    rewardObject.attachedProduct.push("");
     setRewardObject({ ...rewardObject });
   };
 
   const handleRemoveAttachedProduct = (index) => {
     let value = getValues();
     for (let i = index; i < rewardObject.attachedProduct.length - 1; i++) {
+      setValue("gift" + i, value["gift" + (i + 1)]);
       setValue("quantity" + i, value["quantity" + (i + 1)]);
     }
     rewardObject.attachedProduct.splice(index, 1);
     setRewardObject({ ...rewardObject });
   };
 
-  const handleChangeListReward = (index) => (event, value) => {
-    rewardObject.attachedProduct[index].product = value;
-    setRewardObject({ ...rewardObject });
-  };
-
   const handleChangeRewardField = (key) => (event) => {
+    if (event.target.value == defaultReward.gift) {
+      rewardObject.attachedProduct = [""];
+      setRewardObject({ ...rewardObject });
+    }
     setRewardObject({ ...rewardObject, [key]: event.target.value });
   };
 
   const handleChangeConditionField = (key) => (event) => {
-    conditionObject.item = {};
-    conditionObject.seller = [
-      {
-        name: "Chọn tất cả",
-      },
-    ];
+    conditionObject.productList = [""];
     setConditionObject({ ...conditionObject, [key]: event.target.value });
   };
 
   const handleAddProductOfProductList = () => {
-    conditionObject.seller = [
-      {
-        name: "Chọn tất cả",
-      },
-    ];
-    conditionObject.productList.push({
-      seller: [
-        {
-          name: "Chọn tất cả",
-        },
-      ],
-      productName: "",
-      minQuantity: 0,
-      minTotalValue: "",
-    });
+    conditionObject.productList.push("");
     setConditionObject({ ...conditionObject });
   };
 
   const handleRemoveProductOfProductList = (index) => {
     let value = getValues();
     for (let i = index; i < conditionObject.productList.length - 1; i++) {
+      setValue("seller" + i, value["seller" + (i + 1)]);
+      setValue("product" + i, value["product" + (i + 1)]);
       setValue("minQuantity" + i, value["minQuantity" + (i + 1)]);
       setValue("minTotalValue" + i, value["minTotalValue" + (i + 1)]);
     }
-
     conditionObject.productList.splice(index, 1);
-
-    setConditionObject({ ...conditionObject });
-  };
-
-  const handleChangeScopeList = (index) => (event, value) => {
-    scopeObject[index].list = value;
-    setScopeObject([...scopeObject]);
-  };
-
-  const handleChangeConditionList = (event, value) => {
-    conditionObject.item = value;
-    setConditionObject({ ...conditionObject });
-  };
-
-  const handleChangeConditionSeller = (event, value) => {
-    conditionObject.seller = value;
-    setConditionObject({ ...conditionObject });
-  };
-
-  const handleChangeProductListOfCondition = (index, type) => (
-    event,
-    value
-  ) => {
-    conditionObject.productList[index] = {
-      seller:
-        type != "SELLER" ? conditionObject.productList[index]?.seller : value,
-      product:
-        type == "SELLER" ? conditionObject.productList[index]?.product : value,
-      minQuantity: 0,
-      minTotalValue: 0,
-    };
-
     setConditionObject({ ...conditionObject });
   };
 
@@ -233,7 +163,6 @@ function render(props) {
         getValues,
         toast,
         router,
-        scopeObject,
         conditionObject,
         rewardObject,
         true,
@@ -245,11 +174,13 @@ function render(props) {
           setPromotionId(res.data[0].promotionId);
           setOpenModal(true);
         } else {
-          router.back();
+          router.push("/crm/promotion");
         }
       }
     }
   }
+
+  console.log(getValues(), "getValues()");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -275,34 +206,20 @@ function render(props) {
           <MyCardHeader title="TẠO CHƯƠNG TRÌNH KHUYẾN MÃI"></MyCardHeader>
           <MyCardContent>
             <InfomationFields
-              getValues={getValues}
-              errors={errors}
-              control={control}
-              setValue={setValue}
+              useForm={{ errors, register, getValues, control, setValue }}
+              promotionId={promotionId}
+              promotionType={router.query?.type}
               textField={textField}
               handleChangeTextField={handleChangeTextField}
-              register={register}
             />
             <ConditionFields
-              register={register}
-              errors={errors}
-              setValue={setValue}
-              getValues={getValues}
-              control={control}
+              useForm={{ errors, register, getValues, control }}
               object={{ scopeObject, conditionObject, rewardObject }}
-              textField={textField}
-              handleChangeConditionSeller={handleChangeConditionSeller}
-              handleChangeConditionList={handleChangeConditionList}
-              handleChangeProductListOfCondition={
-                handleChangeProductListOfCondition
-              }
               handleAddAttachedProduct={handleAddAttachedProduct}
               handleRemoveAttachedProduct={handleRemoveAttachedProduct}
               handleChangeTextField={handleChangeTextField}
-              handleChangeScopeList={handleChangeScopeList}
               handleChangeConditionField={handleChangeConditionField}
               handleChangeRewardField={handleChangeRewardField}
-              handleChangeListReward={handleChangeListReward}
               handleAddProductOfProductList={handleAddProductOfProductList}
               handleRemoveProductOfProductList={
                 handleRemoveProductOfProductList

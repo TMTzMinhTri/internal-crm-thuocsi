@@ -1,46 +1,25 @@
 import React from "react";
-import { CardContent, Grid } from "@material-ui/core";
+import { CardContent, Grid, Paper, TextField } from "@material-ui/core";
 
 import styles from "./promotion.module.css";
-
-import TextareaAutosize from "@material-ui/core/TextareaAutosize";
-import makeStyles from "@material-ui/core/styles/makeStyles";
 
 import Scope from "./scope";
 import Condition from "./condition";
 import Reward from "./reward";
-import { Controller } from "react-hook-form";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    " .MuiTextField-root": {
-      margin: theme.spacing(1),
-    },
-  },
-  textarea: {
-    width: "100%",
-  },
-}));
 
 const ConditionFields = (props) => {
-  const classess = useStyles();
-
-  const { errors, register, object, textField, getValues, control } = props;
+  const { object, useForm } = props;
 
   const {
-    handleChangeProductListOfCondition,
-    handleChangeConditionSeller,
-    handleChangeScopeList,
     handleChangeConditionField,
     handleChangeRewardField,
-    handleChangeListReward,
     handleAddProductOfProductList,
     handleRemoveProductOfProductList,
     handleAddAttachedProduct,
     handleRemoveAttachedProduct,
-    handleChangeConditionList,
   } = props;
-  const { descriptionField } = textField;
+
+  const { errors, register } = useForm;
 
   const { scopeObject, conditionObject, rewardObject } = object;
 
@@ -55,14 +34,7 @@ const ConditionFields = (props) => {
               spacing={2}
               direction="column"
             >
-              <Scope
-                control={control}
-                getValues={getValues}
-                register={register}
-                errors={errors}
-                handleChangeScopeList={handleChangeScopeList}
-                scopeObject={scopeObject}
-              />
+              <Scope useForm={useForm} scopeObject={scopeObject} />
             </Grid>
             <Grid
               container
@@ -71,16 +43,8 @@ const ConditionFields = (props) => {
               direction="column"
             >
               <Condition
-                control={control}
-                register={register}
-                errors={errors}
-                getValues={getValues}
+                useForm={useForm}
                 condition={conditionObject}
-                handleChangeConditionSeller={handleChangeConditionSeller}
-                handleChangeConditionList={handleChangeConditionList}
-                handleChangeProductListOfCondition={
-                  handleChangeProductListOfCondition
-                }
                 handleAddProductOfProductList={handleAddProductOfProductList}
                 handleRemoveProductOfProductList={
                   handleRemoveProductOfProductList
@@ -95,46 +59,49 @@ const ConditionFields = (props) => {
               direction="column"
             >
               <Reward
-                control={control}
-                register={register}
-                errors={errors}
-                getValues={getValues}
+                useForm={useForm}
                 handleChangeRewardField={handleChangeRewardField}
-                handleChangeListReward={handleChangeListReward}
                 handleAddAttachedProduct={handleAddAttachedProduct}
                 handleRemoveAttachedProduct={handleRemoveAttachedProduct}
                 reward={rewardObject}
               />
             </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <h4>
-              Mô tả<span style={{ color: "red" }}> *</span>
-            </h4>
-            <Grid item xs={6}>
-              <Controller
-                name="description"
-                control={control}
-                render={(props) => (
-                  <TextareaAutosize
-                    style={{
-                      font: "inherit",
-                      padding: 10,
-                      fontSize: 16,
-                      borderColor: errors.description ? "red" : "black",
-                    }}
-                    className={classess.textarea}
-                    rowsMin={20}
-                    rowsMax={20}
-                    placeholder="Nhập mô tả"
-                    value={props.value}
-                    onChange={props.onChange}
-                  />
-                )}
-              />
-              {errors.description && (
-                <p style={{ color: "red" }}>{errors.description.message}</p>
-              )}
+
+            <Grid
+              container
+              spacing={2}
+              className={styles.marginLine}
+              direction="column"
+            >
+              <Paper
+                elevation={3}
+                style={{ padding: "0px 30px 30px 30px", margin: "20px 0" }}
+              >
+                <Grid container direction="column">
+                  <Grid item>
+                    <h4>
+                      Mô tả<span style={{ color: "red" }}> *</span>
+                    </h4>
+                  </Grid>
+                  <Grid item>
+                    <TextField
+                      name="description"
+                      required
+                      multiline
+                      rows={4}
+                      placeholder="Nhập mô tả"
+                      defaultValue=""
+                      variant="outlined"
+                      helperText={errors.description?.message}
+                      fullWidth
+                      error={!!errors.description}
+                      inputRef={register({
+                        required: "Mô tả không được trống",
+                      })}
+                    />
+                  </Grid>
+                </Grid>
+              </Paper>
             </Grid>
           </Grid>
         </Grid>

@@ -14,9 +14,9 @@ import AutoCompleteField from "./autocomplete-field";
 import { textfieldProps } from "./infomation-fields";
 
 const Scope = (props) => {
-  const { scopeObject, register, errors, getValues, control } = props;
+  const { scopeObject, useForm } = props;
 
-  const { handleChangeScopeList } = props;
+  const { register, errors, getValues } = useForm;
 
   return (
     <Paper
@@ -29,7 +29,7 @@ const Scope = (props) => {
         </Grid>
         <Grid item container spacing={4}>
           {scopeObject.map(
-            ({ registeredBefore, registeredAfter, selectField, list }, index) =>
+            ({ selectField }, index) =>
               selectField != "" && (
                 <Grid
                   item
@@ -42,16 +42,15 @@ const Scope = (props) => {
                   <Grid item xs={6} container spacing={3}>
                     <Grid item xs={12}>
                       <AutoCompleteField
-                        control={control}
                         name={displayNameBasedOnScope(selectField)}
                         label={displayLabelBasedOnScope(selectField)}
                         required={false}
                         placeholder=""
-                        defaultValue={list}
+                        multiple
+                        defaultValue={[]}
                         options={[{ name: "" }]}
                         type={selectField}
-                        getValues={getValues}
-                        // handleChange={handleChangeScopeList(index)}
+                        useForm={useForm}
                       />
                     </Grid>
                   </Grid>
@@ -68,7 +67,7 @@ const Scope = (props) => {
                           name={"registeredAfter"}
                           label="Được kích hoạt từ ngày"
                           placeholder=""
-                          defaultValue={registeredAfter}
+                          defaultValue=""
                           helperText={errors.registeredAfter?.message}
                           type="datetime-local"
                           {...textfieldProps}
@@ -82,7 +81,7 @@ const Scope = (props) => {
                           name={"registeredBefore"}
                           label="Được kích hoạt đến ngày"
                           placeholder=""
-                          defaultValue={registeredBefore}
+                          defaultValue=""
                           helperText={errors.registeredBefore?.message}
                           type="datetime-local"
                           {...textfieldProps}
