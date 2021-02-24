@@ -251,12 +251,6 @@ function render(props) {
     }
   }
 
-  console.log(getValues(), "getValues()");
-
-  console.log(conditionObject, "conditionObject");
-
-  console.log(errors, "errors");
-
   return (
     <AppCRM select="/crm/promotion">
       <Head>

@@ -140,7 +140,7 @@ function render(props) {
     router.push({
       pathname: `/crm/promotion`,
       query: {
-        type: stateTypePromotion,
+        ...router.query,
         search: search,
       },
     });
