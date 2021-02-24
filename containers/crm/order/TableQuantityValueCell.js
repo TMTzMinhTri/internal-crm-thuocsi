@@ -2,17 +2,20 @@ import { IconButton, TableCell, TextField } from "@material-ui/core";
 import { Done } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
 
-export const TableQuantityValueCell = ({ orderNo, orderItemNo, initialQuantity, onUpdate, setError, errors, maxQuantity, clearErrors, defaultQuantity, onChange }) => {
+export const TableQuantityValueCell = ({ watch, handleSubmit, index, orderNo, orderItemNo, initialQuantity, onUpdate, setError, errors, maxQuantity, clearErrors, defaultQuantity, onChange }) => {
+    let arrName = `quantity[${index}]`
     const [quantity, setQuantity] = useState(initialQuantity);
     const [focused, setFocused] = useState(false);
     useEffect(() => {
         setQuantity(initialQuantity);
     }, [initialQuantity]);
+    const submit = data => console.log(data)
     return (
         <TableCell>
             <TextField
                 size="small"
-                id="quantity"
+                // id="quantity"
+                // name="quantity"
                 type="number"
                 // disabled
                 placeholder="..."
@@ -42,7 +45,7 @@ export const TableQuantityValueCell = ({ orderNo, orderItemNo, initialQuantity, 
                 onChange={e => {
                     setQuantity(+e.target.value)
                     if (e.target.value < 1) {
-                        setError("quantity", {
+                        setError(arrName, {
                             type: "min",
                             message: "Vui lòng nhập số lượng lớn hơn 0"
                         });
@@ -58,6 +61,7 @@ export const TableQuantityValueCell = ({ orderNo, orderItemNo, initialQuantity, 
                         if (errors.quantity) clearErrors("quantity")
                     }
                     onChange(e.target.value)
+                    console.log(watch())
                 }}
                 value={quantity}
             />

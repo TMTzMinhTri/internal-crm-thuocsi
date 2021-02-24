@@ -141,7 +141,7 @@ export default function renderForm(props, toast) {
     const [deletedOrderItem, setDeletedOrderItem] = useState(null);
     const router = useRouter();
 
-    const { register, handleSubmit, errors, control, getValues, setError, clearErrors } = useForm({
+    const { watch, register, handleSubmit, errors, control, getValues, setError, clearErrors } = useForm({
         defaultValues: editObject,
         mode: "onSubmit"
     });
@@ -202,6 +202,9 @@ export default function renderForm(props, toast) {
                 <TableCell align="left">{data.sellerName}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
                 <TableQuantityValueCell
+                    watch={watch}
+                    handleSubmit={handleSubmit}
+                    index={index}
                     orderNo={data.orderNo}
                     orderItemNo={data.orderItemNo}
                     maxQuantity={data.maxQuantity}
