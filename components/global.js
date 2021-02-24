@@ -115,6 +115,17 @@ export const statuses = [
     }
 ]
 
+export const sellerStatuses = [
+    {
+        value: "NEW",
+        label: "Mới",
+    },
+    {
+        value: "DRAFT",
+        label: "Nháp",
+    }
+]
+
 
 export const ProductStatus = {
     "NEW": "Chờ duyệt",

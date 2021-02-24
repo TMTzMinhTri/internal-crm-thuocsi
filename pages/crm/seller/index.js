@@ -25,7 +25,10 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-import { ErrorCode, formatUrlSearch, statuses } from 'components/global';
+import { ErrorCode, formatUrlSearch, sellerStatuses } from 'components/global';
+import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -55,6 +58,7 @@ export default function SellerPage(props) {
 }
 
 function render(props) {
+    console.log(props)
     let router = useRouter()
     const { register, handleSubmit, errors } = useForm();
     let q = router.query.q || ''
@@ -79,7 +83,7 @@ function render(props) {
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
-            <TableCell align="left">{statuses.find(e => e.value === row.data.status)?.label}</TableCell>
+            <TableCell align="left">{sellerStatuses.find(e => e.value === row.data.status)?.label}</TableCell>
             <TableCell align="center">
                 <Link href={`/crm/seller/edit?sellerCode=${row.data.code}`}>
                     <a>
@@ -94,87 +98,92 @@ function render(props) {
         </TableRow>
     )
 
+    let breadcrumb = [
+        {
+            name: "Trang chủ",
+            link: "/crm"
+        },
+        {
+            name: "Danh sách nhà bán hàng",
+        },
+    ]
+
     return (
-        <AppCRM select="/crm/seller">
+        <AppCRM select="/crm/seller" breadcrumb={breadcrumb}>
             <Head>
                 <title>Danh sách nhà bán hàng</title>
             </Head>
-            <div className={styles.grid}>
-                <Grid container spacing={3} direction="row"
-                    justify="flex-start"
-                    alignItems="center"
-                >
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Paper className={styles.search}>
-                            <InputBase
-                                id="q"
-                                name="q"
-                                className={styles.input}
-                                value={search}
-                                onKeyPress={event => {
-                                    if (event.key === 'Enter' || event.keyCode === 13) {
-                                        onSearch()
-                                    }
-                                }}
-                                onChange={handleChange}
-                                inputRef={register}
-                                placeholder="Tìm kiếm nhà bán hàng"
-                                inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
-                            />
-                            <IconButton className={styles.iconButton} aria-label="search"
-                                onClick={handleSubmit(onSearch)}>
-                                <SearchIcon />
-                            </IconButton>
-                        </Paper>
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={6}>
-                        <Link href="/crm/seller/new">
-                            <ButtonGroup color="primary" aria-label="contained primary button group"
-                                className={styles.rightGroup}>
-                                <Button variant="contained" color="primary">Thêm nhà bán hàng</Button>
-                            </ButtonGroup>
-                        </Link>
-                    </Grid>
-                </Grid>
-            </div>
-
-            <TableContainer component={Paper}>
-                <Table size="small" aria-label="a dense table">
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="left">Mã nhà bán hàng</TableCell>
-                            <TableCell align="left">Tên nhà bán hàng</TableCell>
-                            <TableCell align="left">Email</TableCell>
-                            <TableCell align="left">Số điện thoại</TableCell>
-                            <TableCell align="left">Trạng thái</TableCell>
-                            <TableCell align="center">Thao tác</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    {props.data.length > 0 ? (
-                        <TableBody>
-                            {props.data.map((row, i) => (
-                                <RenderRow data={row} key={i} />
-                            ))}
-                        </TableBody>
-                    ) : (
+            <MyCard>
+                <MyCardHeader title="Danh sách nhà bán hàng">
+                    <Link href="/crm/seller/new">
+                        <Button variant="contained" color="primary">
+                            <FontAwesomeIcon icon={faPlus} style={{ marginRight: 8 }} />  Thêm nhà bán hàng
+                        </Button>
+                    </Link>
+                </MyCardHeader>
+                <MyCardActions>
+                    <Paper className={styles.search}>
+                        <InputBase
+                            id="q"
+                            name="q"
+                            className={styles.input}
+                            value={search}
+                            onKeyPress={event => {
+                                if (event.key === 'Enter' || event.keyCode === 13) {
+                                    onSearch()
+                                }
+                            }}
+                            onChange={handleChange}
+                            inputRef={register}
+                            placeholder="Tìm kiếm nhà bán hàng"
+                            inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
+                        />
+                        <IconButton className={styles.iconButton} aria-label="search"
+                            onClick={handleSubmit(onSearch)}>
+                            <SearchIcon />
+                        </IconButton>
+                    </Paper>
+                </MyCardActions>
+            </MyCard>
+            <MyCard>
+                <TableContainer component={Paper}>
+                    <Table size="small" aria-label="a dense table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="left">Mã nhà bán hàng</TableCell>
+                                <TableCell align="left">Tên nhà bán hàng</TableCell>
+                                <TableCell align="left">Email</TableCell>
+                                <TableCell align="left">Số điện thoại</TableCell>
+                                <TableCell align="left">Trạng thái</TableCell>
+                                <TableCell align="center">Thao tác</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        {props.data.length > 0 ? (
                             <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                </TableRow>
+                                {props.data.map((row, i) => (
+                                    <RenderRow data={row} key={i} />
+                                ))}
                             </TableBody>
-                        )}
+                        ) : (
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
 
-                    <MyTablePagination
-                        labelUnit="nhà bán hàng"
-                        count={props.count}
-                        rowsPerPage={limit}
-                        page={page}
-                        onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(`/crm/seller?page=${page}&limit=${rowsPerPage}&q=${q}`)
-                        }}
-                    />
-                </Table>
-            </TableContainer>
+                        <MyTablePagination
+                            labelUnit="nhà bán hàng"
+                            count={props.count}
+                            rowsPerPage={limit}
+                            page={page}
+                            onChangePage={(event, page, rowsPerPage) => {
+                                Router.push(`/crm/seller?page=${page}&limit=${rowsPerPage}&q=${q}`)
+                            }}
+                        />
+                    </Table>
+                </TableContainer>
+            </MyCard>
         </AppCRM>
     )
 }
