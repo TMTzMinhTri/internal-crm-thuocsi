@@ -21,6 +21,7 @@ import {
 } from "containers/crm/pricing";
 import Link from 'next/link';
 import { getPriceLevelClient } from 'client/price-level';
+import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 
 export async function loadPricingData(ctx, type, offset, limit, q) {
     const feeClient = getFeeClient(ctx);
@@ -226,12 +227,26 @@ function render(props) {
         router.push(`/crm/pricing?v=${viewType}&q=${formatUrlSearch(searchText)}`)
     }
 
+    let breadcrumb = [
+        {
+            name: "Trang chủ",
+            link: "/crm"
+        },
+        {
+            name: "Danh sách hệ số phí",
+        },
+    ]
+
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/pricing" breadcrumb={breadcrumb}>
             <Head>
-                <title>Danh sách cấu hình giá</title>
+                <title>Danh sách hệ số phí</title>
             </Head>
-            <Box
+            <MyCard>
+                <MyCardHeader title="Danh sách hệ số phí">
+
+                </MyCardHeader>
+                <Box
                 component={Paper}
                 style={{ padding: "16px" }}
                 display="block"
@@ -372,6 +387,8 @@ function render(props) {
                     </Grid>
                 </Grid>
             </Box>
+            </MyCard>
+            
         </AppCRM>
     )
 }

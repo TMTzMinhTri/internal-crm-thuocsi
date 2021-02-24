@@ -43,6 +43,7 @@ import styles from "./order.module.css";
 import { formatDateTime, formatNumber } from "components/global"
 import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
 import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
+import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -127,93 +128,102 @@ function render(props) {
         </TableRow>
     );
 
+    let breadcrumb = [
+        {
+            name: "Trang chủ",
+            link: "/crm"
+        },
+        {
+            name: "Danh sách đơn hàng",
+        },
+    ]
+
     return (
-        <AppCRM select="/crm/order">
+        <AppCRM select="/crm/order" breadcrumb={breadcrumb}>
             <Head>
                 <title>Danh sách đơn hàng</title>
             </Head>
-            <div className={styles.grid}>
-                <Grid container spacing={3} direction="row"
-                    justify="space-between"
-                    alignItems="center"
-                >
-                    <Grid item xs={12} sm={4} md={4}>
-                        <Paper className={styles.search}>
-                            <InputBase
-                                id="q"
-                                name="q"
-                                className={styles.input}
-                                value={search}
-                                onChange={handleChange}
-                                inputRef={register}
-                                onKeyPress={event => {
-                                    if (event.key === 'Enter' || event.keyCode === 13) {
-                                        onSearch()
-                                    }
-                                }}
-                                placeholder="Nhập mã đơn hàng"
-                                inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
-                            />
-                            <IconButton className={styles.iconButton} aria-label="search"
-                                onClick={handleSubmit(onSearch)}>
-                                <SearchIcon />
-                            </IconButton>
-                        </Paper>
-                    </Grid>
-                </Grid>
-            </div>
+            <MyCard>
+                <MyCardHeader title="Danh sách đơn hàng">
 
-            <TableContainer component={Paper}>
-                <Table size="small" aria-label="a dense table">
-                    <colgroup>
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                    </colgroup>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell align="left">Mã đơn hàng</TableCell>
-                            <TableCell align="left">Tên khách hàng</TableCell>
-                            <TableCell align="left">Số điện thoại</TableCell>
-                            <TableCell align="left">Địa Chỉ</TableCell>
-                            <TableCell align="right">Tổng tiền</TableCell>
-                            <TableCell align="left">Ngày giao</TableCell>
-                            <TableCell align="center">Trạng thái</TableCell>
-                            <TableCell align="left">Thao tác</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    {props.data.length > 0 ? (
-                        <TableBody>
-                            {props.data.map((row, i) => (
-                                <RenderRow data={row} key={i} />
-                            ))}
-                        </TableBody>
-                    ) : (
+                </MyCardHeader>
+                <MyCardActions>
+                    <Paper className={styles.search}>
+                        <InputBase
+                            id="q"
+                            name="q"
+                            className={styles.input}
+                            value={search}
+                            onChange={handleChange}
+                            inputRef={register}
+                            onKeyPress={event => {
+                                if (event.key === 'Enter' || event.keyCode === 13) {
+                                    onSearch()
+                                }
+                            }}
+                            placeholder="Nhập mã đơn hàng"
+                            inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
+                        />
+                        <IconButton className={styles.iconButton} aria-label="search"
+                            onClick={handleSubmit(onSearch)}>
+                            <SearchIcon />
+                        </IconButton>
+                    </Paper>
+                </MyCardActions>
+            </MyCard>
+            <MyCard>
+                <TableContainer component={Paper}>
+                    <Table size="small" aria-label="a dense table">
+                        <colgroup>
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                        </colgroup>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell align="left">Mã đơn hàng</TableCell>
+                                <TableCell align="left">Tên khách hàng</TableCell>
+                                <TableCell align="left">Số điện thoại</TableCell>
+                                <TableCell align="left">Địa Chỉ</TableCell>
+                                <TableCell align="right">Tổng tiền</TableCell>
+                                <TableCell align="left">Ngày giao</TableCell>
+                                <TableCell align="center">Trạng thái</TableCell>
+                                <TableCell align="left">Thao tác</TableCell>
+                            </TableRow>
+                        </TableHead>
+                        {props.data.length > 0 ? (
                             <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                </TableRow>
+                                {props.data.map((row, i) => (
+                                    <RenderRow data={row} key={i} />
+                                ))}
                             </TableBody>
-                        )}
+                        ) : (
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
 
-                    <MyTablePagination
-                        labelUnit="đơn hàng"
-                        count={props.count}
-                        rowsPerPage={limit}
-                        page={page}
-                        onChangePage={(event, page, rowsPerPage) => {
-                            Router.push(
-                                `/crm/order?page=${page}&limit=${rowsPerPage}&q=${q}`
-                            );
-                        }}
-                    />
-                </Table>
-            </TableContainer>
+                        <MyTablePagination
+                            labelUnit="đơn hàng"
+                            count={props.count}
+                            rowsPerPage={limit}
+                            page={page}
+                            onChangePage={(event, page, rowsPerPage) => {
+                                Router.push(
+                                    `/crm/order?page=${page}&limit=${rowsPerPage}&q=${q}`
+                                );
+                            }}
+                        />
+                    </Table>
+                </TableContainer>
+            </MyCard>
         </AppCRM>
     );
 }
