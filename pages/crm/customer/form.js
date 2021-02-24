@@ -14,6 +14,8 @@ import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
 import { unknownErrorText } from "components/commonErrors";
 import { NotFound } from "components/components-global";
+import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog"
+import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog"
 import { scopes, statuses } from "components/global";
 import MuiSingleAuto from "components/muiauto/single";
 import Head from "next/head";
@@ -94,6 +96,8 @@ export default function renderForm(props, toast) {
     const [loading, setLoading] = useState(false);
     const [province, setProvince] = useState(props.province);
     const [districts, setDistricts] = useState(props.districts || []);
+    const [openLockAccountDialog, setOpenLockAccountDialog] = useState(false);
+    const [openApproveAccountDialog, setOpenApproveAccountDialog] = useState(false);
     const [district, setDistrict] = useState(props.district || {});
     const [wards, setWards] = useState(props.wards || []);
     const [ward, setWard] = useState(checkWardData);
@@ -178,6 +182,30 @@ export default function renderForm(props, toast) {
         }
     }
 
+    async function lockAccount() {
+        const _client = getCustomerClient()
+        setOpenLockAccountDialog(false)
+        const resp = await _client.lockAccount({ code: props.customer.code, isActive: -1 })
+        if (resp.status !== "OK") {
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        } else {
+            success("Khóa tài khoản thành công")
+            window.location.reload()
+        }
+    }
+
+    async function approveAccount() {
+        const _client = getCustomerClient()
+        setOpenApproveAccountDialog(false)
+        const resp = await _client.approveAccount({ code: props.customer.code, isActive: 1 })
+        if (resp.status !== "OK") {
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        } else {
+            success("Kích hoạt tài khoản thành công")
+            window.location.reload()
+        }
+    }
+
     async function createCustomer(formData) {
         try {
             let customerClient = getCustomerClient()
@@ -212,6 +240,16 @@ export default function renderForm(props, toast) {
             <Head>
                 <title>{props.isUpdate ? titlePage : 'Thêm khách hàng'}</title>
             </Head>
+            <ConfirmApproveDialog
+                open={openApproveAccountDialog}
+                onClose={() => setOpenApproveAccountDialog(false)}
+                onConfirm={() => approveAccount()}
+            />
+            <ConfirmLockDialog
+                open={openLockAccountDialog}
+                onClose={() => setOpenLockAccountDialog(false)}
+                onConfirm={() => lockAccount()}
+            />
             {
                 props.isUpdate && typeof props.customer === 'undefined' ? (
                     <div>
@@ -606,7 +644,7 @@ export default function renderForm(props, toast) {
 
                                                     </Grid>
                                                     {
-                                                        props.isUpdate ? (
+                                                        props.isUpdate && props.customer.isActive != -1 ?
                                                             <Grid item xs={12} sm={3} md={3}>
                                                                 <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                                                     <InputLabel id="department-select-label">Trạng thái</InputLabel>
@@ -626,7 +664,19 @@ export default function renderForm(props, toast) {
                                                                     />
                                                                 </FormControl>
                                                             </Grid>
-                                                        ) : ''
+                                                            : props.isUpdate ? <Grid item xs={12} sm={3} md={3}>
+                                                                <TextField
+                                                                    label="Trạng thái"
+                                                                    variant="outlined"
+                                                                    disabled
+                                                                    value="Bị Khóa"
+                                                                    size="small"
+                                                                    InputLabelProps={{
+                                                                        shrink: true,
+                                                                    }}
+                                                                    style={{ width: '100%' }}
+                                                                />
+                                                            </Grid> : ''
                                                     }
 
                                                 </Grid>
@@ -703,20 +753,11 @@ export default function renderForm(props, toast) {
                                         </Card>
                                         <Divider />
                                         <Box>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                onClick={handleSubmit(onSubmit)}
-                                                disabled={loading}
-                                                style={{ margin: 8 }}>
-                                                {loading && <CircularProgress size={20} />}
-                                                Lưu
-                                            </Button>
                                             {
                                                 props.isUpdate ? (
                                                     <Link href={`/crm/customer`}>
                                                         <ButtonGroup color="primary" aria-label="contained primary button group">
-                                                            <Button variant="contained" color="default">Quay lại</Button>
+                                                            <Button style={{ margin: 8 }} variant="contained" color="default">Quay lại</Button>
                                                         </ButtonGroup>
                                                     </Link>
                                                 ) : (
@@ -730,6 +771,29 @@ export default function renderForm(props, toast) {
                                                         </Button>
                                                     )
                                             }
+                                            <Button
+                                                variant="contained"
+                                                color="secondary"
+                                                onClick={() => setOpenLockAccountDialog(true)}
+                                                style={{ margin: 8, display: props.isUpdate && props.customer.isActive == 1 ? null : 'none' }}>
+                                                Khóa
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="secondary"
+                                                onClick={() => setOpenApproveAccountDialog(true)}
+                                                style={{ margin: 8, display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}>
+                                                Kích Hoạt
+                                            </Button>
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                onClick={handleSubmit(onSubmit)}
+                                                disabled={loading}
+                                                style={{ margin: 8 }}>
+                                                {loading && <CircularProgress size={20} />}
+                                                Lưu
+                                            </Button>
                                         </Box>
                                     </Box>
                                 </form>
