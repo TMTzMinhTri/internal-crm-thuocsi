@@ -14,10 +14,10 @@ import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
 import { unknownErrorText } from "components/commonErrors";
 import { NotFound } from "components/components-global";
-import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog"
-import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog"
 import { scopes, statuses } from "components/global";
 import MuiSingleAuto from "components/muiauto/single";
+import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
+import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -644,13 +644,14 @@ export default function renderForm(props, toast) {
 
                                                     </Grid>
                                                     {
-                                                        props.isUpdate && props.customer.isActive != -1 ?
+                                                        props.isUpdate && (
                                                             <Grid item xs={12} sm={3} md={3}>
                                                                 <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                                                     <InputLabel id="department-select-label">Trạng thái</InputLabel>
                                                                     <Controller
                                                                         name="status"
                                                                         control={control}
+                                                                        disabled={props.customer.isActive == -1}
                                                                         defaultValue={statuses ? statuses[0].value : ''}
                                                                         rules={{ required: true }}
                                                                         error={!!errors.status}
@@ -664,19 +665,7 @@ export default function renderForm(props, toast) {
                                                                     />
                                                                 </FormControl>
                                                             </Grid>
-                                                            : props.isUpdate ? <Grid item xs={12} sm={3} md={3}>
-                                                                <TextField
-                                                                    label="Trạng thái"
-                                                                    variant="outlined"
-                                                                    disabled
-                                                                    value="Bị Khóa"
-                                                                    size="small"
-                                                                    InputLabelProps={{
-                                                                        shrink: true,
-                                                                    }}
-                                                                    style={{ width: '100%' }}
-                                                                />
-                                                            </Grid> : ''
+                                                        )
                                                     }
 
                                                 </Grid>
