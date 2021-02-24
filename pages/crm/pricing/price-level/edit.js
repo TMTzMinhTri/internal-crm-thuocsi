@@ -42,7 +42,6 @@ export async function getServerSideProps(ctx) {
 
 const render = ({ priceLevelData, message, status }) => {
     if (status === 'NOT_FOUND') return <NotFound  link="/crm/pricing?v=price-level" message={message} />
-    console.log(priceLevelData?.data?.[0]);
     const router = useRouter();
     const toast = useToast();
     const { register, handleSubmit, errors, watch, formState: { isDirty, isValid, isSubmitting } } = useForm({
