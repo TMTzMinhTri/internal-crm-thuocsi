@@ -452,7 +452,7 @@ export default function renderForm(props, toast) {
                 <title>Cập nhật cài đặt sku</title>
             </Head>
             <MyCard>
-                <MyCardHeader title={`Cài đặt sku #${props.price.sku}`} />
+                <MyCardHeader title={`Cài đặt sku #${props.price?.sku}`} />
                 <MyCardContent>
                     <form noValidate>
                         <CardContent>
