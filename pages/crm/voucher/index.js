@@ -16,20 +16,20 @@ import {
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import Head from "next/head";
 import Link from "next/link";
-import Router, { useRouter } from "next/router";
+import Router, {useRouter} from "next/router";
 import AppCRM from "pages/_layout";
 import {
     doWithLoggedInUser,
     renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
-import React, { useState } from "react";
+import React, {useState} from "react";
 import styles from "./voucher.module.css";
 import Grid from "@material-ui/core/Grid";
 import InputBase from "@material-ui/core/InputBase";
 import SearchIcon from "@material-ui/icons/Search";
 import IconButton from "@material-ui/core/IconButton";
-import { useForm } from "react-hook-form";
-import { getPromoClient } from "../../../client/promo";
+import {useForm} from "react-hook-form";
+import {getPromoClient} from "../../../client/promo";
 import {
     displayPromotionType,
     displayRule,
@@ -44,11 +44,11 @@ import {
 import Switch from "@material-ui/core/Switch";
 import Modal from "@material-ui/core/Modal";
 import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDoubleDown } from "@fortawesome/free-solid-svg-icons";
+import {useToast} from "@thuocsi/nextjs-components/toast/useToast";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
+import {faAngleDoubleDown} from "@fortawesome/free-solid-svg-icons";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
-import { faAngleUp, faAngleDown } from "@fortawesome/free-solid-svg-icons";
+import {faAngleUp, faAngleDown} from "@fortawesome/free-solid-svg-icons";
 import {
     MyCard,
     MyCardContent,
@@ -56,7 +56,7 @@ import {
 } from "@thuocsi/nextjs-components/my-card/my-card";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import { getVoucherClient } from "../../../client/voucher";
+import {getVoucherClient} from "../../../client/voucher";
 import {
     defaultPromotionStatus,
     defaultPromotionType,
@@ -72,7 +72,7 @@ export async function getServerSideProps(ctx) {
 
 export async function loadPromoData(ctx) {
     // Fetch data from external API
-    let returnObject = { props: {} };
+    let returnObject = {props: {}};
     let query = ctx.query;
     let page = query.page || 0;
     let limit = query.limit || 20;
@@ -97,10 +97,15 @@ export function formatNumber(num) {
     return num?.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
 }
 
+async function updateVoucher(voucherId, status) {
+    return getVoucherClient().updateVoucherStatus( voucherId, status );
+}
+
+
 function render(props) {
     const toast = useToast();
     let router = useRouter();
-    const { register, getValues, handleSubmit, errors } = useForm();
+    const {register, getValues, handleSubmit, errors} = useForm();
     let [search, setSearch] = useState("");
     let textSearch = router.query.search || "";
 
@@ -108,6 +113,12 @@ function render(props) {
     const [rowsPerPage, setRowsPerPage] = useState(
         parseInt(router.query.perPage) || 20
     );
+    let [openModal, setOpenModal] = useState({
+        open: false,
+        voucherId: 0,
+        code: "",
+        checked: false,
+    });
 
     function searchPromotion() {
         router.push({
@@ -134,6 +145,15 @@ function render(props) {
         });
     };
 
+    const handleConfirm = (voucherId, checked, open,code) => {
+        setOpenModal({
+            open: open,
+            voucherId: voucherId,
+            code: code,
+            checked: checked,
+        });
+    };
+
     async function handleChange(event) {
         setSearch(event.target.value);
         if (event.target.value === "") {
@@ -149,11 +169,48 @@ function render(props) {
         }
     }
 
+    const handleActiveVoucher = async () => {
+        let { checked, voucherId } = openModal;
+        if (checked) {
+            let voucherResponse = await updateVoucher(voucherId, defaultPromotionStatus.ACTIVE);
+            if (!voucherResponse || voucherResponse.status !== "OK") {
+                setOpenModal({ ...openModal, open: false });
+                return toast.error(voucherResponse.mesage);
+            } else {
+                props.voucher.forEach((d) => {
+                    if (d.voucherId === voucherId) {
+                        return (d.status = defaultPromotionStatus.ACTIVE);
+                    }
+                });
+                setOpenModal({ ...openModal, open: false });
+                return toast.success("Cập nhật thành công");
+            }
+        } else {
+            let voucherResponse = await updateVoucher(
+                voucherId,
+                defaultPromotionStatus.WAITING
+            );
+            if (!voucherResponse || voucherResponse.status !== "OK") {
+                setOpenModal({ ...openModal, open: false });
+                return toast.error(voucherResponse.mesage);
+            } else {
+                props.voucher.forEach((d) => {
+                    if (d.voucherId === voucherId) {
+                        return (d.status = defaultPromotionStatus.WAITING);
+                    }
+                });
+                setOpenModal({ ...openModal, open: false });
+                return toast.success("Cập nhật thành công");
+            }
+        }
+    };
+
+
     return (
         <AppCRM select="/crm/voucher">
-            <div>
+            <Head>
                 <title>Danh sách mã khuyến mãi</title>
-            </div>
+            </Head>
             <MyCard>
                 <MyCardHeader title="Danh sách mã khuyến mãi">
                     <Link
@@ -188,21 +245,21 @@ function render(props) {
                                             }
                                         }}
                                         placeholder="Tìm kiếm mã khuyến mãi"
-                                        inputProps={{ "aria-label": "Tìm kiếm khuyến mãi" }}
+                                        inputProps={{"aria-label": "Tìm kiếm khuyến mãi"}}
                                     />
                                     <IconButton
                                         className={styles.iconButton}
                                         aria-label="search"
                                         onClick={searchPromotion}
                                     >
-                                        <SearchIcon />
+                                        <SearchIcon/>
                                     </IconButton>
                                 </Paper>
                             </Grid>
                         </Grid>
                     </div>
                     {textSearch === "" ? (
-                        <span />
+                        <span/>
                     ) : (
                         <div className={styles.textSearch}>
                             Kết quả tìm kiếm cho <i>'{textSearch}'</i>
@@ -227,7 +284,8 @@ function render(props) {
                                         Khách được sử dụng tối đa
                                     </TableCell>
                                     <TableCell align="left">Hạn sử dụng</TableCell>
-                                    <TableCell align="left">Thời gian hiển thị trên web</TableCell>
+                                    <TableCell align="left">Thời gian hiển thị</TableCell>
+                                    <TableCell align="left">Trạng thái</TableCell>
                                     <TableCell align="center">Thao tác</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -252,6 +310,20 @@ function render(props) {
                                             </TableCell>
                                             <TableCell align="left">
                                                 <div>{formatTime(row.publicTime)}</div>
+                                            </TableCell>
+                                            <TableCell align="left">
+                                                <Switch
+                                                    onChange={(event) => {
+                                                        handleConfirm(
+                                                            row.voucherId,
+                                                            event.target.checked,
+                                                            true,
+                                                            row.code,
+                                                        );
+                                                    }}
+                                                    checked={row.status === "ACTIVE"}
+                                                    color="primary"
+                                                />
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Link
@@ -292,6 +364,29 @@ function render(props) {
                             )}
                         </Table>
                     </TableContainer>
+                    <Dialog open={openModal.open} scroll="body" fullWidth={true}>
+                        <DialogTitle id={"modal" + "-dialog-title"}
+                                     onClose={() => setOpenModal({...openModal, open: false})}>
+                            <Typography variant="h6">Thông báo!</Typography>
+                            <IconButton aria-label="close" onClick={() => setOpenModal({...openModal, open: false})}
+                                        style={{position: "absolute", top: "1px", right: "1px"}}>
+                                <CloseIcon/>
+                            </IconButton>
+                        </DialogTitle>
+                        <DialogContent dividers>
+                            <div>
+                                Bạn muốn{" "}<span style={{fontWeight: "bold"}}>{openModal.checked === true ? "Bật" : "Tắt"}</span>{" "}trạng thái của khuyến mãi{" "}<span style={{fontWeight: "bold"}}>{openModal.code }</span>{" "}hay không?
+                            </div>
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={() => setOpenModal({...openModal, open: false})} variant={"contained"}>
+                                Thoát
+                            </Button>
+                            <Button autoFocus color="primary" variant={"contained"} onClick={handleActiveVoucher}>
+                                Đồng ý
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
                 </MyCardContent>
             </MyCard>
         </AppCRM>
