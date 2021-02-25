@@ -194,7 +194,7 @@ export default function VoucherCodeBody(props) {
 
         router.push({
             pathname: router.pathname,
-            query: {promotionId : promotion.promotionId || ""}
+            query: {...router.query,promotionId : promotion.promotionId || ""}
         }).then(() => {
             setValue("startTime",formatUTCTime(promotion.startTime),{ shouldValidate: true })
             setValue("endTime",formatUTCTime(promotion.endTime),{ shouldValidate: true })
@@ -205,7 +205,7 @@ export default function VoucherCodeBody(props) {
 
     return (
         <Grid container>
-            <Grid container xs={8} spacing={5}>
+            <Grid container xs={8} spacing={3}>
                 <Grid item xs={6} >
                     <h5 className={cssStyle.titleLabel}>Mã khuyến mãi<span style={{color : 'red'}}> *</span></h5>
                     <TextField
@@ -220,8 +220,16 @@ export default function VoucherCodeBody(props) {
                         placeholder="Nhập mã khuyến mãi"
                         style={{width: "100%"}}
                         required
+                        onChange={e => {
+                            setValue("code", e.target.value.trim().toUpperCase());
+                        }}
                         inputRef={register({
-                            required: "Mã khuyến mãi không được để trống"
+                            validate: {
+                                required: val => {
+                                    return val.trim().length > 0;
+                                }
+                            },
+                            required: "Mã khuyến mãi không được để trống",
                         })}
                     />
                 </Grid>
@@ -245,7 +253,7 @@ export default function VoucherCodeBody(props) {
                         required={true}
                     />
                 </Grid>
-                <Grid item xs={3} >
+                <Grid item xs={6} >
                         <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu <span style={{color : 'red'}}> *</span></h5>
                         <TextField
                             id="startTime"
@@ -253,18 +261,18 @@ export default function VoucherCodeBody(props) {
                             helperText={errors.startTime?.message}
                             error={!!errors.startTime}
                             placeholder=""
+                            fullWidth
                             type="datetime-local"
                             InputLabelProps={{
                                 shrink: true,
                             }}
                             required
-                            style={{width: "90%"}}
                             inputRef={register({
                                 required: "Thời gian bắt đầu không được để trống"
                             })}
                         />
                     </Grid>
-                <Grid item xs={3}  >
+                <Grid item xs={6}  >
                         <h5 className={cssStyle.titleLabel}>Thời gian kết thúc <span style={{color : 'red'}}> *</span></h5>
                         <TextField
                             id="endTime"
@@ -272,12 +280,12 @@ export default function VoucherCodeBody(props) {
                             helperText={errors.endTime?.message}
                             error={!!errors.endTime}
                             placeholder=""
+                            fullWidth
                             type="datetime-local"
                             InputLabelProps={{
                                 shrink: true,
                             }}
                             required
-                            style={{width: "90%"}}
                             inputRef={register({
                                 required: "Thời gian kết thúc không được để trống"
                             })}
@@ -363,6 +371,24 @@ export default function VoucherCodeBody(props) {
                     />
                 </Grid>
                 <Grid item xs={6} >
+                    <h5 className={cssStyle.titleLabel}>Loại mã</h5>
+                    <Select
+                        id="type"
+                        name="type"
+                        placeholder="chọn loại mã"
+                        value={dataProps.type}
+                        onChange={event => handleChangeType(event.target.value)}
+                        labelId="select-type"
+                        style={{width: "100%"}}>
+                        <MenuItem value="PUBLIC">
+                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Public</div>
+                        </MenuItem>
+                        <MenuItem value="PRIVATE">
+                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Private</div>
+                        </MenuItem>
+                    </Select>
+                </Grid>
+                <Grid item xs={6} >
                     <h5 className={cssStyle.titleLabel}>Danh sách khách hàng được sử dụng
                         <Tooltip title="Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi">
                                 <span>
@@ -397,24 +423,6 @@ export default function VoucherCodeBody(props) {
                         )}
                         onChange={(e, value) => onChangeCustomer(e, value)}
                     />
-                </Grid>
-                <Grid item xs={6} >
-                    <h5 className={cssStyle.titleLabel}>Loại mã</h5>
-                    <Select
-                        id="type"
-                        name="type"
-                        placeholder="chọn loại mã"
-                        value={dataProps.type}
-                        onChange={event => handleChangeType(event.target.value)}
-                        labelId="select-type"
-                        style={{width: "100%"}}>
-                        <MenuItem value="PUBLIC">
-                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Public</div>
-                        </MenuItem>
-                        <MenuItem value="PRIVATE">
-                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Private</div>
-                        </MenuItem>
-                    </Select>
                 </Grid>
             </Grid>
             {
