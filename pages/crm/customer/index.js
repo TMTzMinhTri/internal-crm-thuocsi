@@ -1,3 +1,5 @@
+import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     Button,
     ButtonGroup,
@@ -73,6 +75,16 @@ export async function loadCustomerData(ctx) {
 export default function CustomerPage(props) {
     return renderWithLoggedInUser(props, render);
 }
+
+const breadcrumb = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách khách hàng",
+    },
+]
 
 function render(props) {
     let router = useRouter();
@@ -168,7 +180,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/customer">
+        <AppCRM select="/crm/customer" breadcrumb={breadcrumb}>
             <Head>
                 <title>Danh sách khách hàng</title>
             </Head>
@@ -187,7 +199,10 @@ function render(props) {
                     <Link href="/crm/customer/new">
                         <ButtonGroup color="primary" aria-label="contained primary button group"
                             className={styles.rightGroup}>
-                            <Button variant="contained" color="primary">Thêm khách hàng</Button>
+                            <Button variant="contained" color="primary">
+                                <FontAwesomeIcon icon={faPlus} style={{ marginRight: 8 }} />
+                                Thêm khách hàng
+                            </Button>
                         </ButtonGroup>
                     </Link>
                 </MyCardHeader>

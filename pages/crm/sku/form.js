@@ -325,14 +325,14 @@ const RenderPriceConfig = ({ name, control, register, hidden, errors, index, def
     )
 }
 
-const breadcrumbEdit = [
+let breadcrumbEdit = [
     {
         name: "Trang chủ",
         link: "/crm"
     },
     {
         name: "Danh sách sku",
-        link: "/crm/seller",
+        link: "/crm/sku",
     },
     {
         name: "Cập nhật cài đặt sku",
