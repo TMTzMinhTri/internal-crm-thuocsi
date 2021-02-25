@@ -97,10 +97,6 @@ async function getListIngredientByCodesClient(q) {
   return getIngredientClient().getIngredientByCodesClient(q);
 }
 
-async function updateStatusPromotion(promotionId, status) {
-  return getPromoClient().updateStatusPromotion({ promotionId, status });
-}
-
 function render(props) {
   const toast = useToast();
 
@@ -186,7 +182,10 @@ function render(props) {
       : defaultCondition.noRule,
     minTotalValue: "",
     seller: [""],
-    productList: [""],
+    productList:
+      conditions[0].type == defaultCondition.noRule
+        ? [""]
+        : conditions[0].productConditions?.map((o) => ""),
     item: {},
   });
 
@@ -295,86 +294,64 @@ function render(props) {
 
     setValue("minOrderValue", conditions[0]?.minOrderValue);
 
-    conditionObject.productList.pop();
-    conditions[0].productConditions?.map((o) => {
-      conditionObject.productList.push("");
-      setConditionObject({ ...conditionObject });
-    });
-
     conditions.map(async (o) => {
       let code;
 
-      // Handle all fields as Condition is Product
-      if (o.type == defaultCondition.product) {
-        o.productConditions.map(async (ob, i) => {
-          let seller = [];
-          let res = await getListProductByIdsClient([ob.productId]);
-          if (res?.status == "OK") {
-            if (ob.sellerQuantityType == "ALL") {
-              seller = [{ name: "Chọn tất cả" }];
-            } else {
-              let response = await getListSellerByCodesClient(ob.sellerCodes);
-              if (response?.status == "OK") {
-                seller = response.data;
-              }
-            }
-            setValue("minQuantity" + i, ob.minQuantity);
-            setValue("minTotalValue" + i, ob.minTotalValue);
-            setValue("product" + i, res.data[0]);
-            setValue("seller" + i, seller);
-          }
-        });
-      } else if (o.type != defaultCondition.noRule) {
+      if (o.type != defaultCondition.noRule) {
         let res;
 
-        // Handle Seller, Quantity, TotalValue as Condition is others
-        if (o.productConditions[0].sellerQuantityType == "ALL") {
-          setValue("seller0", [{ name: "Chọn tất cả" }]);
-        } else {
-          let response = await getListSellerByCodesClient(
-            o.productConditions[0].sellerCodes
-          );
-          if (response?.status == "OK") {
-            setValue("seller0", response.data);
+        o.productConditions.map(async (ob, i) => {
+          // Handle Sellers, Quantity, Value
+          if (ob.sellerQuantityType == "ALL") {
+            setValue("seller" + i, [{ name: "Chọn tất cả" }]);
+          } else {
+            let response = await getListSellerByCodesClient(ob.sellerCodes);
+            if (response?.status == "OK") {
+              setValue("seller" + i, response.data);
+            }
           }
-        }
-        setValue("minQuantity", o.productConditions[0].minQuantity);
-        setValue("minTotalValue", o.productConditions[0].minTotalValue);
+          setValue("minQuantity" + i, ob.minQuantity);
+          setValue("minTotalValue" + i, ob.minTotalValue);
 
-        // Handle Item as Condition is others
-        switch (o.type) {
-          case defaultCondition.productTag:
-            o.productConditions.map(async (ob) => {
+          // Handle Item
+          switch (o.type) {
+            case defaultCondition.product:
+              res = await getListProductByIdsClient([ob.productId]);
+              if (res?.status == "OK") {
+                setValue("product" + i, res.data[0]);
+              }
+              break;
+            case defaultCondition.productTag:
               res = await getProductTagByCodeClient([ob.productTag]);
               if (res?.status == "OK") {
-                setValue("productTag", res.data[0]);
+                setValue("productTag" + i, res.data[0]);
               }
-            });
-            break;
-          case defaultCondition.productCategory:
-            code = o.productConditions[0].categoryCode;
-            res = await getListCategoryByCodesClient([code]);
-            if (res?.status == "OK") {
-              setValue("productCategory", res.data[0]);
-            }
-            break;
-          case defaultCondition.ingredient:
-            code = o.productConditions[0].ingredientCode;
-            res = await getListIngredientByCodesClient([code]);
-            if (res?.status == "OK") {
-              setValue("ingredient", res.data[0]);
-            }
-            break;
-          case defaultCondition.producer:
-            code = o.productConditions[0].producerCode;
-            res = await getListProducerByCodesClient([code]);
-            if (res?.status == "OK") {
-              setValue("producer", res.data[0]);
-            }
-            break;
-          default:
-            break;
-        }
+              break;
+            case defaultCondition.productCategory:
+              code = o.productConditions[0].categoryCode;
+              res = await getListCategoryByCodesClient([code]);
+              if (res?.status == "OK") {
+                setValue("productCategory" + i, res.data[0]);
+              }
+              break;
+            case defaultCondition.ingredient:
+              code = o.productConditions[0].ingredientCode;
+              res = await getListIngredientByCodesClient([code]);
+              if (res?.status == "OK") {
+                setValue("ingredient" + i, res.data[0]);
+              }
+              break;
+            case defaultCondition.producer:
+              code = o.productConditions[0].producerCode;
+              res = await getListProducerByCodesClient([code]);
+              if (res?.status == "OK") {
+                setValue("producer" + i, res.data[0]);
+              }
+              break;
+            default:
+              break;
+          }
+        });
       }
     });
 
@@ -384,8 +361,8 @@ function render(props) {
       rewardObject.attachedProduct.pop();
       rewards[0].gifts.map((o) => {
         rewardObject.attachedProduct.push("");
-        setRewardObject({ ...rewardObject });
       });
+      setRewardObject({ ...rewardObject });
       rewards[0].gifts.map(async (gift, index) => {
         setValue("quantity" + index, gift.quantity);
         let res = await getListProductByIdsClient([gift.productId]);
@@ -420,9 +397,9 @@ function render(props) {
 
   console.log(getValues(), "getValues()");
 
-  console.log(errors, "errors");
+  // console.log(errors, "errors");
 
-  console.log(conditionObject, "conditionObject");
+  console.log(new Date() > new Date(startTime), startTime, "datetime");
 
   return (
     <AppCRM select="/crm/promotion">
@@ -434,15 +411,13 @@ function render(props) {
           <MyCardHeader title="CHỈNH SỬA CHƯƠNG TRÌNH KHUYẾN MÃI"></MyCardHeader>
           <MyCardContent>
             <InfomationFields
+              disabled={new Date() >= new Date(startTime)}
               useForm={{ errors, register, getValues, control, setValue }}
-              updateStatusPromotion={updateStatusPromotion}
-              promotionId={promotionId}
-              edit
-              promotionType={router.query?.type}
               textField={textField}
               handleChangeTextField={handleChangeTextField}
             />
             <ConditionFields
+              disabled={new Date() >= new Date(startTime)}
               useForm={{ errors, register, getValues, control }}
               object={{ scopeObject, conditionObject, rewardObject }}
               handleAddAttachedProduct={handleAddAttachedProduct}

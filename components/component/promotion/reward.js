@@ -17,7 +17,7 @@ import { textfieldProps } from "./infomation-fields";
 import SelectField from "./select-field";
 
 const Reward = (props) => {
-  const { reward, useForm } = props;
+  const { reward, useForm, disabled } = props;
 
   const {
     handleChangeRewardField,
@@ -40,9 +40,10 @@ const Reward = (props) => {
         </Grid>
         <Grid item container xs={5}>
           <SelectField
-            control={control}
-            errors={errors}
             name="reward"
+            control={control}
+            disabled={disabled}
+            errors={errors}
             handleChange={handleChangeRewardField("selectField")}
             options={rewards}
             value={selectField}
@@ -105,6 +106,9 @@ const Reward = (props) => {
                       placeholder=""
                       helperText={errors.percentageDiscount?.message}
                       {...textfieldProps}
+                      InputProps={{
+                        readOnly: disabled,
+                      }}
                       fullWidth
                       defaultValue=""
                       error={!!errors.percentageDiscount}
@@ -130,6 +134,9 @@ const Reward = (props) => {
                       placeholder=""
                       helperText={errors.maxDiscount?.message}
                       {...textfieldProps}
+                      InputProps={{
+                        readOnly: disabled,
+                      }}
                       defaultValue=""
                       fullWidth
                       error={!!errors.maxDiscount}
@@ -158,6 +165,7 @@ const Reward = (props) => {
                           options={[{ name: "" }]}
                           type={selectField}
                           useForm={useForm}
+                          disabled={disabled}
                         />
                       </Grid>
                       <Grid item container xs={5}>
@@ -168,6 +176,9 @@ const Reward = (props) => {
                           placeholder=""
                           helperText={errors["quantity" + index]?.message}
                           {...textfieldProps}
+                          InputProps={{
+                            readOnly: disabled,
+                          }}
                           defaultValue={""}
                           fullWidth
                           error={!!errors["quantity" + index]}

@@ -442,59 +442,43 @@ export async function onSubmitPromotion(
   if (value.condition == defaultCondition.noRule)
     conditions = [{ type: value.condition }];
   else {
-    let sellerObject;
-    if (value.condition != defaultCondition.product) {
-      sellerObject = {
-        sellerCodes: value.seller0.map((seller) => seller.code),
-        sellerQuantityType:
-          value.seller0[0].name == "Chọn tất cả" ? "ALL" : "MANY",
-        minQuantity: parseInt(value.minQuantity),
-        minTotalValue: parseInt(value.minTotalValue),
-      };
-    }
-    let tmpArr =
-      value.condition == defaultCondition.product
-        ? conditionObject.productList
-        : [""];
-
     conditions = [
       {
         type: value.condition,
         minOrderValue: parseInt(value.minOrderValue),
-        productConditions: tmpArr.map((o, index) => {
+        productConditions: conditionObject.productList.map((o, index) => {
+          let sellerObject = {
+            sellerCodes: value["seller" + index].map((seller) => seller.code),
+            sellerQuantityType:
+              value["seller" + index][0].name == "Chọn tất cả" ? "ALL" : "MANY",
+            minQuantity: parseInt(value["minQuantity" + index]),
+            minTotalValue: parseInt(value["minTotalValue" + index]),
+          };
           switch (value.condition) {
             case defaultCondition.ingredient:
               return {
                 ...sellerObject,
-                ingredientCode: value.ingredient.code,
+                ingredientCode: value["ingredient" + index].code,
               };
             case defaultCondition.producer:
               return {
                 ...sellerObject,
-                producerCode: value.producer.code,
+                producerCode: value["producer" + index].code,
               };
             case defaultCondition.product:
               return {
-                sellerCodes: value["seller" + index].map(
-                  (seller) => seller.code
-                ),
-                sellerQuantityType:
-                  value["seller" + index][0].name == "Chọn tất cả"
-                    ? "ALL"
-                    : "MANY",
+                ...sellerObject,
                 productId: value["product" + index].productID,
-                minQuantity: parseInt(value["minQuantity" + index]),
-                minTotalValue: parseInt(value["minTotalValue" + index]),
               };
             case defaultCondition.productCategory:
               return {
                 ...sellerObject,
-                categoryCode: value.productCategory.code,
+                categoryCode: value["productCategory" + index].code,
               };
             case defaultCondition.productTag:
               return {
                 ...sellerObject,
-                productTag: value.productTag.code,
+                productTag: value["productTag" + index].code,
               };
             default:
               break;
@@ -505,6 +489,7 @@ export async function onSubmitPromotion(
   }
 
   let rewards;
+
   switch (value.reward) {
     case defaultReward.absolute:
       rewards = [
@@ -551,12 +536,6 @@ export async function onSubmitPromotion(
     checkTypeSubmit = {
       promotionId: promotionId,
     };
-  } else {
-    checkTypeSubmit = {
-      status: value.status
-        ? defaultPromotionStatus.ACTIVE
-        : defaultPromotionStatus.EXPIRED,
-    };
   }
 
   let body = {
@@ -568,7 +547,9 @@ export async function onSubmitPromotion(
     startTime: new Date(value.startTime).toISOString(),
     publicTime: new Date(value.publicTime).toISOString(),
     endTime: new Date(value.endTime).toISOString(),
-
+    status: value.status
+      ? defaultPromotionStatus.ACTIVE
+      : defaultPromotionStatus.EXPIRED,
     scopes,
     conditions,
     rewards,

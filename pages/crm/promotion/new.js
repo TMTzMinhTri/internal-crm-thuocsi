@@ -207,8 +207,6 @@ function render(props) {
           <MyCardContent>
             <InfomationFields
               useForm={{ errors, register, getValues, control, setValue }}
-              promotionId={promotionId}
-              promotionType={router.query?.type}
               textField={textField}
               handleChangeTextField={handleChangeTextField}
             />

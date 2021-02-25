@@ -8,7 +8,7 @@ import Condition from "./condition";
 import Reward from "./reward";
 
 const ConditionFields = (props) => {
-  const { object, useForm } = props;
+  const { object, useForm, disabled } = props;
 
   const {
     handleChangeConditionField,
@@ -34,7 +34,11 @@ const ConditionFields = (props) => {
               spacing={2}
               direction="column"
             >
-              <Scope useForm={useForm} scopeObject={scopeObject} />
+              <Scope
+                scopeObject={scopeObject}
+                disabled={disabled}
+                useForm={useForm}
+              />
             </Grid>
             <Grid
               container
@@ -43,8 +47,9 @@ const ConditionFields = (props) => {
               direction="column"
             >
               <Condition
-                useForm={useForm}
                 condition={conditionObject}
+                disabled={disabled}
+                useForm={useForm}
                 handleAddProductOfProductList={handleAddProductOfProductList}
                 handleRemoveProductOfProductList={
                   handleRemoveProductOfProductList
@@ -59,11 +64,12 @@ const ConditionFields = (props) => {
               direction="column"
             >
               <Reward
+                reward={rewardObject}
+                disabled={disabled}
                 useForm={useForm}
                 handleChangeRewardField={handleChangeRewardField}
                 handleAddAttachedProduct={handleAddAttachedProduct}
                 handleRemoveAttachedProduct={handleRemoveAttachedProduct}
-                reward={rewardObject}
               />
             </Grid>
 
@@ -91,6 +97,9 @@ const ConditionFields = (props) => {
                       rows={4}
                       placeholder="Nhập mô tả"
                       defaultValue=""
+                      InputProps={{
+                        readOnly: disabled,
+                      }}
                       variant="outlined"
                       helperText={errors.description?.message}
                       fullWidth

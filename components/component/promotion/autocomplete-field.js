@@ -68,6 +68,7 @@ const AutoCompleteField = (props) => {
     required,
     name,
     useForm,
+    disabled,
   } = props;
 
   const { control, errors, getValues } = useForm;
@@ -156,6 +157,7 @@ const AutoCompleteField = (props) => {
       name={name}
       render={(render) => (
         <Autocomplete
+          disabled={disabled}
           fullWidth
           multiple={multiple}
           classes={{
