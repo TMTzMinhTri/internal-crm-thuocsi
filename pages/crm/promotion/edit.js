@@ -155,6 +155,8 @@ function render(props) {
     },
   });
 
+  console.log(formatUTCTime(new Date()) + ":00Z" < startTime, "formatUTCTime");
+
   console.log("props", props);
 
   const [textField, setTextField] = useState({
@@ -291,20 +293,6 @@ function render(props) {
     }
 
     //---------- Condition ---------
-
-    if (conditions[0].type == defaultCondition.product) {
-      conditionObject.productList.pop();
-    }
-
-    conditions[0].productConditions?.map((o) => {
-      conditionObject.productList.push({
-        product: [],
-        minQuantity: "",
-        minTotalValue: "",
-        seller: [],
-      });
-      setConditionObject({ ...conditionObject });
-    });
 
     conditions.map(async (o) => {
       let code;
