@@ -1,6 +1,7 @@
 import { faFilter, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+    Box,
     Button,
     Paper,
     Table,
@@ -36,7 +37,6 @@ import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import styles from "./customer.module.css";
 
 export async function getServerSideProps(ctx) {
@@ -88,7 +88,6 @@ const breadcrumb = [
 
 function render(props) {
     let router = useRouter();
-    const { register, handleSubmit } = useForm();
     const [openApproveAccountDialog, setOpenApproveAccountDialog] = useState(false);
     const [openLockAccountDialog, setOpenLockAccountDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
@@ -105,8 +104,8 @@ function render(props) {
         count: props.count,
     })
     const { limit, page, count } = pagination;
-    const { error, success } = useToast()
-
+    const { error, success } = useToast();
+    
     useEffect(() => {
         setPagination({
             page: parseInt(router.query.page) || 0,
@@ -120,10 +119,10 @@ function render(props) {
         setMessage(props.message);
     }, [props.data, props.message]);
 
-    async function getCustomerByFilter(data, q, limit, page) {
+    async function getCustomerByFilter(data, limit, page) {
         try {
             const customerClient = getCustomerClient({});
-            const { pointFrom, pointTo, ...others } = data;
+            const { pointFrom, pointTo, q, ...others } = data;
             const customersResp = await customerClient.getCustomerByFilter({
                 q: formatUrlSearch(q),
                 limit,
@@ -135,13 +134,16 @@ function render(props) {
                 ...others,
             });
             if (customersResp.status !== "OK") {
+                if (customersResp.status === 'NOT_FOUND') {
+                    setMessage("Không tìm thấy khách hàng")
+                }
                 setMessage(customersResp.message);
             }
             setCustomers(customersResp.data ?? []);
             setPagination({
                 page,
                 limit,
-                count: customersResp.total,
+                count: customersResp.total ?? 0,
             })
         } catch (e) {
             error(e.message);
@@ -176,29 +178,20 @@ function render(props) {
         }
     }
 
-    async function handleChange(event) {
-        const target = event.target;
-        const value = target.value;
-        setSearch(value);
-    }
-
     async function onSearch() {
-        if (openCustomerFilter) {
-            getCustomerByFilter(customerFilter, q, limit, page);
-        } else {
-            q = formatUrlSearch(search);
-            router.push(`?q=${q}`);
-        }
+        q = formatUrlSearch(search);
+        router.push(`?q=${q}`);
+
     }
 
     const handleApplyFilter = async (data) => {
         setCustomerFilter(data);
-        getCustomerByFilter(data, q, limit, page);
+        getCustomerByFilter(data, limit, page);
     }
 
     const handlePageChange = async (event, page, rowsPerPage) => {
         if (openCustomerFilter) {
-            getCustomerByFilter(customerFilter, q, limit, page);
+            getCustomerByFilter(customerFilter, limit, page);
         } else {
             Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`);
         }
@@ -275,34 +268,40 @@ function render(props) {
                         </Button>
                     </Link>
                 </MyCardHeader>
-                <MyCardContent>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} sm={4}>
-                            <Paper className={styles.search}>
-                                <InputBase
-                                    id="q"
-                                    name="q"
-                                    className={styles.input}
-                                    value={search}
-                                    onChange={handleChange}
-                                    inputRef={register}
-                                    onKeyPress={event => {
-                                        if (event.key === 'Enter' || event.keyCode === 13) {
-                                            onSearch()
-                                        }
-                                    }}
-                                    placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
-                                    inputProps={{ 'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại' }}
-                                />
-                                <IconButton className={styles.iconButton} aria-label="search"
-                                    onClick={handleSubmit(onSearch)}>
-                                    <SearchIcon />
-                                </IconButton>
-                            </Paper>
+                <Box style={{ display: !openCustomerFilter ? "block" : "none" }}>
+                    <MyCardContent>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={4}>
+                                <Paper className={styles.search}>
+                                    <InputBase
+                                        id="q"
+                                        name="q"
+                                        className={styles.input}
+                                        value={search}
+                                        onChange={e => setSearch(e.target.value)}
+                                        onKeyPress={event => {
+                                            if (event.key === 'Enter' || event.keyCode === 13) {
+                                                onSearch()
+                                            }
+                                        }}
+                                        placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
+                                        inputProps={{ 'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại' }}
+                                    />
+                                    <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={onSearch}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Paper>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </MyCardContent>
-                <CustomerFilter open={openCustomerFilter} userTypes={props.condUserType} onFilterChange={handleApplyFilter} />
+                    </MyCardContent>
+                </Box>
+                <CustomerFilter
+                    open={openCustomerFilter}
+                    userTypes={props.condUserType}
+                    onFilterChange={handleApplyFilter}
+                    q={search}
+                />
             </MyCard>
             <MyCard>
                 <TableContainer>

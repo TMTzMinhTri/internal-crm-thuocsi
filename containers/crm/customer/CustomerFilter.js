@@ -11,6 +11,7 @@ const styles = createStyles({
     }
 })
 const defaultValues = {
+    q: "",
     code: "",
     name: "",
     email: "",
@@ -20,13 +21,15 @@ const defaultValues = {
     pointFrom: null,
     pointTo: null,
 };
-export const CustomerFilter = ({ open, userTypes, onFilterChange }) => {
+export const CustomerFilter = (props) => {
 
     const filterForm = useForm({
-        defaultValues,
+        defaultValues: {
+            ...defaultValues,
+            q: props.q,
+        },
         mode: "onChange"
     })
-
     const levelController = useController({
         name: "level",
         control: filterForm.control,
@@ -47,7 +50,7 @@ export const CustomerFilter = ({ open, userTypes, onFilterChange }) => {
     }, [])
 
     const applyFilter = (formData) => {
-        onFilterChange?.(formData) 
+        props.onFilterChange?.(formData);
     }
 
     const handleReset = () => {
@@ -57,10 +60,28 @@ export const CustomerFilter = ({ open, userTypes, onFilterChange }) => {
     }
     return (
         <Box style={{
-            display: open ? "block" : "none"
+            display: props.open ? "block" : "none"
         }} clone>
             <MyCardContent>
                 <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={3}>
+                        <Typography
+                            style={styles.title}
+                            color="textPrimary"
+                            gutterBottom
+                        >
+                            Tìm kiếm
+                            </Typography>
+                        <TextField
+                            id="q"
+                            name="q"
+                            variant="outlined"
+                            size="small"
+                            placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
+                            fullWidth
+                            inputRef={filterForm.register}
+                        />
+                    </Grid>
                     <Grid item xs={12} sm={6} md={3}>
                         <Typography
                             style={styles.title}
@@ -138,7 +159,7 @@ export const CustomerFilter = ({ open, userTypes, onFilterChange }) => {
                             inputRef={levelRef}
                         >
                             <MenuItem value={""}>Tất cả</MenuItem>
-                            {userTypes?.map(({ value, label }) => (
+                            {props.userTypes?.map(({ value, label }) => (
                                 <MenuItem key={value} value={value}>{label}</MenuItem>
                             ))}
                         </TextField>
