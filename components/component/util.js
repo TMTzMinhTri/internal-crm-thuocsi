@@ -122,6 +122,18 @@ export function formatUTCTime(time) {
   return result;
 }
 
+export function compareTime(a,b) {
+  let timeA = a.getTime()
+  let timeB = b.getTime()
+
+  if (timeA - timeB > 0) {
+    return 1
+  }else if (timeB - timeA > 0) {
+    return -1
+  }
+  return 0
+}
+
 export function getPromotionOrganizer(organizer) {
   let scope = "Không xác định";
   switch (organizer) {
