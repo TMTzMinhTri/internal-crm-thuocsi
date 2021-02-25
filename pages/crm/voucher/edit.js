@@ -68,8 +68,8 @@ export default function NewPage(props) {
     return renderWithLoggedInUser(props,render)
 }
 
-export async function updateVoucher(voucherId,promotionId,startTime,endTime,publicTime,type,maxUsage,maxUsagePerCustomer,appliedCustomers,promotionName) {
-    let data = {voucherId,promotionId,type,maxUsage,maxUsagePerCustomer,promotionName}
+export async function updateVoucher(voucherId,promotionId,startTime,endTime,publicTime,type,maxUsage,maxUsagePerCustomer,appliedCustomers,promotionName,status) {
+    let data = {voucherId,promotionId,type,maxUsage,maxUsagePerCustomer,promotionName,status}
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers=appliedCustomers
     }
@@ -95,7 +95,7 @@ function render(props) {
     let endTime = ''
     let publicTime = ''
 
-    let compareTime = false
+    let compareTimeFlag = false
 
     if (voucher.startTime) {
         startTime =  formatUTCTime(voucher.startTime)
@@ -105,8 +105,9 @@ function render(props) {
     }
     if (voucher.publicTime) {
         publicTime =  formatUTCTime(voucher.publicTime)
-        compareTime = formatUTCTime(new Date(),publicTime) === 1
+        compareTimeFlag = compareTime(new Date(),new Date(publicTime)) === 1
     }
+    console.log('com',compareTimeFlag)
 
     const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({
         defaultValues:
@@ -127,9 +128,9 @@ function render(props) {
 
     const onSubmit = async () => {
         let value = getValues()
-        let {code,maxUsage,maxUsagePerCustomer,promotionId,startTime,endTime,publicTime} = value
+        let {code,maxUsage,maxUsagePerCustomer,promotionId,startTime,endTime,publicTime,status} = value
         let {type,customerIds} = dataProps
-        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds,promotionId.label)
+        let createVoucherResponse = await updateVoucher(voucher.voucherId,parseInt(promotionId.value),startTime,endTime,publicTime,type,parseInt(maxUsage),parseInt(maxUsagePerCustomer),customerIds,promotionId.label,status?"ACTIVE" : "WAITING")
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success('Cập nhật mã khuyến mãi thành công')
         }else {
@@ -172,14 +173,14 @@ function render(props) {
                         errors={errors}
                         setValue={setValue}
                         getValue={getValues}
-                        defaultchecked={props.voucher.status || false}
+                        defaultStatus={props.voucher.status === "ACTIVE"}
                         promotion={props.promotion}
                         listPromotionDefault = {props.listPromotionDefault || []}
                         control={control}
                         handleChangeType={handleChangeType}
                         dataProps={dataProps}
                         edit={true}
-                        compareTime={compareTime}
+                        compareTime={compareTimeFlag}
                         showPromotionPublic={true}
                         listCustomerDefault={props.listCustomerDefault || []}
                         appliedCustomers={props.customers}

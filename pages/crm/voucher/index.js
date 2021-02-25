@@ -98,7 +98,7 @@ export function formatNumber(num) {
 }
 
 async function updateVoucher(voucherId, status) {
-    return getPromoClient().updateVoucherStatus({ voucherId, status });
+    return getVoucherClient().updateVoucherStatus( voucherId, status );
 }
 
 
@@ -145,10 +145,10 @@ function render(props) {
         });
     };
 
-    const handleConfirm = (promotionId, checked, open,code) => {
+    const handleConfirm = (voucherId, checked, open,code) => {
         setOpenModal({
             open: open,
-            promotionId: promotionId,
+            voucherId: voucherId,
             code: code,
             checked: checked,
         });
@@ -172,10 +172,7 @@ function render(props) {
     const handleActiveVoucher = async () => {
         let { checked, voucherId } = openModal;
         if (checked) {
-            let voucherResponse = await updateVoucher(
-                voucherId,
-                defaultPromotionStatus.ACTIVE
-            );
+            let voucherResponse = await updateVoucher(voucherId, defaultPromotionStatus.ACTIVE);
             if (!voucherResponse || voucherResponse.status !== "OK") {
                 setOpenModal({ ...openModal, open: false });
                 return toast.error(voucherResponse.mesage);
@@ -211,9 +208,9 @@ function render(props) {
 
     return (
         <AppCRM select="/crm/voucher">
-            <div>
+            <Head>
                 <title>Danh sách mã khuyến mãi</title>
-            </div>
+            </Head>
             <MyCard>
                 <MyCardHeader title="Danh sách mã khuyến mãi">
                     <Link
@@ -287,7 +284,7 @@ function render(props) {
                                         Khách được sử dụng tối đa
                                     </TableCell>
                                     <TableCell align="left">Hạn sử dụng</TableCell>
-                                    <TableCell align="left">Thời gian hiển thị trên web</TableCell>
+                                    <TableCell align="left">Thời gian hiển thị</TableCell>
                                     <TableCell align="left">Trạng thái</TableCell>
                                     <TableCell align="center">Thao tác</TableCell>
                                 </TableRow>
@@ -311,7 +308,7 @@ function render(props) {
                                                 <div>Từ : {formatTime(row.startTime)}</div>
                                                 <div>Đến : {formatTime(row.endTime)}</div>
                                             </TableCell>
-                                            <TableCell align="center">
+                                            <TableCell align="left">
                                                 <div>{formatTime(row.publicTime)}</div>
                                             </TableCell>
                                             <TableCell align="left">

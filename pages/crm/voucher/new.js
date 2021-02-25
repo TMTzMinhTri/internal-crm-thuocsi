@@ -75,9 +75,10 @@ export async function createVoucherCode(
     type,
     maxUsage,
     maxUsagePerCustomer,
-    appliedCustomers
+    appliedCustomers,
+    status,
 ) {
-    let data = {code, promotionId, type, maxUsage, maxUsagePerCustomer};
+    let data = {code, promotionId, type, maxUsage, maxUsagePerCustomer,status};
     if (appliedCustomers && appliedCustomers.length > 0) {
         data.appliedCustomers = appliedCustomers;
     }
@@ -146,6 +147,7 @@ function render(props) {
             startTime,
             endTime,
             publicTime,
+            status,
         } = value;
         let {type, customerIds} = dataProps;
         let createVoucherResponse = await createVoucherCode(
@@ -157,7 +159,8 @@ function render(props) {
             type,
             parseInt(maxUsage),
             parseInt(maxUsagePerCustomer),
-            customerIds
+            customerIds,
+            status === true ? "ACTIVE" : "WAITING"
         );
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success("Tạo mã khuyến mãi thành công");
@@ -192,13 +195,13 @@ function render(props) {
             </div>
             <MyCard>
                 <MyCardHeader title="THÊM MỚI MÃ KHUYẾN MÃI"/>
-                <MyCardContent style={{margin: "0 3rem 3rem 3rem"}}>
+                <MyCardContent>
                     <VoucherCodeBody
                         errors={errors}
                         control={control}
                         setValue={setValue}
                         getValue={getValues}
-                        statusDefault={true}
+                        defaultStatus={true}
                         listPromotionDefault={props.listPromotionDefault || []}
                         onChangeCustomer={handleChangeCustomer}
                         showPromotionPublic={!!router.query.promotionId}
