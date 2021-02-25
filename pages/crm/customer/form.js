@@ -80,6 +80,33 @@ export async function loadData(ctx) {
     return data
 }
 
+const breadcrumbNew = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách khách hàng",
+        link: "/crm/customer",
+    },
+    {
+        name: "Thêm khách hàng",
+    },
+]
+const breadcrumbEdit = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách khách hàng",
+        link: "/crm/customer"
+    },
+    {
+        name: "Cập nhật khách hàng",
+    },
+]
+
 export default function renderForm(props, toast) {
     const pageTitle = props.isUpdate ? "Cập nhật khách hàng" : "Thêm khách hàng";
     if (props.status && props.status !== "OK") {
@@ -260,7 +287,7 @@ export default function renderForm(props, toast) {
     )
 
     return (
-        <AppCRM select="/crm/customer">
+        <AppCRM select="/crm/customer" breadcrumb={props.isUpdate ? breadcrumbEdit : breadcrumbNew}>
             <Head>
                 <title>{pageTitle}</title>
             </Head>

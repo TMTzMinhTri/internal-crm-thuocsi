@@ -64,14 +64,14 @@ const AutoCompleteField = (props) => {
     defaultValue,
     placeholder,
     type,
-    multiple = true,
+    multiple,
     required,
-    control,
     name,
-    errors,
+    useForm,
+    disabled,
   } = props;
 
-  const { handleChange } = props;
+  const { control, errors, getValues } = useForm;
 
   let [productList, setProductList] = useState(
     defaultValue ? defaultValue : []
@@ -103,23 +103,20 @@ const AutoCompleteField = (props) => {
   };
 
   const handleChangeTextField = async (event) => {
-    console.log("defaultValue", name);
-    setProductList([]);
     let value = event.target.value;
     let res = await fetchOptions(type, value);
     if (res?.status == "OK") {
       let arr = res.data;
       if (
         (multiple &&
-          Array.isArray(defaultValue) &&
-          defaultValue.length > 0 &&
-          defaultValue[0].name != "Chọn tất cả") ||
-        (multiple && defaultValue.length == 0)
+          Array.isArray(value[name]) &&
+          value[name].length > 0 &&
+          value[name][0].name != "Chọn tất cả") ||
+        (multiple && Array.isArray(value[name]) && value[name].length == 0)
       )
         arr.unshift({
           name: "Chọn tất cả",
         });
-      console.log(arr, "arr");
       setProductList(arr);
     } else {
       setProductList([]);
@@ -133,35 +130,34 @@ const AutoCompleteField = (props) => {
   const renderOptions = () => {
     let codeList = [];
     let newArr = [];
+    let _value = getValues();
 
-    if (Array.isArray(defaultValue)) {
-      defaultValue.map(({ code, name }) => {
+    if (Array.isArray(_value[name])) {
+      _value[name].map(({ code, name }) => {
         codeList.push(name == "Chọn tất cả" ? null : code);
       });
       newArr = productList.filter((val) => !codeList.includes(val.code));
-      // console.log(newArr, "newArr Before");
-      if (
-        multiple &&
-        defaultValue.length == 0 &&
-        productList[0].name != "Chọn tất cả"
-      ) {
+
+      if (multiple && productList[0].name != "Chọn tất cả") {
         newArr.unshift({
           name: "Chọn tất cả",
         });
       }
-      if (defaultValue.length > 0 && defaultValue[0].name == "Chọn tất cả")
+      if (_value[name].length > 0 && _value[name][0].name == "Chọn tất cả")
         newArr = newArr.filter((o) => o.name != "Chọn tất cả");
-      // console.log(newArr, "newArr Final");
+
       return newArr;
     }
 
     return productList;
   };
+
   return (
     <Controller
       name={name}
       render={(render) => (
         <Autocomplete
+          disabled={disabled}
           fullWidth
           multiple={multiple}
           classes={{
@@ -176,11 +172,10 @@ const AutoCompleteField = (props) => {
                 value = isAll;
               }
             }
-            handleChange(event, value);
             render.onChange(value);
           }}
-          getOptionLabel={(option) => option.name}
-          value={defaultValue}
+          getOptionLabel={(option) => (option?.name ? option.name : "")}
+          value={render.value}
           defaultValue={defaultValue}
           filterSelectedOptions
           renderInput={(params) => (

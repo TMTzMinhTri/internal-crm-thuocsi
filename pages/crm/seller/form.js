@@ -1,7 +1,6 @@
 import { Box, Button, ButtonGroup, CardContent, FormGroup, Paper, TextField } from "@material-ui/core";
 import Card from "@material-ui/core/Card";
 import CircularProgress from "@material-ui/core/CircularProgress";
-import Divider from "@material-ui/core/Divider";
 import FormControl from "@material-ui/core/FormControl";
 import Grid from "@material-ui/core/Grid";
 import InputLabel from "@material-ui/core/InputLabel";
@@ -20,7 +19,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
+import { MyCard, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 
 const noOptionsText = "Không có tùy chọn";
 
@@ -88,7 +87,7 @@ export default function renderForm(props, toast) {
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.seller : {}
     const checkWardData = props.isUpdate ? (props.seller.wardCode === '' ? {} : props.ward) : {};
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const [province, setProvince] = useState(props.province);
     const [districts, setDistricts] = useState(props.districts || []);
     const [district, setDistrict] = useState(props.district || {});
@@ -96,8 +95,8 @@ export default function renderForm(props, toast) {
     const [ward, setWard] = useState(checkWardData);
     const isWard = ((props.ward === undefined) || (Object.keys(checkWardData).length === 0 && checkWardData.constructor === Object)) ? true : false;
     const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
-    const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
-    const [isDisabledWard, setDisabledWard] = useState(isWard);
+    const [, setDisabledDistrict] = useState(isDistrict);
+    const [, setDisabledWard] = useState(isWard);
     const router = useRouter();
     const { register, handleSubmit, errors, control, watch } = useForm({
         defaultValues: editObject,

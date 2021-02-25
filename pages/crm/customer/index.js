@@ -76,6 +76,16 @@ export default function CustomerPage(props) {
     return renderWithLoggedInUser(props, render);
 }
 
+const breadcrumb = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách khách hàng",
+    },
+]
+
 function render(props) {
     let router = useRouter();
     const { register, handleSubmit } = useForm();
@@ -236,7 +246,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/customer">
+        <AppCRM select="/crm/customer" breadcrumb={breadcrumb}>
             <Head>
                 <title>Danh sách khách hàng</title>
             </Head>
