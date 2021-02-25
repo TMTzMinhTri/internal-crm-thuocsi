@@ -65,7 +65,7 @@ const Condition = (props) => {
           />
         </Grid>
         {selectField != "" && selectField != defaultCondition.noRule && (
-          <Grid item container xs={12}>
+          <Grid item container xs={12} key={selectField}>
             {productList.map((o, index) => (
               <Paper
                 key={index}
