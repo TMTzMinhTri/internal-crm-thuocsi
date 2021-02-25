@@ -71,6 +71,16 @@ export default function PricingPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
+const breadcrumb = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách sku"
+    },
+]
+
 function render(props) {
     const { error, success } = useToast();
     let router = useRouter();
@@ -146,7 +156,7 @@ function render(props) {
     }
 
     return (
-        <AppCRM select="/crm/sku">
+        <AppCRM select="/crm/sku" breadcrumb={breadcrumb}>
             <Head>
                 <title>Danh sách sku</title>
             </Head>
