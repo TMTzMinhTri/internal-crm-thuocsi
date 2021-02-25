@@ -196,7 +196,10 @@ function render(props) {
     percentageDiscount: "",
     maxDiscount: "",
     absoluteDiscount: "",
-    attachedProduct: [""],
+    attachedProduct:
+      rewards[0].type == defaultReward.gift
+        ? rewards[0].gifts.map((o) => "")
+        : [""],
     pointValue: "",
   });
 
@@ -358,11 +361,6 @@ function render(props) {
     //---------- Reward ---------
 
     if (rewards[0].type == defaultReward.gift) {
-      rewardObject.attachedProduct.pop();
-      rewards[0].gifts.map((o) => {
-        rewardObject.attachedProduct.push("");
-      });
-      setRewardObject({ ...rewardObject });
       rewards[0].gifts.map(async (gift, index) => {
         setValue("quantity" + index, gift.quantity);
         let res = await getListProductByIdsClient([gift.productId]);

@@ -154,7 +154,13 @@ const Reward = (props) => {
               ) : (
                 <>
                   {attachedProduct.map((o, index) => (
-                    <Grid item container spacing={2} key={index}>
+                    <Grid
+                      item
+                      container
+                      spacing={2}
+                      key={index}
+                      alignItems="flex-end"
+                    >
                       <Grid item container xs={6}>
                         <AutoCompleteField
                           name={"gift" + index}
