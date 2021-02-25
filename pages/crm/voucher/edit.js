@@ -107,8 +107,7 @@ function render(props) {
         publicTime =  formatUTCTime(voucher.publicTime)
         compareTimeFlag = compareTime(new Date(),new Date(publicTime)) === 1
     }
-    console.log('com',compareTimeFlag)
-
+    
     const {register, getValues, handleSubmit, setError, setValue, reset, errors,control} = useForm({
         defaultValues:
             {
