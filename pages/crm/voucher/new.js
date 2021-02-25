@@ -20,6 +20,7 @@ import VoucherCodeBody from "../../../components/component/promotion/voucher-cod
 import {getVoucherClient} from "../../../client/voucher";
 import {getCustomerClient} from "../../../client/customer";
 import {formatUTCTime} from "../../../components/component/util";
+import {defaultPromotionStatus} from "../../../components/component/constant";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -123,6 +124,9 @@ function render(props) {
                 })[0]
                 : "",
         },
+        defaultChecked: {
+            status: true
+        },
         mode: "onChange",
     });
     const [showAutoComplete, setShowAutoComplete] = useState(false);
@@ -193,6 +197,8 @@ function render(props) {
                         errors={errors}
                         control={control}
                         setValue={setValue}
+                        getValue={getValues}
+                        statusDefault={true}
                         listPromotionDefault={props.listPromotionDefault || []}
                         onChangeCustomer={handleChangeCustomer}
                         showPromotionPublic={!!router.query.promotionId}

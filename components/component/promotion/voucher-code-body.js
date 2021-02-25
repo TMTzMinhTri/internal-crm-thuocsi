@@ -1,6 +1,6 @@
 import {
     Button,
-    ButtonGroup,
+    ButtonGroup, FormControlLabel,
     Grid,
     IconButton,
     Table,
@@ -19,7 +19,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import {getPromoClient} from "../../../client/promo";
 import {getCustomerClient} from "../../../client/customer";
 import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
-import {Controller} from "react-hook-form";
+import {Controller, FormProvider, useFormContext} from "react-hook-form";
 import {Gif} from "@material-ui/icons";
 import {displayPromotionReward, displayPromotionType, formatTime, formatUTCTime, getPromotionOrganizer} from "../util";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -28,9 +28,11 @@ import {defaultPromotionScope} from "../constant";
 import Switch from "@material-ui/core/Switch";
 import WarningIcon from '@material-ui/icons/Warning';
 import Link from "next/link";
-import { faExclamationCircle } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import {faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from '@fortawesome/react-fontawesome'
 import {useRouter} from "next/router";
+import FormControl from "@material-ui/core/FormControl";
+import {FormSwitch} from "../../switch";
 
 
 const useStyles = makeStyles(theme => ({
@@ -45,12 +47,12 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export async function searchPromotion(promotionName){
+export async function searchPromotion(promotionName) {
     return getPromoClient().getPromotionFromClient(promotionName)
 }
 
 export async function searchCustomer(customerName) {
-    return getCustomerClient().getCustomerFromClient(0,10,customerName)
+    return getCustomerClient().getCustomerFromClient(0, 10, customerName)
 }
 
 export async function getRegionByCodes(codes) {
@@ -75,31 +77,33 @@ export default function VoucherCodeBody(props) {
         control,
         setValue,
         showPromotionPublic,
+        statusDefault,
         listCustomerDefault,
         edit,
+        compareTime,
         onChangeCustomer,
         register,
-    }=props
+    } = props
 
     let customer = appliedCustomers?.length > 0 ? appliedCustomers : listCustomerDefault
 
     const [showAutoComplete, setShowAutoComplete] = useState(false);
-    const [listPromotionSearch,setListPromotionSearch] = useState(listPromotionDefault || [])
+    const [listPromotionSearch, setListPromotionSearch] = useState(listPromotionDefault || [])
     const [listCustomer, setListCustomer] = useState(customer)
     const hasError = typeof errors[`promotionName`] !== 'undefined';
     const [promotionPublic, setPromotionPublic] = useState(promotion[0] || null)
-    const [listCustomerPromotion,setListCustomerPromotion] = useState([])
-    const [listRegions,setListRegions] = useState([])
+    const [listCustomerPromotion, setListCustomerPromotion] = useState([])
+    const [listRegions, setListRegions] = useState([])
 
     useEffect(() => {
         if (!showPromotionPublic) {
             setPromotionPublic({})
         }
         if (promotion.length > 0) {
-            promotion[0].scopes.forEach( async scope => {
-                switch (scope.type){
+            promotion[0].scopes.forEach(async scope => {
+                switch (scope.type) {
                     case defaultPromotionScope.CUSTOMER:
-                        let level =  await getCustomers();
+                        let level = await getCustomers();
                         if (level && level.status === "OK") {
                             let listCustomerPromotion = []
                             level.data.forEach(l => {
@@ -108,15 +112,15 @@ export default function VoucherCodeBody(props) {
                                 }
                             })
                             setListCustomerPromotion(listCustomerPromotion)
-                        }else {
+                        } else {
                             setListCustomerPromotion([])
                         }
                         break;
                     case defaultPromotionScope.AREA:
-                        let region =  await getRegionByCodes(scope.areaCodes)
+                        let region = await getRegionByCodes(scope.areaCodes)
                         if (region && region.status === "OK") {
                             setListRegions(region.data)
-                        }else {
+                        } else {
                             setListRegions([])
                         }
                 }
@@ -132,7 +136,7 @@ export default function VoucherCodeBody(props) {
             return listPromationResponse.data.map((item) => {
                 return {label: item.promotionName, value: item.promotionId}
             })
-        }else {
+        } else {
             setListPromotionSearch(listPromotionDefault)
             return listPromotionDefault.map((item) => {
                 return {label: item.promotionName, value: item.promotionId}
@@ -144,12 +148,12 @@ export default function VoucherCodeBody(props) {
         let listCustomerResponse = await searchCustomer(value)
         if (listCustomerResponse && listCustomerResponse.status === "OK") {
             setListCustomer(listCustomerResponse.data)
-        }else {
+        } else {
             setListCustomer(listCustomerDefault)
         }
     }
 
-    const validateNumber = (number,message) => {
+    const validateNumber = (number, message) => {
         if (number < 0) {
             return message
         }
@@ -166,9 +170,9 @@ export default function VoucherCodeBody(props) {
         }
         if (promotion && promotion.scopes?.length > 0) {
             for (const scope of promotion.scopes) {
-                switch (scope.type){
+                switch (scope.type) {
                     case defaultPromotionScope.CUSTOMER:
-                        let level =  await getCustomers();
+                        let level = await getCustomers();
                         if (level && level.status === "OK") {
                             let listCustomerPromotion = []
                             level.data.forEach(l => {
@@ -177,15 +181,15 @@ export default function VoucherCodeBody(props) {
                                 }
                             })
                             setListCustomerPromotion(listCustomerPromotion)
-                        }else {
+                        } else {
                             setListCustomerPromotion([])
                         }
                         break;
                     case defaultPromotionScope.AREA:
-                        let region =  await getRegionByCodes(scope.areaCodes)
+                        let region = await getRegionByCodes(scope.areaCodes)
                         if (region && region.status === "OK") {
                             setListRegions(region.data)
-                        }else {
+                        } else {
                             setListRegions([])
                         }
                 }
@@ -194,11 +198,11 @@ export default function VoucherCodeBody(props) {
 
         router.push({
             pathname: router.pathname,
-            query: {...router.query,promotionId : promotion.promotionId || ""}
+            query: {...router.query, promotionId: promotion.promotionId || ""}
         }).then(() => {
-            setValue("startTime",formatUTCTime(promotion.startTime),{ shouldValidate: true })
-            setValue("endTime",formatUTCTime(promotion.endTime),{ shouldValidate: true })
-            setValue("publicTime",formatUTCTime(promotion.publicTime),{ shouldValidate: true })
+            setValue("startTime", formatUTCTime(promotion.startTime), {shouldValidate: true})
+            setValue("endTime", formatUTCTime(promotion.endTime), {shouldValidate: true})
+            setValue("publicTime", formatUTCTime(promotion.publicTime), {shouldValidate: true})
             setPromotionPublic(promotion)
         })
     }
@@ -206,8 +210,8 @@ export default function VoucherCodeBody(props) {
     return (
         <Grid container>
             <Grid container xs={8} spacing={3}>
-                <Grid item xs={6} >
-                    <h5 className={cssStyle.titleLabel}>Mã khuyến mãi<span style={{color : 'red'}}> *</span></h5>
+                <Grid item xs={6}>
+                    <h5 className={cssStyle.titleLabel}>Mã khuyến mãi<span style={{color: 'red'}}> *</span></h5>
                     <TextField
                         id="code"
                         name="code"
@@ -234,7 +238,8 @@ export default function VoucherCodeBody(props) {
                     />
                 </Grid>
                 <Grid item xs={6} className={cssStyle.marginLineAutocompletePromotion}>
-                    <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng<span style={{color : 'red'}}> *</span></h5>
+                    <h5 className={cssStyle.titleLabel}>Chương trình khuyến mãi áp dụng<span
+                        style={{color: 'red'}}> *</span></h5>
                     <MuiSingleAuto
                         id="promotionId"
                         options={
@@ -247,52 +252,57 @@ export default function VoucherCodeBody(props) {
                         onFieldChange={handleSearchPromotion}
                         placeholder="Chọn chương trình khuyến mãi áp dụng"
                         control={control}
+                        disabled={compareTime}
                         onValueChange={handleChangePromotion}
                         errors={errors}
                         message="Vui lòng chọn chương trình khuyến mãi áp dụng"
                         required={true}
                     />
                 </Grid>
-                <Grid item xs={6} >
-                        <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu <span style={{color : 'red'}}> *</span></h5>
-                        <TextField
-                            id="startTime"
-                            name="startTime"
-                            helperText={errors.startTime?.message}
-                            error={!!errors.startTime}
-                            placeholder=""
-                            fullWidth
-                            type="datetime-local"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            required
-                            inputRef={register({
-                                required: "Thời gian bắt đầu không được để trống"
-                            })}
-                        />
-                    </Grid>
-                <Grid item xs={6}  >
-                        <h5 className={cssStyle.titleLabel}>Thời gian kết thúc <span style={{color : 'red'}}> *</span></h5>
-                        <TextField
-                            id="endTime"
-                            name="endTime"
-                            helperText={errors.endTime?.message}
-                            error={!!errors.endTime}
-                            placeholder=""
-                            fullWidth
-                            type="datetime-local"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            required
-                            inputRef={register({
-                                required: "Thời gian kết thúc không được để trống"
-                            })}
-                        />
-                    </Grid>
-                <Grid item xs={6} >
-                    <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị <span style={{color : 'red'}}> *</span>
+                <Grid item xs={6}>
+                    <h5 className={cssStyle.titleLabel}>Thời gian bắt đầu <span style={{color: 'red'}}> *</span></h5>
+                    <TextField
+                        id="startTime"
+                        name="startTime"
+                        helperText={errors.startTime?.message}
+                        error={!!errors.startTime}
+                        placeholder=""
+                        disabled={compareTime}
+                        fullWidth
+                        type="datetime-local"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        required
+                        inputRef={register({
+                            required: "Thời gian bắt đầu không được để trống"
+                        })}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <h5 className={cssStyle.titleLabel}>Thời gian kết thúc <span style={{color: 'red'}}> *</span>
+                    </h5>
+                    <TextField
+                        id="endTime"
+                        name="endTime"
+                        helperText={errors.endTime?.message}
+                        error={!!errors.endTime}
+                        placeholder=""
+                        disabled={compareTime}
+                        fullWidth
+                        type="datetime-local"
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        required
+                        inputRef={register({
+                            required: "Thời gian kết thúc không được để trống"
+                        })}
+                    />
+                </Grid>
+                <Grid item xs={6}>
+                    <h5 className={cssStyle.titleLabel}>Thời gian cho phép hiển thị <span
+                        style={{color: 'red'}}> *</span>
                         <Tooltip title="Tới thời gian này sẽ cho hiển thị trên app/web thuocsi">
                                 <span>
                                     <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
@@ -305,6 +315,7 @@ export default function VoucherCodeBody(props) {
                         helperText={errors.publicTime?.message}
                         error={!!errors.publicTime}
                         placeholder=""
+                        disabled={compareTime}
                         type="datetime-local"
                         InputLabelProps={{
                             shrink: true,
@@ -334,16 +345,17 @@ export default function VoucherCodeBody(props) {
                         helperText={errors.maxUsage?.message}
                         error={!!errors.maxUsage}
                         defaultValue={0}
+                        disabled={compareTime}
                         placeholder="Tổng số lần sử dụng toàn hệ thống"
-                        style={{width: "100%", fontWeight : 'normal'}}
+                        style={{width: "100%", fontWeight: 'normal'}}
                         inputRef={register({
                             required: "Tổng số lần sử dụng toàn hệ thống không được để trống",
-                            validate: (value) => validateNumber(value,"Tổng số lần sử dụng toàn hệ thống không được âm")
+                            validate: (value) => validateNumber(value, "Tổng số lần sử dụng toàn hệ thống không được âm")
                         })}
                         required
                     />
                 </Grid>
-                <Grid item xs={6} >
+                <Grid item xs={6}>
                     <h5 className={cssStyle.titleLabel}>Số lần áp dụng tối đa cho mỗi khách hàng
                         <Tooltip title="Nhập = 0 là không giới hạn">
                                 <span>
@@ -358,39 +370,42 @@ export default function VoucherCodeBody(props) {
                         InputProps={{
                             className: classes[".MuiInputBase-input"]
                         }}
+                        disabled={compareTime}
                         helperText={errors.maxUsagePerCustomer?.message}
                         error={!!errors.maxUsagePerCustomer}
                         defaultValue={0}
                         placeholder="Số lần áp dụng tối đa cho mỗi khách hàng"
-                        style={{width: "100%", fontWeight : 'normal'}}
+                        style={{width: "100%", fontWeight: 'normal'}}
                         inputRef={register({
                             required: "Số lần áp dụng tối đa cho mỗi khách hàng không được để trống",
-                            validate: (value) => validateNumber(value,"Số lần áp dụng tối đa cho mỗi khách hàng không được âm")
+                            validate: (value) => validateNumber(value, "Số lần áp dụng tối đa cho mỗi khách hàng không được âm")
                         })}
                         required
                     />
                 </Grid>
-                <Grid item xs={6} >
+                <Grid item xs={6}>
                     <h5 className={cssStyle.titleLabel}>Loại mã</h5>
                     <Select
                         id="type"
                         name="type"
                         placeholder="chọn loại mã"
                         value={dataProps.type}
+                        disabled={compareTime}
                         onChange={event => handleChangeType(event.target.value)}
                         labelId="select-type"
                         style={{width: "100%"}}>
                         <MenuItem value="PUBLIC">
-                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Public</div>
+                            <div style={{fontSize: 16, fontWeight: 'bold'}}>Public</div>
                         </MenuItem>
                         <MenuItem value="PRIVATE">
-                            <div style={{fontSize : 16, fontWeight : 'bold'}}>Private</div>
+                            <div style={{fontSize: 16, fontWeight: 'bold'}}>Private</div>
                         </MenuItem>
                     </Select>
                 </Grid>
-                <Grid item xs={6} >
+                <Grid item xs={6}>
                     <h5 className={cssStyle.titleLabel}>Danh sách khách hàng được sử dụng
-                        <Tooltip title="Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi">
+                        <Tooltip
+                            title="Nếu nhập vào đây, thì chỉ có khách hàng thuộc danh sách này mới được xài khuyến mãi">
                                 <span>
                                     <FontAwesomeIcon icon={faExclamationCircle} style={{marginLeft: "6px"}}/>
                                 </span>
@@ -404,6 +419,8 @@ export default function VoucherCodeBody(props) {
                         options={listCustomer}
                         defaultValue={appliedCustomers}
                         loading={showAutoComplete}
+                        filterSelectedOptions
+                        disabled={compareTime}
                         loadingText="Không tìm thấy danh sách khách hàng được sử dụng"
                         onOpen={() => {
                             setShowAutoComplete(true);
@@ -411,7 +428,7 @@ export default function VoucherCodeBody(props) {
                         onClose={() => {
                             setShowAutoComplete(false);
                         }}
-                        getOptionLabel={(option) => option.name }
+                        getOptionLabel={(option) => option.name}
                         renderInput={(params) => (
                             <TextField
                                 {...params}
@@ -424,10 +441,21 @@ export default function VoucherCodeBody(props) {
                         onChange={(e, value) => onChangeCustomer(e, value)}
                     />
                 </Grid>
+                <Grid item xs={6}>
+                    <h5 className={cssStyle.titleLabel}>Trạng thái</h5>
+                    <FormSwitch
+                        name="status"
+                        register={register}
+                        control={control}
+                        setValue={setValue}
+                        defaultValue={statusDefault}
+                    />
+                </Grid>
             </Grid>
             {
-                promotionPublic?.promotionId  && (
-                    <Grid xs={3} style={{background: "#f6f6f6", borderRadius: "1rem",marginLeft: "5rem"}}  container direction={"column"}>
+                promotionPublic?.promotionId && (
+                    <Grid xs={3} style={{background: "#f6f6f6", borderRadius: "1rem", marginLeft: "5rem"}} container
+                          direction={"column"}>
                         <div style={{padding: "1rem 1rem 1rem 2rem"}}>
                             <Grid className={cssStyle.marginLinePromotion}>
                                 <span>Tên chương trình khuyến mãi</span>
@@ -435,11 +463,13 @@ export default function VoucherCodeBody(props) {
                             </Grid>
                             <Grid className={cssStyle.marginLinePromotion}>
                                 <span>Bên tổ chức</span>
-                                <div className={cssStyle.textInfoPromotion}>{getPromotionOrganizer(promotionPublic.promotionOrganizer)}</div>
+                                <div
+                                    className={cssStyle.textInfoPromotion}>{getPromotionOrganizer(promotionPublic.promotionOrganizer)}</div>
                             </Grid>
                             <Grid className={cssStyle.marginLinePromotion}>
                                 <span>Thời gian áp dụng</span>
-                                <div className={cssStyle.textInfoPromotion}>{formatTime(promotionPublic.startTime) + ' - ' + formatTime(promotionPublic.endTime)}</div>
+                                <div
+                                    className={cssStyle.textInfoPromotion}>{formatTime(promotionPublic.startTime) + ' - ' + formatTime(promotionPublic.endTime)}</div>
                             </Grid>
                             {listCustomerPromotion?.length > 0 && (
                                 <Grid className={cssStyle.marginLinePromotion}>
@@ -465,7 +495,8 @@ export default function VoucherCodeBody(props) {
                                 promotionPublic["conditions"]["type"] && (
                                     <Grid className={cssStyle.marginLinePromotion}>
                                         <span>Loại khuyến mãi</span>
-                                        <div className={cssStyle.textInfoPromotion}>{displayPromotionReward(promotionPublic.rule.type)}</div>
+                                        <div
+                                            className={cssStyle.textInfoPromotion}>{displayPromotionReward(promotionPublic.rule.type)}</div>
                                     </Grid>
                                 )
                             }
@@ -476,3 +507,5 @@ export default function VoucherCodeBody(props) {
         </Grid>
     )
 }
+
+

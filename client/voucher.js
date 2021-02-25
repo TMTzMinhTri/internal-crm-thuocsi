@@ -20,6 +20,13 @@ class VoucherClient extends APIClient {
         )
     }
 
+    updateVoucherStatus(voucherId,status) {
+        return this.callFromClient(
+            "PUT",
+            `${constURL.PREFIX_PROMOTION}/voucher/status`, {voucherId,status}
+        )
+    }
+
     getVoucherById(voucherId) {
         return this.callFromNextJS(
             "GET",

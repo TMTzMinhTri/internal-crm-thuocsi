@@ -208,7 +208,7 @@ function render(props) {
     } else {
       let promotionResponse = await updatePromotion(
         promotionId,
-        defaultPromotionStatus.EXPIRED
+        defaultPromotionStatus.WAITING
       );
       if (!promotionResponse || promotionResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
@@ -216,7 +216,7 @@ function render(props) {
       } else {
         props.promotion.forEach((d) => {
           if (d.promotionId === promotionId) {
-            return (d.status = defaultPromotionStatus.EXPIRED);
+            return (d.status = defaultPromotionStatus.WAITING);
           }
         });
         setOpenModal({ ...openModal, open: false });
