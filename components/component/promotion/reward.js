@@ -17,24 +17,17 @@ import { textfieldProps } from "./infomation-fields";
 import SelectField from "./select-field";
 
 const Reward = (props) => {
-  const { reward, register, errors, control } = props;
+  const { reward, useForm, disabled } = props;
 
   const {
     handleChangeRewardField,
-    handleChangeListReward,
     handleAddAttachedProduct,
     handleRemoveAttachedProduct,
   } = props;
 
-  const {
-    percentageDiscount,
-    maxDiscount,
-    absoluteDiscount,
-    number,
-    pointValue,
-    selectField,
-    attachedProduct,
-  } = reward;
+  const { register, errors, control, getValues } = useForm;
+
+  const { selectField, attachedProduct } = reward;
 
   return (
     <Paper
@@ -47,9 +40,10 @@ const Reward = (props) => {
         </Grid>
         <Grid item container xs={5}>
           <SelectField
-            control={control}
-            errors={errors}
             name="reward"
+            control={control}
+            disabled={disabled}
+            errors={errors}
             handleChange={handleChangeRewardField("selectField")}
             options={rewards}
             value={selectField}
@@ -62,9 +56,6 @@ const Reward = (props) => {
             <Grid item container xs={5} key={selectField}>
               <TextField
                 type="number"
-                id={
-                  selectField == "ABSOLUTE" ? "absoluteDiscount" : "pointValue"
-                }
                 name={
                   selectField == "ABSOLUTE" ? "absoluteDiscount" : "pointValue"
                 }
@@ -74,9 +65,7 @@ const Reward = (props) => {
                     : "Số điểm tặng"
                 }
                 placeholder=""
-                defaultValue={
-                  selectField == "ABSOLUTE" ? absoluteDiscount : pointValue
-                }
+                defaultValue=""
                 helperText={
                   selectField == "ABSOLUTE"
                     ? errors.absoluteDiscount?.message
@@ -112,14 +101,16 @@ const Reward = (props) => {
                   <Grid item container xs={6}>
                     <TextField
                       type="number"
-                      id={"percentageDiscount"}
-                      name={"percentageDiscount"}
+                      name="percentageDiscount"
                       label={"Giá trị giảm giá theo %"}
                       placeholder=""
                       helperText={errors.percentageDiscount?.message}
                       {...textfieldProps}
+                      InputProps={{
+                        readOnly: disabled,
+                      }}
                       fullWidth
-                      defaultValue={percentageDiscount}
+                      defaultValue=""
                       error={!!errors.percentageDiscount}
                       required
                       inputRef={register({
@@ -138,13 +129,15 @@ const Reward = (props) => {
                   <Grid item container xs={6}>
                     <TextField
                       type="number"
-                      id={"maxDiscount"}
-                      name={"maxDiscount"}
+                      name="maxDiscount"
                       label={"Giá trị giảm tối đa"}
                       placeholder=""
                       helperText={errors.maxDiscount?.message}
                       {...textfieldProps}
-                      defaultValue={maxDiscount}
+                      InputProps={{
+                        readOnly: disabled,
+                      }}
+                      defaultValue=""
                       fullWidth
                       error={!!errors.maxDiscount}
                       required
@@ -165,16 +158,14 @@ const Reward = (props) => {
                       <Grid item container xs={6}>
                         <AutoCompleteField
                           name={"gift" + index}
-                          control={control}
                           label="Sản phẩm tặng kèm"
                           placeholder=""
                           required
-                          multiple={false}
-                          defaultValue={o.product ? o.product : []}
+                          defaultValue={[]}
                           options={[{ name: "" }]}
-                          handleChange={handleChangeListReward(index)}
-                          errors={errors}
                           type={selectField}
+                          useForm={useForm}
+                          disabled={disabled}
                         />
                       </Grid>
                       <Grid item container xs={5}>
@@ -185,7 +176,10 @@ const Reward = (props) => {
                           placeholder=""
                           helperText={errors["quantity" + index]?.message}
                           {...textfieldProps}
-                          defaultValue={o.number}
+                          InputProps={{
+                            readOnly: disabled,
+                          }}
+                          defaultValue={""}
                           fullWidth
                           error={!!errors["quantity" + index]}
                           required

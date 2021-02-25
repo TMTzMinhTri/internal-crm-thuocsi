@@ -17,6 +17,7 @@ const SelectField = (props) => {
     control,
     errors,
     required = true,
+    disabled,
   } = props;
 
   const { handleChange } = props;
@@ -26,6 +27,7 @@ const SelectField = (props) => {
       fullWidth
       required={required}
       error={errors[name] && !!errors[name]}
+      disabled={disabled}
     >
       <InputLabel
         shrink
