@@ -251,9 +251,9 @@ function render(props) {
 
   return (
     <AppCRM select="/crm/promotion">
-      <div>
+      <Head>
         <title>Danh sách khuyến mãi</title>
-      </div>
+      </Head>
       <MyCard>
         <MyCardHeader title="Danh sách khuyến mãi">
           <Link

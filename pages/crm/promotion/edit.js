@@ -155,6 +155,8 @@ function render(props) {
     },
   });
 
+  console.log(formatUTCTime(new Date()) + ":00Z" < startTime, "formatUTCTime");
+
   console.log("props", props);
 
   const [textField, setTextField] = useState({
@@ -194,7 +196,10 @@ function render(props) {
     percentageDiscount: "",
     maxDiscount: "",
     absoluteDiscount: "",
-    attachedProduct: [""],
+    attachedProduct:
+      rewards[0].type == defaultReward.gift
+        ? rewards[0].gifts.map((o) => "")
+        : [""],
     pointValue: "",
   });
 
@@ -292,19 +297,7 @@ function render(props) {
 
     //---------- Condition ---------
 
-    if (conditions[0].type == defaultCondition.product) {
-      conditionObject.productList.pop();
-    }
-
-    conditions[0].productConditions?.map((o) => {
-      conditionObject.productList.push({
-        product: [],
-        minQuantity: "",
-        minTotalValue: "",
-        seller: [],
-      });
-      setConditionObject({ ...conditionObject });
-    });
+    setValue("minOrderValue", conditions[0].minOrderValue);
 
     conditions.map(async (o) => {
       let code;
@@ -370,11 +363,6 @@ function render(props) {
     //---------- Reward ---------
 
     if (rewards[0].type == defaultReward.gift) {
-      rewardObject.attachedProduct.pop();
-      rewards[0].gifts.map((o) => {
-        rewardObject.attachedProduct.push("");
-      });
-      setRewardObject({ ...rewardObject });
       rewards[0].gifts.map(async (gift, index) => {
         setValue("quantity" + index, gift.quantity);
         let res = await getListProductByIdsClient([gift.productId]);
