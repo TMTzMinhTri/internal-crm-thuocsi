@@ -1,6 +1,6 @@
 import React from "react";
 import Head from "next/head";
-import { Box, Button, CircularProgress, Grid, Paper, TextField, Typography } from "@material-ui/core";
+import { Button, CircularProgress, Grid, TextField } from "@material-ui/core";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
@@ -12,6 +12,7 @@ import { getPriceLevelClient } from "client/price-level";
 import { MoneyToText } from "components/global";
 import { unknownErrorText } from "components/commonErrors";
 import { PriceLevelValidator } from "view-models/pricing";
+import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 
 export async function getServerSideProps(ctx) {
     return doWithLoggedInUser(ctx, async () => {
@@ -58,18 +59,11 @@ const render = () => {
             <Head>
                 <title>Thêm cài đặt ngưỡng giá mới</title>
             </Head>
-            <Box
-                component={Paper}
-                padding={3}
-                display="block"
-            >
-                <form onSubmit={handleSubmit(createNewPriceLevel)}>
+            <MyCard>
+                <MyCardHeader title="Thêm cài đặt ngưỡng giá"/>
+                <MyCardContent>
                     <Grid container>
                         <Grid container spacing={3} xs={12} md={6}>
-                            <Grid item xs={12}>
-                                <Typography variant="h5">Thêm cài đặt ngưỡng giá</Typography>
-                            </Grid>
-
                             <Grid item xs={12}>
                                 <TextField
                                     id="name"
@@ -197,7 +191,7 @@ const render = () => {
                                         variant="contained"
                                         color="primary"
                                         disabled={!formValid}
-                                        type="submit"
+                                        onClick={handleSubmit(createNewPriceLevel)}
                                     >
                                         {isSubmitting && <CircularProgress size={20} />}
                                         Lưu
@@ -211,8 +205,8 @@ const render = () => {
                             </Grid>
                         </Grid>
                     </Grid>
-                </form>
-            </Box>
+                </MyCardContent>
+            </MyCard>
         </AppCRM>
     )
 };

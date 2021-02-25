@@ -140,7 +140,7 @@ function render(props) {
     router.push({
       pathname: `/crm/promotion`,
       query: {
-        type: stateTypePromotion,
+        ...router.query,
         search: search,
       },
     });
@@ -208,7 +208,7 @@ function render(props) {
     } else {
       let promotionResponse = await updatePromotion(
         promotionId,
-        defaultPromotionStatus.EXPIRED
+        defaultPromotionStatus.WAITING
       );
       if (!promotionResponse || promotionResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
@@ -216,7 +216,7 @@ function render(props) {
       } else {
         props.promotion.forEach((d) => {
           if (d.promotionId === promotionId) {
-            return (d.status = defaultPromotionStatus.EXPIRED);
+            return (d.status = defaultPromotionStatus.WAITING);
           }
         });
         setOpenModal({ ...openModal, open: false });
@@ -251,9 +251,9 @@ function render(props) {
 
   return (
     <AppCRM select="/crm/promotion">
-      <div>
+      <Head>
         <title>Danh sách khuyến mãi</title>
-      </div>
+      </Head>
       <MyCard>
         <MyCardHeader title="Danh sách khuyến mãi">
           <Link
@@ -292,8 +292,8 @@ function render(props) {
                         });
                       }
                     }}
-                    placeholder="Tìm kiếm khuyến mãi"
-                    inputProps={{ "aria-label": "Tìm kiếm khuyến mãi" }}
+                    placeholder="Tìm kiếm chương trình khuyến mãi"
+                    inputProps={{ "aria-label": "Tìm kiếm chương trình khuyến mãi" }}
                   />
                   <IconButton
                     className={styles.iconButton}

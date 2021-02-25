@@ -17,6 +17,7 @@ import {
 import SelectField from "./select-field";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { Controller } from "react-hook-form";
+import { formatUTCTime } from "../util";
 
 export const textfieldProps = {
   InputLabelProps: {
@@ -41,52 +42,26 @@ const useStyles = makeStyles({
 
 const InfomationFields = (props) => {
   const classes = useStyles();
-  const {
-    dataRender = {
-      promotionName: "",
-      totalCode: "",
-      applyPerUser: 1,
-      promotionCode: "",
-      totalUsed: 0,
-      totalCollect: 0,
-    },
-    errors,
-    register,
-    textField,
-    getValues,
-    control,
-    edit = false,
-    status,
-    promotionId,
-    setValue,
-  } = props;
 
-  const { handleChangeTextField, updateStatusPromotion } = props;
+  const { useForm, textField, disabled } = props;
 
-  const toast = useToast();
+  const { handleChangeTextField } = props;
+
+  const { errors, register, getValues, control, setValue } = useForm;
 
   let value = getValues();
 
   const { promotionOrganizer, promotionType } = textField;
 
-  const [active, setActive] = useState(true);
+  const [active, setActive] = useState(value.status ? value.status : false);
 
   const switchActive = async () => {
-    if (edit) {
-      let res = await updateStatusPromotion(
-        promotionId,
-        active ? defaultPromotionStatus.EXPIRED : defaultPromotionStatus.ACTIVE
-      );
-      if (res?.status == "OK") setActive(!active);
-      else toast.error(res.message);
-    } else {
-      setActive(!active);
-      setValue("status", !active);
-    }
+    setActive(!active);
+    setValue("status", !active);
   };
 
   useEffect(() => {
-    setActive(edit ? value.status : true);
+    setActive(value.status ? value.status : false);
   }, [value.status]);
 
   return (
@@ -103,9 +78,12 @@ const InfomationFields = (props) => {
                   name="promotionName"
                   label="Tên khuyến mãi"
                   placeholder=""
-                  defaultValue={dataRender.promotionName}
+                  defaultValue=""
                   helperText={errors.promotionName?.message}
                   {...textfieldProps}
+                  InputProps={{
+                    readOnly: disabled,
+                  }}
                   fullWidth
                   error={!!errors.promotionName}
                   required
@@ -131,6 +109,7 @@ const InfomationFields = (props) => {
               <Grid item xs={6}>
                 <SelectField
                   name="promotionOrganizer"
+                  disabled={disabled}
                   control={control}
                   errors={errors}
                   title="Bên tổ chức"
@@ -143,6 +122,7 @@ const InfomationFields = (props) => {
                 <SelectField
                   name="promotionType"
                   control={control}
+                  disabled={disabled}
                   errors={errors}
                   title="Hình thức áp dụng"
                   value={promotionType}
@@ -163,11 +143,19 @@ const InfomationFields = (props) => {
                   placeholder=""
                   helperText={errors.startTime?.message}
                   {...textfieldProps}
+                  InputProps={{
+                    readOnly: disabled,
+                  }}
                   type="datetime-local"
                   fullWidth
                   error={!!errors.startTime}
                   required
                   inputRef={register({
+                    min: {
+                      value: formatUTCTime(new Date()),
+                      message:
+                        "Thời gian bắt đầu phải lớn hơn thời gian hiện tại",
+                    },
                     required: "Vui lòng chọn thời gian bắt đầu",
                   })}
                 />
@@ -181,6 +169,9 @@ const InfomationFields = (props) => {
                   helperText={errors.endTime?.message}
                   error={!!errors.endTime}
                   {...textfieldProps}
+                  InputProps={{
+                    readOnly: disabled,
+                  }}
                   fullWidth
                   required
                   inputRef={register({
@@ -204,19 +195,22 @@ const InfomationFields = (props) => {
                   helperText={errors.publicTime?.message}
                   error={!!errors.publicTime}
                   {...textfieldProps}
+                  InputProps={{
+                    readOnly: disabled,
+                  }}
                   fullWidth
                   required
                   inputRef={register({
                     required: "Vui lòng chọn thời gian hiển thị",
                     min: {
-                      value: getValues("startTime"),
+                      value: formatUTCTime(new Date()),
                       message:
-                        "Thời gian hiển thị phải lớn hơn thời gian bắt đầu",
+                        "Thời gian hiển thị phải lớn hơn thời gian hiện tại",
                     },
                     max: {
-                      value: getValues("endTime"),
+                      value: getValues("startTime"),
                       message:
-                        "Thời gian hiển thị phải nhỏ hơn thời gian kết thúc",
+                        "Thời gian hiển thị phải nhỏ hơn hoặc bằng thời gian bắt đầu",
                     },
                   })}
                 />
