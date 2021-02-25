@@ -174,7 +174,7 @@ const AutoCompleteField = (props) => {
             }
             render.onChange(value);
           }}
-          getOptionLabel={(option) => (option.name ? option.name : "")}
+          getOptionLabel={(option) => (option?.name ? option.name : "")}
           value={render.value}
           defaultValue={defaultValue}
           filterSelectedOptions

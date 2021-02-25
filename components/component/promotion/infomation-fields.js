@@ -17,6 +17,7 @@ import {
 import SelectField from "./select-field";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { Controller } from "react-hook-form";
+import { formatUTCTime } from "../util";
 
 export const textfieldProps = {
   InputLabelProps: {
@@ -150,6 +151,11 @@ const InfomationFields = (props) => {
                   error={!!errors.startTime}
                   required
                   inputRef={register({
+                    min: {
+                      value: formatUTCTime(new Date()),
+                      message:
+                        "Thời gian bắt đầu phải lớn hơn thời gian hiện tại",
+                    },
                     required: "Vui lòng chọn thời gian bắt đầu",
                   })}
                 />
@@ -197,14 +203,14 @@ const InfomationFields = (props) => {
                   inputRef={register({
                     required: "Vui lòng chọn thời gian hiển thị",
                     min: {
-                      value: getValues("startTime"),
+                      value: formatUTCTime(new Date()),
                       message:
-                        "Thời gian hiển thị phải lớn hơn thời gian bắt đầu",
+                        "Thời gian hiển thị phải lớn hơn thời gian hiện tại",
                     },
                     max: {
-                      value: getValues("endTime"),
+                      value: getValues("startTime"),
                       message:
-                        "Thời gian hiển thị phải nhỏ hơn thời gian kết thúc",
+                        "Thời gian hiển thị phải nhỏ hơn hoặc bằng thời gian bắt đầu",
                     },
                   })}
                 />

@@ -190,7 +190,9 @@ function render(props) {
       <ModalCustom
         title="Thông báo"
         open={openModal}
-        onClose={(val) => setOpenModal(val)}
+        onClose={(val) => {
+          setOpenModal(val), router.push(`/crm/promotion`);
+        }}
         primaryText="Đồng ý"
         onExcute={() =>
           router.push(`/crm/voucher/new?promotionId=${promotionId}`)
