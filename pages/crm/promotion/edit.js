@@ -297,6 +297,8 @@ function render(props) {
 
     //---------- Condition ---------
 
+    setValue("minOrderValue", conditions[0].minOrderValue);
+
     conditions.map(async (o) => {
       let code;
 
