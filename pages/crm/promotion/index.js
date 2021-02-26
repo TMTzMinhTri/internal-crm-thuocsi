@@ -293,7 +293,9 @@ function render(props) {
                       }
                     }}
                     placeholder="Tìm kiếm chương trình khuyến mãi"
-                    inputProps={{ "aria-label": "Tìm kiếm chương trình khuyến mãi" }}
+                    inputProps={{
+                      "aria-label": "Tìm kiếm chương trình khuyến mãi",
+                    }}
                   />
                   <IconButton
                     className={styles.iconButton}
@@ -322,6 +324,7 @@ function render(props) {
             <Table size="small" aria-label="a dense table">
               <TableHead>
                 <TableRow>
+                  <TableCell align="left">Mã chương trình</TableCell>
                   <TableCell align="left">Chương trình khuyến mãi</TableCell>
                   <TableCell align="left">Bên tổ chức</TableCell>
                   <TableCell align="left">Hình thức áp dụng</TableCell>
@@ -334,11 +337,8 @@ function render(props) {
                 <TableBody>
                   {props.promotion.map((row, index) => (
                     <TableRow key={row.promotionId}>
-                      <TableCell align="left">
-                        <div>
-                          {row.promotionId} - {row.promotionName}
-                        </div>
-                      </TableCell>
+                      <TableCell align="left">{row.promotionId}</TableCell>
+                      <TableCell align="left"> {row.promotionName}</TableCell>
                       <TableCell align="left">
                         {getPromotionOrganizer(row.promotionOrganizer)}
                       </TableCell>

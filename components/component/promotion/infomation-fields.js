@@ -97,10 +97,10 @@ const InfomationFields = (props) => {
                       value: 6,
                       message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự",
                     },
-                    pattern: {
-                      value: /[A-Za-z]/,
-                      message: "Tên khuyến mãi phải có kí tự là chứ số",
-                    },
+                    // pattern: {
+                    //   value: /[A-Za-z]/,
+                    //   message: "Tên khuyến mãi phải có kí tự là chứ số",
+                    // },
                   })}
                 />
               </Grid>
@@ -152,7 +152,7 @@ const InfomationFields = (props) => {
                   required
                   inputRef={register({
                     min: {
-                      value: formatUTCTime(new Date()),
+                      value: disabled ? null : formatUTCTime(new Date()),
                       message:
                         "Thời gian bắt đầu phải lớn hơn thời gian hiện tại",
                     },
@@ -203,12 +203,12 @@ const InfomationFields = (props) => {
                   inputRef={register({
                     required: "Vui lòng chọn thời gian hiển thị",
                     min: {
-                      value: formatUTCTime(new Date()),
+                      value: disabled ? null : formatUTCTime(new Date()),
                       message:
                         "Thời gian hiển thị phải lớn hơn thời gian hiện tại",
                     },
                     max: {
-                      value: getValues("startTime"),
+                      value: disabled ? null : getValues("startTime"),
                       message:
                         "Thời gian hiển thị phải nhỏ hơn hoặc bằng thời gian bắt đầu",
                     },
