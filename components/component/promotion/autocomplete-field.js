@@ -10,6 +10,7 @@ import { getTagClient } from "client/tag";
 import React, { useEffect, useState } from "react";
 import { Controller } from "react-hook-form";
 import { defaultCondition, defaultReward, defaultScope } from "../constant";
+import { displayNameBasedOnCondition } from "../util";
 
 async function searchProductList(q) {
   return await getProductClient().searchProductListFromClient(q, "");
@@ -69,6 +70,10 @@ const AutoCompleteField = (props) => {
     name,
     useForm,
     disabled,
+    condition,
+    reward,
+    arr,
+    index,
   } = props;
 
   const { control, errors, getValues } = useForm;
@@ -76,6 +81,73 @@ const AutoCompleteField = (props) => {
   let [productList, setProductList] = useState(
     defaultValue ? defaultValue : []
   );
+
+  const validateDuplicateCondition = () => {
+    let value = getValues();
+    let status = "";
+    let itemName = displayNameBasedOnCondition(value.condition) + index;
+    if (value["seller" + index].length != 0 && value[itemName] != "") {
+      let sellerString = "";
+      let itemString = "";
+      let objString = "";
+
+      value["seller" + index]
+        .sortBy("name")
+        .map((seller) => (sellerString += JSON.stringify(seller)));
+      itemString = JSON.stringify(value[itemName]);
+      objString = sellerString + itemString;
+
+      arr.map((_o, idx) => {
+        let _itemName = displayNameBasedOnCondition(value.condition) + idx;
+
+        let _sellerString = "";
+        let _itemString = "";
+        let _objString = "";
+
+        if (
+          value["seller" + idx].length != 0 &&
+          value[_itemName] != "" &&
+          idx != index
+        ) {
+          value["seller" + idx]
+            .sortBy("name")
+            .map((seller) => (_sellerString += JSON.stringify(seller)));
+          _itemString = JSON.stringify(value[_itemName]);
+          _objString = _sellerString + _itemString;
+
+          if (objString == _objString) {
+            status = "Điều kiện bị trùng";
+          }
+        }
+      });
+    }
+
+    return status == "" ? true : status;
+  };
+
+  const validateDuplicateGift = () => {
+    let value = getValues();
+    let status = "";
+    if (value["gift" + index] != "") {
+      let itemString = "";
+
+      itemString = JSON.stringify(value["gift" + index]);
+
+      arr.map((_o, idx) => {
+        let _itemString = "";
+
+        if (value["gift" + idx] != "" && idx != index) {
+          _itemString = JSON.stringify(value["gift" + idx]);
+
+          if (itemString == _itemString) {
+            status = "Điều kiện bị trùng";
+          }
+        }
+      });
+    }
+
+    return status == "" ? true : status;
+  };
 
   const fetchOptions = async (type, value) => {
     switch (type) {
@@ -199,6 +271,17 @@ const AutoCompleteField = (props) => {
           )}
         />
       )}
+      rules={{
+        validate: (d) => {
+          if (required && (d == "" || (multiple && d.length == 0))) {
+            return "Không được bỏ trống";
+          } else if (condition) {
+            return validateDuplicateCondition();
+          } else if (reward) {
+            return validateDuplicateGift();
+          }
+        },
+      }}
       control={control}
       defaultValue={defaultValue}
     />

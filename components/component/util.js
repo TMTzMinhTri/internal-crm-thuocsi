@@ -12,6 +12,12 @@ import {
   defaultTypeConditionsRule,
 } from "./constant";
 
+Array.prototype.sortBy = function (p) {
+  return this.slice(0).sort(function (a, b) {
+    return a[p] > b[p] ? 1 : a[p] < b[p] ? -1 : 0;
+  });
+};
+
 export function currencyFormat(num) {
   return formatNumber(num) + "đ";
 }
@@ -182,11 +188,11 @@ export function displayTime(time) {
 export function displayPromotionType(type) {
   switch (type) {
     case defaultPromotionType.COMBO:
-      return "Combo linh hoạt";
+      return "Tự động áp dụng";
     case defaultPromotionType.FREESHIP:
       return "Miễn phí vận chuyển";
     case defaultPromotionType.VOUCHER_CODE:
-      return "Mã khuyến mãi (Voucher)";
+      return "Thông qua mã khuyến mãi";
     default:
       return "Không xác định";
   }
@@ -302,101 +308,6 @@ export function displayUsage(usage) {
   }
   return usage;
 }
-
-export const validatePromotion = (
-  getValues,
-  setError,
-  conditionObject,
-  rewardObject
-) => {
-  console.timeLog("validatePromotion");
-  let isError = true;
-  let value = getValues();
-  if (value.promotionOrganizer == "") {
-    isError = false;
-    setError("promotionOrganizer", {
-      type: "required",
-      message: "Chưa chọn bên tổ chức",
-    });
-  }
-  if (value.promotionType == "") {
-    isError = false;
-    setError("promotionType", {
-      type: "required",
-      message: "Chưa chọn hình thức áp dụng",
-    });
-  }
-  if (value.condition != defaultCondition.noRule)
-    conditionObject.productList.map((o, index) => {
-      if (!value["seller" + index] || value["seller" + index].length == 0) {
-        isError = false;
-        setError("seller" + index, {
-          type: "required",
-          message: "Chưa chọn người bán",
-        });
-      }
-      if (
-        !value[displayNameBasedOnCondition(value.condition) + index] ||
-        value[displayNameBasedOnCondition(value.condition) + index].length == 0
-      ) {
-        isError = false;
-        setError(displayNameBasedOnCondition(value.condition) + index, {
-          type: "required",
-          message:
-            displayLabelBasedOnCondition(value.condition) +
-            " không được bỏ trống",
-        });
-      }
-      // let sellerString = "";
-      // value["seller" + index].map((o) => (sellerString += o.toString()));
-      // let itemString = JSON.stringify(
-      //   value[displayNameBasedOnCondition(value.condition) + index]
-      // );
-      // console.log(stringObj, "stringify", sellerString);
-    });
-  if (value[displayNameBasedOnCondition(conditionObject.selectField)] == "") {
-    isError = false;
-    setError(displayNameBasedOnCondition(conditionObject.selectField), {
-      type: "required",
-      message:
-        displayLabelBasedOnCondition(conditionObject.selectField) +
-        " không được bỏ trống",
-    });
-  }
-  if (value.condition == "") {
-    isError = false;
-    setError("condition", {
-      type: "required",
-      message: "Chưa chọn điều kiện khuyến mãi",
-    });
-  }
-  if (value.reward == "") {
-    isError = false;
-    setError("reward", {
-      type: "required",
-      message: "Chưa chọn giá trị khuyến mãi",
-    });
-  }
-  if (value.reward == defaultReward.gift) {
-    rewardObject.attachedProduct.map((o, index) => {
-      if (!value["gift" + index] || value["gift" + index].length == 0) {
-        isError = false;
-        setError("gift" + index, {
-          type: "required",
-          message: "Chưa chọn sản phẩm",
-        });
-      }
-    });
-  }
-  if (!value.description || value.description == "") {
-    isError = false;
-    setError("description", {
-      type: "required",
-      message: "Mô tả không được trống",
-    });
-  }
-  return isError;
-};
 
 export function displayPromotionReward(type) {
   switch (type) {

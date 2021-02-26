@@ -2,7 +2,7 @@ import {
     IconButton, Button, Paper, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow,
     Tooltip, Dialog, FormControl, FormLabel, DialogContent, DialogActions,
-    TextField, DialogTitle, Typography, Select, MenuItem, Divider, Grid, InputBase,
+    TextField, DialogTitle, Typography, Select, MenuItem, Divider, Grid, InputBase, Box,
 } from "@material-ui/core";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import EditIcon from "@material-ui/icons/Edit";
@@ -10,7 +10,7 @@ import SearchIcon from "@material-ui/icons/Search";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getPricingClient } from 'client/pricing';
-import { ErrorCode, formatNumber, ProductStatus, SkuStatuses, SellPrices, formatUrlSearch } from "components/global";
+import { formatNumber, ProductStatus, SkuStatuses, SellPrices, formatUrlSearch } from "components/global";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -20,6 +20,10 @@ import { useForm, Controller } from "react-hook-form";
 import { getPriceClient } from "client/price";
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import styles from "./pricing.module.css"
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { SkuFilter } from "containers/crm/sku/SkuFilter";
+import { getProductClient } from "client/product";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -67,6 +71,41 @@ export async function loadPricingData(ctx) {
     return { props: { data: [], count: 0, message: "Không tìm thấy kết quả phù hợp" } }
 }
 
+async function getPricingDataByFilter(data, limit, offset) {
+    const res = {
+        pricingData: [],
+        total: 0,
+        message: "",
+        statuses: {},
+    }
+    try {
+        const pricingClient = getPricingClient();
+        const pricingResp = await pricingClient.getListPricingByFilter({ ...data, limit, offset });
+        if (pricingResp.status !== "OK") {
+            if (pricingResp.status === 'NOT_FOUND') {
+                res.message = "Không tìm thấy kết quả phù hợp";
+            } else {
+                res.message = pricingResp.message;
+            }
+        } else {
+            
+            const productCodes = pricingResp.data.map(item => item.productCode);
+            const listProducts = await pricingClient.getListProductByProductCodeFromClient(productCodes);
+            const mixData = pricingResp.data.map(t1 => ({ ...t1, ...listProducts.data.find(t2 => t2.code === t1.productCode) }));
+            const statuses = pricingResp.data.reduce((acc, cur) => {
+                acc[cur.sellPriceCode] = cur.status;
+                return acc;
+            }, {});
+            res.pricingData = mixData;
+            res.total = pricingResp.total;
+            res.statuses = statuses;
+        }
+    } catch (e) {
+        res.message = e.message;
+    }
+    return res;
+}
+
 export default function PricingPage(props) {
     return renderWithLoggedInUser(props, render)
 }
@@ -85,24 +124,47 @@ function render(props) {
     const { error, success } = useToast();
     let router = useRouter();
 
-    let page = parseInt(router.query.page) || 0;
-    let limit = parseInt(router.query.limit) || 20;
-    let q = router.query.q && router.query.q !== '' ? `q=${router.query.q}` : '';
+    const [skus, setSkus] = useState(props.data ?? []);
+    const [message, setMessage] = useState(props.message);
+    const [openSkuFilter, setOpenSkuFilter] = useState(false);
+    const [skuFilter, setSkuFilter] = useState();
+    const [pagination, setPagination] = useState({
+        page: parseInt(router.query.page) || 0,
+        limit: parseInt(router.query.limit) || 20,
+        count: props.count,
+    })
+    const { limit, page, count } = pagination;
 
     let [searchText, setSearchText] = useState(router.query.q || '');
     let [, setLoading] = useState(false);
 
-    const { register, handleSubmit, errors, control } = useForm()
+    const { register, handleSubmit, errors, control } = useForm();
     const [open, setOpen] = useState(false);
     const [selectedSku, setSelectedSku] = useState({
         code: "",
         status: ""
     });
-    const [statuses, setStatuses] = useState(props.statuses)
+    const [statuses, setStatuses] = useState(props.statuses);
 
     useEffect(() => {
         setStatuses(props.statuses);
     }, [props.statuses])
+
+    const handleApplyFilter = async (data) => {
+        setSkuFilter(data);
+        const { pricingData, message, total, statuses } = await getPricingDataByFilter(data, limit, 0);
+        if (message) setMessage(message);
+        setSkus(pricingData);
+        setStatuses(statuses);
+        setPagination({
+            limit,
+            page: 0,
+            count: total,
+        })
+        Router.replace("/crm/sku", "/crm/sku", {
+            shallow: true,
+        });
+    }
 
     const handleClickOpen = (code, status) => {
         setOpen(true);
@@ -155,36 +217,63 @@ function render(props) {
         }
     }
 
+    const handlePageChange = async (event, page, rowsPerPage) => {
+        if (openSkuFilter && skuFilter) {
+            const { pricingData, message, total, statuses } = await getPricingDataByFilter(skuFilter, rowsPerPage, page);
+            if (message) setMessage(message);
+            setSkus(pricingData);
+            setStatuses(statuses);
+            setPagination({
+                limit: rowsPerPage,
+                page,
+                count: total,
+            })
+        } else {
+            Router.push(`/crm/sku?page=${page}&limit=${rowsPerPage}&q=${searchText}`);
+        }
+    }
+
+
     return (
         <AppCRM select="/crm/sku" breadcrumb={breadcrumb}>
             <Head>
                 <title>Danh sách sku</title>
             </Head>
             <MyCard>
-                <MyCardHeader title="Danh sách sku" />
-                <MyCardActions>
-                    <Grid container spacing={1} md={6}>
-                        <Grid item xs={12} sm={8} md={6}>
-                            <Paper className={styles.search} style={{ width: '100%' }}>
-                                <InputBase
-                                    id="q"
-                                    name="q"
-                                    className={styles.input}
-                                    value={searchText}
-                                    autoComplete='off'
-                                    onChange={(e) => setSearchText(e.target.value)}
-                                    onKeyPress={handleSearch}
-                                    placeholder="Nhập tên sản phẩm, mã sku, tên nhà bán hàng,..."
-                                    inputProps={{ 'aria-label': 'Nhập tên phí' }}
-                                />
-                                <IconButton className={styles.iconButton} aria-label="search"
-                                    onClick={searchSku}>
-                                    <SearchIcon />
-                                </IconButton>
-                            </Paper>
+                <MyCardHeader title="Danh sách sku" >
+                    <Button variant="contained" color="primary" style={{ marginRight: 8 }}
+                        onClick={() => setOpenSkuFilter(!openSkuFilter)}
+                    >
+                        <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
+                        Bộ lọc
+                    </Button>
+                </MyCardHeader>
+                <Box display={!openSkuFilter ? "block" : "none"}>
+                    <MyCardActions>
+                        <Grid container spacing={1} md={6}>
+                            <Grid item xs={12} sm={8} md={6}>
+                                <Paper className={styles.search} style={{ width: '100%' }}>
+                                    <InputBase
+                                        id="q"
+                                        name="q"
+                                        className={styles.input}
+                                        value={searchText}
+                                        autoComplete='off'
+                                        onChange={(e) => setSearchText(e.target.value)}
+                                        onKeyPress={handleSearch}
+                                        placeholder="Nhập tên sản phẩm, mã sku, tên nhà bán hàng,..."
+                                        inputProps={{ 'aria-label': 'Nhập tên phí' }}
+                                    />
+                                    <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={searchSku}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Paper>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </MyCardActions>
+                    </MyCardActions>
+                </Box>
+                <SkuFilter open={openSkuFilter} onFilterChange={handleApplyFilter} q={searchText} />
             </MyCard>
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
@@ -199,9 +288,9 @@ function render(props) {
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
-                    {props.data.length > 0 ? (
+                    {skus.length > 0 ? (
                         <TableBody>
-                            {props.data.map((row, i) => (
+                            {skus.map((row, i) => (
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="left">{row.name || '-'}</TableCell>
@@ -229,7 +318,7 @@ function render(props) {
                     ) : (
                             <TableBody>
                                 <TableRow>
-                                    <TableCell colSpan={3} align="left">{ErrorCode['NOT_FOUND_TABLE']}</TableCell>
+                                    <TableCell colSpan={3} align="left">{message}</TableCell>
                                 </TableRow>
                             </TableBody>
                         )}
@@ -306,13 +395,10 @@ function render(props) {
                     </Dialog>
                     <MyTablePagination
                         labelUnit="chỉ số"
-                        count={props.count}
+                        count={count}
                         rowsPerPage={limit}
                         page={page}
-                        onChangePage={(event, page, rowsPerPage) => {
-                            let qq = q ? '&' + q : '';
-                            Router.push(`/crm/sku?page=${page}&limit=${rowsPerPage}${qq}`)
-                        }}
+                        onChangePage={handlePageChange}
                     />
                 </Table>
             </TableContainer>

@@ -21,8 +21,43 @@ class PricingClient extends APIClient {
         })
     }
 
+    getListPricingByFilter({
+        q,
+        sku,
+        productCode,
+        type,
+        price,
+        status,
+        limit,
+        offset,
+    }) {
+        return this.callFromClient(
+            "POST",
+            `${prefix}/selling/search`,
+            {
+                q,
+                sku,
+                productCode,
+                type,
+                price,
+                status,
+                limit,
+                offset,
+                getTotal: true,
+            }
+        )
+    }
+
     getListProductByProductCode(productCodes) {
         return this.callFromNextJS(
+            "POST",
+            `${prefixProduct}/product/list`, {
+            productCodes
+        });
+    }
+
+    getListProductByProductCodeFromClient(productCodes) {
+        return this.callFromClient(
             "POST",
             `${prefixProduct}/product/list`, {
             productCodes

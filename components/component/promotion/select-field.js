@@ -56,6 +56,11 @@ const SelectField = (props) => {
             ))}
           </NativeSelect>
         )}
+        rules={{
+          validate: (v) => {
+            if (v == "") return "Chưa chọn " + title.toLowerCase();
+          },
+        }}
         name={name}
         control={control}
         defaultValue={value}
