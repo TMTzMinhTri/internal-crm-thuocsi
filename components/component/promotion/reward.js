@@ -29,6 +29,8 @@ const Reward = (props) => {
 
   const { selectField, attachedProduct } = reward;
 
+  let length = attachedProduct.length;
+
   return (
     <Paper
       elevation={3}
@@ -154,59 +156,65 @@ const Reward = (props) => {
               ) : (
                 <>
                   {attachedProduct.map((o, index) => (
-                    <Grid
-                      item
-                      container
-                      spacing={2}
+                    <Paper
                       key={index}
-                      alignItems="flex-end"
+                      variant="outlined"
+                      style={{ padding: 10, margin: "10px 0", width: "100%" }}
                     >
-                      <Grid item container xs={6}>
-                        <AutoCompleteField
-                          name={"gift" + index}
-                          label="Sản phẩm tặng kèm"
-                          placeholder=""
-                          required
-                          defaultValue={[]}
-                          options={[{ name: "" }]}
-                          type={selectField}
-                          useForm={useForm}
-                          disabled={disabled}
-                        />
+                      <Grid item container spacing={2} alignItems="flex-end">
+                        <Grid item container xs={6}>
+                          <AutoCompleteField
+                            name={"gift" + index}
+                            label="Sản phẩm tặng kèm"
+                            placeholder=""
+                            required
+                            defaultValue={[]}
+                            options={[{ name: "" }]}
+                            type={selectField}
+                            useForm={useForm}
+                            disabled={disabled}
+                            reward
+                            arr={attachedProduct}
+                            index={index}
+                          />
+                        </Grid>
+                        <Grid item container xs={5}>
+                          <TextField
+                            type="number"
+                            name={"quantity" + index}
+                            label={"Số lượng được tặng"}
+                            placeholder=""
+                            helperText={errors["quantity" + index]?.message}
+                            {...textfieldProps}
+                            InputProps={{
+                              readOnly: disabled,
+                            }}
+                            defaultValue={""}
+                            fullWidth
+                            error={!!errors["quantity" + index]}
+                            required
+                            inputRef={register({
+                              min: {
+                                value: 1,
+                                message: "Số lượng tặng tối thiếu 1",
+                              },
+                              required: "Vui lòng chọn số lượng",
+                            })}
+                          />
+                        </Grid>
+                        {length > 1 && (
+                          <Grid item xs={1} container justify="center">
+                            <IconButton
+                              onClick={() => handleRemoveAttachedProduct(index)}
+                            >
+                              <Delete color="secondary" />
+                            </IconButton>
+                          </Grid>
+                        )}
                       </Grid>
-                      <Grid item container xs={5}>
-                        <TextField
-                          type="number"
-                          name={"quantity" + index}
-                          label={"Số lượng được tặng"}
-                          placeholder=""
-                          helperText={errors["quantity" + index]?.message}
-                          {...textfieldProps}
-                          InputProps={{
-                            readOnly: disabled,
-                          }}
-                          defaultValue={""}
-                          fullWidth
-                          error={!!errors["quantity" + index]}
-                          required
-                          inputRef={register({
-                            min: {
-                              value: 1,
-                              message: "Số lượng tặng tối thiếu 1",
-                            },
-                            required: "Vui lòng chọn số lượng",
-                          })}
-                        />
-                      </Grid>
-                      <Grid item xs={1} container justify="center">
-                        <IconButton
-                          onClick={() => handleRemoveAttachedProduct(index)}
-                        >
-                          <Delete color="secondary" />
-                        </IconButton>
-                      </Grid>
-                    </Grid>
+                    </Paper>
                   ))}
+
                   <Grid item xs={2}>
                     <Button
                       variant="contained"

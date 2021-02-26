@@ -1,4 +1,10 @@
-import { Button, FormGroup, Paper, ButtonGroup } from "@material-ui/core";
+import {
+  Button,
+  FormGroup,
+  Paper,
+  ButtonGroup,
+  CircularProgress,
+} from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
@@ -141,7 +147,6 @@ function render(props) {
     setValue,
     errors,
     control,
-    setError,
   } = useForm({
     defaultValues: {
       description: description,
@@ -333,23 +338,21 @@ function render(props) {
               }
               break;
             case defaultCondition.productCategory:
-              code = o.productConditions[0].categoryCode;
-              res = await getListCategoryByCodesClient([code]);
+              res = await getListCategoryByCodesClient([ob.categoryCode]);
               if (res?.status == "OK") {
                 setValue("productCategory" + i, res.data[0]);
               }
               break;
             case defaultCondition.ingredient:
-              code = o.productConditions[0].ingredientCode;
-              res = await getListIngredientByCodesClient([code]);
+              res = await getListIngredientByCodesClient([ob.ingredientCode]);
               if (res?.status == "OK") {
                 setValue("ingredient" + i, res.data[0]);
               }
               break;
             case defaultCondition.producer:
-              code = o.productConditions[0].producerCode;
-              res = await getListProducerByCodesClient([code]);
+              res = await getListProducerByCodesClient([ob.producerCode]);
               if (res?.status == "OK") {
+                console.log();
                 setValue("producer" + i, res.data[0]);
               }
               break;
@@ -379,16 +382,15 @@ function render(props) {
   };
 
   async function onSubmitUpdate() {
-    if (validatePromotion(getValues, setError, conditionObject, rewardObject))
-      onSubmitPromotion(
-        getValues,
-        toast,
-        router,
-        conditionObject,
-        rewardObject,
-        false,
-        promotionId
-      );
+    onSubmitPromotion(
+      getValues,
+      toast,
+      router,
+      conditionObject,
+      rewardObject,
+      false,
+      promotionId
+    );
   }
 
   useEffect(() => {
@@ -396,11 +398,6 @@ function render(props) {
   }, []);
 
   console.log(getValues(), "getValues()");
-
-  // console.log(errors, "errors");
-
-  console.log(new Date() > new Date(startTime), startTime, "datetime");
-
   return (
     <AppCRM select="/crm/promotion">
       <Head>
@@ -436,14 +433,7 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmitUpdate, () =>
-                  validatePromotion(
-                    getValues,
-                    setError,
-                    conditionObject,
-                    rewardObject
-                  )
-                )}
+                onClick={handleSubmit(onSubmitUpdate)}
                 style={{ margin: 8 }}
               >
                 cập nhật

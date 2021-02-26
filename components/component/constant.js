@@ -186,19 +186,15 @@ export const promotions = [
     value: defaultPromotion.COORPORATE,
     label: "Chương trình hợp tác của 2 bên",
   },
-  {
-    value: defaultPromotion.SELLER,
-    label: "Chương trình của riêng nhà bán hàng",
-  },
 ];
 
 export const promotionTypes = [
   {
     value: defaultPromotionType.VOUCHER_CODE,
-    label: "Mã khuyến mãi (Voucher)",
+    label: "Thông qua mã khuyến mãi",
   },
   {
     value: defaultPromotionType.COMBO,
-    label: "Combo linh hoạt",
+    label: "Tự động áp dụng",
   },
 ];

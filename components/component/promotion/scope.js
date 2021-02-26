@@ -44,9 +44,9 @@ const Scope = (props) => {
                       <AutoCompleteField
                         name={displayNameBasedOnScope(selectField)}
                         label={displayLabelBasedOnScope(selectField)}
-                        required={false}
                         placeholder=""
                         multiple
+                        required
                         defaultValue={[]}
                         options={[{ name: "" }]}
                         type={selectField}
