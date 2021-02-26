@@ -1,4 +1,10 @@
-import { Button, FormGroup, Paper, ButtonGroup } from "@material-ui/core";
+import {
+  Button,
+  FormGroup,
+  Paper,
+  ButtonGroup,
+  CircularProgress,
+} from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useState } from "react";
@@ -24,10 +30,7 @@ import {
   MyCardContent,
   MyCardHeader,
 } from "@thuocsi/nextjs-components/my-card/my-card";
-import {
-  onSubmitPromotion,
-  validatePromotion,
-} from "components/component/util";
+import { onSubmitPromotion } from "components/component/util";
 import ModalCustom from "components/modal/dialogs";
 
 export async function getServerSideProps(ctx) {
@@ -56,7 +59,6 @@ function render(props) {
     setValue,
     errors,
     control,
-    setError,
   } = useForm({
     defaultValues: {
       customerLevel: [{ name: "Chọn tất cả" }],
@@ -161,24 +163,22 @@ function render(props) {
   };
 
   async function onSubmit() {
-    if (validatePromotion(getValues, setError, conditionObject, rewardObject)) {
-      let res = await onSubmitPromotion(
-        getValues,
-        toast,
-        router,
-        conditionObject,
-        rewardObject,
-        true,
-        null
-      );
-      console.log(res, "res create");
-      if (res?.status == "OK") {
-        if (getValues().promotionType == defaultPromotionType.VOUCHER_CODE) {
-          setPromotionId(res.data[0].promotionId);
-          setOpenModal(true);
-        } else {
-          router.push("/crm/promotion");
-        }
+    let res = await onSubmitPromotion(
+      getValues,
+      toast,
+      router,
+      conditionObject,
+      rewardObject,
+      true,
+      null
+    );
+    console.log(res, "res create");
+    if (res?.status == "OK") {
+      if (getValues().promotionType == defaultPromotionType.VOUCHER_CODE) {
+        setPromotionId(res.data[0].promotionId);
+        setOpenModal(true);
+      } else {
+        router.push("/crm/promotion");
       }
     }
   }
@@ -232,14 +232,7 @@ function render(props) {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={handleSubmit(onSubmit, () =>
-                  validatePromotion(
-                    getValues,
-                    setError,
-                    conditionObject,
-                    rewardObject
-                  )
-                )}
+                onClick={handleSubmit(onSubmit)}
                 style={{ margin: 8 }}
               >
                 thêm chương trình khuyến mãi
