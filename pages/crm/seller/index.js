@@ -58,7 +58,10 @@ export default function SellerPage(props) {
 }
 
 function render(props) {
-    console.log(props)
+    const statusColor = {
+        "NEW": "blue",
+        "DRAFT": "grey"
+    }
     let router = useRouter()
     const { register, handleSubmit, errors } = useForm();
     let q = router.query.q || ''
@@ -83,7 +86,11 @@ function render(props) {
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
-            <TableCell align="left">{sellerStatuses.find(e => e.value === row.data.status)?.label}</TableCell>
+            <TableCell align="left">
+                <Button size="small" variant="outlined" style={{ color: `${statusColor[row.data.status]}`, borderColor: `${statusColor[row.data.status]}` }}>
+                    {sellerStatuses.find(e => e.value === row.data.status)?.label}
+                </Button>
+            </TableCell>
             <TableCell align="center">
                 <Link href={`/crm/seller/edit?sellerCode=${row.data.code}`}>
                     <a>
