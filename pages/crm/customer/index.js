@@ -1,8 +1,8 @@
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faFilter, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+    Box,
     Button,
-    ButtonGroup,
     Paper,
     Table,
     TableBody,
@@ -31,12 +31,12 @@ import { getCustomerClient } from "client/customer";
 import { formatUrlSearch, statuses } from 'components/global';
 import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
 import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
+import { CustomerFilter } from "containers/crm/customer/CustomerFilter";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useState } from "react";
 import styles from "./customer.module.css";
 
 export async function getServerSideProps(ctx) {
@@ -88,27 +88,67 @@ const breadcrumb = [
 
 function render(props) {
     let router = useRouter();
-    const { register, handleSubmit } = useForm();
     const [openApproveAccountDialog, setOpenApproveAccountDialog] = useState(false);
     const [openLockAccountDialog, setOpenLockAccountDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
     const [lockedCustomerCode, setLockedCustomerCode] = useState();
-
+    const [customers, setCustomers] = useState(props.data);
+    const [message, setMessage] = useState(props.message);
+    const [openCustomerFilter, setOpenCustomerFilter] = useState(false);
+    const [customerFilter, setCustomerFilter] = useState({});
     let q = router.query.q || "";
     const [search, setSearch] = useState(q);
-    let page = parseInt(router.query.page) || 0;
-    let limit = parseInt(router.query.limit) || 20;
-    const { error, success } = useToast()
+    const [pagination, setPagination] = useState({
+        page: parseInt(router.query.page) || 0,
+        limit: parseInt(router.query.limit) || 20,
+        count: props.count,
+    })
+    const { limit, page, count } = pagination;
+    const { error, success } = useToast();
+    
+    useEffect(() => {
+        setPagination({
+            page: parseInt(router.query.page) || 0,
+            limit: parseInt(router.query.limit) || 20,
+            count: props.count,
+        })
+    }, [router.query.page, router.query.limit, props.count]);
 
-    async function handleChange(event) {
-        const target = event.target;
-        const value = target.value;
-        setSearch(value);
-    }
+    useEffect(() => {
+        setCustomers(props.data);
+        setMessage(props.message);
+    }, [props.data, props.message]);
 
-    async function onSearch() {
-        q = formatUrlSearch(search);
-        router.push(`?q=${q}`);
+    async function getCustomerByFilter(data, limit, page) {
+        try {
+            const customerClient = getCustomerClient({});
+            const { pointFrom, pointTo, q, ...others } = data;
+            const customersResp = await customerClient.getCustomerByFilter({
+                q: formatUrlSearch(q),
+                limit,
+                offset: page * limit,
+                point: {
+                    from: pointFrom,
+                    to: pointTo,
+                },
+                ...others,
+            });
+            if (customersResp.status !== "OK") {
+                if (customersResp.status === 'NOT_FOUND') {
+                    setMessage("Không tìm thấy khách hàng")
+                }
+                setMessage(customersResp.message);
+            }
+            setCustomers(customersResp.data ?? []);
+            setPagination({
+                page,
+                limit,
+                count: customersResp.total ?? 0,
+            })
+        } catch (e) {
+            error(e.message);
+        }
+
     }
 
     async function approveAccount() {
@@ -135,6 +175,25 @@ function render(props) {
             props.data.filter(row => row.code === lockedCustomerCode.code)[0].isActive = -1
             setApprovedCustomerCode(null)
             success("Khóa tài khoản thành công")
+        }
+    }
+
+    async function onSearch() {
+        q = formatUrlSearch(search);
+        router.push(`?q=${q}`);
+
+    }
+
+    const handleApplyFilter = async (data) => {
+        setCustomerFilter(data);
+        getCustomerByFilter(data, limit, page);
+    }
+
+    const handlePageChange = async (event, page, rowsPerPage) => {
+        if (openCustomerFilter) {
+            getCustomerByFilter(customerFilter, limit, page);
+        } else {
+            Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`);
         }
     }
 
@@ -196,43 +255,53 @@ function render(props) {
             />
             <MyCard>
                 <MyCardHeader title="Danh sách khách hàng">
+                    <Button variant="contained" color="primary" style={{ marginRight: 8 }}
+                        onClick={() => setOpenCustomerFilter(!openCustomerFilter)}
+                    >
+                        <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
+                        Bộ lọc
+                    </Button>
                     <Link href="/crm/customer/new">
-                        <ButtonGroup color="primary" aria-label="contained primary button group"
-                            className={styles.rightGroup}>
-                            <Button variant="contained" color="primary">
-                                <FontAwesomeIcon icon={faPlus} style={{ marginRight: 8 }} />
-                                Thêm khách hàng
-                            </Button>
-                        </ButtonGroup>
+                        <Button variant="contained" color="primary">
+                            <FontAwesomeIcon icon={faPlus} style={{ marginRight: 8 }} />
+                            Thêm khách hàng
+                        </Button>
                     </Link>
                 </MyCardHeader>
-                <MyCardContent>
-                    <Grid container spacing={3}>
-                        <Grid item xs={12} sm={4}>
-                            <Paper className={styles.search}>
-                                <InputBase
-                                    id="q"
-                                    name="q"
-                                    className={styles.input}
-                                    value={search}
-                                    onChange={handleChange}
-                                    inputRef={register}
-                                    onKeyPress={event => {
-                                        if (event.key === 'Enter' || event.keyCode === 13) {
-                                            onSearch()
-                                        }
-                                    }}
-                                    placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
-                                    inputProps={{ 'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại' }}
-                                />
-                                <IconButton className={styles.iconButton} aria-label="search"
-                                    onClick={handleSubmit(onSearch)}>
-                                    <SearchIcon />
-                                </IconButton>
-                            </Paper>
+                <Box style={{ display: !openCustomerFilter ? "block" : "none" }}>
+                    <MyCardContent>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={4}>
+                                <Paper className={styles.search}>
+                                    <InputBase
+                                        id="q"
+                                        name="q"
+                                        className={styles.input}
+                                        value={search}
+                                        onChange={e => setSearch(e.target.value)}
+                                        onKeyPress={event => {
+                                            if (event.key === 'Enter' || event.keyCode === 13) {
+                                                onSearch()
+                                            }
+                                        }}
+                                        placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
+                                        inputProps={{ 'aria-label': 'Nhập Tên khách hàng, Email, Số điện thoại' }}
+                                    />
+                                    <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={onSearch}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Paper>
+                            </Grid>
                         </Grid>
-                    </Grid>
-                </MyCardContent>
+                    </MyCardContent>
+                </Box>
+                <CustomerFilter
+                    open={openCustomerFilter}
+                    userTypes={props.condUserType}
+                    onFilterChange={handleApplyFilter}
+                    q={search}
+                />
             </MyCard>
             <MyCard>
                 <TableContainer>
@@ -259,30 +328,26 @@ function render(props) {
                                 <TableCell align="left">Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
-                        {props.data.length > 0 ? (
+                        {customers.length > 0 ? (
                             <TableBody>
-                                {props.data.map((row, i) => (
+                                {customers.map((row, i) => (
                                     <RenderRow key={i} row={row} i={i} />
                                 ))}
                             </TableBody>
                         ) : (
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                        <TableCell colSpan={3} align="left">{message}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             )}
 
                         <MyTablePagination
                             labelUnit="khách hàng"
-                            count={props.count}
+                            count={count}
                             rowsPerPage={limit}
                             page={page}
-                            onChangePage={(event, page, rowsPerPage) => {
-                                Router.push(
-                                    `/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`
-                                );
-                            }}
+                            onChangePage={handlePageChange}
                         />
                     </Table>
                 </TableContainer>
