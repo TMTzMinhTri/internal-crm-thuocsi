@@ -23,7 +23,7 @@ import {
     doWithLoggedInUser,
     renderWithLoggedInUser
 } from "@thuocsi/nextjs-components/lib/login";
-import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
+import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCommonAPI } from 'client/common';
@@ -72,6 +72,42 @@ export async function loadCustomerData(ctx) {
     return { props: { data: resp.data, count: resp.total, condUserType } }
 }
 
+async function getCustomerByFilter(data, limit, page) {
+    const res = {
+        customers: [],
+        total: 0,
+        message: "",
+    }
+    try {
+        const customerClient = getCustomerClient({});
+        const { pointFrom, pointTo, q, ...others } = data;
+        const customersResp = await customerClient.getCustomerByFilter({
+            q: formatUrlSearch(q),
+            limit,
+            offset: page * limit,
+            point: {
+                from: pointFrom,
+                to: pointTo,
+            },
+            ...others,
+        });
+        if (customersResp.status !== "OK") {
+            if (customersResp.status === 'NOT_FOUND') {
+                res.message = "Không tìm thấy khách hàng";
+            } else {
+                res.message = customersResp.message;
+            }
+        } else {
+            res.customers = customersResp.data;
+            res.total = customersResp.total;
+        }
+
+    } catch (e) {
+        res.message = e.message;
+    }
+    return res;
+}
+
 export default function CustomerPage(props) {
     return renderWithLoggedInUser(props, render);
 }
@@ -95,7 +131,7 @@ function render(props) {
     const [customers, setCustomers] = useState(props.data);
     const [message, setMessage] = useState(props.message);
     const [openCustomerFilter, setOpenCustomerFilter] = useState(false);
-    const [customerFilter, setCustomerFilter] = useState({});
+    const [customerFilter, setCustomerFilter] = useState();
     let q = router.query.q || "";
     const [search, setSearch] = useState(q);
     const [pagination, setPagination] = useState({
@@ -105,7 +141,7 @@ function render(props) {
     })
     const { limit, page, count } = pagination;
     const { error, success } = useToast();
-    
+
     useEffect(() => {
         setPagination({
             page: parseInt(router.query.page) || 0,
@@ -118,38 +154,6 @@ function render(props) {
         setCustomers(props.data);
         setMessage(props.message);
     }, [props.data, props.message]);
-
-    async function getCustomerByFilter(data, limit, page) {
-        try {
-            const customerClient = getCustomerClient({});
-            const { pointFrom, pointTo, q, ...others } = data;
-            const customersResp = await customerClient.getCustomerByFilter({
-                q: formatUrlSearch(q),
-                limit,
-                offset: page * limit,
-                point: {
-                    from: pointFrom,
-                    to: pointTo,
-                },
-                ...others,
-            });
-            if (customersResp.status !== "OK") {
-                if (customersResp.status === 'NOT_FOUND') {
-                    setMessage("Không tìm thấy khách hàng")
-                }
-                setMessage(customersResp.message);
-            }
-            setCustomers(customersResp.data ?? []);
-            setPagination({
-                page,
-                limit,
-                count: customersResp.total ?? 0,
-            })
-        } catch (e) {
-            error(e.message);
-        }
-
-    }
 
     async function approveAccount() {
         const _client = getCustomerClient()
@@ -186,12 +190,29 @@ function render(props) {
 
     const handleApplyFilter = async (data) => {
         setCustomerFilter(data);
-        getCustomerByFilter(data, limit, page);
+        const { customers, message, total } = await getCustomerByFilter(data, limit, 0);
+        if (message) setMessage(message);
+        setCustomers(customers);
+        setPagination({
+            limit,
+            page: 0,
+            count: total,
+        })
+        Router.replace("/crm/customer", "/crm/customer", {
+            shallow: true,
+        });
     }
 
     const handlePageChange = async (event, page, rowsPerPage) => {
-        if (openCustomerFilter) {
-            getCustomerByFilter(customerFilter, limit, page);
+        if (openCustomerFilter && customerFilter) {
+            const { customers, message, total } = await getCustomerByFilter(customerFilter, rowsPerPage, page);
+            if (message) setMessage(message);
+            setCustomers(customers);
+            setPagination({
+                limit: rowsPerPage,
+                page,
+                count: total,
+            })
         } else {
             Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`);
         }
@@ -269,7 +290,7 @@ function render(props) {
                     </Link>
                 </MyCardHeader>
                 <Box style={{ display: !openCustomerFilter ? "block" : "none" }}>
-                    <MyCardContent>
+                    <MyCardActions>
                         <Grid container spacing={3}>
                             <Grid item xs={12} sm={4}>
                                 <Paper className={styles.search}>
@@ -294,7 +315,7 @@ function render(props) {
                                 </Paper>
                             </Grid>
                         </Grid>
-                    </MyCardContent>
+                    </MyCardActions>
                 </Box>
                 <CustomerFilter
                     open={openCustomerFilter}

@@ -77,7 +77,7 @@ const InfomationFields = (props) => {
                 <TextField
                   name="promotionName"
                   label="Tên khuyến mãi"
-                  placeholder=""
+                  placeholder="Nhập tên chương trình"
                   defaultValue=""
                   helperText={errors.promotionName?.message}
                   {...textfieldProps}
@@ -237,7 +237,7 @@ const InfomationFields = (props) => {
                           name="gilad"
                         />
                       }
-                      label={active ? "Đang hoạt động" : "Chưa kích hoạt"}
+                      label={active ? "Đang hoạt động" : "Ngưng hoạt động"}
                     />
                   )}
                 />

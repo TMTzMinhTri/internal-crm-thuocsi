@@ -87,6 +87,9 @@ const Condition = (props) => {
                       options={[{ name: "" }]}
                       type="SELLER"
                       disabled={disabled}
+                      condition
+                      arr={productList}
+                      index={index}
                     />
                   </Grid>
                   <Grid item container xs={3}>
@@ -100,6 +103,9 @@ const Condition = (props) => {
                       type={selectField}
                       useForm={useForm}
                       disabled={disabled}
+                      condition
+                      arr={productList}
+                      index={index}
                     />
                   </Grid>
                   <Grid item container xs={2}>
@@ -123,6 +129,9 @@ const Condition = (props) => {
                           message: "Số lượng tối thiểu 1",
                         },
                         required: "Số lượng không được trống",
+                        validate: (value) => {
+                          if (value % 1 != 0) return "Số lượng là số nguyên";
+                        },
                       })}
                     />
                   </Grid>
@@ -155,11 +164,6 @@ const Condition = (props) => {
                 </Grid>
               </Paper>
             ))}
-            {/* {getValues("seller" + (length - 1)) != [] &&
-              getValues(
-                displayNameBasedOnCondition(selectField) + (length - 1)
-              ) != "" &&
-              getValues("minTotalValue" + (length - 1)) && ( */}
             <Grid item container>
               <Button
                 variant="contained"
@@ -170,7 +174,6 @@ const Condition = (props) => {
                 Thêm
               </Button>
             </Grid>
-            {/* )} */}
           </Grid>
         )}
       </Grid>
