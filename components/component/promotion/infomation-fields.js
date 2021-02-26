@@ -231,6 +231,7 @@ const InfomationFields = (props) => {
                           classes={{
                             root: classes.root,
                           }}
+                          color={"primary"}
                           checked={active}
                           onChange={switchActive}
                           name="gilad"
