@@ -122,16 +122,16 @@ export function formatUTCTime(time) {
   return result;
 }
 
-export function compareTime(a,b) {
-  let timeA = a.getTime()
-  let timeB = b.getTime()
+export function compareTime(a, b) {
+  let timeA = a.getTime();
+  let timeB = b.getTime();
 
   if (timeA - timeB > 0) {
-    return 1
-  }else if (timeB - timeA > 0) {
-    return -1
+    return 1;
+  } else if (timeB - timeA > 0) {
+    return -1;
   }
-  return 0
+  return 0;
 }
 
 export function getPromotionOrganizer(organizer) {
@@ -335,14 +335,24 @@ export const validatePromotion = (
           message: "Chưa chọn người bán",
         });
       }
-      if (value.condition == defaultCondition.product)
-        if (!value["product" + index] || value["product" + index].length == 0) {
-          isError = false;
-          setError("product" + index, {
-            type: "required",
-            message: "Sản phẩm không được bỏ trống",
-          });
-        }
+      if (
+        !value[displayNameBasedOnCondition(value.condition) + index] ||
+        value[displayNameBasedOnCondition(value.condition) + index].length == 0
+      ) {
+        isError = false;
+        setError(displayNameBasedOnCondition(value.condition) + index, {
+          type: "required",
+          message:
+            displayLabelBasedOnCondition(value.condition) +
+            " không được bỏ trống",
+        });
+      }
+      // let sellerString = "";
+      // value["seller" + index].map((o) => (sellerString += o.toString()));
+      // let itemString = JSON.stringify(
+      //   value[displayNameBasedOnCondition(value.condition) + index]
+      // );
+      // console.log(stringObj, "stringify", sellerString);
     });
   if (value[displayNameBasedOnCondition(conditionObject.selectField)] == "") {
     isError = false;
@@ -452,7 +462,9 @@ export async function onSubmitPromotion(
   let conditions;
 
   if (value.condition == defaultCondition.noRule)
-    conditions = [{ type: value.condition }];
+    conditions = [
+      { type: value.condition, minOrderValue: parseInt(value.minOrderValue) },
+    ];
   else {
     conditions = [
       {

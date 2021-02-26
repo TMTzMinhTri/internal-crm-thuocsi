@@ -179,10 +179,6 @@ export const rewards = [
 
 export const promotions = [
   {
-    value: "",
-    label: "Chọn ...",
-  },
-  {
     value: defaultPromotion.MARKETPLACE,
     label: "Chương trình riêng của sàn",
   },
@@ -197,10 +193,6 @@ export const promotions = [
 ];
 
 export const promotionTypes = [
-  {
-    value: "",
-    label: "Chọn loại khuyến mãi",
-  },
   {
     value: defaultPromotionType.VOUCHER_CODE,
     label: "Mã khuyến mãi (Voucher)",
