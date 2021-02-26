@@ -81,7 +81,6 @@ export default function VoucherCodeBody(props) {
         defaultStatus,
         listCustomerDefault,
         edit,
-        customerIds,
         compareTime,
         onChangeCustomer,
         getValue,
@@ -152,7 +151,7 @@ export default function VoucherCodeBody(props) {
         if (listCustomerResponse && listCustomerResponse.status === "OK") {
             let listCustomer = []
             listCustomerResponse.data.forEach(cusResponse => {
-                if (!customerIds.some(id => id === cusResponse.customerID)) {
+                if (!dataProps.customerIds.some(id => id === cusResponse.customerID)) {
                     listCustomer.push(cusResponse)
                 }
             })
@@ -458,7 +457,6 @@ export default function VoucherCodeBody(props) {
                             name="status"
                             register={register}
                             control={control}
-                            value={getValue()["status"]}
                             setValue={setValue}
                             getValue={getValue}
                             labelSuccess={"Đang hoạt động"}
