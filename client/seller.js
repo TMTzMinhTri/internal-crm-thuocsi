@@ -16,6 +16,33 @@ class SellerClient extends APIClient {
     });
   }
 
+  getSellerByFilter({
+    q,
+    code,
+    name,
+    email,
+    phone,
+    status,
+    limit,
+    offset,
+  }) {
+    return this.callFromClient(
+      "POST",
+      `${URI}/account/search`,
+      {
+        q,
+        code,
+        name,
+        email,
+        phone,
+        status,
+        limit,
+        offset,
+        getTotal: true,
+      }
+    );
+  }
+
   getSellerClient(offset, limit, q) {
     return this.callFromClient("GET", `${URI}/account/list`, {
       q: q,
