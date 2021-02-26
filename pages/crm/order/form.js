@@ -140,7 +140,6 @@ export default function renderForm(props, toast) {
     }
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.order : {}
-    console.log(editObject)
     editObject.paymentMethodName = paymentMethod[editObject.paymentMethod]
     editObject.deliveryPlatformName = shippingType[editObject.deliveryPlatform]
     const [loading] = useState(false);
