@@ -24,6 +24,33 @@ class CustomerClient extends APIClient {
     });
   }
 
+  getCustomerByFilter({
+    q,
+    code,
+    name,
+    email,
+    level,
+    point,
+    phone,
+    status,
+    limit,
+    offset,
+  }) {
+    return this.callFromClient("POST", `${URI}/account/search`, {
+      q,
+      code,
+      name,
+      email,
+      level,
+      point,
+      phone,
+      status,
+      limit,
+      offset,
+      getTotal: true,
+    })
+  }
+
   getCustomerByCustomerID(customerID) {
     return this.callFromNextJS("GET", `${URI}/account`, {
       customerID: customerID,
