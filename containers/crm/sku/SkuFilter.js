@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useController, useForm } from 'react-hook-form'
 import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core'
 import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card'
-import { statuses } from 'components/global'
+import MuiSingleAuto from '@thuocsi/nextjs-components/muiauto/single'
+
+import { SellPrices, SkuStatuses } from 'components/global'
 import { customerValidation } from 'view-models/customer'
+import { getProductClient } from "client/product";
 
 const useStyles = makeStyles(theme => ({
     title: {
@@ -15,30 +18,29 @@ const useStyles = makeStyles(theme => ({
 }))
 const defaultValues = {
     q: "",
-    code: "",
-    name: "",
-    email: "",
-    level: "",
-    phone: "",
+    sku: "",
+    productCode: "",
+    type: "",
+    priceFrom: null,
+    priceTo: null,
     status: "",
-    pointFrom: null,
-    pointTo: null,
 };
-export const CustomerFilter = (props) => {
+export const SkuFilter = ({ open, q = "", onFilterChange, }) => {
     const styles = useStyles();
     const filterForm = useForm({
         defaultValues: {
             ...defaultValues,
-            q: props.q,
+            q,
         },
         mode: "onChange"
     })
-    const levelController = useController({
-        name: "level",
+    const [productOptions, setProductOptions] = useState([]);
+    const typeController = useController({
+        name: "type",
         control: filterForm.control,
-        defaultValue: defaultValues.level
+        defaultValue: defaultValues.type
     })
-    const { ref: levelRef, ...levelProps } = levelController.field;
+    const { ref: typeRef, ...typeProps } = typeController.field;
 
     const statusController = useController({
         name: "status",
@@ -47,16 +49,31 @@ export const CustomerFilter = (props) => {
     })
     const { ref: statusRef, ...statusProps } = statusController.field;
 
+    const searchProduct = async (q = "") => {
+        const productClient = getProductClient();
+        const productResp = await productClient.searchProductsFromClient({ q, limit: 10, offset: 0 });
+        setProductOptions(productResp.data?.map(({ name, code }) => ({ label: name, value: code })) ?? []);
+    }
+
     useEffect(() => {
-        filterForm.register({ name: "level" })
-        filterForm.register({ name: "status" })
+        filterForm.register({ name: "type" });
+        filterForm.register({ name: "status" });
+        searchProduct();
     }, [])
     useEffect(() => {
-        filterForm.setValue('q', props.q);
-    }, [props.q])
+        filterForm.setValue('q', q);
+    }, [q])
 
     const applyFilter = async (formData) => {
-        await props.onFilterChange?.(formData);
+        const { priceFrom, priceTo, productCode, ...others } = formData;
+        await onFilterChange?.({
+            price: {
+                from: priceFrom,
+                to: priceTo,
+            },
+            productCode: productCode?.value,
+            ...others
+        });
     }
 
     const handleReset = () => {
@@ -66,7 +83,7 @@ export const CustomerFilter = (props) => {
     }
     return (
         <Box style={{
-            display: props.open ? "block" : "none"
+            display: open ? "block" : "none"
         }}>
             <MyCardActions>
                 <Grid container spacing={2}>
@@ -84,7 +101,7 @@ export const CustomerFilter = (props) => {
                             name="q"
                             variant="outlined"
                             size="small"
-                            placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
+                            placeholder="Nhập Tên sản phẩm, mã sku, tên nhà bán hàng,..."
                             fullWidth
                             inputRef={filterForm.register}
                         />
@@ -95,34 +112,15 @@ export const CustomerFilter = (props) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Mã khách hàng
-                            </Typography>
-                        <TextField
-                            className={styles.textField}
-                            id="code"
-                            name="code"
-                            variant="outlined"
-                            size="small"
-                            placeholder="Nhập mã khách hàng"
-                            fullWidth
-                            inputRef={filterForm.register}
-                        />
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <Typography
-                            className={styles.title}
-                            color="textPrimary"
-                            gutterBottom
-                        >
-                            Tên khách hàng
+                            Mã sku
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="name"
-                            name="name"
+                            id="sku"
+                            name="sku"
                             variant="outlined"
                             size="small"
-                            placeholder="Nhập tên khách hàng"
+                            placeholder="Nhập mã sku"
                             fullWidth
                             inputRef={filterForm.register}
                         />
@@ -133,18 +131,18 @@ export const CustomerFilter = (props) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Email
+                            Tên sản phẩm
                         </Typography>
-                        <TextField
-                            className={styles.textField}
-                            id="email"
-                            name="email"
-                            variant="outlined"
-                            size="small"
-                            placeholder="Nhập email"
-                            fullWidth
-                            inputRef={filterForm.register}
-                        />
+                        <Box className={styles.textField}>
+                            <MuiSingleAuto
+                                name="productCode"
+                                placeholder="Nhập tên sản phẩm"
+                                onFieldChange={searchProduct}
+                                options={productOptions}
+                                control={filterForm.control}
+                                errors={filterForm.errors}
+                            />
+                        </Box>
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
                         <Typography
@@ -152,12 +150,12 @@ export const CustomerFilter = (props) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Cấp độ
+                            Loại
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="level"
-                            name="level"
+                            id="type"
+                            name="type"
                             variant="outlined"
                             size="small"
                             placeholder="Chọn cấp độ"
@@ -166,11 +164,11 @@ export const CustomerFilter = (props) => {
                                 displayEmpty: true
                             }}
                             fullWidth
-                            {...levelProps}
-                            inputRef={levelRef}
+                            {...typeProps}
+                            inputRef={typeRef}
                         >
                             <MenuItem value={""}>Tất cả</MenuItem>
-                            {props.userTypes?.map(({ value, label }) => (
+                            {SellPrices?.map(({ value, label }) => (
                                 <MenuItem key={value} value={value}>{label}</MenuItem>
                             ))}
                         </TextField>
@@ -181,68 +179,46 @@ export const CustomerFilter = (props) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Điểm
+                            Giá bán lẻ
                         </Typography>
                         <Grid container spacing={1}>
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     className={styles.textField}
-                                    id="pointFrom"
-                                    name="pointFrom"
+                                    id="priceFrom"
+                                    name="priceFrom"
                                     variant="outlined"
                                     size="small"
-                                    placeholder="Điểm từ"
+                                    placeholder="Giá bán lẻ từ"
                                     fullWidth
                                     type="number"
                                     inputProps={{
                                         min: 0,
                                     }}
-                                    error={!!filterForm.errors.pointFrom}
-                                    helperText={filterForm.errors.pointFrom?.message}
+                                    error={!!filterForm.errors.priceFrom}
+                                    helperText={filterForm.errors.priceFrom?.message}
                                     inputRef={filterForm.register({ ...customerValidation.point, valueAsNumber: true })}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
                                 <TextField
                                     className={styles.textField}
-                                    id="pointTo"
-                                    name="pointTo"
+                                    id="priceTo"
+                                    name="priceTo"
                                     variant="outlined"
                                     size="small"
-                                    placeholder="Điểm đến"
+                                    placeholder="Giá bán lẻ đến"
                                     fullWidth
                                     type="number"
                                     inputProps={{
                                         min: 0,
                                     }}
-                                    error={!!filterForm.errors.pointTo}
-                                    helperText={filterForm.errors.pointTo?.message}
+                                    error={!!filterForm.errors.priceTo}
+                                    helperText={filterForm.errors.priceTo?.message}
                                     inputRef={filterForm.register({ ...customerValidation.point, valueAsNumber: true })}
                                 />
                             </Grid>
                         </Grid>
-
-
-
-                    </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
-                        <Typography
-                            className={styles.title}
-                            color="textPrimary"
-                            gutterBottom
-                        >
-                            Số điện thoại
-                            </Typography>
-                        <TextField
-                            className={styles.textField}
-                            id="phone"
-                            name="phone"
-                            variant="outlined"
-                            size="small"
-                            placeholder="Nhập số điện thoại"
-                            fullWidth
-                            inputRef={filterForm.register}
-                        />
                     </Grid>
                     <Grid item xs={12} sm={6} md={3}>
                         <Typography
@@ -268,7 +244,7 @@ export const CustomerFilter = (props) => {
                             inputRef={statusRef}
                         >
                             <MenuItem value={""}>Tất cả</MenuItem>
-                            {statuses?.map(({ value, label }) => (
+                            {SkuStatuses?.map(({ value, label }) => (
                                 <MenuItem key={value} value={value}>{label}</MenuItem>
                             ))}
                         </TextField>

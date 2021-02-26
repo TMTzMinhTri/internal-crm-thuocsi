@@ -64,6 +64,12 @@ class ProductClient extends APIClient {
     });
   }
 
+  searchProductsFromClient({ q, limit, offset }) {
+    return this.callFromClient("GET", `${PREFIX}/product/list`, {
+      q, limit, offset,
+    })
+  }
+
   searchProductCategoryListFromClient(productName, categoryCode) {
     let data = {};
     if (productName) {
