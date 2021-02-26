@@ -129,6 +129,9 @@ const Condition = (props) => {
                           message: "Số lượng tối thiểu 1",
                         },
                         required: "Số lượng không được trống",
+                        validate: (value) => {
+                          if (value % 1 != 0) return "Số lượng là số nguyên";
+                        },
                       })}
                     />
                   </Grid>
