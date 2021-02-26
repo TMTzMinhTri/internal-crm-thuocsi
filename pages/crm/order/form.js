@@ -130,9 +130,18 @@ export default function renderForm(props, toast) {
             <NotFound link='/crm/order' titlePage={titlePage} labelLink="đơn hàng" />
         )
     }
+    const paymentMethod = {
+        "COD": "Thu hộ",
+        "ChuyenKhoan": "Chuyển khoản"
+    }
+    const shippingType = {
+        "Normal": "Tiêu chuẩn",
+        "Quick": "Nhanh"
+    }
     let { error, success } = toast;
     let editObject = props.isUpdate ? props.order : {}
-
+    editObject.paymentMethodName = paymentMethod[editObject.paymentMethod]
+    editObject.deliveryPlatformName = shippingType[editObject.deliveryPlatform]
     const [loading] = useState(false);
     const [openModal, setOpenModal] = useState(false);
     const [defaultQuantity, setDefaultQuantity] = useState(props.orderItem?.map(item => item.quantity))
@@ -372,7 +381,7 @@ export default function renderForm(props, toast) {
                                         <Grid item xs={12} sm={3} md={3}>
                                             <Typography variant="h6" component="h6"
                                                 style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
-                                                ID khách hàng
+                                                Số điện thoại
                                             </Typography>
                                             <TextField
                                                 id="customerPhone"
@@ -401,7 +410,7 @@ export default function renderForm(props, toast) {
                                         <Grid item xs={12} sm={6} md={6}>
                                             <Typography variant="h6" component="h6"
                                                 style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
-                                                ID khách hàng
+                                                Địa chỉ
                                             </Typography>
                                             <TextField
                                                 id="customerShippingAddress"
@@ -429,7 +438,7 @@ export default function renderForm(props, toast) {
                                         <Grid item xs={12} sm={3} md={3}>
                                             <Typography variant="h6" component="h6"
                                                 style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
-                                                ID khách hàng
+                                                Tỉnh/Thành phố
                                             </Typography>
                                             <TextField
                                                 id="customerProvinceCode"
@@ -451,7 +460,7 @@ export default function renderForm(props, toast) {
                                         <Grid item xs={12} sm={3} md={3}>
                                             <Typography variant="h6" component="h6"
                                                 style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
-                                                ID khách hàng
+                                                Quận/Huyện
                                             </Typography>
                                             <TextField
                                                 id="customerDistrictCode"
@@ -475,7 +484,7 @@ export default function renderForm(props, toast) {
                                         <Grid item xs={12} sm={3} md={3}>
                                             <Typography variant="h6" component="h6"
                                                 style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
-                                                ID khách hàng
+                                                Phường/Xã
                                             </Typography>
                                             <TextField
                                                 id="customerWardCode"
@@ -502,8 +511,8 @@ export default function renderForm(props, toast) {
                                                 Hình thức vận chuyển
                                             </Typography>
                                             <TextField
-                                                id="deliveryPlatform"
-                                                name="deliveryPlatform"
+                                                id="deliveryPlatformName"
+                                                name="deliveryPlatformName"
                                                 size="small"
                                                 inputProps={{
                                                     readOnly: true,
@@ -524,8 +533,8 @@ export default function renderForm(props, toast) {
                                                 Phương thức thanh toán
                                             </Typography>
                                             <TextField
-                                                id="paymentMethod"
-                                                name="paymentMethod"
+                                                id="paymentMethodName"
+                                                name="paymentMethodName"
                                                 size="small"
                                                 inputProps={{
                                                     readOnly: true,
