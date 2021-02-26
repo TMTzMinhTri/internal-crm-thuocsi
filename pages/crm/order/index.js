@@ -89,8 +89,11 @@ function render(props) {
     let page = parseInt(router.query.page) || 0;
     let limit = parseInt(router.query.limit) || 20;
 
-    const { error, success } = useToast()
-
+    let statusColor = {
+        "WaitConfirm": "orange",
+        "Confirmed": "green",
+        "Canceled": "red"
+    }
     async function handleChange(event) {
         const target = event.target;
         const value = target.value;
@@ -112,8 +115,13 @@ function render(props) {
             <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
             <TableCell align="right">{formatNumber(row.data.totalPrice)}</TableCell>
             <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
-            <TableCell align="center">{row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
-                : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}</TableCell>
+            <TableCell align="center">
+                <Button size="small" variant="outlined" style={{color: statusColor[row.data.status], borderColor: statusColor[row.data.status]}}>
+                    {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
+                    : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}
+                </Button>
+                
+            </TableCell>
             <TableCell align="left">
                 <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
                     <a>
