@@ -137,6 +137,8 @@ function render(props) {
   );
 
   function searchPromotion() {
+    setPage(0);
+    router.query.page = 0;
     router.push({
       pathname: `/crm/promotion`,
       query: {
@@ -236,6 +238,7 @@ function render(props) {
 
   async function handleChange(event) {
     setSearch(event.target.value);
+
     if (event.target.value === "") {
       router
         .push({
@@ -283,13 +286,7 @@ function render(props) {
                     onChange={handleChange}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
-                        router.push({
-                          pathname: `/crm/promotion`,
-                          query: {
-                            ...router.query,
-                            search: search,
-                          },
-                        });
+                        searchPromotion();
                       }
                     }}
                     placeholder="Tìm kiếm chương trình khuyến mãi"
@@ -333,9 +330,9 @@ function render(props) {
                   <TableCell align="center">Thao tác</TableCell>
                 </TableRow>
               </TableHead>
-              {props.promotion?.length > 0 ? (
-                <TableBody>
-                  {props.promotion.map((row, index) => (
+              <TableBody>
+                {props.promotion?.length > 0 ? (
+                  props.promotion.map((row, index) => (
                     <TableRow key={row.promotionId}>
                       <TableCell align="left">{row.promotionId}</TableCell>
                       <TableCell align="left"> {row.promotionName}</TableCell>
@@ -382,12 +379,16 @@ function render(props) {
                         </Link>
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              ) : (
-                <div></div>
-              )}
-              {props.promotionCount > 0 ? (
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell align="left">
+                      Không tìm thấy chương trình khuyến mãi
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+              {props.promotionCount > 0 && (
                 <MyTablePagination
                   labelUnit="khuyến mãi"
                   count={props.promotionCount}
@@ -395,10 +396,6 @@ function render(props) {
                   page={page}
                   onChangePage={handleChangePage}
                 />
-              ) : (
-                textSearch && (
-                  <h3>Không tìm thấy danh sách chương trình khuyến mãi</h3>
-                )
               )}
             </Table>
           </TableContainer>
