@@ -32,6 +32,7 @@ import { formatUrlSearch, statuses } from 'components/global';
 import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
 import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
 import { CustomerFilter } from "containers/crm/customer/CustomerFilter";
+import { ConfirmActiveDialog } from "containers/crm/customer/ConfirmActiveDialog";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -126,7 +127,9 @@ function render(props) {
     let router = useRouter();
     const [openApproveAccountDialog, setOpenApproveAccountDialog] = useState(false);
     const [openLockAccountDialog, setOpenLockAccountDialog] = useState(false);
+    const [openActiveAccountDialog, setOpenActiveAccountDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
+    const [activeCustomerCode, setActiveCustomerCode] = useState();
     const [lockedCustomerCode, setLockedCustomerCode] = useState();
     const [customers, setCustomers] = useState(props.data);
     const [message, setMessage] = useState(props.message);
@@ -165,6 +168,19 @@ function render(props) {
             props.data.filter(row => row.code === approvedCustomerCode.code)[0].isActive = 1
             props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "ACTIVE"
             setApprovedCustomerCode(null)
+            success("Kích hoạt tài khoản thành công")
+        }
+    }
+
+    async function activeAccount() {
+        const _client = getCustomerClient()
+        setOpenActiveAccountDialog(false)
+        const resp = await _client.activeAccount({ code: activeCustomerCode.code, status: "ACTIVE" })
+        if (resp.status !== "OK") {
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        } else {
+            props.data.filter(row => row.code === activeCustomerCode.code)[0].status = "ACTIVE"
+            setActiveCustomerCode(null)
             success("Kích hoạt tài khoản thành công")
         }
     }
@@ -232,7 +248,7 @@ function render(props) {
                 <TableCell align="left">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
                 <TableCell align="center">
-                    <Button size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>
+                    <Button disabled={row.status == "ACTIVE"} onClick={() => { setOpenActiveAccountDialog(true); setActiveCustomerCode(row) }} size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>
                 </TableCell>
                 <TableCell align="left">
                     <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
@@ -244,7 +260,7 @@ function render(props) {
                             </Tooltip>
                         </a>
                     </Link>
-                    {row.isActive == '-1' ? <Tooltip title="Nhấp vào để mở khóa">
+                    {/* {row.isActive == '-1' ? <Tooltip title="Nhấp vào để mở khóa">
                         <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
                             <LockIcon fontSize="small" />
                         </IconButton>
@@ -253,7 +269,7 @@ function render(props) {
                             <IconButton onClick={() => { setOpenLockAccountDialog(true); setLockedCustomerCode(row) }}>
                                 <LockOpenIcon fontSize="small" />
                             </IconButton>
-                        </Tooltip>}
+                        </Tooltip>} */}
                 </TableCell>
             </TableRow >
         );
@@ -268,6 +284,11 @@ function render(props) {
                 open={openApproveAccountDialog}
                 onClose={() => setOpenApproveAccountDialog(false)}
                 onConfirm={() => approveAccount()}
+            />
+             <ConfirmActiveDialog
+                open={openActiveAccountDialog}
+                onClose={() => setOpenActiveAccountDialog(false)}
+                onConfirm={() => activeAccount()}
             />
             <ConfirmLockDialog
                 open={openLockAccountDialog}

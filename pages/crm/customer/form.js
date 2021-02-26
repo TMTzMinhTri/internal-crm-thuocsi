@@ -132,8 +132,9 @@ export default function renderForm(props, toast) {
     const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
     const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
     const [isDisabledWard, setDisabledWard] = useState(isWard);
+    const [isDisableStatus, setIsDisableStatus] = useState(editObject.status == 'ACTIVE')
     const router = useRouter();
-    const { register, handleSubmit, errors, control, watch } = useForm({
+    const { register, handleSubmit, errors, control, getValues, watch } = useForm({
         defaultValues: editObject,
         mode: "onChange"
     });
@@ -255,6 +256,7 @@ export default function renderForm(props, toast) {
             if (resp.status !== 'OK') {
                 error(resp.message ?? unknownErrorText)
             } else {
+                setIsDisableStatus(formData.status == 'ACTIVE' ? true : false)
                 success(pageTitle + ' thành công')
             }
         } catch (err) {
@@ -674,7 +676,7 @@ export default function renderForm(props, toast) {
                                             <Controller
                                                 name="status"
                                                 control={control}
-                                                disabled={props.customer.isActive == -1}
+                                                disabled={isDisableStatus}
                                                 defaultValue={statuses ? statuses[0].value : ''}
                                                 rules={{ required: true }}
                                                 error={!!errors.status}
@@ -775,7 +777,7 @@ export default function renderForm(props, toast) {
                                 Làm mới
                                 </Button>
                             )}
-                        <Button
+                        {/* <Button
                             variant="contained"
                             color="secondary"
                             onClick={() => setOpenLockAccountDialog(true)}
@@ -790,7 +792,7 @@ export default function renderForm(props, toast) {
                             style={{ margin: 8, display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}
                         >
                             Mở khoá
-                        </Button>
+                        </Button> */}
                         <Button
                             variant="contained"
                             color="primary"
