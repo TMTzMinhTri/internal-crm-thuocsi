@@ -202,6 +202,7 @@ function render(props) {
                         setValue={setValue}
                         getValue={getValues}
                         defaultStatus={true}
+                        customerIds={dataProps.customerIds}
                         listPromotionDefault={props.listPromotionDefault || []}
                         onChangeCustomer={handleChangeCustomer}
                         showPromotionPublic={!!router.query.promotionId}
