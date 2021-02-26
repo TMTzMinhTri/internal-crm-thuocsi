@@ -149,9 +149,16 @@ export default function VoucherCodeBody(props) {
     const handleSearchCustomer = async (value) => {
         let listCustomerResponse = await searchCustomer(value)
         if (listCustomerResponse && listCustomerResponse.status === "OK") {
-            setListCustomer(listCustomerResponse.data)
+            let listCustomer = []
+            listCustomerResponse.data.forEach(cusResponse => {
+                if (!dataProps.customerIds.some(id => id === cusResponse.customerID)) {
+                    listCustomer.push(cusResponse)
+                }
+            })
+            console.log('list',listCustomer)
+            setListCustomer(listCustomer)
         } else {
-            setListCustomer(listCustomerDefault)
+            setListCustomer([])
         }
     }
 
@@ -431,7 +438,7 @@ export default function VoucherCodeBody(props) {
                             onClose={() => {
                                 setShowAutoComplete(false);
                             }}
-                            getOptionLabel={(option) => option.name}
+                            getOptionLabel={(option) => option?.name? option.name : ""}
                             renderInput={(params) => (
                                 <TextField
                                     {...params}
