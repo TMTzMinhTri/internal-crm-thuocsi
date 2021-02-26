@@ -22,6 +22,8 @@ const Condition = (props) => {
 
   const { minOrderValue, productList, item, selectField, seller } = condition;
 
+  let length = productList.length;
+
   return (
     <Paper
       elevation={3}
@@ -37,7 +39,7 @@ const Condition = (props) => {
             name="minOrderValue"
             label="Giá trị nhỏ nhất của đơn hàng"
             placeholder=""
-            defaultValue=""
+            defaultValue={0}
             helperText={errors.minOrderValue?.message}
             {...textfieldProps}
             InputProps={{
@@ -141,16 +143,23 @@ const Condition = (props) => {
                       inputRef={register()}
                     />
                   </Grid>{" "}
-                  <Grid item xs={1} container justify="center">
-                    <IconButton
-                      onClick={() => handleRemoveProductOfProductList(index)}
-                    >
-                      <Delete color="secondary" />
-                    </IconButton>
-                  </Grid>
+                  {length > 1 && (
+                    <Grid item xs={1} container justify="center">
+                      <IconButton
+                        onClick={() => handleRemoveProductOfProductList(index)}
+                      >
+                        <Delete color="secondary" />
+                      </IconButton>
+                    </Grid>
+                  )}
                 </Grid>
               </Paper>
             ))}
+            {/* {getValues("seller" + (length - 1)) != [] &&
+              getValues(
+                displayNameBasedOnCondition(selectField) + (length - 1)
+              ) != "" &&
+              getValues("minTotalValue" + (length - 1)) && ( */}
             <Grid item container>
               <Button
                 variant="contained"
@@ -161,6 +170,7 @@ const Condition = (props) => {
                 Thêm
               </Button>
             </Grid>
+            {/* )} */}
           </Grid>
         )}
       </Grid>

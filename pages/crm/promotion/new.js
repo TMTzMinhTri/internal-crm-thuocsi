@@ -1,4 +1,4 @@
-import { Box, Button, FormGroup, Paper, ButtonGroup } from "@material-ui/core";
+import { Button, FormGroup, Paper, ButtonGroup } from "@material-ui/core";
 import Head from "next/head";
 import AppCRM from "pages/_layout";
 import React, { useState } from "react";
@@ -10,6 +10,7 @@ import {
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import {
   defaultCondition,
+  defaultPromotion,
   defaultPromotionType,
   defaultReward,
   defaultScope,
@@ -60,6 +61,8 @@ function render(props) {
     defaultValues: {
       customerLevel: [{ name: "Chọn tất cả" }],
       area: [{ name: "Chọn tất cả" }],
+      promotionOrganizer: defaultPromotion.MARKETPLACE,
+      promotionType: defaultPromotionType.VOUCHER_CODE,
     },
   });
 
@@ -179,8 +182,6 @@ function render(props) {
       }
     }
   }
-
-  console.log(getValues(), "getValues()");
 
   return (
     <AppCRM select="/crm/promotion">
