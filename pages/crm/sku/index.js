@@ -23,7 +23,6 @@ import styles from "./pricing.module.css"
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
 import { SkuFilter } from "containers/crm/sku/SkuFilter";
-import { getProductClient } from "client/product";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -273,7 +272,12 @@ function render(props) {
                         </Grid>
                     </MyCardActions>
                 </Box>
-                <SkuFilter open={openSkuFilter} onFilterChange={handleApplyFilter} q={searchText} />
+                <SkuFilter
+                    open={openSkuFilter}
+                    onFilterChange={handleApplyFilter}
+                    q={searchText}
+                    onClose={({q}) => setSearchText(q)}
+                />
             </MyCard>
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
