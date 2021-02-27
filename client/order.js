@@ -20,6 +20,37 @@ class OrderClient extends APIClient {
             })
     }
 
+    getOrderByFilter({
+        q,
+        orderNo,
+        customerName,
+        customerPhone,
+        customerEmail,
+        customerShippingAddress,
+        price,
+        status,
+        limit,
+        ofset,
+    }) {
+        return this.callFromClient(
+            "POST",
+            `${URI}/order/search`,
+            {
+                q,
+                orderNo,
+                customerName,
+                customerPhone,
+                customerEmail,
+                customerShippingAddress,
+                price,
+                status,
+                limit,
+                ofset,
+                getTotal: true,
+            }
+        )
+    }
+
     // getCustomerByCustomerID(customerID) {
     //     return this.callFromNextJS(
     //         "GET",
