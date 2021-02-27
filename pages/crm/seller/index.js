@@ -1,6 +1,6 @@
 import {
+    Box,
     Button,
-    ButtonGroup,
     Paper,
     Table,
     TableBody,
@@ -9,7 +9,6 @@ import {
     TableHead,
     TableRow
 } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -25,10 +24,11 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-import { ErrorCode, formatUrlSearch, sellerStatuses } from 'components/global';
+import { formatUrlSearch, sellerStatuses } from 'components/global';
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faFilter, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { SellerFilter } from "containers/crm/seller/SellerFilter";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -53,6 +53,31 @@ export async function loadSellerData(ctx) {
     return { props: { data: resp.data, count: resp.total } }
 }
 
+async function getSellersByFilter(data, limit, offset) {
+    const res = {
+        sellers: [],
+        total: 0,
+        message: "",
+    }
+    try {
+        let sellerClient = getSellerClient({});
+        const sellerResp = await sellerClient.getSellerByFilter({ ...data, limit, offset });
+        if (sellerResp.status !== "OK") {
+            if (sellerResp.status === 'NOT_FOUND') {
+                res.message = "Không tìm thấy kết quả phù hợp";
+            } else {
+                res.message = sellerResp.message;
+            }
+        } else {
+            res.sellers = sellerResp.data;
+            res.total = sellerResp.total;
+        }
+    } catch (e) {
+        res.message = e.message;
+    }
+    return res;
+}
+
 export default function SellerPage(props) {
     return renderWithLoggedInUser(props, render)
 }
@@ -63,11 +88,19 @@ function render(props) {
         "DRAFT": "grey"
     }
     let router = useRouter()
-    const { register, handleSubmit, errors } = useForm();
+    const { register, handleSubmit } = useForm();
     let q = router.query.q || ''
     let [search, setSearch] = useState(q)
-    let page = parseInt(router.query.page) || 0
-    let limit = parseInt(router.query.limit) || 20
+    const [sellers, setSellers] = useState(props.data ?? []);
+    const [message, setMessage] = useState(props.message);
+    const [openSellerFilter, setOpenSellerFilter] = useState(false);
+    const [sellerFilter, setSellerFilter] = useState();
+    const [pagination, setPagination] = useState({
+        page: parseInt(router.query.page) || 0,
+        limit: parseInt(router.query.limit) || 20,
+        count: props.count,
+    })
+    const { limit, page, count } = pagination;
 
     async function handleChange(event) {
         const target = event.target;
@@ -78,6 +111,36 @@ function render(props) {
     function onSearch() {
         let q = formatUrlSearch(search)
         router.push(`?q=${q}`)
+    }
+
+    const handleApplyFilter = async (data) => {
+        setSellerFilter(data);
+        const { sellers, message, total } = await getSellersByFilter(data, limit, 0);
+        if (message) setMessage(message);
+        setSellers(sellers);
+        setPagination({
+            limit,
+            page: 0,
+            count: total,
+        })
+        Router.replace("/crm/seller", "/crm/seller", {
+            shallow: true,
+        });
+    }
+
+    const handlePageChange = async (event, page, rowsPerPage) => {
+        if (openSellerFilter && sellerFilter) {
+            const { sellers, message, total } = await getSellersByFilter(sellerFilter, rowsPerPage, page);
+            if (message) setMessage(message);
+            setSellers(sellers);
+            setPagination({
+                limit: rowsPerPage,
+                page,
+                count: total,
+            })
+        } else {
+            Router.push(`/crm/seller?page=${page}&limit=${rowsPerPage}&q=${search}`);
+        }
     }
 
     const RenderRow = (row, i) => (
@@ -122,35 +185,49 @@ function render(props) {
             </Head>
             <MyCard>
                 <MyCardHeader title="Danh sách nhà bán hàng">
+                    <Button variant="contained" color="primary" style={{ marginRight: 8 }}
+                        onClick={() => setOpenSellerFilter(!openSellerFilter)}
+                    >
+                        <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
+                        Bộ lọc
+                    </Button>
                     <Link href="/crm/seller/new">
                         <Button variant="contained" color="primary">
                             <FontAwesomeIcon icon={faPlus} style={{ marginRight: 8 }} />  Thêm nhà bán hàng
                         </Button>
                     </Link>
                 </MyCardHeader>
-                <MyCardActions>
-                    <Paper className={styles.search}>
-                        <InputBase
-                            id="q"
-                            name="q"
-                            className={styles.input}
-                            value={search}
-                            onKeyPress={event => {
-                                if (event.key === 'Enter' || event.keyCode === 13) {
-                                    onSearch()
-                                }
-                            }}
-                            onChange={handleChange}
-                            inputRef={register}
-                            placeholder="Tìm kiếm nhà bán hàng"
-                            inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
-                        />
-                        <IconButton className={styles.iconButton} aria-label="search"
-                            onClick={handleSubmit(onSearch)}>
-                            <SearchIcon />
-                        </IconButton>
-                    </Paper>
-                </MyCardActions>
+                <Box display={!openSellerFilter ? "block" : "none"}>
+                    <MyCardActions>
+                        <Paper className={styles.search}>
+                            <InputBase
+                                id="q"
+                                name="q"
+                                className={styles.input}
+                                value={search}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter' || event.keyCode === 13) {
+                                        onSearch()
+                                    }
+                                }}
+                                onChange={handleChange}
+                                inputRef={register}
+                                placeholder="Tìm kiếm nhà bán hàng"
+                                inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
+                            />
+                            <IconButton className={styles.iconButton} aria-label="search"
+                                onClick={handleSubmit(onSearch)}>
+                                <SearchIcon />
+                            </IconButton>
+                        </Paper>
+                    </MyCardActions>
+                </Box>
+                <SellerFilter
+                    open={openSellerFilter}
+                    onFilterChange={handleApplyFilter}
+                    q={search}
+                    onClose={({q}) => setSearch(q)}
+                />
             </MyCard>
             <MyCard>
                 <TableContainer component={Paper}>
@@ -165,28 +242,26 @@ function render(props) {
                                 <TableCell align="center">Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
-                        {props.data.length > 0 ? (
+                        {sellers.length > 0 ? (
                             <TableBody>
-                                {props.data.map((row, i) => (
+                                {sellers.map((row, i) => (
                                     <RenderRow data={row} key={i} />
                                 ))}
                             </TableBody>
                         ) : (
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                        <TableCell colSpan={3} align="left">{message}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             )}
 
                         <MyTablePagination
                             labelUnit="nhà bán hàng"
-                            count={props.count}
+                            count={count}
                             rowsPerPage={limit}
                             page={page}
-                            onChangePage={(event, page, rowsPerPage) => {
-                                Router.push(`/crm/seller?page=${page}&limit=${rowsPerPage}&q=${q}`)
-                            }}
+                            onChangePage={handlePageChange}
                         />
                     </Table>
                 </TableContainer>
