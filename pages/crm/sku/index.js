@@ -3,8 +3,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     Box, Button,
 
-    Dialog, DialogActions, DialogContent,
-    DialogTitle, Divider, FormControl, FormLabel,
+
+    FormControl, FormLabel,
     Grid, IconButton,
 
 
@@ -22,10 +22,11 @@ import SearchIcon from "@material-ui/icons/Search";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import ModalCustom from "@thuocsi/nextjs-components/simple-dialog/dialogs";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getPriceClient } from "client/price";
 import { getPricingClient } from 'client/pricing';
-import { formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
+import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
 import { SkuFilter } from "containers/crm/sku/SkuFilter";
 import Head from "next/head";
 import Link from "next/link";
@@ -182,11 +183,12 @@ function render(props) {
         });
     }
 
-    const handleClickOpen = (code, status) => {
+    const handleClickOpen = (code, status, ticketCode) => {
         setOpen(true);
         setSelectedSku({
             code: code,
-            status: SkuStatuses.filter(e => e.value === status)[0]
+            status: SkuStatuses.filter(e => e.value === status)[0],
+            ticketCode: ticketCode
         })
     };
 
@@ -198,8 +200,9 @@ function render(props) {
         setLoading(true);
         let newStatuses = statuses
         newStatuses[selectedSku.code] = formData.status
-        setStatuses(newStatuses)
+        // setStatuses(newStatuses)
         formData.sellPriceCode = selectedSku.code
+        formData.approveCodes = [selectedSku.ticketCode]
         let _client = getPriceClient()
         let result = await _client.updateStatusPrice(formData)
         setLoading(false);
@@ -266,7 +269,7 @@ function render(props) {
                 </MyCardHeader>
                 <Box display={!openSkuFilter ? "block" : "none"}>
                     <MyCardActions>
-                        <Grid container spacing={1} md={6}>
+                        <Grid container spacing={1}>
                             <Grid item xs={12} sm={8} md={6}>
                                 <Paper className={styles.search} style={{ width: '100%' }}>
                                     <InputBase
@@ -306,6 +309,7 @@ function render(props) {
                             <TableCell align="right">Giá bán lẻ</TableCell>
                             {/* <TableCell align="left">Giá bán buôn</TableCell> */}
                             <TableCell align="center">Trạng thái</TableCell>
+                            <TableCell align="left">Ngày cập nhật</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -320,13 +324,24 @@ function render(props) {
                                     }</TableCell>
                                     <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
                                     <TableCell align="center">
-                                        <Button variant="outlined" 
-                                            size="small" 
-                                            style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}` }}
-                                            onClick={() => handleClickOpen(row.sellPriceCode, row.status)}>
-                                            {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
-                                        </Button>
+                                        {
+                                            (row.ticketCode && row.status === 'NEW')?(
+                                                <Button variant="outlined" 
+                                                    size="small" 
+                                                    style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}` }}
+                                                    onClick={() => handleClickOpen(row.sellPriceCode, row.status, row.ticketCode)}>
+                                                    {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
+                                                </Button>
+                                            ):(
+                                                <Button variant="outlined" disabled
+                                                    size="small" 
+                                                    style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}` }}>
+                                                    {typeof (row.sellPriceCode) !== 'undefined' ? (ProductStatus[statuses[row.sellPriceCode]]?ProductStatus[statuses[row.sellPriceCode]]:'Chưa xác định') : 'Chưa xác định'}
+                                                </Button>
+                                            )
+                                        }
                                     </TableCell>
+                                    <TableCell align="left">{formatDateTime(row.lastUpdatedTime)}</TableCell>
                                     <TableCell align="center">
                                         <Link href={`/crm/sku/edit?sellPriceCode=${row.sellPriceCode}`}>
                                             <Tooltip title="Cập nhật thông tin">
@@ -347,76 +362,63 @@ function render(props) {
                             </TableBody>
                         )}
 
-                    <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title" maxWidth={"sm"} fullWidth={true}>
-                        <DialogTitle id="form-dialog-title">Cập nhật trạng thái</DialogTitle>
-                        <Divider></Divider>
-                        <DialogContent>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <FormControl style={{ width: '100%' }} size="small">
-                                        <Typography gutterBottom>
-                                            <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
-                                                Trạng thái <span style={{ color: 'red' }}>*</span>
-                                            </FormLabel>
-                                        </Typography>
-                                        <Controller
-                                            id="status"
-                                            name="status"
-                                            variant="outlined"
-                                            size="small"
-                                            value={selectedSku.status}
-                                            control={control}
-                                            style={{ width: '50%' }}
-                                            defaultValue={SkuStatuses ? SkuStatuses[0].value : ''}
-                                            rules={{ required: true }}
-                                            error={!!errors.status}
-                                            as={
-                                                <Select size="small">
-                                                    {SkuStatuses?.map(({ value, label }) => (
-                                                        <MenuItem size="small" value={value} key={value}>{label}</MenuItem>
-                                                    ))}
-                                                </Select>
-                                            }
-                                        />
-                                    </FormControl>
-                                </Grid>
-                                <Grid item xs={12} sm={12} md={12}>
-                                    <FormControl style={{ width: '100%' }}>
-                                        <Typography gutterBottom>
-                                            <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>Ghi chú</FormLabel>
-                                        </Typography>
-                                        <TextField
-                                            id="description"
-                                            name="description"
-                                            disabled={true}
-                                            multiline
-                                            rows={4}
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder=""
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            style={{ width: '100%' }}
-                                            required
-                                            inputRef={
-                                                register()
-                                            }
-                                        />
-                                    </FormControl>
-                                </Grid>
+                    <ModalCustom open={open} name="simple-dialog" title="Cập nhật trạng thái" onClose={handleClose} onExcute={handleSubmit(onUpdateStatus)}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <FormControl style={{ width: '100%' }} size="small">
+                                    <Typography gutterBottom>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                            Trạng thái <span style={{ color: 'red' }}>*</span>
+                                        </FormLabel>
+                                    </Typography>
+                                    <Controller
+                                        id="status"
+                                        name="status"
+                                        variant="outlined"
+                                        size="small"
+                                        value={selectedSku.status}
+                                        control={control}
+                                        style={{ width: '50%' }}
+                                        defaultValue={SkuStatuses ? SkuStatuses[0].value : ''}
+                                        rules={{ required: true }}
+                                        error={!!errors.status}
+                                        as={
+                                            <Select size="small">
+                                                {SkuStatuses?.map(({ value, label }) => (
+                                                    <MenuItem size="small" value={value} key={value}>{label}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        }
+                                    />
+                                </FormControl>
                             </Grid>
-                        </DialogContent>
-                        <Divider></Divider>
-                        <DialogActions>
-                            <Button onClick={handleClose} color="secondary">
-                                Hủy
-                            </Button>
-                            <Button onClick={handleSubmit(onUpdateStatus)} color="primary">
-                                Lưu
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <FormControl style={{ width: '100%' }}>
+                                    <Typography gutterBottom>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>Ghi chú</FormLabel>
+                                    </Typography>
+                                    <TextField
+                                        id="description"
+                                        name="description"
+                                        multiline
+                                        rows={4}
+                                        variant="outlined"
+                                        size="small"
+                                        placeholder=""
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{ width: '100%' }}
+                                        required
+                                        inputRef={
+                                            register()
+                                        }
+                                    />
+                                </FormControl>
+                            </Grid>
+                        </Grid>
+                    </ModalCustom>
+                    
                     <MyTablePagination
                         labelUnit="sku"
                         count={count}
