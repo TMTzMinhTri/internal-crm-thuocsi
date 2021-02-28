@@ -57,7 +57,7 @@ class PriceClient extends APIClient {
     updateStatusPrice(data) {
         return this.callFromClient(
             "PUT",
-            `${PREFIX}/selling/status`,
+            `${PREFIX}/selling/ticket`,
             data
         )
     }

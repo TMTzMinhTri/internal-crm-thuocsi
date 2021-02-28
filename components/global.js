@@ -129,18 +129,18 @@ export const sellerStatuses = [
 
 export const ProductStatus = {
     "NEW": "Chờ duyệt",
-    "APPROVED": "Đã duyệt",
-    "CANCEL": "Hủy"
+    "ACTIVE": "Đang hoạt động",
+    "INACTIVE": "Tạm ngưng"
 }
 
 export const SkuStatuses = [
     {
-        label: "Chờ duyệt",
-        value: "NEW"
+        label: "Duyệt",
+        value: "APPROVED"
     },
     {
-        label: "Đã duyệt",
-        value: "APPROVED"
+        label: "Chờ duyệt",
+        value: "NEW"
     },
     {
         label: "Hủy",
