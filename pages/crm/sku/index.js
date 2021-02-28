@@ -323,15 +323,31 @@ function render(props) {
                                         showType(row.retailPrice.type)
                                     }</TableCell>
                                     <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
-                                    <TableCell align="center">
+                                    <TableCell align="left">
                                         {
-                                            (row.ticketCode && row.status === 'NEW')?(
-                                                <Button variant="outlined" 
-                                                    size="small" 
-                                                    style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}` }}
-                                                    onClick={() => handleClickOpen(row.sellPriceCode, row.status, row.ticketCode)}>
-                                                    {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
-                                                </Button>
+                                            (row.ticketCode)?(
+                                                (row.status === 'NEW')?(
+                                                    <Button variant="outlined" 
+                                                        size="small" 
+                                                        style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}` }}
+                                                        onClick={() => handleClickOpen(row.sellPriceCode, row.status, row.ticketCode)}>
+                                                        {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
+                                                    </Button>
+                                                ):(
+                                                    <>
+                                                        <Button variant="outlined" disabled
+                                                            size="small" 
+                                                            style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}`, marginRight: 5 }}>
+                                                            {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
+                                                        </Button>
+                                                        <Button variant="outlined" 
+                                                            size="small" 
+                                                            style={{ color: `${statusColor['NEW']}`, borderColor: `${statusColor['NEW']}` }}>
+                                                            {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus['NEW'] : 'Chưa xác định'}
+                                                        </Button>
+                                                    </>
+                                                )
+                                               
                                             ):(
                                                 <Button variant="outlined" disabled
                                                     size="small" 
