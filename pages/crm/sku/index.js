@@ -1,28 +1,39 @@
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-    IconButton, Button, Paper, Table, TableBody,
+    Box, Button,
+
+    Dialog, DialogActions, DialogContent,
+    DialogTitle, Divider, FormControl, FormLabel,
+    Grid, IconButton,
+
+
+    InputBase, MenuItem, Paper,
+
+
+    Select, Table, TableBody,
     TableCell, TableContainer, TableHead, TableRow,
-    Tooltip, Dialog, FormControl, FormLabel, DialogContent, DialogActions,
-    TextField, DialogTitle, Typography, Select, MenuItem, Divider, Grid, InputBase, Box,
+
+    TextField, Tooltip,
+    Typography
 } from "@material-ui/core";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getPriceClient } from "client/price";
 import { getPricingClient } from 'client/pricing';
-import { formatNumber, ProductStatus, SkuStatuses, SellPrices, formatUrlSearch } from "components/global";
+import { formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
+import { SkuFilter } from "containers/crm/sku/SkuFilter";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
-import { useForm, Controller } from "react-hook-form";
-import { getPriceClient } from "client/price";
-import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
-import styles from "./pricing.module.css"
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { SkuFilter } from "containers/crm/sku/SkuFilter";
+import { Controller, useForm } from "react-hook-form";
+import styles from "./pricing.module.css";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -118,6 +129,12 @@ const breadcrumb = [
         name: "Danh sách sku"
     },
 ]
+
+const statusColor = {
+    "NEW": "blue",
+    "ACTIVE": "green",
+    "INACTIVE": "grey"
+}
 
 function render(props) {
     const { error, success } = useToast();
@@ -303,8 +320,11 @@ function render(props) {
                                     }</TableCell>
                                     <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
                                     <TableCell align="center">
-                                        <Button variant="outlined" size="small" onClick={() => handleClickOpen(row.sellPriceCode, row.status)}>
-                                            {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : ''}
+                                        <Button variant="outlined" 
+                                            size="small" 
+                                            style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}` }}
+                                            onClick={() => handleClickOpen(row.sellPriceCode, row.status)}>
+                                            {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
                                         </Button>
                                     </TableCell>
                                     <TableCell align="center">
@@ -398,7 +418,7 @@ function render(props) {
                         </DialogActions>
                     </Dialog>
                     <MyTablePagination
-                        labelUnit="chỉ số"
+                        labelUnit="sku"
                         count={count}
                         rowsPerPage={limit}
                         page={page}
