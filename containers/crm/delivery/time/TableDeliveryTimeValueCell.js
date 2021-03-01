@@ -1,8 +1,6 @@
 import {
     IconButton,
     TableCell,
-    // eslint-disable-next-line no-unused-vars
-    TableCellProps,
     TextField,
     // eslint-disable-next-line no-unused-vars
     TextFieldProps,
@@ -25,7 +23,6 @@ export const TableDeliveryTimeValueCell = ({
     ...others
 }) => {
     const [deliveryTime, setDeliveryTime] = useState(initialDeliveryTime);
-    const [focused, setFocused] = useState(false);
     useEffect(() => {
         setDeliveryTime(initialDeliveryTime);
     }, [initialDeliveryTime]);
@@ -49,7 +46,6 @@ export const TableDeliveryTimeValueCell = ({
                                     disabled={deliveryTime == initialDeliveryTime}
                                     onClick={() => {
                                         onUpdate?.({ code, deliveryTime });
-                                        setFocused(false);
                                     }}
                                 >
                                     <Done />
@@ -58,13 +54,11 @@ export const TableDeliveryTimeValueCell = ({
                         )
                     ),
                 }}
-                inputProps={{ step: 0.5, min: 0, style: { textAlign: 'right' } }}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
+                inputProps={{ step: 0.5, min: 0, style: { textAlign: "right" } }}
                 onChange={e => setDeliveryTime(+e.target.value)}
                 value={deliveryTime}
                 {...TextFieldProps}
             />
         </TableCell>
-    )
-}
+    );
+};
