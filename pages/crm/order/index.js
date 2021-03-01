@@ -1,37 +1,24 @@
 import {
     Button,
-    ButtonGroup,
     Paper,
-    Dialog,
-    DialogActions,
-    DialogContent,
-    DialogContentText,
-    DialogTitle,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
+    Box,
 } from "@material-ui/core";
-import Grid from "@material-ui/core/Grid";
-import DoneIcon from '@material-ui/icons/Done';
-import ClearIcon from '@material-ui/icons/Clear';
-import HourglassFullIcon from '@material-ui/icons/HourglassFull';
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import IndeterminateCheckBoxIcon from '@material-ui/icons/IndeterminateCheckBox';
-import LockIcon from '@material-ui/icons/Lock';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from "@material-ui/icons/Search";
 import {
     doWithLoggedInUser,
     renderWithLoggedInUser,
 } from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getOrderClient } from "client/order";
 import Head from "next/head";
 import Link from "next/link";
@@ -41,9 +28,11 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
 import { formatDateTime, formatNumber } from "components/global"
-import { ErrorCode, formatUrlSearch, statuses, condUserType } from 'components/global';
-import { Lock, SettingsPhoneRounded } from "@material-ui/icons";
+import { formatUrlSearch } from 'components/global';
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
+import { OrderFilter } from "containers/crm/order/OrderFilter";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFilter } from "@fortawesome/free-solid-svg-icons";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -76,34 +65,92 @@ export async function loadOrderData(ctx) {
     }
 }
 
+async function getOrderByFilter(data, limit, offset) {
+    const res = {
+        orders: [],
+        total: 0,
+        message: "",
+    }
+    try {
+        let orderClient = getOrderClient();
+        const orderResp = await orderClient.getOrderByFilter({ ...data, limit, offset });
+        if (orderResp.status !== "OK") {
+            if (orderResp.status === 'NOT_FOUND') {
+                res.message = "Không tìm thấy kết quả phù hợp";
+            } else {
+                res.message = orderResp.message;
+            }
+        } else {
+            res.orders = orderResp.data;
+            res.total = orderResp.total;
+        }
+    } catch (e) {
+        res.message = e.message;
+    }
+    return res;
+}
+
 export default function OrderPage(props) {
     return renderWithLoggedInUser(props, render);
 }
 
 function render(props) {
     let router = useRouter();
-    const { register, handleSubmit, errors } = useForm();
+    const { register, handleSubmit } = useForm();
 
-    let q = router.query.q || "";
-    const [search, setSearch] = useState(q);
-    let page = parseInt(router.query.page) || 0;
-    let limit = parseInt(router.query.limit) || 20;
+    const [search, setSearch] = useState(router.query.q ?? "");
+    const [orders, setOrders] = useState(props.data ?? []);
+    const [message, setMessage] = useState(props.message);
+    const [openOrderFilter, setOpenOrderFilter] = useState(false);
+    const [orderFilter, setOrderFilter] = useState();
+    const [pagination, setPagination] = useState({
+        page: parseInt(router.query.page) || 0,
+        limit: parseInt(router.query.limit) || 20,
+        count: props.count,
+    })
+    const { limit, page, count } = pagination;
 
     let statusColor = {
         "WaitConfirm": "orange",
         "Confirmed": "green",
         "Canceled": "red"
     }
-    async function handleChange(event) {
-        const target = event.target;
-        const value = target.value;
-        setSearch(value);
+
+    const handleApplyFilter = async (data) => {
+        setOrderFilter(data);
+        const { orders, message, total } = await getOrderByFilter(data, limit, 0);
+        if (message) setMessage(message);
+        setOrders(orders);
+        setPagination({
+            limit,
+            page: 0,
+            count: total,
+        })
+        Router.replace("/crm/order", "/crm/order", {
+            shallow: true,
+        });
     }
 
     async function onSearch() {
-        q = formatUrlSearch(search);
+        const q = formatUrlSearch(search);
         router.push(`?q=${q}`);
     }
+
+    const handlePageChange = async (event, page, rowsPerPage) => {
+        if (openOrderFilter && orderFilter) {
+            const { orders, message, total } = await getOrderByFilter(orderFilter, rowsPerPage, page);
+            if (message) setMessage(message);
+            setOrders(orders);
+            setPagination({
+                limit: rowsPerPage,
+                page,
+                count: total,
+            })
+        } else {
+            Router.push(`/crm/order?page=${page}&limit=${rowsPerPage}&q=${search}`);
+        }
+    }
+
 
     const RenderRow = (row, i) => (
         <TableRow key={i}>
@@ -116,11 +163,11 @@ function render(props) {
             <TableCell align="right">{formatNumber(row.data.totalPrice)}</TableCell>
             <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
             <TableCell align="center">
-                <Button size="small" variant="outlined" style={{color: statusColor[row.data.status], borderColor: statusColor[row.data.status]}}>
+                <Button size="small" variant="outlined" style={{ color: statusColor[row.data.status], borderColor: statusColor[row.data.status] }}>
                     {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
-                    : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}
+                        : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}
                 </Button>
-                
+
             </TableCell>
             <TableCell align="left">
                 <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
@@ -153,31 +200,44 @@ function render(props) {
             </Head>
             <MyCard>
                 <MyCardHeader title="Danh sách đơn hàng">
-
+                    <Button variant="contained" color="primary" style={{ marginRight: 8 }}
+                        onClick={() => setOpenOrderFilter(!openOrderFilter)}
+                    >
+                        <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
+                        Bộ lọc
+                    </Button>
                 </MyCardHeader>
-                <MyCardActions>
-                    <Paper className={styles.search}>
-                        <InputBase
-                            id="q"
-                            name="q"
-                            className={styles.input}
-                            value={search}
-                            onChange={handleChange}
-                            inputRef={register}
-                            onKeyPress={event => {
-                                if (event.key === 'Enter' || event.keyCode === 13) {
-                                    onSearch()
-                                }
-                            }}
-                            placeholder="Nhập mã đơn hàng"
-                            inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
-                        />
-                        <IconButton className={styles.iconButton} aria-label="search"
-                            onClick={handleSubmit(onSearch)}>
-                            <SearchIcon />
-                        </IconButton>
-                    </Paper>
-                </MyCardActions>
+                <Box display={!openOrderFilter ? "block" : "none"}>
+                    <MyCardActions>
+                        <Paper className={styles.search}>
+                            <InputBase
+                                id="q"
+                                name="q"
+                                className={styles.input}
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                inputRef={register}
+                                onKeyPress={event => {
+                                    if (event.key === 'Enter' || event.keyCode === 13) {
+                                        onSearch()
+                                    }
+                                }}
+                                placeholder="Nhập mã đơn hàng"
+                                inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
+                            />
+                            <IconButton className={styles.iconButton} aria-label="search"
+                                onClick={handleSubmit(onSearch)}>
+                                <SearchIcon />
+                            </IconButton>
+                        </Paper>
+                    </MyCardActions>
+                </Box>
+                <OrderFilter
+                    open={openOrderFilter}
+                    onFilterChange={handleApplyFilter}
+                    q={search}
+                    onClose={({ q }) => setSearch(q ?? "")}
+                />
             </MyCard>
             <MyCard>
                 <TableContainer component={Paper}>
@@ -204,30 +264,26 @@ function render(props) {
                                 <TableCell align="left">Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
-                        {props.data.length > 0 ? (
+                        {orders.length > 0 ? (
                             <TableBody>
-                                {props.data.map((row, i) => (
+                                {orders.map((row, i) => (
                                     <RenderRow data={row} key={i} />
                                 ))}
                             </TableBody>
                         ) : (
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                        <TableCell colSpan={3} align="left">{message}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             )}
 
                         <MyTablePagination
                             labelUnit="đơn hàng"
-                            count={props.count}
+                            count={count}
                             rowsPerPage={limit}
                             page={page}
-                            onChangePage={(event, page, rowsPerPage) => {
-                                Router.push(
-                                    `/crm/order?page=${page}&limit=${rowsPerPage}&q=${q}`
-                                );
-                            }}
+                            onChangePage={handlePageChange}
                         />
                     </Table>
                 </TableContainer>
