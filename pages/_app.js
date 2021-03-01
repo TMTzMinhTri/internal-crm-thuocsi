@@ -67,7 +67,20 @@ const menu = [{
                     link: "/crm/voucher"
                 }
             ]
-        }]
+        },
+        {
+            key:"DELIVERY",
+            name:"Giao hàng",
+            link:"/crm/delivery/time",
+            subMenu: [
+                {
+                    key:"DELIVERY",
+                    name:"Thời gian giao hàng",
+                    link:"/crm/delivery/time",
+                },
+            ]
+        },
+    ]
 
 export var theme = createMuiTheme({
     palette: {
