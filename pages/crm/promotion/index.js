@@ -255,10 +255,10 @@ function render(props) {
   return (
     <AppCRM select="/crm/promotion">
       <Head>
-        <title>Danh sách khuyến mãi</title>
+        <title>Danh sách chương trình khuyến mãi</title>
       </Head>
       <MyCard>
-        <MyCardHeader title="Danh sách khuyến mãi">
+        <MyCardHeader title="Danh sách chương trình khuyến mãi">
           <Link
             href={`/crm/promotion/${
               typePromotion === defaultPromotionType.PROMOTION
