@@ -478,7 +478,7 @@ function render(props) {
                                         rules={{ required: true }}
                                         error={!!errors.status}
                                         as={
-                                            <Select size="small">
+                                            <Select size="small" disabled>
                                                 {SkuStatuses?.map(({ value, label }) => (
                                                     <MenuItem size="small" value={value} key={value}>{label}</MenuItem>
                                                 ))}
