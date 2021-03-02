@@ -64,6 +64,12 @@ class SellerClient extends APIClient {
     });
   }
 
+  getSellerBySellerCodes(codes) {
+    return this.callFromNextJS("POST", `${URI}/account/list`, {
+      codes,
+    });
+  }
+
   getSellerBySellerCodesClient(codes) {
     return this.callFromClient("POST", `${URI}/account/list`, {
       codes,

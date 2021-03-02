@@ -18,7 +18,19 @@ const menu = [{
             key: "PRICING",
             name: "Sản phẩm",
             link: "/crm/sku",
-            icon: faDollarSign
+            icon: faDollarSign,
+            subMenu: [
+                {
+                    key: "PRICING_ACTIVE",
+                    name: "Sản phẩm đang hoạt động",
+                    link: "/crm/sku/active",
+                },
+                {
+                    key: "PRICING_REQUEST",
+                    name: "Sản phẩm chờ duyệt",
+                    link: "/crm/sku/request",
+                },
+            ]
         },
         {
             key: "FEE",

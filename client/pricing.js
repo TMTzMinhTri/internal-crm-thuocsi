@@ -31,6 +31,33 @@ class PricingClient extends APIClient {
         limit,
         offset,
     }) {
+        return this.callFromNextJS(
+            "POST",
+            `${prefix}/selling/search`,
+            {
+                q,
+                sku,
+                productCode,
+                type,
+                price,
+                status,
+                limit,
+                offset,
+                getTotal: true,
+            }
+        )
+    }
+
+    getListPricingByFilterFromClient({
+        q,
+        sku,
+        productCode,
+        type,
+        price,
+        status,
+        limit,
+        offset,
+    }) {
         return this.callFromClient(
             "POST",
             `${prefix}/selling/search`,
