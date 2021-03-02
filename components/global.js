@@ -117,12 +117,14 @@ export const statuses = [
 
 export const sellerStatuses = [
     {
-        value: "NEW",
-        label: "Mới",
+        value: "ACTIVE",
+        label: "Đang hoạt động",
+        color: "green"
     },
     {
-        value: "DRAFT",
-        label: "Nháp",
+        value: "INACTIVE",
+        label: "Chưa kích hoạt",
+        color: "grey"
     }
 ]
 
