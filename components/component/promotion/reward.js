@@ -202,7 +202,7 @@ const Reward = (props) => {
                             })}
                           />
                         </Grid>
-                        {length > 1 && (
+                        {!disabled && length > 1 && (
                           <Grid item xs={1} container justify="center">
                             <IconButton
                               onClick={() => handleRemoveAttachedProduct(index)}
@@ -215,16 +215,18 @@ const Reward = (props) => {
                     </Paper>
                   ))}
 
-                  <Grid item xs={2}>
-                    <Button
-                      variant="contained"
-                      startIcon={<Add />}
-                      color="primary"
-                      onClick={handleAddAttachedProduct}
-                    >
-                      Thêm sản phẩm
-                    </Button>
-                  </Grid>
+                  {!disabled && (
+                    <Grid item xs={2}>
+                      <Button
+                        variant="contained"
+                        startIcon={<Add />}
+                        color="primary"
+                        onClick={handleAddAttachedProduct}
+                      >
+                        Thêm sản phẩm
+                      </Button>
+                    </Grid>
+                  )}
                 </>
               )}
             </>
