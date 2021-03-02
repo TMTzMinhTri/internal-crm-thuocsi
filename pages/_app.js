@@ -23,7 +23,7 @@ const menu = [{
                 {
                     key: "PRICING_ACTIVE",
                     name: "Sản phẩm đang hoạt động",
-                    link: "/crm/sku/active",
+                    link: "/crm/sku/index",
                 },
                 {
                     key: "PRICING_REQUEST",
