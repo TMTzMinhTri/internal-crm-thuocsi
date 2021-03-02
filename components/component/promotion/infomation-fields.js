@@ -228,6 +228,7 @@ const InfomationFields = (props) => {
                       }}
                       control={
                         <Switch
+                          color="primary"
                           classes={{
                             root: classes.root,
                           }}
