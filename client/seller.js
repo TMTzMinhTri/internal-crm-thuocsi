@@ -77,6 +77,10 @@ class SellerClient extends APIClient {
   updateSeller(data) {
     return this.callFromClient("PUT", `${URI}/account`, data);
   }
+
+  activeAccount(data) {
+    return this.callFromClient("PUT", `${URI}/account/active`, data);
+  }
 }
 
 export function getSellerClient(ctx, data) {

@@ -7,6 +7,7 @@ import {
     TableCell,
     TableContainer,
     TableHead,
+    Grid,
     TableRow
 } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
@@ -24,7 +25,9 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./seller.module.css";
-import { formatUrlSearch, sellerStatuses } from 'components/global';
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { formatUrlSearch, statuses } from 'components/global';
+import { ConfirmActiveDialog } from "containers/crm/customer/ConfirmActiveDialog";
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -84,13 +87,20 @@ export default function SellerPage(props) {
 
 function render(props) {
     const statusColor = {
-        "NEW": "blue",
-        "DRAFT": "grey"
+        "ACTIVE": "green",
+        "INACTIVE": "grey"
+    }
+    const statusLabel = {
+        "ACTIVE": "Đang hoạt động",
+        "INACTIVE": "Chưa kích hoạt"
     }
     let router = useRouter()
     const { register, handleSubmit } = useForm();
     let q = router.query.q || ''
     let [search, setSearch] = useState(q)
+    const { error, success } = useToast();
+    const [openActiveAccountDialog, setOpenActiveAccountDialog] = useState(false);
+    const [activeSellerCode, setActiveSellerCode] = useState();
     const [sellers, setSellers] = useState(props.data ?? []);
     const [message, setMessage] = useState(props.message);
     const [openSellerFilter, setOpenSellerFilter] = useState(false);
@@ -143,17 +153,30 @@ function render(props) {
         }
     }
 
+    async function activeAccount() {
+        const _client = getSellerClient()
+        setOpenActiveAccountDialog(false)
+        const resp = await _client.activeAccount({ code: activeSellerCode.code})
+        if (resp.status !== "OK") {
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+        } else {
+            props.data.filter(row => row.code === activeSellerCode.code)[0].status = "ACTIVE"
+            setActiveSellerCode(null)
+            success("Kích hoạt tài khoản thành công")
+        }
+    }
+
     const RenderRow = (row, i) => (
         <TableRow key={i}>
             <TableCell component="th" scope="row">{row.data.code}</TableCell>
             <TableCell align="left">{row.data.name}</TableCell>
             <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.data.email}</TableCell>
             <TableCell align="left">{row.data.phone}</TableCell>
-            <TableCell align="left">
-                <Button size="small" variant="outlined" style={{ color: `${statusColor[row.data.status]}`, borderColor: `${statusColor[row.data.status]}` }}>
-                    {sellerStatuses.find(e => e.value === row.data.status)?.label}
-                </Button>
+            <TableCell align="center">
+                <Button disabled={row.data.status == "ACTIVE"} onClick={() => { setOpenActiveAccountDialog(true); setActiveSellerCode(row.data) }} size="small" variant="outlined" 
+                style={{ color: `${statusColor[row.data.status]}`, borderColor: `${statusColor[row.data.status]}` }}>{statusLabel[row.data.status]}</Button>
             </TableCell>
+            
             <TableCell align="center">
                 <Link href={`/crm/seller/edit?sellerCode=${row.data.code}`}>
                     <a>
@@ -183,6 +206,11 @@ function render(props) {
             <Head>
                 <title>Danh sách nhà bán hàng</title>
             </Head>
+            <ConfirmActiveDialog
+                open={openActiveAccountDialog}
+                onClose={() => setOpenActiveAccountDialog(false)}
+                onConfirm={() => activeAccount()}
+            />
             <MyCard>
                 <MyCardHeader title="Danh sách nhà bán hàng">
                     <Button variant="contained" color="primary" style={{ marginRight: 8 }}
@@ -199,27 +227,31 @@ function render(props) {
                 </MyCardHeader>
                 <Box display={!openSellerFilter ? "block" : "none"}>
                     <MyCardActions>
-                        <Paper className={styles.search}>
-                            <InputBase
-                                id="q"
-                                name="q"
-                                className={styles.input}
-                                value={search}
-                                onKeyPress={event => {
-                                    if (event.key === 'Enter' || event.keyCode === 13) {
-                                        onSearch()
-                                    }
-                                }}
-                                onChange={handleChange}
-                                inputRef={register}
-                                placeholder="Tìm kiếm nhà bán hàng"
-                                inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
-                            />
-                            <IconButton className={styles.iconButton} aria-label="search"
-                                onClick={handleSubmit(onSearch)}>
-                                <SearchIcon />
-                            </IconButton>
-                        </Paper>
+                        <Grid container spacing={3}>
+                            <Grid item xs={12} sm={4}>
+                                <Paper className={styles.search}>
+                                    <InputBase
+                                        id="q"
+                                        name="q"
+                                        className={styles.input}
+                                        value={search}
+                                        onKeyPress={event => {
+                                            if (event.key === 'Enter' || event.keyCode === 13) {
+                                                onSearch()
+                                            }
+                                        }}
+                                        onChange={handleChange}
+                                        inputRef={register}
+                                        placeholder="Tìm kiếm nhà bán hàng"
+                                        inputProps={{ 'aria-label': 'Tìm kiếm nhà bán hàng' }}
+                                    />
+                                    <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={handleSubmit(onSearch)}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Paper>
+                            </Grid>
+                        </Grid>
                     </MyCardActions>
                 </Box>
                 <SellerFilter
@@ -238,7 +270,7 @@ function render(props) {
                                 <TableCell align="left">Tên nhà bán hàng</TableCell>
                                 <TableCell align="left">Email</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
-                                <TableCell align="left">Trạng thái</TableCell>
+                                <TableCell align="center">Trạng thái</TableCell>
                                 <TableCell align="center">Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
