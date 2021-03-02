@@ -27,6 +27,7 @@ import { getFeeClient } from "client/fee";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
 import { ErrorCode, formatUrlSearch } from "components/global";
 import { ConfirmDialog } from "containers/crm/fee/ConfirmDialog";
+import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
@@ -40,7 +41,7 @@ async function loadFeeData(ctx, offset, limit, q) {
     const res = await feeClient.getFee(offset, limit, q);
     if (res.status !== 'OK') {
         if (res.status === 'NOT_FOUND') {
-            return { data: [], count: 0, message: 'Không tìm thấy phí dịch vụ' }
+            return { data: [], count: 0, message: 'Không tìm thấy công thức phí' }
         }
         return { data: [], count: 0, message: res.message }
     }
@@ -120,17 +121,20 @@ function render({ feeData, page, limit, q }) {
             link: "/crm"
         },
         {
-            name: "Phí dịch vụ"
+            name: "Danh sách công thức phí"
         }
     ]
 
     return (
         <AppCRM select="/crm/fee" breadcrumb={breadcrumb}>
+            <Head>
+                <title>Danh sách công thức phí</title>
+            </Head>
             <MyCard>
-                <MyCardHeader title="Phí dịch vụ">
+                <MyCardHeader title="Danh sách công thức phí">
                     <Link href="/crm/fee/new">
                         <Button variant="contained" color="primary">
-                            <FontAwesomeIcon icon={faPlus} style={{ marginRight: 8 }} />  Thêm phí dịch vụ
+                            <FontAwesomeIcon icon={faPlus} style={{ marginRight: 8 }} />  Thêm công thức phí
                         </Button>
                     </Link>
                 </MyCardHeader>
@@ -146,7 +150,7 @@ function render({ feeData, page, limit, q }) {
                                     autoComplete='off'
                                     onChange={(e) => setSearchText(e.target.value)}
                                     onKeyPress={handleSearch}
-                                    placeholder="Nhập tên hoặc mã phí dịch vụ"
+                                    placeholder="Nhập tên hoặc mã công thức phí"
                                     inputProps={{ 'aria-label': 'Nhập tên phí' }}
                                 />
                                 <IconButton className={styles.iconButton} aria-label="search"
@@ -220,7 +224,7 @@ function render({ feeData, page, limit, q }) {
                             )}
                         {!!feeData.count && (
                             <MyTablePagination
-                                labelUnit="phí dịch vụ"
+                                labelUnit="công thức phí"
                                 count={feeData.count}
                                 rowsPerPage={limit}
                                 page={page}
