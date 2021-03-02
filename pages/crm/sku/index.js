@@ -13,7 +13,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Tooltip,
+    Tooltip
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
@@ -25,11 +25,13 @@ import { getSellerClient } from "client/seller";
 import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices } from "components/global";
 import { SkuActiveFilter } from "containers/crm/sku/active/SkuActiveFilter";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
 import styles from "./pricing.module.css";
+import { getFirstImage } from "./request";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -327,18 +329,20 @@ function render(props) {
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
+                        <col width="5%" />
                         <col width="10%" />
                         <col width="20%" />
-                        <col width="15%" />
-                        <col width="15%" />
+                        <col width="20%" />
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
+                        <col width="5%" />
                     </colgroup>
                     <TableHead>
                         <TableRow>
                             <TableCell align="left">SKU</TableCell>
+                            <TableCell align="center">Hình ảnh</TableCell>
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Nhà bán hàng</TableCell>
                             <TableCell align="left">Loại</TableCell>
@@ -353,8 +357,11 @@ function render(props) {
                             {skus.map((row, i) => (
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
+                                    <TableCell align="center">
+                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
+                                    </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
-                                    <TableCell>{row.seller.code} - {row.seller.name}</TableCell>
+                                    <TableCell>{row.seller.code?(row.seller?.code + ' - ' + row.seller?.name):row.sellerCode}</TableCell>
                                     <TableCell align="left">{
                                         showType(row.retailPrice.type)
                                     }</TableCell>
@@ -362,7 +369,7 @@ function render(props) {
                                     <TableCell align="center">
                                         <Button variant="outlined" disabled
                                             size="small"
-                                            style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}` }}>
+                                            style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}`, width: '150px' }}>
                                             {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
                                         </Button>
                                     </TableCell>

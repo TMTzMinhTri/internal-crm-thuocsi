@@ -19,7 +19,7 @@ import {
     TableRow,
     TextField,
     Tooltip,
-    Typography,
+    Typography
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
@@ -34,6 +34,7 @@ import { getSellerClient } from "client/seller";
 import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
 import { SkuRequestFilter } from "containers/crm/sku/request/SkuRequestFilter";
 import Head from "next/head";
+import Image from "next/image";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
@@ -63,7 +64,7 @@ export async function loadPricingData(ctx) {
 
     try {
         const _client = getPricingClient(ctx, {});
-        const pricingResp = await _client.getListPricing(offset, limit, q);
+        const pricingResp = await _client.getListPricing(offset, limit, q, true);
         if (pricingResp.status === 'OK') {
             props.data = pricingResp.data ?? [];
             props.count = pricingResp.total;
@@ -181,6 +182,13 @@ async function getPricingDataByFilter(data, limit, offset) {
         res.message = e.message;
     }
     return res;
+}
+
+export function getFirstImage(val) {
+    if (val && val.length > 0) {
+        return val[0];
+    }
+    return `/default.png`;
 }
 
 export default function PricingPage(props) {
@@ -348,7 +356,7 @@ function render(props) {
                 <Box display={!openSkuFilter ? "block" : "none"}>
                     <MyCardActions>
                         <Grid container spacing={1}>
-                            <Grid item xs={12} sm={8} md={6}>
+                            <Grid item xs={12} sm={8} md={4}>
                                 <Paper className={styles.search} style={{ width: '100%' }}>
                                     <InputBase
                                         id="q"
@@ -379,18 +387,20 @@ function render(props) {
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
+                        <col width="5%" />
                         <col width="10%" />
-                        <col width="15%" />
-                        <col width="15%" />
+                        <col width="20%" />
                         <col width="20%" />
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
                         <col width="10%" />
+                        <col width="5%" />
                     </colgroup>
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">SKU</TableCell>
+                            <TableCell align="center">SKU</TableCell>
+                            <TableCell align="center">Hình ảnh</TableCell>
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Nhà bán hàng</TableCell>
                             <TableCell align="left">Loại</TableCell>
@@ -405,8 +415,11 @@ function render(props) {
                             {skus.map((row, i) => (
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
+                                    <TableCell align="center">
+                                            <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
+                                    </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
-                                    <TableCell>{row.seller.code} - {row.seller.name}</TableCell>
+                                    <TableCell>{row.seller.code?(row.seller?.code + ' - ' + row.seller?.name):row.sellerCode}</TableCell>
                                     <TableCell align="left">{
                                         showType(row.retailPrice.type)
                                     }</TableCell>

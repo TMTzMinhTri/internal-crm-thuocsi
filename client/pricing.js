@@ -10,14 +10,15 @@ class PricingClient extends APIClient {
         super(ctx, data)
     }
 
-    getListPricing(offset, limit, q) {
+    getListPricing(offset, limit, q, waitConfirm) {
         return this.callFromNextJS(
             "GET",
             `${prefix}/selling/list`, {
             q,
             offset,
             limit,
-            getTotal: true
+            getTotal: true,
+            waitConfirm
         })
     }
 
