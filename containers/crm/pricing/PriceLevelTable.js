@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import {
     Box,
     IconButton,
@@ -7,19 +6,21 @@ import {
     TableCell,
     TableContainer,
     TableHead,
-    TableRow,
+    TableRow
 } from "@material-ui/core";
 import { Edit } from "@material-ui/icons";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { useRouter } from "next/router";
-
-import { ViewType } from "./enum";
-import { TableFeeValueCell } from "./TableFeeValueCell";
 import { getFeeClient } from "client/fee";
 import { unknownErrorText } from "components/commonErrors";
-import { ConfirmDialog } from "./ConfirmDialog";
+import { formatNumber } from "components/global";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import React, { useEffect, useState } from "react";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { ViewType } from "./enum";
+import { TableFeeValueCell } from "./TableFeeValueCell";
+
 
 /**
  * @param {object} props
@@ -99,8 +100,8 @@ export const PriceLevelTable = (props) => {
                         <TableRow key={`tr_${i}`}>
                             <TableCell>{row.code}</TableCell>
                             <TableCell>{row.name}</TableCell>
-                            <TableCell align="right">{row.fromPrice}</TableCell>
-                            <TableCell align="right">{row.toPrice}</TableCell>
+                            <TableCell align="right">{formatNumber(row.fromPrice)}</TableCell>
+                            <TableCell align="right">{formatNumber(row.toPrice)}</TableCell>
                             <TableFeeValueCell
                                 code={row.code}
                                 initialFee={row.feeValue}
