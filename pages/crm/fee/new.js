@@ -53,7 +53,7 @@ function render() {
             const feeClient = getFeeClient();
             const res = await feeClient.createFee(feeCreatorData);
             if (res.status === "OK") {
-                success("Tạo công thức phí thành công");
+                success("Tạo phí dịch vụ thành công");
                 router.push(`/crm/fee/edit?feeCode=${res.data[0].code}`);
             } else {
                 error(res.message ?? actionErrorText);
@@ -75,21 +75,21 @@ function render() {
             link: "/crm"
         },
         {
-            name: "Danh sách công thức phí",
+            name: "Phí dịch vụ",
             link: "/crm/fee"
         },
         {
-            name: "Thêm mới công thức phí"
+            name: "Thêm mới"
         }
     ]
 
     return (
         <AppCRM select="/crm/fee" breadcrumb={breadcrumb}>
             <Head>
-                <title>Thêm mới công thức phí</title>
+                <title>Phí dịch vụ và giá bán</title>
             </Head>
             <MyCard>
-                <MyCardHeader title="Thêm mới công thức phí"/>
+                <MyCardHeader title="Phí dịch vụ và giá bán"/>
             </MyCard>
             <MyCard>
                 <form noValidate>

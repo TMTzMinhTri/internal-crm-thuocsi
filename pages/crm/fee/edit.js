@@ -25,7 +25,7 @@ async function loadFeeData(ctx) {
             message: (() => {
                 switch (res.status) {
                     case 'NOT_FOUND':
-                        return "Không tìm thấy công thức phí";
+                        return "Không tìm thấy phí dịch vụ";
                     default:
                         return res.message;
                 }
@@ -49,14 +49,14 @@ export async function getServerSideProps(ctx) {
 function FeeNotFound({ message = "Không tìm thấy kết quả phù hợp" }) {
     return (<AppCRM select="/crm/fee">
         <Head>
-            <title>Cập nhật công thức phí</title>
+            <title>Phí dịch vụ và giá bán</title>
         </Head>
         <div className={globalStyles.height404}>
             <div>
                 <span>{message} | </span>
                 <Link href={`/crm/fee`}>
-                    Quay lại trang danh sách công thức phí.
-                </Link>
+                    Quay lại trang danh sách phí dịch vụ.
+            </Link>
             </div>
         </div>
     </AppCRM>)
@@ -90,7 +90,7 @@ function render({ data: { data, status, message } }) {
         feeUpdateData.code = data.code;
         const res = await feeClient.updateFee(feeUpdateData);
         if (res.status === "OK") {
-            toast.success("Cập nhật công thức phí thành công");
+            toast.success("Cập nhật phí dịch vụ thành công");
         } else {
             toast.error(
                 res.message || "Thao tác không thành công, vui lòng thử lại sau"
@@ -110,18 +110,18 @@ function render({ data: { data, status, message } }) {
             link: "/crm"
         },
         {
-            name: "Danh sách công thức phí",
+            name: "Phí dịch vụ",
             link: "/crm/fee"
         },
         {
-            name: "Cập nhật công thức phí"
+            name: "Cập nhật phí dịch vụ"
         }
     ]
 
     return (
         <AppCRM select="/crm/fee" breadcrumb={breadcrumb}>
             <Head>
-                <title>Cập nhật công thức phí</title>
+                <title>Phí dịch vụ và giá bán</title>
             </Head>
             <MyCard>
                 <MyCardHeader title={'Công thức phí #' + data.code }/>
