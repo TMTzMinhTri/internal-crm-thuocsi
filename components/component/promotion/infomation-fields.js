@@ -88,6 +88,11 @@ const InfomationFields = (props) => {
                   error={!!errors.promotionName}
                   required
                   inputRef={register({
+                    validate: (value) => {
+                      console.log(value.trim().length, "valueeee");
+                      if (value.trim().length <= 6)
+                        return "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự";
+                    },
                     required: "Tên khuyến mãi không được để trống",
                     maxLength: {
                       value: 250,
@@ -97,6 +102,7 @@ const InfomationFields = (props) => {
                       value: 6,
                       message: "Tên khuyến mãi phải có độ dài lớn hơn 6 kí tự",
                     },
+
                     // pattern: {
                     //   value: /[A-Za-z]/,
                     //   message: "Tên khuyến mãi phải có kí tự là chứ số",
