@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export async function searchPromotion(promotionName) {
-  return getPromoClient().getPromotionFromClient(promotionName);
+  return getPromoClient().getPromotionFromClient(promotionName,5,0,false,"ACTIVE");
 }
 
 export async function searchCustomer(customerName) {
@@ -175,12 +175,21 @@ export default function VoucherCodeBody(props) {
           listCustomer.push(cusResponse);
         }
       });
-      console.log("list", listCustomer);
       setListCustomer(listCustomer);
     } else {
       setListCustomer([]);
     }
   };
+
+  const validateUnicode = (value) => {
+    let result = false
+    for (let i = 0; i < value.length; i++) {
+      if (value.charCodeAt(i) > 127 && i > 0) {
+        result = true
+      }
+    }
+    return result
+  }
 
   const validateNumber = (number, message) => {
     if (number < 0) {
@@ -256,28 +265,32 @@ export default function VoucherCodeBody(props) {
               Mã khuyến mãi<span style={{ color: "red" }}> *</span>
             </h5>
             <TextField
-              id="code"
-              name="code"
-              disabled={edit}
-              helperText={errors.code?.message}
-              InputLabelProps={{
-                shrink: true,
-              }}
-              error={!!errors.code}
-              placeholder="Nhập mã khuyến mãi"
-              style={{ width: "100%" }}
-              required
-              onChange={(e) => {
-                setValue("code", e.target.value.trim().toUpperCase());
-              }}
-              inputRef={register({
-                validate: {
-                  required: (val) => {
-                    return val.trim().length > 0;
+                id="code"
+                name="code"
+                disabled={edit}
+                helperText={errors.code?.message}
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                error={!!errors.code}
+                placeholder="Nhập mã khuyến mãi"
+                style={{width: "100%"}}
+                required
+                onChange={e => {
+                  let a = e.target.value.replace(/\s/g, '')
+                  setValue("code", a.trim().toUpperCase());
+                }}
+                inputRef={register({
+                  validate: {
+                    required: val => {
+                      if (validateUnicode(val)) {
+                        return "Mã khuyến mãi không được chứa kí tự có dấu"
+                      }
+                      return val.trim().length > 0;
+                    },
                   },
-                },
-                required: "Mã khuyến mãi không được để trống",
-              })}
+                  required: "Mã khuyến mãi không được để trống",
+                })}
             />
           </Grid>
           <Grid
@@ -409,6 +422,10 @@ export default function VoucherCodeBody(props) {
               inputRef={register({
                 required:
                   "Tổng số lần sử dụng toàn hệ thống không được để trống",
+                maxLength: {
+                  value : 10,
+                  message: "Tổng số lần sử dụng không được vượt quá 10 kí tự"
+                },
                 validate: (value) =>
                   validateNumber(
                     value,
@@ -446,6 +463,10 @@ export default function VoucherCodeBody(props) {
               inputRef={register({
                 required:
                   "Số lần áp dụng tối đa cho mỗi khách hàng không được để trống",
+                maxLength: {
+                  value : 10,
+                  message: "Số lần áp dụng tối đa không được vượt quá 10 kí tự"
+                },
                 validate: (value) =>
                   validateNumber(
                     value,

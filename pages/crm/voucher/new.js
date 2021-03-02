@@ -48,7 +48,7 @@ export async function loadDataPromotion(ctx) {
         returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data;
     }
 
-    let promotionDefaultResponse = await getPromoClient(ctx, {}).getPromotion("", 5, 0, false);
+    let promotionDefaultResponse = await getPromoClient(ctx, {}).getPromotion("", 5, 0, false,"ACTIVE");
     if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
         returnObject.props.listPromotionDefault = promotionDefaultResponse.data;
     }
