@@ -31,7 +31,9 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getPriceClient } from "client/price";
 import { getPricingClient } from 'client/pricing';
 import { getSellerClient } from "client/seller";
+import { unknownErrorText } from "components/commonErrors";
 import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
+import SkuRequestDrawer from "containers/crm/sku/request/SkuRequestDrawer";
 import { SkuRequestFilter } from "containers/crm/sku/request/SkuRequestFilter";
 import Head from "next/head";
 import Link from "next/link";
@@ -225,9 +227,23 @@ function render(props) {
     const [open, setOpen] = useState(false);
     const [selectedSku, setSelectedSku] = useState({
         code: "",
-        status: ""
+        status: "",
+        ticketCode: "",
     });
     const [statuses, setStatuses] = useState(props.statuses);
+    const [openConfirnRequest, setOpenConfirnRequest] = useState(false);
+
+    const reloadData = async () => {
+        try {
+            const { pricingData, total, message, statuses } = await getPricingDataByFilter({}, limit, page * limit);
+            setSkus(pricingData);
+            if (message) setMessage(message);
+            setStatuses(statuses);
+            setPagination({ ...pagination, count: total });
+        } catch (e) {
+            error(unknownErrorText);
+        }
+    };
 
     useEffect(() => {
         setSkus(props.data);
@@ -263,7 +279,11 @@ function render(props) {
     };
 
     const handleClickOpen = (code, status, ticketCode) => {
-        setOpen(true);
+        if (status === "NEW") {
+            setOpen(true);
+        } else {
+            setOpenConfirnRequest(true);
+        }
         setSelectedSku({
             code: code,
             status: SkuStatuses.filter(e => e.value === status)[0],
@@ -284,6 +304,7 @@ function render(props) {
         formData.approveCodes = [selectedSku.ticketCode];
         let _client = getPriceClient();
         let result = await _client.updateStatusPrice(formData);
+        await reloadData();
         setLoading(false);
         if (result.status === "OK") {
             success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định');
@@ -500,7 +521,7 @@ function render(props) {
                             </Grid>
                         </Grid>
                     </ModalCustom>
-
+                    <SkuRequestDrawer open={openConfirnRequest} onClose={() => setOpenConfirnRequest(false)} ticketCode={selectedSku.ticketCode} />
                     <MyTablePagination
                         labelUnit="sku"
                         count={count}

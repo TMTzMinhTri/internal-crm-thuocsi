@@ -177,6 +177,35 @@ class PricingClient extends APIClient {
         });
     }
 
+    getPricingTicketByCode(code) {
+        return {
+            data: [
+                {
+                    code,
+                    name: "Seller request update sku #Medx.LHPGEQ1PGE",
+                    status: "NEW",
+                    next : {
+                        sellerCode : "Medx",
+                        retailPrice : {
+                            price : 1000022,
+                            type : "FIXED_PRICE"
+                        },
+                        brand : "LOCAL",
+                        maxQuantity : 100054,
+                    },
+                    previous : {
+                        brand : "LOCAL",
+                        maxQuantity : 1000,
+                        retailPrice : {
+                            type : "FIXED_REVENUE",
+                            price : 10000
+                        },
+                    },
+                }
+            ],
+            status: "OK",
+        };
+    }
 }
 
 export function getPricingClient(ctx, data) {
