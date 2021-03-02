@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { useController, useForm } from 'react-hook-form'
-import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core'
-import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card'
-import MuiSingleAuto from '@thuocsi/nextjs-components/muiauto/single'
+import React, { useEffect, useState } from 'react';
+import { useController, useForm } from 'react-hook-form';
+import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core';
+import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card';
+import MuiSingleAuto from '@thuocsi/nextjs-components/muiauto/single';
 
-import { SellPrices, SkuStatuses } from 'components/global'
-import { customerValidation } from 'view-models/customer'
+import { SellPrices, SkuStatuses } from 'components/global';
+import { customerValidation } from 'view-models/customer';
 import { getProductClient } from "client/product";
 
 const useStyles = makeStyles(theme => ({
@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     textField: {
         background: theme.palette.background.paper,
     }
-}))
+}));
 const defaultValues = {
     q: "",
     sku: "",
@@ -25,7 +25,7 @@ const defaultValues = {
     priceTo: null,
     status: "",
 };
-export const SkuFilter = ({ open, q = "", onFilterChange, onClose }) => {
+export const SkuRequestFilter = ({ open, q = "", onFilterChange, onClose }) => {
     const styles = useStyles();
     const filterForm = useForm({
         defaultValues: {
@@ -33,27 +33,27 @@ export const SkuFilter = ({ open, q = "", onFilterChange, onClose }) => {
             q,
         },
         mode: "onChange"
-    })
+    });
     const [productOptions, setProductOptions] = useState([]);
     const typeController = useController({
         name: "type",
         control: filterForm.control,
         defaultValue: defaultValues.type
-    })
+    });
     const { ref: typeRef, ...typeProps } = typeController.field;
 
     const statusController = useController({
         name: "status",
         control: filterForm.control,
         defaultValue: defaultValues.status
-    })
+    });
     const { ref: statusRef, ...statusProps } = statusController.field;
 
     const searchProduct = async (q = "") => {
         const productClient = getProductClient();
         const productResp = await productClient.searchProductsFromClient({ q, limit: 10, offset: 0 });
         setProductOptions(productResp.data?.map(({ name, code }) => ({ label: name, value: code })) ?? []);
-    }
+    };
 
     useEffect(() => {
         filterForm.register({ name: "type" });
@@ -77,13 +77,13 @@ export const SkuFilter = ({ open, q = "", onFilterChange, onClose }) => {
             productCode: productCode?.value,
             ...others
         });
-    }
+    };
 
     const handleReset = () => {
         filterForm.reset(defaultValues);
         filterForm.setValue("level", defaultValues.level);
         filterForm.setValue("status", defaultValues.status);
-    }
+    };
     return (
         <Box style={{
             display: open ? "block" : "none"
@@ -277,5 +277,5 @@ export const SkuFilter = ({ open, q = "", onFilterChange, onClose }) => {
                 </Grid>
             </MyCardActions>
         </Box>
-    )
-}
+    );
+};
