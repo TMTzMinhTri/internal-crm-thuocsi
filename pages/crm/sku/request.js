@@ -193,10 +193,6 @@ export function getFirstImage(val) {
     return `/default.png`;
 }
 
-export default function PricingPage(props) {
-    return renderWithLoggedInUser(props, render);
-}
-
 const breadcrumb = [
     {
         name: "Trang chủ",
@@ -239,18 +235,10 @@ function render(props) {
         ticketCode: "",
     });
     const [statuses, setStatuses] = useState(props.statuses);
-    const [openConfirnRequest, setOpenConfirnRequest] = useState(false);
+    const [openSkuRequestDrawer, setOpenSkuRequestDrawer] = useState(false);
 
     const reloadData = async () => {
-        try {
-            const { pricingData, total, message, statuses } = await getPricingDataByFilter({}, limit, page * limit);
-            setSkus(pricingData);
-            if (message) setMessage(message);
-            setStatuses(statuses);
-            setPagination({ ...pagination, count: total });
-        } catch (e) {
-            error(unknownErrorText);
-        }
+        Router.replace("");
     };
 
     useEffect(() => {
@@ -290,12 +278,12 @@ function render(props) {
         if (status === "NEW") {
             setOpen(true);
         } else {
-            setOpenConfirnRequest(true);
+            setOpenSkuRequestDrawer(true);
         }
         setSelectedSku({
             code: code,
             status: SkuStatuses.filter(e => e.value === status)[0],
-            ticketCode: ticketCode
+            ticketCode: Array.isArray(ticketCode) ? ticketCode : [ticketCode],
         });
     };
 
@@ -309,7 +297,7 @@ function render(props) {
         newStatuses[selectedSku.code] = formData.status;
         // setStatuses(newStatuses)
         formData.sellPriceCode = selectedSku.code;
-        formData.approveCodes = [selectedSku.ticketCode];
+        formData.approveCodes = selectedSku.ticketCode;
         let _client = getPriceClient();
         let result = await _client.updateStatusPrice(formData);
         await reloadData();
@@ -321,6 +309,10 @@ function render(props) {
         }
         setOpen(false);
 
+    }
+
+    async function handleUpdateTickets() {
+        await reloadData();
     }
 
     function showType(type) {
@@ -437,10 +429,10 @@ function render(props) {
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="center">
-                                            <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
+                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
-                                    <TableCell>{row.seller.code?(row.seller?.code + ' - ' + row.seller?.name):row.sellerCode}</TableCell>
+                                    <TableCell>{row.seller.code ? (row.seller?.code + ' - ' + row.seller?.name) : row.sellerCode}</TableCell>
                                     <TableCell align="left">{
                                         showType(row.retailPrice.type)
                                     }</TableCell>
@@ -499,7 +491,7 @@ function render(props) {
                                         rules={{ required: true }}
                                         error={!!errors.status}
                                         as={
-                                            <Select size="small" disabled>
+                                            <Select size="small" readOnly>
                                                 {SkuStatuses?.map(({ value, label }) => (
                                                     <MenuItem size="small" value={value} key={value}>{label}</MenuItem>
                                                 ))}
@@ -534,7 +526,12 @@ function render(props) {
                             </Grid>
                         </Grid>
                     </ModalCustom>
-                    <SkuRequestDrawer open={openConfirnRequest} onClose={() => setOpenConfirnRequest(false)} ticketCode={selectedSku.ticketCode} />
+                    <SkuRequestDrawer
+                        open={openSkuRequestDrawer}
+                        ticketCodes={selectedSku.ticketCode}
+                        onClose={() => setOpenSkuRequestDrawer(false)}
+                        onUpdate={handleUpdateTickets}
+                    />
                     <MyTablePagination
                         labelUnit="sku"
                         count={count}
@@ -546,4 +543,8 @@ function render(props) {
             </TableContainer>
         </AppCRM>
     );
+}
+
+export default function PricingPage(props) {
+    return renderWithLoggedInUser(props, render);
 }

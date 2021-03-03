@@ -19,6 +19,9 @@ import { MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/
 import { getPricingClient } from "client/pricing";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { ProductStatus } from "components/global";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { unknownErrorText } from "components/commonErrors";
 
 const useStyles = makeStyles((theme) => ({
     container: {
@@ -103,11 +106,12 @@ const RenderWholesalePrice = ({ data }) => {
 };
 
 const checkUpdated = (oldValue, newValue) => {
-    if (!(oldValue ?? false) || !(newValue ?? false)) return false;
+    if (!(newValue ?? false)) return false;
     return oldValue !== newValue;
 };
 
-const checkTagsUpdated = (list1 = [], list2 = []) => {
+const checkTagsUpdated = (list1, list2) => {
+    if (!(list2 ?? false)) return false;
     if (list1.length !== list2.length) return true;
     const comparer = (a = "", b = "") => a.localeCompare(b) > 0;
     list1.sort(comparer);
@@ -118,30 +122,44 @@ const checkTagsUpdated = (list1 = [], list2 = []) => {
     return false;
 };
 
-const TicketRow = ({ previous, next, name }) => {
+const TicketRow = ({ previous, next, name, selected, onSelect }) => {
     const classes = useStyles();
+    const statusUpdated = checkUpdated(previous.status, next.status);
     const tagsUpdated = checkTagsUpdated(previous.tags, next.tags);
-    const brandUpdated = previous.brand !== next.brand;
+    const brandUpdated = checkUpdated(previous.brand, next.brand);
+    const maxQuantityUndated = checkUpdated(previous.maxQuantity, next.maxQuantity);
     const retailTypeUpdated = checkUpdated(previous.retailPrice?.type, next.retailPrice?.type);
     const retailPriceUpdated = checkUpdated(previous.retailPrice?.price, next.retailPrice?.price);
+    const wholesalePriceUpdated = !!next.wholesalePrice;
     let rowSpan = 1;
+    if (statusUpdated) rowSpan++;
     if (tagsUpdated) rowSpan++;
     if (brandUpdated) rowSpan++;
-    if (next.maxQuantity) rowSpan++;
+    if (maxQuantityUndated) rowSpan++;
     if (retailTypeUpdated) rowSpan++;
     if (retailPriceUpdated) rowSpan++;
     if (retailTypeUpdated || retailPriceUpdated) rowSpan++;
-    if (next.wholesalePrice) rowSpan += 2;
+    if (wholesalePriceUpdated) rowSpan += 2;
     return (
         <>
             <TableRow>
                 <TableCell valign="top" rowSpan={rowSpan}>
-                    <Checkbox color="primary" size="small" />
+                    <Checkbox color="primary" size="small" checked={selected} onClick={onSelect} />
                 </TableCell>
                 <TableCell className={classes.ticketTitle} colSpan={4}>
                     {name}
                 </TableCell>
             </TableRow>
+            {statusUpdated && (
+                <TableRow>
+                    <TableCell>Trạng thái</TableCell>
+                    <TableCell>{ProductStatus[previous.status]}</TableCell>
+                    <TableCell>
+                        <FontAwesomeIcon icon={faArrowRight} />
+                    </TableCell>
+                    <TableCell>{ProductStatus[next.status]}</TableCell>
+                </TableRow>
+            )}
             {tagsUpdated && (
                 <TableRow>
                     <TableCell>Thẻ</TableCell>
@@ -162,7 +180,7 @@ const TicketRow = ({ previous, next, name }) => {
                     <TableCell>{BranText[next.brand]}</TableCell>
                 </TableRow>
             )}
-            {next.maxQuantity && (
+            {maxQuantityUndated && (
                 <TableRow>
                     <TableCell>Số lượng tối đa</TableCell>
                     <TableCell>{previous.maxQuantity}</TableCell>
@@ -201,7 +219,7 @@ const TicketRow = ({ previous, next, name }) => {
                     )}
                 </>
             )}
-            {next.wholesalePrice && (
+            {wholesalePriceUpdated && (
                 <>
                     <TableRow>
                         <TableCell className={classes.rowGroupTitle} colSpan={4}>
@@ -228,24 +246,72 @@ const TicketRow = ({ previous, next, name }) => {
 
 /**
  * @param {object} props
- * @param {string} props.ticketCode
+ * @param {string[]} props.ticketCodes
  * @param {boolean} props.open
  * @param {Function} props.onClose
+ * @param {Function} props.onUpdate
  */
-const SkuRequestDrawer = ({ ticketCode, open, onClose }) => {
+const SkuRequestDrawer = ({ ticketCodes, open, onClose, onUpdate }) => {
+    const toast = useToast();
+
     const [tickets, setTickets] = useState([]);
+    const [selectedTickets, setSelectedTickets] = useState(ticketCodes ?? []);
     const classes = useStyles();
 
     const loadSellingData = useCallback(async () => {
-        if (!ticketCode) return;
+        if (!ticketCodes) return;
         const pricingClient = getPricingClient();
-        const resp = await pricingClient.getPricingTicketByCode(ticketCode);
-        setTickets(resp.data);
-    }, [ticketCode]);
+        const resps = await Promise.all(ticketCodes?.map?.(ticketCode => pricingClient.getPricingTicketByCodeFromClient(ticketCode)) ?? []);
+        const data = resps.reduce((acc, cur) => {
+            if (cur.status === "OK") acc.push(cur.data[0]);
+            return acc;
+        }, []);
+        setTickets(data);
+    }, [ticketCodes]);
+
+    const resolveTickets = useCallback(async () => {
+        const unselectedTickets = ticketCodes?.filter?.(ticket => !selectedTickets.find(selectedTicket => selectedTicket === ticket));
+
+        const pricingClient = getPricingClient();
+        const resp = await pricingClient.updatePricingTicket({
+            approveCodes: selectedTickets.length === 0 ? undefined : selectedTickets,
+            cancelCodes: unselectedTickets.length === 0 ? undefined : unselectedTickets,
+        });
+        if (resp.status === "OK") {
+            toast.success("Cập nhật sku thành công");
+            onUpdate?.({
+                approveCodes: selectedTickets,
+                cancelCodes: unselectedTickets,
+            });
+        } else {
+            throw new Error(resp.message);
+        }
+    }, [selectedTickets, tickets]);
 
     useEffect(() => {
         loadSellingData();
-    }, [ticketCode]);
+        setSelectedTickets(ticketCodes);
+    }, [ticketCodes]);
+
+    const handleTicketSelect = ({ code }) => {
+        const existedIndex = selectedTickets.findIndex(ticketCode => ticketCode === code);
+        const newSelectedTickets = [...selectedTickets];
+        if (existedIndex == -1) {
+            newSelectedTickets.push(code);
+        } else {
+            newSelectedTickets.splice(existedIndex, 1);
+        }
+        setSelectedTickets(newSelectedTickets);
+    };
+
+    const handleResolveTickets = async () => {
+        try {
+            await resolveTickets();
+            onClose?.();
+        } catch (e) {
+            toast.error(e.message ?? unknownErrorText);
+        }
+    };
 
     return (
         <Drawer
@@ -275,8 +341,15 @@ const SkuRequestDrawer = ({ ticketCode, open, onClose }) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                {tickets.map(({ previous, next, code, name }) => (
-                                    <TicketRow key={code} previous={previous} next={next} code={code} name={name} />
+                                {tickets.map(ticket => (
+                                    <TicketRow
+                                        key={ticket.code}
+                                        previous={ticket.previous}
+                                        next={ticket.next}
+                                        name={ticket.name}
+                                        selected={!!selectedTickets.find(ticketCode => ticketCode === ticket.code)}
+                                        onSelect={() => handleTicketSelect(ticket)}
+                                    />
                                 ))}
                             </TableBody>
                         </Table>
@@ -284,12 +357,24 @@ const SkuRequestDrawer = ({ ticketCode, open, onClose }) => {
                 </MyCardContent>
                 <MyCardContent>
                     <Box paddingTop={1} clone>
-                        <Grid container spacing={1}>
+                        <Grid container spacing={1} justify="flex-end">
                             <Grid item>
-                                <Button variant="contained">Từ chối</Button>
+                                <Button
+                                    variant="contained"
+                                    onClick={onClose}
+                                >
+                                    Quay lại
+                                </Button>
                             </Grid>
                             <Grid item>
-                                <Button variant="contained">Chấp nhận</Button>
+
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    onClick={handleResolveTickets}
+                                >
+                                    Chấp nhận
+                                </Button>
                             </Grid>
                         </Grid>
                     </Box>

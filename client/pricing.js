@@ -1,13 +1,13 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 import { constURL } from "../components/component/constant";
 
-const prefixMaster = constURL.PREFIX_MASTER
-const prefix = constURL.PREFIX_PRICING
-const prefixProduct = `${constURL.PREFIX_PRODUCT}`
+const prefixMaster = constURL.PREFIX_MASTER;
+const prefix = constURL.PREFIX_PRICING;
+const prefixProduct = `${constURL.PREFIX_PRODUCT}`;
 class PricingClient extends APIClient {
 
     constructor(ctx, data) {
-        super(ctx, data)
+        super(ctx, data);
     }
 
     getListPricing(offset, limit, q, waitConfirm) {
@@ -19,7 +19,7 @@ class PricingClient extends APIClient {
             limit,
             getTotal: true,
             waitConfirm
-        })
+        });
     }
 
     getListPricingByFilter({
@@ -46,7 +46,7 @@ class PricingClient extends APIClient {
                 offset,
                 getTotal: true,
             }
-        )
+        );
     }
 
     getListPricingByFilterFromClient({
@@ -73,7 +73,7 @@ class PricingClient extends APIClient {
                 offset,
                 getTotal: true,
             }
-        )
+        );
     }
 
     getListProductByProductCode(productCodes) {
@@ -100,7 +100,7 @@ class PricingClient extends APIClient {
             // offset: 0,
             // limit: 100,
             // getTotal: true
-        })
+        });
     }
 
     getListCategoryFromClient(q) {
@@ -109,7 +109,7 @@ class PricingClient extends APIClient {
             `${prefixProduct}/category/list`, {
             q,
             getTotal: true
-        })
+        });
     }
 
     updatePriceGenConfig(data) {
@@ -117,14 +117,14 @@ class PricingClient extends APIClient {
             "PUT",
             `${prefix}/product/config`,
             data
-        )
+        );
     }
 
     createNewPriceGenConfig(data) {
         return this.callFromClient(
             "POST",
             `${prefix}/product/config`, data
-        )
+        );
     }
 
     configPrice(data) {
@@ -140,13 +140,13 @@ class PricingClient extends APIClient {
             `${prefix}/product/config/list`, {
             ...data,
             getTotal: true
-        })
+        });
     }
 
     getConfigPriceByCode(code) {
         return this.callFromNextJS(
             "GET",
-            `${prefix}/product/config?priceCode=${code}`)
+            `${prefix}/product/config?priceCode=${code}`);
     }
 
     getProvinceLists() {
@@ -178,37 +178,31 @@ class PricingClient extends APIClient {
         });
     }
 
-    getPricingTicketByCode(code) {
-        return {
-            data: [
-                {
-                    code,
-                    name: "Seller request update sku #Medx.LHPGEQ1PGE",
-                    status: "NEW",
-                    next : {
-                        sellerCode : "Medx",
-                        retailPrice : {
-                            price : 1000022,
-                            type : "FIXED_PRICE"
-                        },
-                        brand : "LOCAL",
-                        maxQuantity : 100054,
-                    },
-                    previous : {
-                        brand : "LOCAL",
-                        maxQuantity : 1000,
-                        retailPrice : {
-                            type : "FIXED_REVENUE",
-                            price : 10000
-                        },
-                    },
-                }
-            ],
-            status: "OK",
-        };
+    getPricingTicketByCodeFromClient(ticketCode) {
+        return this.callFromClient(
+            "GET",
+            `${prefix}/selling/ticket`,
+            {
+                ticketCode,
+            }
+        );
+    }
+
+    updatePricingTicket({
+        approveCodes,
+        cancelCodes,
+    }) {
+        return this.callFromClient(
+            "PUT",
+            `${prefix}/selling/ticket`,
+            {
+                approveCodes,
+                cancelCodes,
+            }
+        );
     }
 }
 
 export function getPricingClient(ctx, data) {
-    return new PricingClient(ctx, data)
+    return new PricingClient(ctx, data);
 }
