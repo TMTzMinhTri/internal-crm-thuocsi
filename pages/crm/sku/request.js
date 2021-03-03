@@ -31,7 +31,9 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getPriceClient } from "client/price";
 import { getPricingClient } from 'client/pricing';
 import { getSellerClient } from "client/seller";
+import { unknownErrorText } from "components/commonErrors";
 import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
+import SkuRequestDrawer from "containers/crm/sku/request/SkuRequestDrawer";
 import { SkuRequestFilter } from "containers/crm/sku/request/SkuRequestFilter";
 import Head from "next/head";
 import Image from "next/image";
@@ -191,10 +193,6 @@ export function getFirstImage(val) {
     return `/default.png`;
 }
 
-export default function PricingPage(props) {
-    return renderWithLoggedInUser(props, render);
-}
-
 const breadcrumb = [
     {
         name: "Trang chủ",
@@ -233,9 +231,15 @@ function render(props) {
     const [open, setOpen] = useState(false);
     const [selectedSku, setSelectedSku] = useState({
         code: "",
-        status: ""
+        status: "",
+        ticketCode: "",
     });
     const [statuses, setStatuses] = useState(props.statuses);
+    const [openSkuRequestDrawer, setOpenSkuRequestDrawer] = useState(false);
+
+    const reloadData = async () => {
+        Router.replace("");
+    };
 
     useEffect(() => {
         setSkus(props.data);
@@ -271,11 +275,15 @@ function render(props) {
     };
 
     const handleClickOpen = (code, status, ticketCode) => {
-        setOpen(true);
+        if (status === "NEW") {
+            setOpen(true);
+        } else {
+            setOpenSkuRequestDrawer(true);
+        }
         setSelectedSku({
             code: code,
             status: SkuStatuses.filter(e => e.value === status)[0],
-            ticketCode: ticketCode
+            ticketCode: Array.isArray(ticketCode) ? ticketCode : [ticketCode],
         });
     };
 
@@ -289,9 +297,10 @@ function render(props) {
         newStatuses[selectedSku.code] = formData.status;
         // setStatuses(newStatuses)
         formData.sellPriceCode = selectedSku.code;
-        formData.approveCodes = [selectedSku.ticketCode];
+        formData.approveCodes = selectedSku.ticketCode;
         let _client = getPriceClient();
         let result = await _client.updateStatusPrice(formData);
+        await reloadData();
         setLoading(false);
         if (result.status === "OK") {
             success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định');
@@ -300,6 +309,10 @@ function render(props) {
         }
         setOpen(false);
 
+    }
+
+    async function handleUpdateTickets() {
+        await reloadData();
     }
 
     function showType(type) {
@@ -416,10 +429,10 @@ function render(props) {
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="center">
-                                            <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
+                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
-                                    <TableCell>{row.seller.code?(row.seller?.code + ' - ' + row.seller?.name):row.sellerCode}</TableCell>
+                                    <TableCell>{row.seller.code ? (row.seller?.code + ' - ' + row.seller?.name) : row.sellerCode}</TableCell>
                                     <TableCell align="left">{
                                         showType(row.retailPrice.type)
                                     }</TableCell>
@@ -478,7 +491,7 @@ function render(props) {
                                         rules={{ required: true }}
                                         error={!!errors.status}
                                         as={
-                                            <Select size="small" disabled>
+                                            <Select size="small" readOnly>
                                                 {SkuStatuses?.map(({ value, label }) => (
                                                     <MenuItem size="small" value={value} key={value}>{label}</MenuItem>
                                                 ))}
@@ -513,7 +526,12 @@ function render(props) {
                             </Grid>
                         </Grid>
                     </ModalCustom>
-
+                    <SkuRequestDrawer
+                        open={openSkuRequestDrawer}
+                        ticketCodes={selectedSku.ticketCode}
+                        onClose={() => setOpenSkuRequestDrawer(false)}
+                        onUpdate={handleUpdateTickets}
+                    />
                     <MyTablePagination
                         labelUnit="sku"
                         count={count}
@@ -525,4 +543,8 @@ function render(props) {
             </TableContainer>
         </AppCRM>
     );
+}
+
+export default function PricingPage(props) {
+    return renderWithLoggedInUser(props, render);
 }
