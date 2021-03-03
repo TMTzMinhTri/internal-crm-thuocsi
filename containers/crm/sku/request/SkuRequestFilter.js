@@ -1,12 +1,12 @@
+import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core';
+import MuiSingleAuto from '@thuocsi/nextjs-components/muiauto/single';
+import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card';
+import { getProductClient } from "client/product";
+import { SellPrices, SkuStatuses } from 'components/global';
 import React, { useEffect, useState } from 'react';
 import { useController, useForm } from 'react-hook-form';
-import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core';
-import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card';
-import MuiSingleAuto from '@thuocsi/nextjs-components/muiauto/single';
-
-import { SellPrices, SkuStatuses } from 'components/global';
 import { customerValidation } from 'view-models/customer';
-import { getProductClient } from "client/product";
+
 
 const useStyles = makeStyles(theme => ({
     title: {
@@ -223,7 +223,7 @@ export const SkuRequestFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3}>
+                    <Grid item xs={12} sm={6} md={3} >
                         <Typography
                             className={styles.title}
                             color="textPrimary"
@@ -237,6 +237,7 @@ export const SkuRequestFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             name="phone"
                             variant="outlined"
                             size="small"
+                            disabled
                             InputLabelProps={{ shrink: true }}
                             select
                             SelectProps={{

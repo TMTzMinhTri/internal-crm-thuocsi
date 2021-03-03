@@ -29,17 +29,9 @@ const statuses = [
         label: "Đang hoạt động",
     },
     {
-        value: "DRAFT",
-        label: "Nháp",
-    },
-    {
-        value: "NEW",
-        label: "Mới",
-    },
-    {
-        value: "GUEST",
-        label: "Khách",
-    },
+        value: "INACTIVE",
+        label: "Chưa kích hoạt"
+    }
 ]
 
 export async function loadData(ctx) {
@@ -97,6 +89,7 @@ export default function renderForm(props, toast) {
     const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
     const [, setDisabledDistrict] = useState(isDistrict);
     const [, setDisabledWard] = useState(isWard);
+    const [isDisableStatus, setIsDisableStatus] = useState(editObject.status == 'ACTIVE')
     const router = useRouter();
     const { register, handleSubmit, errors, control, watch } = useForm({
         defaultValues: editObject,
@@ -194,6 +187,7 @@ export default function renderForm(props, toast) {
             if (resp.status !== 'OK') {
                 error(resp.message ?? actionErrorText)
             } else {
+                setIsDisableStatus(formData.status == 'ACTIVE' ? true : false)
                 success('Cập nhật nhà bán hàng thành công')
             }
         } catch (error) {
@@ -473,6 +467,7 @@ export default function renderForm(props, toast) {
                                                     <InputLabel id="department-select-label">Trạng thái</InputLabel>
                                                     <Controller
                                                         name="status"
+                                                        disabled={isDisableStatus}
                                                         control={control}
                                                         defaultValue={statuses ? statuses[0].value : ''}
                                                         rules={{ required: true }}
