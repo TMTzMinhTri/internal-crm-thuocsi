@@ -3,35 +3,44 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     Box,
     Button,
+    FormControl,
+    FormLabel,
     Grid,
     IconButton,
     InputBase,
+    MenuItem,
     Paper,
+    Select,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
-    Tooltip
+    TextField,
+    Tooltip,
+    Typography
 } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
+import ModalCustom from "@thuocsi/nextjs-components/simple-dialog/dialogs";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getPriceClient } from "client/price";
 import { getPricingClient } from 'client/pricing';
 import { getSellerClient } from "client/seller";
-import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices } from "components/global";
-import { SkuActiveFilter } from "containers/crm/sku/active/SkuActiveFilter";
+import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
+import { SkuRequestFilter } from "containers/crm/sku/request/SkuRequestFilter";
 import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
 import styles from "./pricing.module.css";
-import { getFirstImage } from "./request";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -40,6 +49,7 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadPricingData(ctx) {
+    // Fetch data from external API
     const query = ctx.query;
     const page = query.page || 0;
     const limit = query.limit || 20;
@@ -53,8 +63,8 @@ export async function loadPricingData(ctx) {
     };
 
     try {
-        const pricingClient = getPricingClient(ctx, {});
-        const pricingResp = await pricingClient.getListPricingByFilter({ status: "ACTIVE", q, offset, limit });
+        const _client = getPricingClient(ctx, {});
+        const pricingResp = await _client.getListPricing(offset, limit, q, true);
         if (pricingResp.status === 'OK') {
             props.data = pricingResp.data ?? [];
             props.count = pricingResp.total;
@@ -73,7 +83,7 @@ export async function loadPricingData(ctx) {
                 productCodes.push(sku.productCode);
             }
         });
-        const listProductsResp = await pricingClient.getListProductByProductCode(productCodes);
+        const listProductsResp = await _client.getListProductByProductCode(productCodes);
         if (listProductsResp.status === 'OK') {
             props.data = props.data.map(sku => ({
                 ...sku,
@@ -174,6 +184,13 @@ async function getPricingDataByFilter(data, limit, offset) {
     return res;
 }
 
+export function getFirstImage(val) {
+    if (val && val.length > 0) {
+        return val[0];
+    }
+    return `/default.png`;
+}
+
 export default function PricingPage(props) {
     return renderWithLoggedInUser(props, render);
 }
@@ -195,6 +212,7 @@ const statusColor = {
 };
 
 function render(props) {
+    const { error, success } = useToast();
     let router = useRouter();
 
     const [skus, setSkus] = useState(props.data ?? []);
@@ -209,6 +227,14 @@ function render(props) {
     const { limit, page, count } = pagination;
 
     let [searchText, setSearchText] = useState(router.query.q || '');
+    let [, setLoading] = useState(false);
+
+    const { register, handleSubmit, errors, control } = useForm();
+    const [open, setOpen] = useState(false);
+    const [selectedSku, setSelectedSku] = useState({
+        code: "",
+        status: ""
+    });
     const [statuses, setStatuses] = useState(props.statuses);
 
     useEffect(() => {
@@ -229,8 +255,8 @@ function render(props) {
     }, [router.query.q]);
 
     const handleApplyFilter = async (data) => {
-        setSkuFilter(data);
         const { pricingData, message, total, statuses } = await getPricingDataByFilter(data, limit, 0);
+        setSkuFilter(data);
         if (message) setMessage(message);
         setSkus(pricingData);
         setStatuses(statuses);
@@ -239,10 +265,42 @@ function render(props) {
             page: 0,
             count: total,
         });
-        Router.replace("/crm/sku", "/crm/sku", {
+        Router.replace("", "", {
             shallow: true,
         });
     };
+
+    const handleClickOpen = (code, status, ticketCode) => {
+        setOpen(true);
+        setSelectedSku({
+            code: code,
+            status: SkuStatuses.filter(e => e.value === status)[0],
+            ticketCode: ticketCode
+        });
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    async function onUpdateStatus(formData) {
+        setLoading(true);
+        let newStatuses = statuses;
+        newStatuses[selectedSku.code] = formData.status;
+        // setStatuses(newStatuses)
+        formData.sellPriceCode = selectedSku.code;
+        formData.approveCodes = [selectedSku.ticketCode];
+        let _client = getPriceClient();
+        let result = await _client.updateStatusPrice(formData);
+        setLoading(false);
+        if (result.status === "OK") {
+            success(result.message ? 'Thao tác thành công' : 'Thông báo không xác định');
+        } else {
+            error(result.message || 'Thao tác không thành công, vui lòng thử lại sau');
+        }
+        setOpen(false);
+
+    }
 
     function showType(type) {
         let a = SellPrices.filter((item) => {
@@ -277,7 +335,7 @@ function render(props) {
                 count: total,
             });
         } else {
-            Router.push(`/crm/sku?page=${page}&limit=${rowsPerPage}&q=${searchText}`);
+            Router.push(`?page=${page}&limit=${rowsPerPage}&q=${searchText}`);
         }
     };
 
@@ -298,7 +356,7 @@ function render(props) {
                 <Box display={!openSkuFilter ? "block" : "none"}>
                     <MyCardActions>
                         <Grid container spacing={1}>
-                            <Grid item xs={12} sm={8} md={6}>
+                            <Grid item xs={12} sm={8} md={4}>
                                 <Paper className={styles.search} style={{ width: '100%' }}>
                                     <InputBase
                                         id="q"
@@ -319,7 +377,7 @@ function render(props) {
                         </Grid>
                     </MyCardActions>
                 </Box>
-                <SkuActiveFilter
+                <SkuRequestFilter
                     open={openSkuFilter}
                     onFilterChange={handleApplyFilter}
                     q={searchText}
@@ -341,7 +399,7 @@ function render(props) {
                     </colgroup>
                     <TableHead>
                         <TableRow>
-                            <TableCell align="left">SKU</TableCell>
+                            <TableCell align="center">SKU</TableCell>
                             <TableCell align="center">Hình ảnh</TableCell>
                             <TableCell align="left">Tên Sản Phẩm</TableCell>
                             <TableCell align="left">Nhà bán hàng</TableCell>
@@ -358,7 +416,7 @@ function render(props) {
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="center">
-                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
+                                            <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
                                     <TableCell>{row.seller.code?(row.seller?.code + ' - ' + row.seller?.name):row.sellerCode}</TableCell>
@@ -367,11 +425,16 @@ function render(props) {
                                     }</TableCell>
                                     <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
                                     <TableCell align="center">
-                                        <Button variant="outlined" disabled
-                                            size="small"
-                                            style={{ color: `${statusColor[row.status]}`, borderColor: `${statusColor[row.status]}`, width: '150px' }}>
-                                            {typeof (row.sellPriceCode) !== 'undefined' ? ProductStatus[statuses[row.sellPriceCode]] : 'Chưa xác định'}
-                                        </Button>
+                                        {row.ticketCode && (
+                                            <Button
+                                                variant="outlined"
+                                                size="small"
+                                                style={{ color: statusColor.NEW, borderColor: statusColor.NEW }}
+                                                onClick={() => handleClickOpen(row.sellPriceCode, row.status, row.ticketCode)}
+                                            >
+                                                {ProductStatus.NEW}
+                                            </Button>
+                                        )}
                                     </TableCell>
                                     <TableCell align="left">{formatDateTime(row.lastUpdatedTime)}</TableCell>
                                     <TableCell align="center">
@@ -393,6 +456,64 @@ function render(props) {
                                 </TableRow>
                             </TableBody>
                         )}
+
+                    <ModalCustom open={open} name="simple-dialog" title="Cập nhật trạng thái" onClose={handleClose} onExcute={handleSubmit(onUpdateStatus)}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <FormControl style={{ width: '100%' }} size="small">
+                                    <Typography gutterBottom>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>
+                                            Trạng thái <span style={{ color: 'red' }}>*</span>
+                                        </FormLabel>
+                                    </Typography>
+                                    <Controller
+                                        id="status"
+                                        name="status"
+                                        variant="outlined"
+                                        size="small"
+                                        value={selectedSku.status}
+                                        control={control}
+                                        style={{ width: '50%' }}
+                                        defaultValue={SkuStatuses ? SkuStatuses[0].value : ''}
+                                        rules={{ required: true }}
+                                        error={!!errors.status}
+                                        as={
+                                            <Select size="small" disabled>
+                                                {SkuStatuses?.map(({ value, label }) => (
+                                                    <MenuItem size="small" value={value} key={value}>{label}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        }
+                                    />
+                                </FormControl>
+                            </Grid>
+                            <Grid item xs={12} sm={12} md={12}>
+                                <FormControl style={{ width: '100%' }}>
+                                    <Typography gutterBottom>
+                                        <FormLabel component="legend" style={{ fontWeight: 'bold', color: 'black' }}>Ghi chú</FormLabel>
+                                    </Typography>
+                                    <TextField
+                                        id="description"
+                                        name="description"
+                                        multiline
+                                        rows={4}
+                                        variant="outlined"
+                                        size="small"
+                                        placeholder=""
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        style={{ width: '100%' }}
+                                        required
+                                        inputRef={
+                                            register()
+                                        }
+                                    />
+                                </FormControl>
+                            </Grid>
+                        </Grid>
+                    </ModalCustom>
+
                     <MyTablePagination
                         labelUnit="sku"
                         count={count}

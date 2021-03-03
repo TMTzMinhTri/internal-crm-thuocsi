@@ -10,18 +10,46 @@ class PricingClient extends APIClient {
         super(ctx, data)
     }
 
-    getListPricing(offset, limit, q) {
+    getListPricing(offset, limit, q, waitConfirm) {
         return this.callFromNextJS(
             "GET",
             `${prefix}/selling/list`, {
             q,
             offset,
             limit,
-            getTotal: true
+            getTotal: true,
+            waitConfirm
         })
     }
 
     getListPricingByFilter({
+        q,
+        sku,
+        productCode,
+        type,
+        price,
+        status,
+        limit,
+        offset,
+    }) {
+        return this.callFromNextJS(
+            "POST",
+            `${prefix}/selling/search`,
+            {
+                q,
+                sku,
+                productCode,
+                type,
+                price,
+                status,
+                limit,
+                offset,
+                getTotal: true,
+            }
+        )
+    }
+
+    getListPricingByFilterFromClient({
         q,
         sku,
         productCode,

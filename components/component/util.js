@@ -475,7 +475,7 @@ export async function onSubmitPromotion(
 
   let body = {
     ...checkTypeSubmit,
-    promotionName: value.promotionName,
+    promotionName: value.promotionName.trim(),
     promotionType: value.promotionType,
     promotionOrganizer: value.promotionOrganizer,
     description: value.description,

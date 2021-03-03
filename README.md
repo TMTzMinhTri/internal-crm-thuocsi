@@ -1,3 +1,3 @@
 ### internal-crm
 
-Used to manage pricing, promotion.
+Used to manage customer, pricing, promotion.

@@ -6,6 +6,6 @@ export async function getServerSideProps(ctx) {
     })
 }
 
-export default function HRMIndexPage(props) {
+export default function CRMIndexPage(props) {
     return PricingPage(props)
 }
