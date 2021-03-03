@@ -8,6 +8,7 @@ import {
     TableHead,
     TableRow,
     Box,
+    Grid,
 } from "@material-ui/core";
 import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
@@ -209,27 +210,31 @@ function render(props) {
                 </MyCardHeader>
                 <Box display={!openOrderFilter ? "block" : "none"}>
                     <MyCardActions>
-                        <Paper className={styles.search}>
-                            <InputBase
-                                id="q"
-                                name="q"
-                                className={styles.input}
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                inputRef={register}
-                                onKeyPress={event => {
-                                    if (event.key === 'Enter' || event.keyCode === 13) {
-                                        onSearch()
-                                    }
-                                }}
-                                placeholder="Nhập mã đơn hàng"
-                                inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
-                            />
-                            <IconButton className={styles.iconButton} aria-label="search"
-                                onClick={handleSubmit(onSearch)}>
-                                <SearchIcon />
-                            </IconButton>
-                        </Paper>
+                        <Grid container>
+                            <Grid item xs={12} md={4}>
+                                <Paper className={styles.search}>
+                                    <InputBase
+                                        id="q"
+                                        name="q"
+                                        className={styles.input}
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        inputRef={register}
+                                        onKeyPress={event => {
+                                            if (event.key === 'Enter' || event.keyCode === 13) {
+                                                onSearch()
+                                            }
+                                        }}
+                                        placeholder="Nhập mã đơn hàng"
+                                        inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
+                                    />
+                                    <IconButton className={styles.iconButton} aria-label="search"
+                                        onClick={handleSubmit(onSearch)}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </Paper>
+                            </Grid>
+                        </Grid>
                     </MyCardActions>
                 </Box>
                 <OrderFilter
