@@ -16,8 +16,6 @@ import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
-import LockIcon from '@material-ui/icons/Lock';
-import LockOpenIcon from '@material-ui/icons/LockOpen';
 import SearchIcon from "@material-ui/icons/Search";
 import {
     doWithLoggedInUser,
@@ -47,30 +45,30 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadCustomerData(ctx) {
-    let data = { props: {} }
-    let query = ctx.query
-    let q = typeof (query.q) === "undefined" ? '' : query.q
-    let page = query.page || 0
-    let limit = query.limit || 20
-    let offset = page * limit
+    let data = { props: {} };
+    let query = ctx.query;
+    let q = typeof (query.q) === "undefined" ? '' : query.q;
+    let page = query.page || 0;
+    let limit = query.limit || 20;
+    let offset = page * limit;
 
-    let customerClient = getCustomerClient(ctx, data)
-    let resp = await customerClient.getCustomer(offset, limit, q)
+    let customerClient = getCustomerClient(ctx, data);
+    let resp = await customerClient.getCustomer(offset, limit, q);
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
-            return { props: { data: [], count: 0, message: 'Không tìm thấy khách hàng' } }
+            return { props: { data: [], count: 0, message: 'Không tìm thấy khách hàng' } };
         }
-        return { props: { data: [], count: 0, message: resp.message } }
+        return { props: { data: [], count: 0, message: resp.message } };
     }
 
-    const customerCommon = getCommonAPI(ctx, {})
-    const resLevel = await customerCommon.getListLevelCustomers()
-    let condUserType = []
+    const customerCommon = getCommonAPI(ctx, {});
+    const resLevel = await customerCommon.getListLevelCustomers();
+    let condUserType = [];
     if (resLevel.status === 'OK') {
-        condUserType = resLevel.data.map(item => { return { value: item.code, label: item.name } })
+        condUserType = resLevel.data.map(item => { return { value: item.code, label: item.name }; });
     }
     // Pass data to the page via props
-    return { props: { data: resp.data, count: resp.total, condUserType } }
+    return { props: { data: resp.data, count: resp.total, condUserType } };
 }
 
 async function getCustomerByFilter(data, limit, page) {
@@ -78,7 +76,7 @@ async function getCustomerByFilter(data, limit, page) {
         customers: [],
         total: 0,
         message: "",
-    }
+    };
     try {
         const customerClient = getCustomerClient({});
         const { pointFrom, pointTo, q, ...others } = data;
@@ -121,7 +119,7 @@ const breadcrumb = [
     {
         name: "Danh sách khách hàng",
     },
-]
+];
 
 function render(props) {
     let router = useRouter();
@@ -130,7 +128,7 @@ function render(props) {
     const [openActiveAccountDialog, setOpenActiveAccountDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
     const [activeCustomerCode, setActiveCustomerCode] = useState();
-    const [lockedCustomerCode, setLockedCustomerCode] = useState();
+    const [lockedCustomerCode] = useState();
     const [customers, setCustomers] = useState(props.data);
     const [message, setMessage] = useState(props.message);
     const [openCustomerFilter, setOpenCustomerFilter] = useState(false);
@@ -141,7 +139,7 @@ function render(props) {
         page: parseInt(router.query.page) || 0,
         limit: parseInt(router.query.limit) || 20,
         count: props.count,
-    })
+    });
     const { limit, page, count } = pagination;
     const { error, success } = useToast();
 
@@ -150,7 +148,7 @@ function render(props) {
             page: parseInt(router.query.page) || 0,
             limit: parseInt(router.query.limit) || 20,
             count: props.count,
-        })
+        });
     }, [router.query.page, router.query.limit, props.count]);
 
     useEffect(() => {
@@ -159,42 +157,42 @@ function render(props) {
     }, [props.data, props.message]);
 
     async function approveAccount() {
-        const _client = getCustomerClient()
-        setOpenApproveAccountDialog(false)
-        const resp = await _client.approveAccount({ code: approvedCustomerCode.code, isActive: 1 })
+        const _client = getCustomerClient();
+        setOpenApproveAccountDialog(false);
+        const resp = await _client.approveAccount({ code: approvedCustomerCode.code, isActive: 1 });
         if (resp.status !== "OK") {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
         } else {
-            props.data.filter(row => row.code === approvedCustomerCode.code)[0].isActive = 1
-            props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "ACTIVE"
-            setApprovedCustomerCode(null)
-            success("Kích hoạt tài khoản thành công")
+            props.data.filter(row => row.code === approvedCustomerCode.code)[0].isActive = 1;
+            props.data.filter(row => row.code === approvedCustomerCode.code)[0].status = "ACTIVE";
+            setApprovedCustomerCode(null);
+            success("Kích hoạt tài khoản thành công");
         }
     }
 
     async function activeAccount() {
-        const _client = getCustomerClient()
-        setOpenActiveAccountDialog(false)
-        const resp = await _client.activeAccount({ code: activeCustomerCode.code, status: "ACTIVE" })
+        const _client = getCustomerClient();
+        setOpenActiveAccountDialog(false);
+        const resp = await _client.activeAccount({ code: activeCustomerCode.code, status: "ACTIVE" });
         if (resp.status !== "OK") {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
         } else {
-            props.data.filter(row => row.code === activeCustomerCode.code)[0].status = "ACTIVE"
-            setActiveCustomerCode(null)
-            success("Kích hoạt tài khoản thành công")
+            props.data.filter(row => row.code === activeCustomerCode.code)[0].status = "ACTIVE";
+            setActiveCustomerCode(null);
+            success("Kích hoạt tài khoản thành công");
         }
     }
 
     async function lockAccount() {
-        const _client = getCustomerClient()
-        setOpenLockAccountDialog(false)
-        const resp = await _client.lockAccount({ code: lockedCustomerCode.code, isActive: -1 })
+        const _client = getCustomerClient();
+        setOpenLockAccountDialog(false);
+        const resp = await _client.lockAccount({ code: lockedCustomerCode.code, isActive: -1 });
         if (resp.status !== "OK") {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau')
+            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
         } else {
-            props.data.filter(row => row.code === lockedCustomerCode.code)[0].isActive = -1
-            setApprovedCustomerCode(null)
-            success("Khóa tài khoản thành công")
+            props.data.filter(row => row.code === lockedCustomerCode.code)[0].isActive = -1;
+            setApprovedCustomerCode(null);
+            success("Khóa tài khoản thành công");
         }
     }
 
@@ -213,11 +211,11 @@ function render(props) {
             limit,
             page: 0,
             count: total,
-        })
+        });
         Router.replace("/crm/customer", "/crm/customer", {
             shallow: true,
         });
-    }
+    };
 
     const handlePageChange = async (event, page, rowsPerPage) => {
         if (openCustomerFilter && customerFilter) {
@@ -228,15 +226,15 @@ function render(props) {
                 limit: rowsPerPage,
                 page,
                 count: total,
-            })
+            });
         } else {
             Router.push(`/crm/customer?page=${page}&limit=${rowsPerPage}&q=${q}`);
         }
-    }
+    };
 
     const RenderRow = ({ row }) => {
-        let mainColor = statuses.find((e) => e.value === row.status)?.color || "grey"
-        let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định"
+        let mainColor = statuses.find((e) => e.value === row.status)?.color || "grey";
+        let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định";
         return (
             <TableRow>
                 <TableCell component="th" scope="row">
@@ -248,7 +246,7 @@ function render(props) {
                 <TableCell align="left">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
                 <TableCell align="center">
-                    <Button disabled={row.status == "ACTIVE"} onClick={() => { setOpenActiveAccountDialog(true); setActiveCustomerCode(row) }} size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>
+                    <Button disabled={row.status == "ACTIVE"} onClick={() => { setOpenActiveAccountDialog(true); setActiveCustomerCode(row); }} size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>
                 </TableCell>
                 <TableCell align="left">
                     <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
@@ -273,7 +271,7 @@ function render(props) {
                 </TableCell>
             </TableRow >
         );
-    }
+    };
 
     return (
         <AppCRM select="/crm/customer" breadcrumb={breadcrumb}>
@@ -323,7 +321,7 @@ function render(props) {
                                         onChange={e => setSearch(e.target.value)}
                                         onKeyPress={event => {
                                             if (event.key === 'Enter' || event.keyCode === 13) {
-                                                onSearch()
+                                                onSearch();
                                             }
                                         }}
                                         placeholder="Nhập Tên khách hàng, Email, Số điện thoại"
