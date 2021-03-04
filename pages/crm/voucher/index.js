@@ -167,7 +167,7 @@ function render(props) {
   };
 
   async function handleChange(event) {
-    setSearch(event.target.value.toUpperCase());
+    setSearch(event.target.value.replace(/\s/g, '').trim().toUpperCase());
     if (event.target.value === "") {
       router
         .push({

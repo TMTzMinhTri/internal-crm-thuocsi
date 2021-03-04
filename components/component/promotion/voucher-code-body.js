@@ -466,7 +466,7 @@ export default function VoucherCodeBody(props) {
                   "Số lần áp dụng tối đa cho mỗi khách hàng không được để trống",
                 maxLength: {
                   value : 10,
-                  message: "Số lần áp dụng tối đa không được vượt quá 10 kí tự"
+                  message: "Số lần áp dụng tối đa cho mỗi khách hàng không được vượt quá 10 kí tự"
                 },
                 validate: (value) =>
                   validateNumber(
