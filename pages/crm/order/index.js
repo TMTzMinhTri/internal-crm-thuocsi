@@ -28,7 +28,7 @@ import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
-import { formatDateTime, formatNumber } from "components/global"
+import { formatDateTime, formatNumber } from "components/global";
 import { formatUrlSearch } from 'components/global';
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { OrderFilter } from "containers/crm/order/OrderFilter";
@@ -42,20 +42,20 @@ export async function getServerSideProps(ctx) {
 }
 
 export async function loadOrderData(ctx) {
-    let data = { props: {} }
-    let query = ctx.query
-    let q = typeof (query.q) === "undefined" ? '' : query.q
-    let page = query.page || 0
-    let limit = query.limit || 20
-    let offset = page * limit
+    let data = { props: {} };
+    let query = ctx.query;
+    let q = typeof (query.q) === "undefined" ? '' : query.q;
+    let page = query.page || 0;
+    let limit = query.limit || 20;
+    let offset = page * limit;
 
-    let orderClient = getOrderClient(ctx, data)
-    let resp = await orderClient.getOrder(offset, limit, q)
+    let orderClient = getOrderClient(ctx, data);
+    let resp = await orderClient.getOrder(offset, limit, q);
     if (resp.status !== 'OK') {
         if (resp.status === 'NOT_FOUND') {
-            return { props: { data: [], count: 0, message: 'Không tìm thấy đơn hàng' } }
+            return { props: { data: [], count: 0, message: 'Không tìm thấy đơn hàng' } };
         }
-        return { props: { data: [], count: 0, message: resp.message } }
+        return { props: { data: [], count: 0, message: resp.message } };
     }
     // Pass data to the page via props
     return {
@@ -63,7 +63,7 @@ export async function loadOrderData(ctx) {
             data: resp.data,
             count: resp.total
         }
-    }
+    };
 }
 
 async function getOrderByFilter(data, limit, offset) {
@@ -71,7 +71,7 @@ async function getOrderByFilter(data, limit, offset) {
         orders: [],
         total: 0,
         message: "",
-    }
+    };
     try {
         let orderClient = getOrderClient();
         const orderResp = await orderClient.getOrderByFilter({ ...data, limit, offset });
@@ -91,9 +91,57 @@ async function getOrderByFilter(data, limit, offset) {
     return res;
 }
 
-export default function OrderPage(props) {
-    return renderWithLoggedInUser(props, render);
-}
+const statusColor = {
+    "WaitConfirm": "blue",
+    "Confirmed": "green",
+    "Canceled": "red",
+    "undefined": "grey",
+};
+
+const RenderRow = (row, i) => (
+    <TableRow key={i}>
+        <TableCell component="th" scope="row">{row.data.orderNo}</TableCell>
+        <TableCell align="left">{row.data.customerName}</TableCell>
+        <TableCell align="left">{row.data.customerPhone}</TableCell>
+        <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
+        <TableCell align="right">{formatNumber(row.data.totalPrice) || "-"}</TableCell>
+        <TableCell align="left">{formatDateTime(row.data.createdTime) || "-"}</TableCell>
+        <TableCell align="left">{formatDateTime(row.data.confirmationDate) || "-"}</TableCell>
+        <TableCell align="right">{formatNumber(row.data.totalDiscount) || "-"}</TableCell>
+        <TableCell align="right">{formatNumber(row.data.totalFee) || "-"}</TableCell>
+        <TableCell align="right">{row.data.source ?? "-"}</TableCell>
+        <TableCell align="center">
+            <Button
+                size="small"
+                variant="outlined"
+                style={{ color: statusColor[row.data.status], borderColor: statusColor[row.data.status] }}
+                disabled
+            >
+                {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
+                    : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}
+            </Button>
+        </TableCell>
+        <TableCell align="center">
+            <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
+                <Tooltip title="Cập nhật thông tin">
+                    <IconButton>
+                        <EditIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            </Link>
+        </TableCell>
+    </TableRow>
+);
+
+const breadcrumb = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách đơn hàng",
+    },
+];
 
 function render(props) {
     let router = useRouter();
@@ -108,14 +156,8 @@ function render(props) {
         page: parseInt(router.query.page) || 0,
         limit: parseInt(router.query.limit) || 20,
         count: props.count,
-    })
+    });
     const { limit, page, count } = pagination;
-
-    let statusColor = {
-        "WaitConfirm": "orange",
-        "Confirmed": "green",
-        "Canceled": "red"
-    }
 
     const handleApplyFilter = async (data) => {
         setOrderFilter(data);
@@ -126,11 +168,11 @@ function render(props) {
             limit,
             page: 0,
             count: total,
-        })
+        });
         Router.replace("/crm/order", "/crm/order", {
             shallow: true,
         });
-    }
+    };
 
     async function onSearch() {
         const q = formatUrlSearch(search);
@@ -146,53 +188,11 @@ function render(props) {
                 limit: rowsPerPage,
                 page,
                 count: total,
-            })
+            });
         } else {
             Router.push(`/crm/order?page=${page}&limit=${rowsPerPage}&q=${search}`);
         }
-    }
-
-
-    const RenderRow = (row, i) => (
-        <TableRow key={i}>
-            <TableCell component="th" scope="row">
-                {row.data.orderNo}
-            </TableCell>
-            <TableCell align="left">{row.data.customerName}</TableCell>
-            <TableCell align="left">{row.data.customerPhone}</TableCell>
-            <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
-            <TableCell align="right">{formatNumber(row.data.totalPrice)}</TableCell>
-            <TableCell align="left">{formatDateTime(row.data.deliveryDate)}</TableCell>
-            <TableCell align="center">
-                <Button size="small" variant="outlined" style={{ color: statusColor[row.data.status], borderColor: statusColor[row.data.status] }}>
-                    {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
-                        : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}
-                </Button>
-
-            </TableCell>
-            <TableCell align="left">
-                <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
-                    <a>
-                        <Tooltip title="Cập nhật thông tin">
-                            <IconButton>
-                                <EditIcon fontSize="small" />
-                            </IconButton>
-                        </Tooltip>
-                    </a>
-                </Link>
-            </TableCell>
-        </TableRow>
-    );
-
-    let breadcrumb = [
-        {
-            name: "Trang chủ",
-            link: "/crm"
-        },
-        {
-            name: "Danh sách đơn hàng",
-        },
-    ]
+    };
 
     return (
         <AppCRM select="/crm/order" breadcrumb={breadcrumb}>
@@ -222,7 +222,7 @@ function render(props) {
                                         inputRef={register}
                                         onKeyPress={event => {
                                             if (event.key === 'Enter' || event.keyCode === 13) {
-                                                onSearch()
+                                                onSearch();
                                             }
                                         }}
                                         placeholder="Nhập mã đơn hàng"
@@ -248,14 +248,18 @@ function render(props) {
                 <TableContainer component={Paper}>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="10%" />
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col width="15%"/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
                         </colgroup>
                         <TableHead>
                             <TableRow>
@@ -264,9 +268,13 @@ function render(props) {
                                 <TableCell align="left">Số điện thoại</TableCell>
                                 <TableCell align="left">Địa Chỉ</TableCell>
                                 <TableCell align="right">Tổng tiền</TableCell>
-                                <TableCell align="left">Ngày giao</TableCell>
+                                <TableCell align="left">Ngày mua</TableCell>
+                                <TableCell align="left">Ngày xác nhận</TableCell>
+                                <TableCell align="right">Khuyến mãi</TableCell>
+                                <TableCell align="right">Phí dịch vụ</TableCell>
+                                <TableCell align="right">Nguồn</TableCell>
                                 <TableCell align="center">Trạng thái</TableCell>
-                                <TableCell align="left">Thao tác</TableCell>
+                                <TableCell align="center">Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
                         {orders.length > 0 ? (
@@ -295,4 +303,8 @@ function render(props) {
             </MyCard>
         </AppCRM>
     );
+}
+
+export default function OrderPage(props) {
+    return renderWithLoggedInUser(props, render);
 }
