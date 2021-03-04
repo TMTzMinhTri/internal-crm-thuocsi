@@ -21,6 +21,7 @@ import {getVoucherClient} from "../../../client/voucher";
 import {getCustomerClient} from "../../../client/customer";
 import {formatUTCTime} from "../../../components/component/util";
 import {defaultPromotionStatus} from "../../../components/component/constant";
+import Head from "next/head";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -190,9 +191,9 @@ function render(props) {
 
     return (
         <AppCRM select="/crm/voucher">
-            <div>
+            <Head>
                 <title>Tạo mã khuyến mãi</title>
-            </div>
+            </Head>
             <MyCard>
                 <MyCardHeader title="THÊM MỚI MÃ KHUYẾN MÃI"/>
                 <MyCardContent>
