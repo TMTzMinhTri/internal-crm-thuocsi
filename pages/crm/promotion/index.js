@@ -44,7 +44,7 @@ import {
   displayUsage,
   formatTime,
   getPromotionOrganizer,
-  getPromotionScope,
+  getPromotionScope, limitText,
   removeElement,
 } from "../../../components/component/util";
 import Switch from "@material-ui/core/Switch";
@@ -218,7 +218,7 @@ function render(props) {
       } else {
         props.promotion.forEach((d) => {
           if (d.promotionId === promotionId) {
-            return (d.status = defaultPromotionStatus.WAITING);
+            return (d.status = defaultPromotionStatus.EXPIRED);
           }
         });
         setOpenModal({ ...openModal, open: false });
@@ -335,7 +335,7 @@ function render(props) {
                   props.promotion.map((row, index) => (
                     <TableRow key={row.promotionId}>
                       <TableCell align="left">{row.promotionId}</TableCell>
-                      <TableCell align="left"> {row.promotionName}</TableCell>
+                      <TableCell align="left"> {limitText(row.promotionName,50)}</TableCell>
                       <TableCell align="left">
                         {getPromotionOrganizer(row.promotionOrganizer)}
                       </TableCell>
