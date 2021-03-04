@@ -218,7 +218,7 @@ function render(props) {
       } else {
         props.promotion.forEach((d) => {
           if (d.promotionId === promotionId) {
-            return (d.status = defaultPromotionStatus.WAITING);
+            return (d.status = defaultPromotionStatus.EXPIRED);
           }
         });
         setOpenModal({ ...openModal, open: false });

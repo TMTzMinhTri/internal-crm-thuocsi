@@ -51,7 +51,7 @@ import Modal from "@material-ui/core/Modal";
 import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDoubleDown } from "@fortawesome/free-solid-svg-icons";
+import {faAngleDoubleDown, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import { faAngleUp, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -68,6 +68,7 @@ import {
 } from "components/component/constant";
 import ModalCustom from "../../../components/modal/dialogs";
 import CloseIcon from "@material-ui/icons/Close";
+import Tooltip from "@material-ui/core/Tooltip";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
@@ -211,7 +212,7 @@ function render(props) {
       } else {
         props.voucher.forEach((d) => {
           if (d.voucherId === voucherId) {
-            return (d.status = defaultPromotionStatus.WAITING);
+            return (d.status = defaultPromotionStatus.EXPIRED);
           }
         });
         setOpenModal({ ...openModal, open: false });
@@ -319,18 +320,22 @@ function render(props) {
                         <div>{formatTime(row.publicTime)}</div>
                       </TableCell>
                       <TableCell align="left">
-                        <Switch
-                          onChange={(event) => {
-                            handleConfirm(
-                              row.voucherId,
-                              event.target.checked,
-                              true,
-                              row.code
-                            );
-                          }}
-                          checked={row.status === "ACTIVE"}
-                          color="primary"
-                        />
+                        <Tooltip title={row.status === "ACTIVE" ? "Đang hoạt động" : "Ngưng hoạt động"}>
+                          <div>
+                            <Switch
+                                onChange={(event) => {
+                                  handleConfirm(
+                                      row.voucherId,
+                                      event.target.checked,
+                                      true,
+                                      row.code
+                                  );
+                                }}
+                                checked={row.status === "ACTIVE"}
+                                color="primary"
+                            />
+                          </div>
+                        </Tooltip>
                       </TableCell>
                       <TableCell align="center">
                         <Link

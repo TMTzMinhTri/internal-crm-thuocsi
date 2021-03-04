@@ -32,7 +32,7 @@ import {
 } from "../util";
 import Tooltip from "@material-ui/core/Tooltip";
 import { getAreaClient } from "../../../client/area";
-import { defaultPromotionScope } from "../constant";
+import {defaultPromotionScope, defaultPromotionStatus} from "../constant";
 import Switch from "@material-ui/core/Switch";
 import WarningIcon from "@material-ui/icons/Warning";
 import Link from "next/link";
@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export async function searchPromotion(promotionName) {
-  return getPromoClient().getPromotionFromClient(promotionName,5,0,false,"ACTIVE");
+  return getPromoClient().getPromotionFromClient(promotionName,5,0,false,defaultPromotionStatus.ACTIVE);
 }
 
 export async function searchCustomer(customerName) {

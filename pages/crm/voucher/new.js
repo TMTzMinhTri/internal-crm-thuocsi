@@ -49,7 +49,7 @@ export async function loadDataPromotion(ctx) {
         returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data;
     }
 
-    let promotionDefaultResponse = await getPromoClient(ctx, {}).getPromotion("", 5, 0, false,"ACTIVE");
+    let promotionDefaultResponse = await getPromoClient(ctx, {}).getPromotion("", 5, 0, false,defaultPromotionStatus.ACTIVE);
     if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
         returnObject.props.listPromotionDefault = promotionDefaultResponse.data;
     }
@@ -161,7 +161,7 @@ function render(props) {
             parseInt(maxUsage),
             parseInt(maxUsagePerCustomer),
             customerIds,
-            status === true ? "ACTIVE" : "WAITING"
+            status === true ? defaultPromotionStatus.ACTIVE : defaultPromotionStatus.WAITING
         );
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success("Tạo mã khuyến mãi thành công");

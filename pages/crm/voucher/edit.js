@@ -23,6 +23,7 @@ import { getCustomerClient } from "../../../client/customer";
 import { createVoucherCode } from "./new";
 import { compareTime, formatUTCTime } from "../../../components/component/util";
 import Head from "next/head";
+import {defaultPromotionStatus} from "../../../components/component/constant";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -72,7 +73,7 @@ export async function loadVoucherCode(ctx) {
     5,
     0,
     false,
-      "ACTIVE"
+      defaultPromotionStatus.ACTIVE,
   );
   if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
     returnObject.props.listPromotionDefault = promotionDefaultResponse.data;
@@ -210,7 +211,7 @@ function render(props) {
       parseInt(maxUsagePerCustomer),
       customerIds,
       promotionId.label,
-      status ? "ACTIVE" : "WAITING"
+      status ? defaultPromotionStatus.ACTIVE : defaultPromotionStatus.EXPIRED
     );
     if (createVoucherResponse && createVoucherResponse.status === "OK") {
       toast.success("Cập nhật mã khuyến mãi thành công");
