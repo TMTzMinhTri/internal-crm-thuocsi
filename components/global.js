@@ -2,11 +2,13 @@ import moment from "moment";
 
 export const SellPrices = [
     {
-        label: "Đảm bảo doanh thu của người bán hàng",
+        tooltip: "Đảm bảo doanh thu của người bán hàng",
+        label: "Doanh thu bán hàng",
         value: "FIXED_REVENUE"
     },
     {
-        label: "Đảm bảo giá bán đến tay người mua",
+        tooltip: "Đảm bảo giá bán đến tay người mua",
+        label: "Giá bán cuối",
         value: "FIXED_PRICE"
     }
 ];
