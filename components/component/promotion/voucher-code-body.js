@@ -424,8 +424,8 @@ export default function VoucherCodeBody(props) {
                 required:
                   "Tổng số lần sử dụng toàn hệ thống không được để trống",
                 maxLength: {
-                  value : 10,
-                  message: "Tổng số lần sử dụng không được vượt quá 10 kí tự"
+                  value : 6,
+                  message: "Tổng số lần sử dụng không được vượt quá 1000000"
                 },
                 validate: (value) =>
                   validateNumber(
@@ -465,8 +465,8 @@ export default function VoucherCodeBody(props) {
                 required:
                   "Số lần áp dụng tối đa cho mỗi khách hàng không được để trống",
                 maxLength: {
-                  value : 10,
-                  message: "Số lần áp dụng tối đa cho mỗi khách hàng không được vượt quá 10 kí tự"
+                  value : 6,
+                  message: "Số lần áp dụng tối đa cho mỗi khách hàng không được vượt quá 1000000"
                 },
                 validate: (value) =>
                   validateNumber(
