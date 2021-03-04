@@ -22,6 +22,8 @@ import { getPromoClient } from "../../../client/promo";
 import { getCustomerClient } from "../../../client/customer";
 import { createVoucherCode } from "./new";
 import { compareTime, formatUTCTime } from "../../../components/component/util";
+import Head from "next/head";
+import {defaultPromotionStatus} from "../../../components/component/constant";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -70,7 +72,8 @@ export async function loadVoucherCode(ctx) {
     "",
     5,
     0,
-    false
+    false,
+      defaultPromotionStatus.ACTIVE,
   );
   if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
     returnObject.props.listPromotionDefault = promotionDefaultResponse.data;
@@ -208,7 +211,7 @@ function render(props) {
       parseInt(maxUsagePerCustomer),
       customerIds,
       promotionId.label,
-      status ? "ACTIVE" : "WAITING"
+      status ? defaultPromotionStatus.ACTIVE : defaultPromotionStatus.EXPIRED
     );
     if (createVoucherResponse && createVoucherResponse.status === "OK") {
       toast.success("Cập nhật mã khuyến mãi thành công");
@@ -242,9 +245,9 @@ function render(props) {
 
   return (
     <AppCRM select="/crm/voucher">
-      <div>
+      <Head>
         <title>Chỉnh sửa mã khuyến mãi</title>
-      </div>
+      </Head>
       <MyCard>
         <MyCardHeader title="CHỈNH SỬA MÃ KHUYẾN MÃI" />
         <MyCardContent style={{ margin: "0 3rem 3rem 3rem" }}>

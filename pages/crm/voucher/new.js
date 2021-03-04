@@ -21,6 +21,7 @@ import {getVoucherClient} from "../../../client/voucher";
 import {getCustomerClient} from "../../../client/customer";
 import {formatUTCTime} from "../../../components/component/util";
 import {defaultPromotionStatus} from "../../../components/component/constant";
+import Head from "next/head";
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -48,7 +49,7 @@ export async function loadDataPromotion(ctx) {
         returnObject.props.listCustomerDefault = listCustomerDefaultReponse.data;
     }
 
-    let promotionDefaultResponse = await getPromoClient(ctx, {}).getPromotion("", 5, 0, false);
+    let promotionDefaultResponse = await getPromoClient(ctx, {}).getPromotion("", 5, 0, false,defaultPromotionStatus.ACTIVE);
     if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
         returnObject.props.listPromotionDefault = promotionDefaultResponse.data;
     }
@@ -160,7 +161,7 @@ function render(props) {
             parseInt(maxUsage),
             parseInt(maxUsagePerCustomer),
             customerIds,
-            status === true ? "ACTIVE" : "WAITING"
+            status === true ? defaultPromotionStatus.ACTIVE : defaultPromotionStatus.WAITING
         );
         if (createVoucherResponse && createVoucherResponse.status === "OK") {
             toast.success("Tạo mã khuyến mãi thành công");
@@ -190,9 +191,9 @@ function render(props) {
 
     return (
         <AppCRM select="/crm/voucher">
-            <div>
+            <Head>
                 <title>Tạo mã khuyến mãi</title>
-            </div>
+            </Head>
             <MyCard>
                 <MyCardHeader title="THÊM MỚI MÃ KHUYẾN MÃI"/>
                 <MyCardContent>
