@@ -31,7 +31,6 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getPriceClient } from "client/price";
 import { getPricingClient } from 'client/pricing';
 import { getSellerClient } from "client/seller";
-import { unknownErrorText } from "components/commonErrors";
 import { formatDateTime, formatNumber, formatUrlSearch, ProductStatus, SellPrices, SkuStatuses } from "components/global";
 import SkuRequestDrawer from "containers/crm/sku/request/SkuRequestDrawer";
 import { SkuRequestFilter } from "containers/crm/sku/request/SkuRequestFilter";
@@ -432,7 +431,7 @@ function render(props) {
                                         <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
-                                    <TableCell>{row.seller.code ? (row.seller?.code + ' - ' + row.seller?.name) : row.sellerCode}</TableCell>
+                                    <TableCell>{row.seller?.code ? (row.seller?.code + ' - ' + row.seller?.name) : row.sellerCode}</TableCell>
                                     <TableCell align="left">{
                                         showType(row.retailPrice.type)
                                     }</TableCell>
