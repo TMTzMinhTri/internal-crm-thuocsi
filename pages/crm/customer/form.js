@@ -8,7 +8,7 @@ import MenuItem from "@material-ui/core/MenuItem";
 import Select from "@material-ui/core/Select";
 import Typography from "@material-ui/core/Typography";
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
+import { MyCard, MyCardActions, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { getCommonAPI } from 'client/common';
 import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
@@ -24,6 +24,7 @@ import { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { customerValidation } from "view-models/customer";
 import styles from "./customer.module.css";
 
 export async function loadData(ctx) {
@@ -312,7 +313,7 @@ export default function renderForm(props, toast) {
                                 Thông tin cơ bản
                                     </Typography>
                             <Grid spacing={3} container>
-                                <Grid item xs={12} sm={4} md={4}>
+                                <Grid item xs={12} md={3}>
                                     <TextField
                                         id="name"
                                         name="name"
@@ -333,25 +334,11 @@ export default function renderForm(props, toast) {
                                         error={!!errors.name}
                                         required
                                         inputRef={
-                                            register({
-                                                required: "Tên khách hàng không thể để trống",
-                                                maxLength: {
-                                                    value: 50,
-                                                    message: "Tên khách hàng có độ dài tối đa 50 kí tự"
-                                                },
-                                                minLength: {
-                                                    value: 6,
-                                                    message: "Tên khách hàng có độ dài tối thiểu 6 kí tự"
-                                                },
-                                                pattern: {
-                                                    value: /^(?!.*[ ]{2})/,
-                                                    message: "Tên không hợp lệ (không được dư khoảng trắng)."
-                                                }
-                                            })
+                                            register(customerValidation.name)
                                         }
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={4} md={4}>
+                                <Grid item xs={12} md={3}>
                                     <TextField
                                         id="email"
                                         name="email"
@@ -373,19 +360,13 @@ export default function renderForm(props, toast) {
                                         error={!!errors.email}
                                         required
                                         inputRef={
-                                            register({
-                                                required: "Email khách hàng không thể để trống",
-                                                pattern: {
-                                                    value: /^([a-z0-9])+([\._+][a-z0-9]+)*@([a-z0-9]+\.)+[a-z0-9]+$/,
-                                                    message: "Email không hợp lệ",
-                                                }
-                                            })
+                                            register(customerValidation.email)
                                         }
                                     />
                                 </Grid>
                             </Grid>
                             <Grid spacing={3} container>
-                                <Grid item xs={12} sm={3} md={3}>
+                                <Grid item xs={12} md={3}>
                                     <TextField
                                         id="phone"
                                         name="phone"
@@ -407,13 +388,7 @@ export default function renderForm(props, toast) {
                                         error={!!errors.phone}
                                         required
                                         inputRef={
-                                            register({
-                                                required: "Số điện thoại không thể để trống",
-                                                pattern: {
-                                                    value: /^[0-9]{10,12}$/,
-                                                    message: "Số điện thoại không hợp lệ"
-                                                },
-                                            })
+                                            register(customerValidation.phone)
                                         }
                                     />
                                 </Grid>
@@ -440,27 +415,13 @@ export default function renderForm(props, toast) {
                                         error={!!errors.address}
                                         required
                                         inputRef={
-                                            register({
-                                                required: "Địa chỉ không thể để trống",
-                                                maxLength: {
-                                                    value: 250,
-                                                    message: "Địa chỉ có độ dài tối đa 250 kí tự"
-                                                },
-                                                minLength: {
-                                                    value: 1,
-                                                    message: "Địa chỉ có độ dài tối thiểu 1 kí tự"
-                                                },
-                                                pattern: {
-                                                    value: /^(?!.*[ ]{2})/,
-                                                    message: "Địa chỉ không hợp lệ (không được dư khoảng trắng)."
-                                                }
-                                            })
+                                            register(customerValidation.address)
                                         }
                                     />
                                 </Grid>
                             </Grid>
                             <Grid spacing={3} container>
-                                <Grid item xs={12} sm={3} md={3}>
+                                <Grid item xs={12} md={3}>
                                     <MuiSingleAuto
                                         id="provinceCode"
                                         name="provinceCode"
@@ -474,7 +435,7 @@ export default function renderForm(props, toast) {
                                         message={'Vui lòng chọn tỉnh thành'}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={3} md={3}>
+                                <Grid item xs={12} md={3}>
                                     <Autocomplete
                                         options={districts}
                                         size="small"
@@ -499,7 +460,7 @@ export default function renderForm(props, toast) {
                                                 {...params} />}
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={3} md={3}>
+                                <Grid item xs={12} md={3}>
                                     <Autocomplete
                                         size="small"
                                         options={wards}
@@ -541,7 +502,7 @@ export default function renderForm(props, toast) {
                                 Thông tin pháp lý
                                     </Typography>
                             <Grid spacing={3} container>
-                                <Grid item xs={12} sm={4} md={4}>
+                                <Grid item xs={12} md={3}>
                                     <TextField
                                         id="legalRepresentative"
                                         name="legalRepresentative"
@@ -562,25 +523,11 @@ export default function renderForm(props, toast) {
                                         error={!!errors.legalRepresentative}
                                         required
                                         inputRef={
-                                            register({
-                                                required: "Người đại diện không thể để trống",
-                                                maxLength: {
-                                                    value: 100,
-                                                    message: "Người đại diện có độ dài tối đa 100 kí tự"
-                                                },
-                                                minLength: {
-                                                    value: 1,
-                                                    message: "Người đại diện có độ dài tối thiểu 1 kí tự"
-                                                },
-                                                pattern: {
-                                                    value: /^(?!.*[ ]{2})/,
-                                                    message: "Người đại diện không hợp lệ (không được dư khoảng trắng)."
-                                                }
-                                            })
+                                            register(customerValidation.legalRepresentative)
                                         }
                                     />
                                 </Grid>
-                                <Grid item xs={12} sm={3} md={3}>
+                                <Grid item xs={12} md={3}>
                                     <TextField
                                         id="mst"
                                         name="mst"
@@ -601,22 +548,44 @@ export default function renderForm(props, toast) {
                                         error={!!errors.mst}
                                         required
                                         inputRef={
-                                            register({
-                                                required: "Mã số thuế không thể để trống",
-                                                maxLength: {
-                                                    value: 50,
-                                                    message: "Mã số thuế có độ dài tối đa 50 kí tự"
-                                                },
-                                                minLength: {
-                                                    value: 1,
-                                                    message: "Mã số thuế có độ dài tối thiểu 1 kí tự"
-                                                },
-                                                pattern: {
-                                                    value: /^(?!.*[ ]{2})/,
-                                                    message: "Mã số thuế không hợp lệ (không được dư khoảng trắng)."
-                                                }
-                                            })
+                                            register(customerValidation.mst)
                                         }
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    <TextField
+                                        id="companyName"
+                                        name="companyName"
+                                        label="Tên công ty"
+                                        variant="outlined"
+                                        size="small"
+                                        placeholder="Nhập tên công ty"
+                                        error={!!errors.companyName}
+                                        helperText={errors.companyName?.message}
+                                        fullWidth
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        autoComplete={false}
+                                        inputRef={register}
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={6}>
+                                    <TextField
+                                        id="companyAddress"
+                                        name="companyAddress"
+                                        label="Địa chỉ công ty"
+                                        variant="outlined"
+                                        size="small"
+                                        placeholder="Nhập địa chỉ công ty"
+                                        error={!!errors.companyAddress}
+                                        helperText={errors.companyAddress?.message}
+                                        fullWidth
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        autoComplete={false}
+                                        inputRef={register}
                                     />
                                 </Grid>
                             </Grid>
@@ -628,7 +597,7 @@ export default function renderForm(props, toast) {
                                 Thông tin tài khoản
                                     </Typography>
                             <Grid spacing={3} container>
-                                <Grid item xs={12} sm={3} md={3}>
+                                <Grid item xs={12} md={3}>
                                     <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                         <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
                                         <Controller
@@ -649,7 +618,7 @@ export default function renderForm(props, toast) {
                                     </FormControl>
 
                                 </Grid>
-                                <Grid item xs={12} sm={3} md={3}>
+                                <Grid item xs={12} md={3}>
                                     <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                         <InputLabel id="department-select-label" sise="small">Cấp độ</InputLabel>
                                         <Controller
@@ -670,7 +639,7 @@ export default function renderForm(props, toast) {
                                     </FormControl>
                                 </Grid>
                                 {props.isUpdate && (
-                                    <Grid item xs={12} sm={3} md={3}>
+                                    <Grid item xs={12} md={3}>
                                         <FormControl style={{ width: '100%' }} size="small" variant="outlined">
                                             <InputLabel id="department-select-label">Trạng thái</InputLabel>
                                             <Controller
@@ -694,7 +663,7 @@ export default function renderForm(props, toast) {
                             </Grid>
                             {!props.isUpdate && (
                                 <Grid spacing={3} container>
-                                    <Grid item xs={12} sm={3} md={3}>
+                                    <Grid item xs={12} md={3}>
                                         <TextField
                                             id="password"
                                             name="password"
@@ -717,17 +686,11 @@ export default function renderForm(props, toast) {
                                             error={!!errors.password}
                                             required
                                             inputRef={
-                                                register({
-                                                    required: "Mật khẩu không thể để trống",
-                                                    pattern: {
-                                                        value: /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,12}$/,
-                                                        message: "Mật khẩu có độ dài từ 8 đến 12 kí tự, phải có ít nhất 1 chữ thường, 1 chữ hoa và 1 số"
-                                                    }
-                                                })
+                                                register(customerValidation.password)
                                             }
                                         />
                                     </Grid>
-                                    <Grid item xs={12} sm={3} md={3}>
+                                    <Grid item xs={12} md={3}>
                                         <TextField
                                             id="passwordConfirm"
                                             name="passwordConfirm"
@@ -759,29 +722,29 @@ export default function renderForm(props, toast) {
                             )}
                         </CardContent>
                     </Card>
-                    <Box>
-                        {props.isUpdate ? (
-                            <Link href={`/crm/customer`}>
-                                <ButtonGroup color="primary" aria-label="contained primary button group">
-                                    <Button style={{ margin: 8 }} variant="contained" color="default">Quay lại</Button>
-                                </ButtonGroup>
-                            </Link>
-                        ) : (
-                                <Button
-                                    variant="contained"
-                                    type="reset"
-                                    style={{ margin: 8 }}
-                                    disabled={loading}
-                                >
-                                    {loading && <CircularProgress size={20} />}
-                                Làm mới
-                                </Button>
-                            )}
-                        {/* <Button
+                </MyCardContent>
+                <MyCardActions>
+                    {props.isUpdate ? (
+                        <Link href={`/crm/customer`}>
+                            <ButtonGroup color="primary" aria-label="contained primary button group">
+                                <Button variant="contained" color="default">Quay lại</Button>
+                            </ButtonGroup>
+                        </Link>
+                    ) : (
+                            <Button
+                                variant="contained"
+                                type="reset"
+                                disabled={loading}
+                            >
+                                {loading && <CircularProgress size={20} />}
+                            Làm mới
+                            </Button>
+                        )}
+                    {/* <Button
                             variant="contained"
                             color="secondary"
                             onClick={() => setOpenLockAccountDialog(true)}
-                            style={{ margin: 8, display: props.isUpdate && props.customer.isActive == 1 ? null : 'none' }}
+                            style={{ display: props.isUpdate && props.customer.isActive == 1 ? null : 'none' }}
                         >
                             Khóa
                         </Button>
@@ -789,22 +752,20 @@ export default function renderForm(props, toast) {
                             variant="contained"
                             color="secondary"
                             onClick={() => setOpenApproveAccountDialog(true)}
-                            style={{ margin: 8, display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}
+                            style={{ display: props.isUpdate && props.customer.status != 'DRAFT' && props.customer.isActive != 1 ? null : 'none' }}
                         >
                             Mở khoá
                         </Button> */}
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            onClick={handleSubmit(onSubmit)}
-                            disabled={loading}
-                            style={{ margin: 8 }}
-                        >
-                            {loading && <CircularProgress size={20} />}
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleSubmit(onSubmit)}
+                        disabled={loading}
+                    >
+                        {loading && <CircularProgress size={20} />}
                             Lưu
                         </Button>
-                    </Box>
-                </MyCardContent>
+                </MyCardActions>
             </MyCard>
         </AppCRM >
     )
