@@ -134,14 +134,18 @@ const render = props => {
 
     useEffect(() => {
         setDeliveryTimeData(props.deliveryTimeData);
+        setMessage(props.message);
+    }, [props.deliveryTimeData, props.message]);
+    useEffect(() => {
         setPagination({
             page: parseInt(router.query.page) || 0,
             limit: parseInt(router.query.limit) || 20,
             count: props.count,
         });
-        setMessage(props.message);
-    }, [props]);
-
+    }, [router.query.page, router.query.limit, props.count]);
+    useEffect(() => {
+        setSearch(router.query.q ?? "");
+    }, [router.query.q]);
 
     const handleSearch = () => {
         router.push({
