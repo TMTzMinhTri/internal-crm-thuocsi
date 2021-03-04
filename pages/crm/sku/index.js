@@ -119,7 +119,7 @@ async function getPricingDataByFilter(data, limit, offset) {
     };
     try {
         const pricingClient = getPricingClient();
-        const pricingResp = await pricingClient.getListPricingByFilterFromClient({ ...data, limit, offset });
+        const pricingResp = await pricingClient.getListPricingByFilterFromClient({ ...data, status: "ACTIVE", limit, offset });
         if (pricingResp.status !== "OK") {
             if (pricingResp.status === 'NOT_FOUND') {
                 res.message = "Không tìm thấy kết quả phù hợp";
@@ -213,10 +213,10 @@ function render(props) {
 
     useEffect(() => {
         setSkus(props.data);
-    }, [props.data]);
-    useEffect(() => {
+        setMessage(props.message);
         setStatuses(props.statuses);
-    }, [props.statuses]);
+    }, [props.data, props.message, props.statuses]);
+
     useEffect(() => {
         setPagination({
             page: parseInt(router.query.page) || 0,
@@ -298,7 +298,7 @@ function render(props) {
                 <Box display={!openSkuFilter ? "block" : "none"}>
                     <MyCardActions>
                         <Grid container spacing={1}>
-                            <Grid item xs={12} sm={8} md={6}>
+                            <Grid item xs={12} md={4}>
                                 <Paper className={styles.search} style={{ width: '100%' }}>
                                     <InputBase
                                         id="q"
@@ -361,7 +361,7 @@ function render(props) {
                                         <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
-                                    <TableCell>{row.seller.code?(row.seller?.code + ' - ' + row.seller?.name):row.sellerCode}</TableCell>
+                                    <TableCell>{row.seller?.code?(row.seller?.code + ' - ' + row.seller?.name):row.sellerCode}</TableCell>
                                     <TableCell align="left">{
                                         showType(row.retailPrice.type)
                                     }</TableCell>
