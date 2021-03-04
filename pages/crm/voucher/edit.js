@@ -70,7 +70,8 @@ export async function loadVoucherCode(ctx) {
     "",
     5,
     0,
-    false
+    false,
+      "ACTIVE"
   );
   if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
     returnObject.props.listPromotionDefault = promotionDefaultResponse.data;

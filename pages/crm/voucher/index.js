@@ -43,7 +43,7 @@ import {
   displayUsage,
   formatTime,
   getPromotionOrganizer,
-  getPromotionScope,
+  getPromotionScope, limitText,
   removeElement,
 } from "../../../components/component/util";
 import Switch from "@material-ui/core/Switch";
@@ -301,9 +301,9 @@ function render(props) {
                   props.voucher.map((row, index) => (
                     <TableRow key={row.voucherId + "_" + index}>
                       <TableCell align="left">
-                        <div>{row.code}</div>
+                        <div>{limitText(row.code,20)}</div>
                       </TableCell>
-                      <TableCell align="left">{row.promotionName}</TableCell>
+                      <TableCell align="left">{limitText(row.promotionName,50)}</TableCell>
                       <TableCell align="left">{row.type}</TableCell>
                       <TableCell align="center">
                         <div>{displayUsage(row.maxUsage)}</div>
