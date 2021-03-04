@@ -25,7 +25,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
 import { formatDateTime, formatNumber } from "components/global";
@@ -104,11 +104,11 @@ const RenderRow = (row, i) => (
         <TableCell align="left">{row.data.customerName}</TableCell>
         <TableCell align="left">{row.data.customerPhone}</TableCell>
         <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
-        <TableCell align="right">{formatNumber(row.data.totalPrice) || "-"}</TableCell>
+        <TableCell align="right">{formatNumber(row.data.totalFee) || 0}</TableCell>
+        <TableCell align="right">{formatNumber(row.data.totalDiscount) || 0}</TableCell>
+        <TableCell align="right">{formatNumber(row.data.totalPrice) || 0}</TableCell>
         <TableCell align="left">{formatDateTime(row.data.createdTime) || "-"}</TableCell>
         <TableCell align="left">{formatDateTime(row.data.confirmationDate) || "-"}</TableCell>
-        <TableCell align="right">{formatNumber(row.data.totalDiscount) || "-"}</TableCell>
-        <TableCell align="right">{formatNumber(row.data.totalFee) || "-"}</TableCell>
         <TableCell align="right">{row.data.source ?? "-"}</TableCell>
         <TableCell align="center">
             <Button
@@ -158,6 +158,20 @@ function render(props) {
         count: props.count,
     });
     const { limit, page, count } = pagination;
+
+    useEffect(() => {
+        setOrders(props.data ?? []);
+        setMessage(props.message);
+        setSearch(router.query.q ?? "");
+    }, [props.data, props.message, router.query.q]);
+    useEffect(() => {
+        setPagination({
+            page: parseInt(router.query.page) || 0,
+            limit: parseInt(router.query.limit) || 20,
+            count: props.count,
+        });
+
+    }, [router.query.page, router.query.limit, props.count]);
 
     const handleApplyFilter = async (data) => {
         setOrderFilter(data);
@@ -267,11 +281,11 @@ function render(props) {
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
                                 <TableCell align="left">Địa Chỉ</TableCell>
+                                <TableCell align="right">Phí dịch vụ</TableCell>
+                                <TableCell align="right">Khuyến mãi</TableCell>
                                 <TableCell align="right">Tổng tiền</TableCell>
                                 <TableCell align="left">Ngày mua</TableCell>
                                 <TableCell align="left">Ngày xác nhận</TableCell>
-                                <TableCell align="right">Khuyến mãi</TableCell>
-                                <TableCell align="right">Phí dịch vụ</TableCell>
                                 <TableCell align="right">Nguồn</TableCell>
                                 <TableCell align="center">Trạng thái</TableCell>
                                 <TableCell align="center">Thao tác</TableCell>
