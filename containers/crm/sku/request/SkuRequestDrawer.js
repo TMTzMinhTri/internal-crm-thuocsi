@@ -13,6 +13,7 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    Typography,
 } from "@material-ui/core";
 import Image from "next/image";
 import { BranText, SellingPriceText } from "view-models/sku";
@@ -20,7 +21,7 @@ import { MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/
 import { getPricingClient } from "client/pricing";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import { ProductStatus } from "components/global";
+import { formatNumber, ProductStatus } from "components/global";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { unknownErrorText } from "components/commonErrors";
 
@@ -80,7 +81,7 @@ const RenderWholesalePrice = ({ data }) => {
                             </TableRow>
                             <TableRow>
                                 <TableCell>Giá bán</TableCell>
-                                <TableCell>{price.price}</TableCell>
+                                <TableCell>{formatNumber(price.price)}</TableCell>
                                 <TableCell />
                             </TableRow>
                             <TableRow>
@@ -89,13 +90,18 @@ const RenderWholesalePrice = ({ data }) => {
                                 <TableCell />
                             </TableRow>
                             <TableRow>
+                                <TableCell>Số lượng tối đa áp dụng</TableCell>
+                                <TableCell>{price.maxQuantity ?? "-"}</TableCell>
+                                <TableCell />
+                            </TableRow>
+                            <TableRow>
                                 <TableCell>Tỉ lệ phần trăm giảm giá</TableCell>
-                                <TableCell>{price.absoluteDiscount}</TableCell>
+                                <TableCell>{price.percentageDiscount}</TableCell>
                                 <TableCell />
                             </TableRow>
                             <TableRow>
                                 <TableCell>Giảm giá tuyệt đối</TableCell>
-                                <TableCell>{price.absoluteDiscount}</TableCell>
+                                <TableCell>{formatNumber(price.absoluteDiscount)}</TableCell>
                                 <TableCell />
                             </TableRow>
                         </>
@@ -211,11 +217,11 @@ const TicketRow = ({ previous, next, name, selected, onSelect }) => {
                     {retailPriceUpdated && (
                         <TableRow>
                             <TableCell>Giá bán</TableCell>
-                            <TableCell>{previous.retailPrice?.price}</TableCell>
+                            <TableCell>{formatNumber(previous.retailPrice?.price)}</TableCell>
                             <TableCell>
                                 <FontAwesomeIcon icon={faArrowRight} />
                             </TableCell>
-                            <TableCell>{next.retailPrice?.price}</TableCell>
+                            <TableCell>{formatNumber(next.retailPrice?.price)}</TableCell>
                         </TableRow>
                     )}
                 </>
@@ -247,15 +253,16 @@ const TicketRow = ({ previous, next, name, selected, onSelect }) => {
 
 /**
  * @param {object} props
+ * @param {string} props.sku
  * @param {string[]} props.ticketCodes
- * @param {string} props.productImage
+ * @param {object} props.product
  * @param {string} props.sellerCode
  * @param {object} props.seller
  * @param {boolean} props.open
  * @param {Function} props.onClose
  * @param {Function} props.onUpdate
  */
-const SkuRequestDrawer = ({ ticketCodes, productImage, sellerCode, seller, open, onClose, onUpdate }) => {
+const SkuRequestDrawer = ({ sku, ticketCodes, product, sellerCode, seller, open, onClose, onUpdate }) => {
     const toast = useToast();
 
     const [tickets, setTickets] = useState([]);
@@ -327,22 +334,30 @@ const SkuRequestDrawer = ({ ticketCodes, productImage, sellerCode, seller, open,
             onClose={onClose}
         >
             <Card className={classes.card}>
-                <MyCardHeader title="Cập nhật trạng thái" />
+                <MyCardHeader title={`Cập nhật trạng thái #${sku}`} />
                 <MyCardContent>
-                    <TableContainer>
-                        <Table size="small">
-                            <TableHead>
-                                <TableCell>Hình ảnh</TableCell>
-                                <TableCell>Thông tin nhà bán hàng</TableCell>
-                            </TableHead>
-                            <TableBody>
-                                <TableCell>
-                                    <Image src={productImage ?? "/default.png"} title="image" alt="image" width={100} height={100} />
-                                </TableCell>
-                                <TableCell>{seller?.name ? `${sellerCode} - ${seller.name}` : sellerCode}</TableCell>
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <Grid container spacing={1}>
+                        <Grid item xs={12} md={2} justify="center">
+                            <Image
+                                src={product?.imageUrls?.[0] ?? "/default.png"}
+                                title="image"
+                                alt="image"
+                                width={100}
+                                height={100}
+                                objectFit="contain"
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={10}>
+                            <Typography>
+                                <strong>Nhà bán hàng: </strong>
+                                {seller?.name ? `${sellerCode} - ${seller.name}` : sellerCode}
+                            </Typography>
+                            <Typography>
+                                <strong>Sản phẩm: </strong>
+                                {product?.name}
+                            </Typography>
+                        </Grid>
+                    </Grid>
                 </MyCardContent>
                 <MyCardContent>
                     <TableContainer>
