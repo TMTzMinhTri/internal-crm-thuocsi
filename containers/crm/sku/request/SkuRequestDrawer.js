@@ -14,6 +14,7 @@ import {
     TableHead,
     TableRow,
 } from "@material-ui/core";
+import Image from "next/image";
 import { BranText, SellingPriceText } from "view-models/sku";
 import { MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { getPricingClient } from "client/pricing";
@@ -247,11 +248,14 @@ const TicketRow = ({ previous, next, name, selected, onSelect }) => {
 /**
  * @param {object} props
  * @param {string[]} props.ticketCodes
+ * @param {string} props.productImage
+ * @param {string} props.sellerCode
+ * @param {object} props.seller
  * @param {boolean} props.open
  * @param {Function} props.onClose
  * @param {Function} props.onUpdate
  */
-const SkuRequestDrawer = ({ ticketCodes, open, onClose, onUpdate }) => {
+const SkuRequestDrawer = ({ ticketCodes, productImage, sellerCode, seller, open, onClose, onUpdate }) => {
     const toast = useToast();
 
     const [tickets, setTickets] = useState([]);
@@ -324,6 +328,22 @@ const SkuRequestDrawer = ({ ticketCodes, open, onClose, onUpdate }) => {
         >
             <Card className={classes.card}>
                 <MyCardHeader title="Cập nhật trạng thái" />
+                <MyCardContent>
+                    <TableContainer>
+                        <Table size="small">
+                            <TableHead>
+                                <TableCell>Hình ảnh</TableCell>
+                                <TableCell>Thông tin nhà bán hàng</TableCell>
+                            </TableHead>
+                            <TableBody>
+                                <TableCell>
+                                    <Image src={productImage ?? "/default.png"} title="image" alt="image" width={100} height={100} />
+                                </TableCell>
+                                <TableCell>{seller?.name ? `${sellerCode} - ${seller.name}` : sellerCode}</TableCell>
+                            </TableBody>
+                        </Table>
+                    </TableContainer>
+                </MyCardContent>
                 <MyCardContent>
                     <TableContainer>
                         <Table size="small">
