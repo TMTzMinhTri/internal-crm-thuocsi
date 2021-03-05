@@ -9,13 +9,8 @@ import {
   Switch,
   TextField,
 } from "@material-ui/core";
-import {
-  defaultPromotionStatus,
-  promotions,
-  promotionTypes,
-} from "../constant";
+import { promotions, promotionTypes } from "../constant";
 import SelectField from "./select-field";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { Controller } from "react-hook-form";
 import { formatUTCTime } from "../util";
 
@@ -43,7 +38,7 @@ const useStyles = makeStyles({
 const InfomationFields = (props) => {
   const classes = useStyles();
 
-  const { useForm, textField, disabled } = props;
+  const { useForm, textField, disabled, status } = props;
 
   const { handleChangeTextField } = props;
 
@@ -63,6 +58,8 @@ const InfomationFields = (props) => {
   useEffect(() => {
     setActive(value.status ? value.status : false);
   }, [value.status]);
+
+  console.log(value.status, "status");
 
   return (
     <Paper
@@ -232,6 +229,7 @@ const InfomationFields = (props) => {
                       classes={{
                         label: classes.root,
                       }}
+                      disabled={status == "EXPIRED"}
                       control={
                         <Switch
                           color="primary"
