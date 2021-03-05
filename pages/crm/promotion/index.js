@@ -86,6 +86,8 @@ export async function loadPromoData(ctx) {
   let offset = page * limit;
   let search = query.search || "";
 
+  console.log("search", search);
+
   let _promotionClient = getPromoClient(ctx, {});
   let getPromotionResponse = await _promotionClient.getPromotion(
     search,
@@ -116,19 +118,27 @@ async function updatePromotion(promotionId, status) {
 
 function render(props) {
   const toast = useToast();
-  let router = useRouter();
-  const { register, getValues, handleSubmit, errors } = useForm();
 
-  let [search, setSearch] = useState("");
+  let router = useRouter();
+
+  const { register, getValues, handleSubmit, errors } = useForm({
+    defaultValues: {
+      search: router.query.search || "",
+    },
+  });
+
   let [openModal, setOpenModal] = useState({
     open: false,
     promotionId: 0,
     promotionName: "",
+    promotionStatus: "",
     checked: false,
   });
+
   let textSearch = router.query.search || "";
 
   const [page, setPage] = useState(parseInt(router.query.page || 0));
+
   const [rowsPerPage, setRowsPerPage] = useState(
     parseInt(router.query.perPage) || 20
   );
@@ -138,13 +148,14 @@ function render(props) {
   );
 
   function searchPromotion() {
+    let value = getValues();
     setPage(0);
     router.query.page = 0;
     router.push({
       pathname: `/crm/promotion`,
       query: {
         ...router.query,
-        search: search,
+        search: value.search,
       },
     });
   }
@@ -162,30 +173,6 @@ function render(props) {
         perPage: rowsPerPage,
         offset: newPage * rowsPerPage,
       },
-    });
-  };
-
-  const handleChangeTypePromotion = (event) => {
-    setStateTypePromotion(event.target.value);
-  };
-
-  const handleClickShowItem = (promotionId) => {
-    let listItem = document.getElementsByName("hideItem" + promotionId);
-    let buttonDown = document.getElementById("buttonDown" + promotionId);
-    let buttonUp = document.getElementById("buttonUp" + promotionId);
-    if (buttonDown.style.display === "") {
-      buttonDown.style.display = "none";
-      buttonUp.style.display = "";
-    } else {
-      buttonDown.style.display = "";
-      buttonUp.style.display = "none";
-    }
-    listItem.forEach((item) => {
-      if (item.style.display === "none") {
-        item.style.display = "";
-      } else {
-        item.style.display = "none";
-      }
     });
   };
 
@@ -228,18 +215,17 @@ function render(props) {
     }
   };
 
-  const handleConfirm = (promotionId, checked, open, promotionName) => {
+  const handleConfirm = (promotionId, checked, open, promotionName, status) => {
     setOpenModal({
       open: open,
       promotionName: promotionName,
       promotionId: promotionId,
       checked: checked,
+      promotionStatus: status,
     });
   };
 
   async function handleChange(event) {
-    setSearch(event.target.value);
-
     if (event.target.value === "") {
       router
         .push({
@@ -249,7 +235,7 @@ function render(props) {
             search: "",
           },
         })
-        .then(setSearch(""));
+        .then();
     }
   }
 
@@ -279,11 +265,10 @@ function render(props) {
               <Grid item xs={12} sm={6} md={6}>
                 <Paper className={styles.search}>
                   <InputBase
-                    id="search"
                     name="search"
                     autoComplete="off"
                     className={styles.input}
-                    value={search}
+                    defaultValue={textSearch}
                     onChange={handleChange}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
@@ -294,6 +279,7 @@ function render(props) {
                     inputProps={{
                       "aria-label": "Tìm kiếm chương trình khuyến mãi",
                     }}
+                    inputRef={register}
                   />
                   <IconButton
                     className={styles.iconButton}
@@ -357,7 +343,8 @@ function render(props) {
                               row.promotionId,
                               event.target.checked,
                               true,
-                              row.promotionName
+                              row.promotionName,
+                              row.status
                             );
                           }}
                           checked={row.status === "ACTIVE" ? true : false}
@@ -418,17 +405,21 @@ function render(props) {
               </IconButton>
             </DialogTitle>
             <DialogContent dividers>
-              <div>
-                Bạn muốn{" "}
-                <span style={{ fontWeight: "bold" }}>
-                  {openModal.checked === true ? "bật" : "tắt"}
-                </span>{" "}
-                trạng thái của chương trình{" "}
-                <span style={{ fontWeight: "bold" }}>
-                  {openModal.promotionId + " - " + openModal.promotionName}
-                </span>{" "}
-                hay không?
-              </div>
+              {openModal.promotionStatus == defaultPromotionStatus.EXPIRED ? (
+                <b>Chương trình khuyến mãi đã hết hạn</b>
+              ) : (
+                <div>
+                  Bạn muốn{" "}
+                  <span style={{ fontWeight: "bold" }}>
+                    {openModal.checked === true ? "bật" : "tắt"}
+                  </span>{" "}
+                  trạng thái của chương trình{" "}
+                  <span style={{ fontWeight: "bold" }}>
+                    {openModal.promotionId + " - " + openModal.promotionName}
+                  </span>{" "}
+                  hay không?
+                </div>
+              )}
             </DialogContent>
             <DialogActions>
               <Button
@@ -437,14 +428,16 @@ function render(props) {
               >
                 Thoát
               </Button>
-              <Button
-                autoFocus
-                color="primary"
-                variant={"contained"}
-                onClick={handleActivePromotion}
-              >
-                Đồng ý
-              </Button>
+              {openModal.promotionStatus != defaultPromotionStatus.EXPIRED && (
+                <Button
+                  autoFocus
+                  color="primary"
+                  variant={"contained"}
+                  onClick={handleActivePromotion}
+                >
+                  Đồng ý
+                </Button>
+              )}
             </DialogActions>
           </Dialog>
         </MyCardContent>
