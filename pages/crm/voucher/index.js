@@ -76,6 +76,7 @@ import Tooltip from "@material-ui/core/Tooltip";
 
 export async function getServerSideProps(ctx) {
   return await doWithLoggedInUser(ctx, (ctx) => {
+    console.log("login");
     return loadPromoData(ctx);
   });
 }
@@ -119,8 +120,8 @@ async function updateVoucher(voucherId, status) {
 function render(props) {
   const toast = useToast();
   let router = useRouter();
-  const { register, getValues, handleSubmit, errors } = useForm();
-  let [search, setSearch] = useState("");
+  const { register, getValues, handleSubmit, setValue } = useForm();
+
   let textSearch = router.query.search || "";
 
   const [page, setPage] = useState(parseInt(router.query.page || 0));
@@ -132,16 +133,18 @@ function render(props) {
     voucherId: 0,
     code: "",
     checked: false,
+    voucherStatus: "",
   });
 
   function searchPromotion() {
+    let value = getValues();
     router.query.page = 0;
     setPage(0);
     router.push({
       pathname: `/crm/voucher`,
       query: {
         ...router.query,
-        search: search,
+        search: value.search,
       },
     });
   }
@@ -162,27 +165,29 @@ function render(props) {
     });
   };
 
-  const handleConfirm = (voucherId, checked, open, code) => {
+  const handleConfirm = (voucherId, checked, open, code, status) => {
     setOpenModal({
       open: open,
       voucherId: voucherId,
       code: code,
       checked: checked,
+      voucherStatus: status,
     });
   };
 
   async function handleChange(event) {
-    setSearch(event.target.value.replace(/\s/g, "").trim().toUpperCase());
+    setValue(
+      "search",
+      event.target.value.replace(/\s/g, "").trim().toUpperCase()
+    );
     if (event.target.value === "") {
-      router
-        .push({
-          pathname: "/crm/voucher",
-          query: {
-            ...router.query,
-            search: "",
-          },
-        })
-        .then(setSearch(""));
+      router.push({
+        pathname: "/crm/voucher",
+        query: {
+          ...router.query,
+          search: "",
+        },
+      });
     }
   }
 
@@ -191,7 +196,7 @@ function render(props) {
     if (checked) {
       let voucherResponse = await updateVoucher(
         voucherId,
-        defaultPromotionStatus.ACTIVE
+        defaultPromotionStatus.EXPIRED?.ACTIVE
       );
       if (!voucherResponse || voucherResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
@@ -199,7 +204,7 @@ function render(props) {
       } else {
         props.voucher.forEach((d) => {
           if (d.voucherId === voucherId) {
-            return (d.status = defaultPromotionStatus.ACTIVE);
+            return (d.status = defaultPromotionStatus.EXPIRED?.ACTIVE);
           }
         });
         setOpenModal({ ...openModal, open: false });
@@ -208,7 +213,7 @@ function render(props) {
     } else {
       let voucherResponse = await updateVoucher(
         voucherId,
-        defaultPromotionStatus.WAITING
+        defaultPromotionStatus.EXPIRED?.WAITING
       );
       if (!voucherResponse || voucherResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
@@ -216,7 +221,7 @@ function render(props) {
       } else {
         props.voucher.forEach((d) => {
           if (d.voucherId === voucherId) {
-            return (d.status = defaultPromotionStatus.EXPIRED);
+            return (d.status = defaultPromotionStatus.EXPIRED?.EXPIRED);
           }
         });
         setOpenModal({ ...openModal, open: false });
@@ -245,12 +250,11 @@ function render(props) {
               <Grid item xs={12} sm={6} md={6}>
                 <Paper className={styles.search}>
                   <InputBase
-                    id="search"
                     name="search"
                     autoComplete="off"
                     className={styles.input}
-                    value={search}
                     onChange={handleChange}
+                    defaultValue={textSearch}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
                         searchPromotion();
@@ -258,6 +262,7 @@ function render(props) {
                     }}
                     placeholder="Tìm kiếm mã khuyến mãi"
                     inputProps={{ "aria-label": "Tìm kiếm khuyến mãi" }}
+                    inputRef={register}
                   />
                   <IconButton
                     className={styles.iconButton}
@@ -340,7 +345,8 @@ function render(props) {
                                   row.voucherId,
                                   event.target.checked,
                                   true,
-                                  row.code
+                                  row.code,
+                                  row.status
                                 );
                               }}
                               checked={row.status === "ACTIVE"}
@@ -403,15 +409,19 @@ function render(props) {
               </IconButton>
             </DialogTitle>
             <DialogContent dividers>
-              <div>
-                Bạn muốn{" "}
-                <span style={{ fontWeight: "bold" }}>
-                  {openModal.checked === true ? "Bật" : "Tắt"}
-                </span>{" "}
-                trạng thái của khuyến mãi{" "}
-                <span style={{ fontWeight: "bold" }}>{openModal.code}</span> hay
-                không?
-              </div>
+              {openModal.voucherStatus == defaultPromotionStatus.EXPIRED ? (
+                <b>Mã khuyến mãi đã hết hạn</b>
+              ) : (
+                <div>
+                  Bạn muốn{" "}
+                  <span style={{ fontWeight: "bold" }}>
+                    {openModal.checked === true ? "Bật" : "Tắt"}
+                  </span>{" "}
+                  trạng thái của khuyến mãi{" "}
+                  <span style={{ fontWeight: "bold" }}>{openModal.code}</span>{" "}
+                  hay không?
+                </div>
+              )}
             </DialogContent>
             <DialogActions>
               <Button
@@ -420,14 +430,16 @@ function render(props) {
               >
                 Thoát
               </Button>
-              <Button
-                autoFocus
-                color="primary"
-                variant={"contained"}
-                onClick={handleActiveVoucher}
-              >
-                Đồng ý
-              </Button>
+              {openModal.voucherStatus != defaultPromotionStatus.EXPIRED && (
+                <Button
+                  autoFocus
+                  color="primary"
+                  variant={"contained"}
+                  onClick={handleActiveVoucher}
+                >
+                  Đồng ý
+                </Button>
+              )}
             </DialogActions>
           </Dialog>
         </MyCardContent>

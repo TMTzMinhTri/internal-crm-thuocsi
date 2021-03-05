@@ -451,6 +451,7 @@ const PromotionForm = (props, type) => {
           ) : (
             <MyCardContent>
               <InfomationFields
+                status={status}
                 disabled={disabled}
                 useForm={{ errors, register, getValues, control, setValue }}
                 textField={textField}
@@ -472,7 +473,7 @@ const PromotionForm = (props, type) => {
               />
             </MyCardContent>
           )}
-          {!isLoadingPage && (
+          {!isLoadingPage && status != "EXPIRED" && (
             <MyCardActions>
               <ButtonGroup>
                 {isLoading ? (
