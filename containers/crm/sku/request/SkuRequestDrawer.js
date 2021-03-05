@@ -4,6 +4,7 @@ import {
     Button,
     Card,
     Checkbox,
+    Chip,
     Drawer,
     Grid,
     makeStyles,
@@ -120,11 +121,8 @@ const checkUpdated = (oldValue, newValue) => {
 const checkTagsUpdated = (list1, list2) => {
     if (!(list2 ?? false)) return false;
     if (list1.length !== list2.length) return true;
-    const comparer = (a = "", b = "") => a.localeCompare(b) > 0;
-    list1.sort(comparer);
-    list2.sort(comparer);
     for (let i = 0; i < list1.length; i++) {
-        if (list1[i] !== list2[1]) return true;
+        if (list1[i] !== list2[i]) return true;
     }
     return false;
 };
@@ -170,11 +168,23 @@ const TicketRow = ({ previous, next, name, selected, onSelect }) => {
             {tagsUpdated && (
                 <TableRow>
                     <TableCell>Thẻ</TableCell>
-                    <TableCell>{previous.tag}</TableCell>
+                    <TableCell>
+                        {previous.tags?.map?.((tag, i) => (
+                            <Box key={`pre_tag_${i}`} mr={1} clone>
+                                <Chip label={tag} variant="outlined" size="small" />
+                            </Box>
+                        ))}
+                    </TableCell>
                     <TableCell>
                         <FontAwesomeIcon icon={faArrowRight} />
                     </TableCell>
-                    <TableCell>{next.tag}</TableCell>
+                    <TableCell>
+                        {next.tags?.map?.((tag, i) => (
+                            <Box key={`pre_tag_${i}`} mr={1} clone>
+                                <Chip label={tag} variant="outlined" size="small" />
+                            </Box>
+                        ))}
+                    </TableCell>
                 </TableRow>
             )}
             {brandUpdated && (
