@@ -225,7 +225,7 @@ function render(props) {
         ticketCode: "",
         sellerCode: null,
         seller: null,
-        productImage: null,
+        product: null,
     });
     const [statuses, setStatuses] = useState(props.statuses);
     const [openSkuRequestDrawer, setOpenSkuRequestDrawer] = useState(false);
@@ -267,19 +267,20 @@ function render(props) {
         });
     };
 
-    const handleClickOpen = (code, status, ticketCode, sellerCode, seller, productImages,) => {
+    const handleClickOpen = (code, status, ticketCode, sellerCode, seller, product, sku) => {
         if (status === "NEW") {
             setOpen(true);
         } else {
             setOpenSkuRequestDrawer(true);
         }
         setSelectedSku({
-            code: code,
+            code,
             status: SkuStatuses.filter(e => e.value === status)[0],
             ticketCode: Array.isArray(ticketCode) ? ticketCode : [ticketCode],
             sellerCode,
             seller,
-            productImage: productImages?.[0],
+            product,
+            sku,
         });
     };
 
@@ -425,7 +426,7 @@ function render(props) {
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="center">
-                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
+                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} objectFit="contain"/>
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
                                     <TableCell>{row.seller?.code ? (row.seller?.code + ' - ' + row.seller?.name) : row.sellerCode}</TableCell>
@@ -445,7 +446,8 @@ function render(props) {
                                                     row.ticketCode,
                                                     row.sellerCode,
                                                     row.seller,
-                                                    row.product.imageUrls
+                                                    row.product,
+                                                    row.sku,
                                                 )}
                                             >
                                                 {ProductStatus.NEW}
@@ -531,8 +533,9 @@ function render(props) {
                     </ModalCustom>
                     <SkuRequestDrawer
                         open={openSkuRequestDrawer}
+                        sku={selectedSku.sku}
                         ticketCodes={selectedSku.ticketCode}
-                        productImage={selectedSku.productImage}
+                        product={selectedSku.product}
                         sellerCode={selectedSku.sellerCode}
                         seller={selectedSku.seller}
                         onClose={() => setOpenSkuRequestDrawer(false)}
