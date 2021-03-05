@@ -223,7 +223,7 @@ export default function renderForm(props, toast) {
                 <TableCell align="left">{data.sellerName}</TableCell>
                 <TableCell align="left">{data.name}</TableCell>
                 <TableQuantityValueCell
-                    disabled={order.status != 'WaitConfirm'}
+                    disabled={order?.status != 'WaitConfirm'}
                     watch={watch}
                     handleSubmit={handleSubmit}
                     index={index}
@@ -571,7 +571,7 @@ export default function renderForm(props, toast) {
                                                         rules={{ required: true }}
                                                         error={!!errors.status}
                                                         as={
-                                                            <Select label="Trạng thái" disabled={order.status != 'WaitConfirm'}>
+                                                            <Select label="Trạng thái" disabled={order?.status != 'WaitConfirm'}>
                                                                 {orderStatus?.map(({ value, label }) => (
                                                                     <MenuItem value={value} key={value}>{label}</MenuItem>
                                                                 ))}
@@ -650,7 +650,7 @@ export default function renderForm(props, toast) {
                                         variant="contained"
                                         color="primary"
                                         onClick={handleSubmit(onSubmit)}
-                                        disabled={order.status != 'WaitConfirm'}
+                                        disabled={order?.status != 'WaitConfirm'}
                                         style={{ margin: 8 }}>
                                         {loading && <CircularProgress size={20} />}
                                 Lưu
