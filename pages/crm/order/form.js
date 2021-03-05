@@ -79,14 +79,14 @@ export async function loadData(ctx) {
         let deliveryClient = getDeliveryClient(ctx, data)
         let deliveryResp = await deliveryClient.getListDelivery(0, 20, "")
         if (deliveryResp.status == 'OK') {
-            data.props.order.deliveryPlatformName = deliveryResp.data.filter(delivery => delivery.code == data.props.order.deliveryPlatform)[0]?.name
+            data.props.order.deliveryPlatformName = deliveryResp.data.filter(delivery => delivery.code == data.props.order.deliveryPlatform)[0]?.name || ""
         }
 
         // Get list payment method
         let paymentClient = getPaymentClient(ctx, data)
         let paymentResp = await paymentClient.getListPaymentMethod(0, 20, "")
         if (paymentResp.status == 'OK') {
-            data.props.order.paymentMethodName = paymentResp.data.filter(payment => payment.code == data.props.order.paymentMethod)[0]?.name
+            data.props.order.paymentMethodName = paymentResp.data.filter(payment => payment.code == data.props.order.paymentMethod)[0]?.name || ""
         }
 
         //get list order-item 
