@@ -44,7 +44,8 @@ import {
   displayUsage,
   formatTime,
   getPromotionOrganizer,
-  getPromotionScope, limitText,
+  getPromotionScope,
+  limitText,
   removeElement,
 } from "../../../components/component/util";
 import Switch from "@material-ui/core/Switch";
@@ -197,7 +198,7 @@ function render(props) {
       );
       if (!promotionResponse || promotionResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
-        return toast.error(promotionResponse.mesage);
+        return toast.error(promotionResponse.message);
       } else {
         props.promotion.forEach((d) => {
           if (d.promotionId === promotionId) {
@@ -214,7 +215,7 @@ function render(props) {
       );
       if (!promotionResponse || promotionResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
-        return toast.error(promotionResponse.mesage);
+        return toast.error(promotionResponse.message);
       } else {
         props.promotion.forEach((d) => {
           if (d.promotionId === promotionId) {
@@ -335,7 +336,10 @@ function render(props) {
                   props.promotion.map((row, index) => (
                     <TableRow key={row.promotionId}>
                       <TableCell align="left">{row.promotionId}</TableCell>
-                      <TableCell align="left"> {limitText(row.promotionName,50)}</TableCell>
+                      <TableCell align="left">
+                        {" "}
+                        {limitText(row.promotionName, 50)}
+                      </TableCell>
                       <TableCell align="left">
                         {getPromotionOrganizer(row.promotionOrganizer)}
                       </TableCell>
