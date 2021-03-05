@@ -43,7 +43,8 @@ import {
   displayUsage,
   formatTime,
   getPromotionOrganizer,
-  getPromotionScope, limitText,
+  getPromotionScope,
+  limitText,
   removeElement,
 } from "../../../components/component/util";
 import Switch from "@material-ui/core/Switch";
@@ -51,7 +52,10 @@ import Modal from "@material-ui/core/Modal";
 import UnfoldLessIcon from "@material-ui/icons/UnfoldLess";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {faAngleDoubleDown, faExclamationCircle} from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleDoubleDown,
+  faExclamationCircle,
+} from "@fortawesome/free-solid-svg-icons";
 import MoreHorizIcon from "@material-ui/icons/MoreHoriz";
 import { faAngleUp, faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -168,7 +172,7 @@ function render(props) {
   };
 
   async function handleChange(event) {
-    setSearch(event.target.value.replace(/\s/g, '').trim().toUpperCase());
+    setSearch(event.target.value.replace(/\s/g, "").trim().toUpperCase());
     if (event.target.value === "") {
       router
         .push({
@@ -191,7 +195,7 @@ function render(props) {
       );
       if (!voucherResponse || voucherResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
-        return toast.error(voucherResponse.mesage);
+        return toast.error(voucherResponse.message);
       } else {
         props.voucher.forEach((d) => {
           if (d.voucherId === voucherId) {
@@ -208,7 +212,7 @@ function render(props) {
       );
       if (!voucherResponse || voucherResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
-        return toast.error(voucherResponse.mesage);
+        return toast.error(voucherResponse.message);
       } else {
         props.voucher.forEach((d) => {
           if (d.voucherId === voucherId) {
@@ -302,9 +306,11 @@ function render(props) {
                   props.voucher.map((row, index) => (
                     <TableRow key={row.voucherId + "_" + index}>
                       <TableCell align="left">
-                        <div>{limitText(row.code,20)}</div>
+                        <div>{limitText(row.code, 20)}</div>
                       </TableCell>
-                      <TableCell align="left">{limitText(row.promotionName,50)}</TableCell>
+                      <TableCell align="left">
+                        {limitText(row.promotionName, 50)}
+                      </TableCell>
                       <TableCell align="left">{row.type}</TableCell>
                       <TableCell align="center">
                         <div>{displayUsage(row.maxUsage)}</div>
@@ -320,19 +326,25 @@ function render(props) {
                         <div>{formatTime(row.publicTime)}</div>
                       </TableCell>
                       <TableCell align="left">
-                        <Tooltip title={row.status === "ACTIVE" ? "Đang hoạt động" : "Ngưng hoạt động"}>
+                        <Tooltip
+                          title={
+                            row.status === "ACTIVE"
+                              ? "Đang hoạt động"
+                              : "Ngưng hoạt động"
+                          }
+                        >
                           <div>
                             <Switch
-                                onChange={(event) => {
-                                  handleConfirm(
-                                      row.voucherId,
-                                      event.target.checked,
-                                      true,
-                                      row.code
-                                  );
-                                }}
-                                checked={row.status === "ACTIVE"}
-                                color="primary"
+                              onChange={(event) => {
+                                handleConfirm(
+                                  row.voucherId,
+                                  event.target.checked,
+                                  true,
+                                  row.code
+                                );
+                              }}
+                              checked={row.status === "ACTIVE"}
+                              color="primary"
                             />
                           </div>
                         </Tooltip>
