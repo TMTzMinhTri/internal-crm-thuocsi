@@ -18,9 +18,23 @@ export async function getServerSideProps(ctx) {
     return doWithLoggedInUser(ctx, async () => {
         return {
             props: {}
-        }
-    })
+        };
+    });
 }
+
+const breadcrumb = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách hệ số phí",
+        link: "/crm/pricing"
+    },
+    {
+        name: "Thêm cài đặt ngưỡng giá",
+    },
+];
 
 const render = () => {
     const router = useRouter();
@@ -43,19 +57,19 @@ const render = () => {
             const priceLevelClient = getPriceLevelClient();
             const resp = await priceLevelClient.createPriceLevel(formData);
             if (resp.status === 'OK') {
-                toast.success("Tạo cài đặt thành công")
-                router.push(`/crm/pricing/price-level/edit?priceLevelCode=${resp.data?.[0]?.code}`)
+                toast.success("Tạo cài đặt thành công");
+                router.push(`/crm/pricing/price-level/edit?priceLevelCode=${resp.data?.[0]?.code}`);
             } else {
-                toast.error(resp.message || "Tạo cài đặt không thành công")
+                toast.error(resp.message || "Tạo cài đặt không thành công");
             }
         } catch (e) {
-            toast.error(e.message || unknownErrorText)
+            toast.error(e.message || unknownErrorText);
         }
 
-    }
+    };
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/pricing" breadcrumb={breadcrumb}>
             <Head>
                 <title>Thêm cài đặt ngưỡng giá mới</title>
             </Head>
@@ -102,7 +116,7 @@ const render = () => {
                                         validate: price => {
                                             if (!toPrice) return true;
                                             if (toPrice <= price) {
-                                                return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới."
+                                                return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới.";
                                             }
                                         }
                                     })}
@@ -135,7 +149,7 @@ const render = () => {
                                         validate: price => {
                                             if (!fromPrice) return true;
                                             if (fromPrice >= price) {
-                                                return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới."
+                                                return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới.";
                                             }
                                         }
                                     })}
@@ -208,7 +222,7 @@ const render = () => {
                 </MyCardContent>
             </MyCard>
         </AppCRM>
-    )
+    );
 };
 
 export default function NewPriceLevelPage(props) {

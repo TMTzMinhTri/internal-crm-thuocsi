@@ -242,13 +242,26 @@ function render(props) {
                 </TableCell>
                 <TableCell align="left">{row.name}</TableCell>
                 <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.email || '-'}</TableCell>
+                <TableCell align="left">{row.companyName ?? "-"}</TableCell>
+                <TableCell align="left">{row.companyAddress ?? "-"}</TableCell>
                 <TableCell align="left">{props.condUserType.find(e => e.value === row.level)?.label || '-'}</TableCell>
-                <TableCell align="left">{row.point}</TableCell>
+                <TableCell align="right">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
                 <TableCell align="center">
-                    <Button disabled={row.status == "ACTIVE"} onClick={() => { setOpenActiveAccountDialog(true); setActiveCustomerCode(row); }} size="small" variant="outlined" style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}>{status}</Button>
+                    <Button
+                        disabled={row.status == "ACTIVE"}
+                        onClick={() => {
+                            setOpenActiveAccountDialog(true);
+                            setActiveCustomerCode(row);
+                        }}
+                        size="small"
+                        variant="outlined"
+                        style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}
+                    >
+                        {status}
+                    </Button>
                 </TableCell>
-                <TableCell align="left">
+                <TableCell align="center">
                     <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
                         <a>
                             <Tooltip title="Cập nhật thông tin">
@@ -283,7 +296,7 @@ function render(props) {
                 onClose={() => setOpenApproveAccountDialog(false)}
                 onConfirm={() => approveAccount()}
             />
-             <ConfirmActiveDialog
+            <ConfirmActiveDialog
                 open={openActiveAccountDialog}
                 onClose={() => setOpenActiveAccountDialog(false)}
                 onConfirm={() => activeAccount()}
@@ -347,25 +360,29 @@ function render(props) {
                 <TableContainer>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col width="10%" />
-                            <col width="15%" />
-                            <col width="20%" />
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="15%" />
-                            <col width="10%" />
+                            <col minWidth="10%"/>
+                            <col minWidth="10%"/>
+                            <col minWidth="15%"/>
+                            <col minWidth="10%"/>
+                            <col minWidth="10%"/>
+                            <col minWidth="10%"/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
                         </colgroup>
                         <TableHead>
                             <TableRow>
                                 <TableCell align="left">Mã khách hàng</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Email</TableCell>
+                                <TableCell align="left">Tên công ty</TableCell>
+                                <TableCell align="left">Địa chỉ công ty</TableCell>
                                 <TableCell align="left">Cấp độ</TableCell>
-                                <TableCell align="left">Điểm</TableCell>
+                                <TableCell align="right">Điểm</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
                                 <TableCell align="center">Trạng thái</TableCell>
-                                <TableCell align="left">Thao tác</TableCell>
+                                <TableCell align="center">Thao tác</TableCell>
                             </TableRow>
                         </TableHead>
                         {customers.length > 0 ? (
