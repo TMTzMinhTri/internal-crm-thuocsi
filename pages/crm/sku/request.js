@@ -94,8 +94,6 @@ export async function loadPricingData(ctx) {
                 acc[cur.sellPriceCode] = cur.status;
                 return acc;
             }, {});
-        } else {
-            props.message = listProductsResp.message;
         }
 
         const sellerCodes = [];
@@ -111,10 +109,7 @@ export async function loadPricingData(ctx) {
                 ...sku,
                 seller: sellerResp.data.find(seller => seller.code === sku.sellerCode) ?? {},
             }));
-        } else {
-            props.message = sellerResp.message;
         }
-
     } catch (e) {
         props.message = e.message;
     }
@@ -158,8 +153,6 @@ async function getPricingDataByFilter(data, limit, offset) {
                 ...sku,
                 product: listProductsResp.data.find(product => product.code === sku.productCode) ?? {},
             }));
-        } else {
-            res.message = listProductsResp.message;
         }
 
         const sellerCodes = [];
@@ -175,8 +168,6 @@ async function getPricingDataByFilter(data, limit, offset) {
                 ...sku,
                 seller: sellerResp.data.find(seller => seller.code === sku.sellerCode) ?? {},
             }));
-        } else {
-            res.message = sellerResp.message;
         }
 
     } catch (e) {
@@ -232,6 +223,9 @@ function render(props) {
         code: "",
         status: "",
         ticketCode: "",
+        sellerCode: null,
+        seller: null,
+        product: null,
     });
     const [statuses, setStatuses] = useState(props.statuses);
     const [openSkuRequestDrawer, setOpenSkuRequestDrawer] = useState(false);
@@ -273,16 +267,20 @@ function render(props) {
         });
     };
 
-    const handleClickOpen = (code, status, ticketCode) => {
+    const handleClickOpen = (code, status, ticketCode, sellerCode, seller, product, sku) => {
         if (status === "NEW") {
             setOpen(true);
         } else {
             setOpenSkuRequestDrawer(true);
         }
         setSelectedSku({
-            code: code,
+            code,
             status: SkuStatuses.filter(e => e.value === status)[0],
             ticketCode: Array.isArray(ticketCode) ? ticketCode : [ticketCode],
+            sellerCode,
+            seller,
+            product,
+            sku,
         });
     };
 
@@ -428,7 +426,7 @@ function render(props) {
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="center">
-                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} />
+                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} objectFit="contain"/>
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
                                     <TableCell>{row.seller?.code ? (row.seller?.code + ' - ' + row.seller?.name) : row.sellerCode}</TableCell>
@@ -442,7 +440,15 @@ function render(props) {
                                                 variant="outlined"
                                                 size="small"
                                                 style={{ color: statusColor.NEW, borderColor: statusColor.NEW }}
-                                                onClick={() => handleClickOpen(row.sellPriceCode, row.status, row.ticketCode)}
+                                                onClick={() => handleClickOpen(
+                                                    row.sellPriceCode,
+                                                    row.status,
+                                                    row.ticketCode,
+                                                    row.sellerCode,
+                                                    row.seller,
+                                                    row.product,
+                                                    row.sku,
+                                                )}
                                             >
                                                 {ProductStatus.NEW}
                                             </Button>
@@ -527,7 +533,11 @@ function render(props) {
                     </ModalCustom>
                     <SkuRequestDrawer
                         open={openSkuRequestDrawer}
+                        sku={selectedSku.sku}
                         ticketCodes={selectedSku.ticketCode}
+                        product={selectedSku.product}
+                        sellerCode={selectedSku.sellerCode}
+                        seller={selectedSku.seller}
                         onClose={() => setOpenSkuRequestDrawer(false)}
                         onUpdate={handleUpdateTickets}
                     />

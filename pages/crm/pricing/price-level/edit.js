@@ -18,7 +18,7 @@ import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/
 const loadPriceLevelData = async (ctx, { code }) => {
     const priceLevelClient = getPriceLevelClient(ctx);
     return priceLevelClient.getPriceLevelByCode(code);
-}
+};
 
 export async function getServerSideProps(ctx) {
     return doWithLoggedInUser(ctx, async () => {
@@ -26,23 +26,37 @@ export async function getServerSideProps(ctx) {
         const { priceLevelCode } = ctx.query;
         if (!priceLevelCode) {
             props.status = 'NOT_FOUND';
-            props.message = 'Không tìm thấy kết quả phù hợp'
-            return { props }
+            props.message = 'Không tìm thấy kết quả phù hợp';
+            return { props };
         }
         const priceLevelData = await loadPriceLevelData(ctx, { code: priceLevelCode });
         if (priceLevelData.status != 'OK') {
             props.status = priceLevelData.status;
             props.message = priceLevelData.message;
-            return { props }
+            return { props };
         } else {
             props.priceLevelData = priceLevelData;
-            return { props }
+            return { props };
         }
-    })
+    });
 }
 
+const breadcrumb = [
+    {
+        name: "Trang chủ",
+        link: "/crm"
+    },
+    {
+        name: "Danh sách hệ số phí",
+        link: "/crm/pricing"
+    },
+    {
+        name: "Cập nhật cài đặt ngưỡng giá",
+    },
+];
+
 const render = ({ priceLevelData, message, status }) => {
-    if (status === 'NOT_FOUND') return <NotFound link="/crm/pricing?v=price-level" message={message} />
+    if (status === 'NOT_FOUND') return <NotFound link="/crm/pricing?v=price-level" message={message} />;
     const router = useRouter();
     const toast = useToast();
     const { register, handleSubmit, errors, watch, formState: { isDirty, isValid, isSubmitting } } = useForm({
@@ -60,20 +74,20 @@ const render = ({ priceLevelData, message, status }) => {
             console.log(formData);
             const resp = await priceLevelClient.updatePriceLevel(formData);
             if (resp.status === 'OK') {
-                toast.success("Cập nhật cài đặt thành công")
-                router.push(`/crm/pricing/price-level/edit?priceLevelCode=${resp.data?.[0]?.code}`)
+                toast.success("Cập nhật cài đặt thành công");
+                router.push(`/crm/pricing/price-level/edit?priceLevelCode=${resp.data?.[0]?.code}`);
             } else {
-                toast.error(resp.message || "Cập nhật cài đặt không thành công")
+                toast.error(resp.message || "Cập nhật cài đặt không thành công");
             }
         } catch (e) {
-            toast.error(e.message || unknownErrorText)
+            toast.error(e.message || unknownErrorText);
         }
-    }
+    };
 
     return (
-        <AppCRM select="/crm/pricing">
+        <AppCRM select="/crm/pricing" breadcrumb={breadcrumb}>
             <Head>
-                <title>Chỉnh sửa cài đặt ngưỡng giá</title>
+                <title>Cập nhật cài đặt ngưỡng giá</title>
             </Head>
             <MyCard>
                 <MyCardHeader title={`Cài đặt ngưỡng giá #${priceLevelData?.data?.[0].code}`} />
@@ -138,7 +152,7 @@ const render = ({ priceLevelData, message, status }) => {
                                             validate: price => {
                                                 if (!toPrice) return true;
                                                 if (toPrice <= price) {
-                                                    return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới."
+                                                    return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới.";
                                                 }
                                             }
                                         })}
@@ -171,7 +185,7 @@ const render = ({ priceLevelData, message, status }) => {
                                             validate: price => {
                                                 if (!fromPrice) return true;
                                                 if (fromPrice >= price) {
-                                                    return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới."
+                                                    return "Khoảng giá mua trên không được nhỏ hơn khoảng giá mua dưới.";
                                                 }
                                             }
                                         })}
@@ -247,7 +261,7 @@ const render = ({ priceLevelData, message, status }) => {
                 </MyCardContent>
             </MyCard>
         </AppCRM>
-    )
+    );
 };
 
 export default function EditPriceLevelPage(props) {

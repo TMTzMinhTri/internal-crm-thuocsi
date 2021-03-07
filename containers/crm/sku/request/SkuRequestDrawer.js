@@ -4,6 +4,7 @@ import {
     Button,
     Card,
     Checkbox,
+    Chip,
     Drawer,
     Grid,
     makeStyles,
@@ -13,13 +14,15 @@ import {
     TableContainer,
     TableHead,
     TableRow,
+    Typography,
 } from "@material-ui/core";
+import Image from "next/image";
 import { BranText, SellingPriceText } from "view-models/sku";
 import { MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { getPricingClient } from "client/pricing";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
-import { ProductStatus } from "components/global";
+import { formatNumber, ProductStatus } from "components/global";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { unknownErrorText } from "components/commonErrors";
 
@@ -79,7 +82,7 @@ const RenderWholesalePrice = ({ data }) => {
                             </TableRow>
                             <TableRow>
                                 <TableCell>Giá bán</TableCell>
-                                <TableCell>{price.price}</TableCell>
+                                <TableCell>{formatNumber(price.price)}</TableCell>
                                 <TableCell />
                             </TableRow>
                             <TableRow>
@@ -88,13 +91,18 @@ const RenderWholesalePrice = ({ data }) => {
                                 <TableCell />
                             </TableRow>
                             <TableRow>
+                                <TableCell>Số lượng tối đa áp dụng</TableCell>
+                                <TableCell>{price.maxQuantity ?? "-"}</TableCell>
+                                <TableCell />
+                            </TableRow>
+                            <TableRow>
                                 <TableCell>Tỉ lệ phần trăm giảm giá</TableCell>
-                                <TableCell>{price.absoluteDiscount}</TableCell>
+                                <TableCell>{price.percentageDiscount}</TableCell>
                                 <TableCell />
                             </TableRow>
                             <TableRow>
                                 <TableCell>Giảm giá tuyệt đối</TableCell>
-                                <TableCell>{price.absoluteDiscount}</TableCell>
+                                <TableCell>{formatNumber(price.absoluteDiscount)}</TableCell>
                                 <TableCell />
                             </TableRow>
                         </>
@@ -113,11 +121,8 @@ const checkUpdated = (oldValue, newValue) => {
 const checkTagsUpdated = (list1, list2) => {
     if (!(list2 ?? false)) return false;
     if (list1.length !== list2.length) return true;
-    const comparer = (a = "", b = "") => a.localeCompare(b) > 0;
-    list1.sort(comparer);
-    list2.sort(comparer);
     for (let i = 0; i < list1.length; i++) {
-        if (list1[i] !== list2[1]) return true;
+        if (list1[i] !== list2[i]) return true;
     }
     return false;
 };
@@ -163,11 +168,23 @@ const TicketRow = ({ previous, next, name, selected, onSelect }) => {
             {tagsUpdated && (
                 <TableRow>
                     <TableCell>Thẻ</TableCell>
-                    <TableCell>{previous.tag}</TableCell>
+                    <TableCell>
+                        {previous.tags?.map?.((tag, i) => (
+                            <Box key={`pre_tag_${i}`} mr={1} clone>
+                                <Chip label={tag} variant="outlined" size="small" />
+                            </Box>
+                        ))}
+                    </TableCell>
                     <TableCell>
                         <FontAwesomeIcon icon={faArrowRight} />
                     </TableCell>
-                    <TableCell>{next.tag}</TableCell>
+                    <TableCell>
+                        {next.tags?.map?.((tag, i) => (
+                            <Box key={`pre_tag_${i}`} mr={1} clone>
+                                <Chip label={tag} variant="outlined" size="small" />
+                            </Box>
+                        ))}
+                    </TableCell>
                 </TableRow>
             )}
             {brandUpdated && (
@@ -210,11 +227,11 @@ const TicketRow = ({ previous, next, name, selected, onSelect }) => {
                     {retailPriceUpdated && (
                         <TableRow>
                             <TableCell>Giá bán</TableCell>
-                            <TableCell>{previous.retailPrice?.price}</TableCell>
+                            <TableCell>{formatNumber(previous.retailPrice?.price)}</TableCell>
                             <TableCell>
                                 <FontAwesomeIcon icon={faArrowRight} />
                             </TableCell>
-                            <TableCell>{next.retailPrice?.price}</TableCell>
+                            <TableCell>{formatNumber(next.retailPrice?.price)}</TableCell>
                         </TableRow>
                     )}
                 </>
@@ -246,12 +263,16 @@ const TicketRow = ({ previous, next, name, selected, onSelect }) => {
 
 /**
  * @param {object} props
+ * @param {string} props.sku
  * @param {string[]} props.ticketCodes
+ * @param {object} props.product
+ * @param {string} props.sellerCode
+ * @param {object} props.seller
  * @param {boolean} props.open
  * @param {Function} props.onClose
  * @param {Function} props.onUpdate
  */
-const SkuRequestDrawer = ({ ticketCodes, open, onClose, onUpdate }) => {
+const SkuRequestDrawer = ({ sku, ticketCodes, product, sellerCode, seller, open, onClose, onUpdate }) => {
     const toast = useToast();
 
     const [tickets, setTickets] = useState([]);
@@ -323,7 +344,31 @@ const SkuRequestDrawer = ({ ticketCodes, open, onClose, onUpdate }) => {
             onClose={onClose}
         >
             <Card className={classes.card}>
-                <MyCardHeader title="Cập nhật trạng thái" />
+                <MyCardHeader title={`Cập nhật trạng thái #${sku}`} />
+                <MyCardContent>
+                    <Grid container spacing={1}>
+                        <Grid item xs={12} md={2} justify="center">
+                            <Image
+                                src={product?.imageUrls?.[0] ?? "/default.png"}
+                                title="image"
+                                alt="image"
+                                width={100}
+                                height={100}
+                                objectFit="contain"
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={10}>
+                            <Typography>
+                                <strong>Nhà bán hàng: </strong>
+                                {seller?.name ? `${sellerCode} - ${seller.name}` : sellerCode}
+                            </Typography>
+                            <Typography>
+                                <strong>Sản phẩm: </strong>
+                                {product?.name}
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                </MyCardContent>
                 <MyCardContent>
                     <TableContainer>
                         <Table size="small">

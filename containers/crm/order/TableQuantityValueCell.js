@@ -1,70 +1,81 @@
 import { IconButton, TableCell, TextField } from "@material-ui/core";
 import { Done } from "@material-ui/icons";
 import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 
-export const TableQuantityValueCell = ({ watch, handleSubmit, index, orderNo, orderItemNo, initialQuantity, onUpdate, setError, errors, maxQuantity, clearErrors, defaultQuantity, onChange }) => {
-    let arrName = `quantity[${index}]`
+export const TableQuantityValueCell = ({ disabled, orderNo, orderItemNo, initialQuantity, onUpdate, maxQuantity, defaultQuantity, onChange }) => {
+
     const [quantity, setQuantity] = useState(initialQuantity);
     const [focused, setFocused] = useState(false);
+    const { watch, register, handleSubmit, errors, control, getValues, setError, clearErrors } = useForm({
+        mode: "onChange",
+        defaultValues: {
+            quantity: quantity
+        }
+    });
+
     useEffect(() => {
         setQuantity(initialQuantity);
     }, [initialQuantity]);
-    const submit = data => console.log(data)
+
     return (
         <TableCell>
-            <TextField
-                size="small"
-                // id="quantity"
-                // name="quantity"
-                type="number"
-                // disabled
-                placeholder="..."
-                variant="outlined"
-                fullWidth
-                InputProps={{
-                    endAdornment: (
-                        (focused || quantity != defaultQuantity) && (
-                            < IconButton
-                                size="small"
-                                color="primary"
-                                disabled={quantity == defaultQuantity || errors.quantity}
-                                onClick={() => {
-                                    onUpdate?.({ orderNo, orderItemNo, quantity });
-                                    setFocused(false);
-                                }}
-                            >
-                                <Done />
-                            </IconButton>
-                        )
-                    ),
-                }}
-                error={!!errors.quantity}
-                helperText={errors.quantity?.type == 'min' ? errors.quantity?.message : errors.quantity?.type == 'max' ? errors.quantity?.message : null}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                onChange={e => {
-                    setQuantity(+e.target.value)
-                    if (e.target.value < 1) {
-                        setError(arrName, {
-                            type: "min",
-                            message: "Vui lòng nhập số lượng lớn hơn 0"
-                        });
-                    }
-                    // else if (e.target.value > maxQuantity) {
-                    //     setQuantity(maxQuantity)
-                    //     setError("quantity", {
-                    //         type: "max",
-                    //         message: `Vui lòng nhập số lượng nhỏ hơn ${maxQuantity + 1}`
-                    //     });
-                    // }
-                    else {
-                        if (errors.quantity) clearErrors("quantity")
-                    }
-                    onChange(e.target.value)
-                    console.log(watch())
-                }}
-                value={quantity}
-            />
+            <form >
+                <TextField
+                    size="small"
+                    id="quantity"
+                    name="quantity"
+                    type="number"
+                    onKeyPress={(event) => {
+                        if (event.key === "Enter") {
+                            event.preventDefault()
+                        }
+                    }}
+                    disabled={disabled}
+                    placeholder="..."
+                    variant="outlined"
+                    fullWidth
+                    InputProps={{
+                        endAdornment: (
+                            (focused || quantity != defaultQuantity) && (
+                                < IconButton
+                                    size="small"
+                                    color="primary"
+                                    disabled={quantity == defaultQuantity || errors.quantity}
+                                    onClick={() => {
+                                        onUpdate?.({ orderNo, orderItemNo, quantity });
+                                        setFocused(false);
+                                    }}
+                                >
+                                    <Done />
+                                </IconButton>
+                            )
+                        ),
+                    }}
+                    error={!!errors.quantity}
+                    helperText={errors.quantity?.message}
+                    inputRef={register(
+                        {
+                            required: "Vui lòng nhập số lượng",
+                            min: {
+                                value: 1,
+                                message: "Vui lòng nhập số lượng lớn hơn bằng 1"
+                            },
+                            max: {
+                                value: maxQuantity,
+                                message: `Vui lòng nhập số lượng bé hơn bằng ${maxQuantity}`
+                            }
+                        },
+
+                    )}
+                    onFocus={() => setFocused(true)}
+                    onBlur={() => setFocused(false)}
+                    onChange={e => {
+                        setQuantity(+e.target.value)
+                        onChange(e.target.value)
+                    }}
+                />
+            </form>
         </TableCell>
     )
 }
