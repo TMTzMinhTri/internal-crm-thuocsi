@@ -89,6 +89,10 @@ const Reward = (props) => {
                         ? "Giá trị giảm tuyệt đối tối thiếu 1000"
                         : "Số điểm tặng tối thiếu 1",
                   },
+                  maxLength: {
+                    value: 13,
+                    message: "Giá trị nhập không quá 13 ký tự",
+                  },
                   required:
                     selectField == "ABSOLUTE"
                       ? "Giá trị không được trống"
@@ -122,8 +126,12 @@ const Reward = (props) => {
                           message: "Giá trị lớn nhất là 100",
                         },
                         min: {
-                          value: 0,
-                          message: "Giá trị nhỏ nhất là 0",
+                          value: 1,
+                          message: "Giá trị nhỏ nhất là 1",
+                        },
+                        maxLength: {
+                          value: 13,
+                          message: "Giá trị nhập không quá 13 ký tự",
                         },
                       })}
                     />
@@ -147,6 +155,10 @@ const Reward = (props) => {
                         min: {
                           value: 1000,
                           message: "Giá trị tối thiếu 1000",
+                        },
+                        maxLength: {
+                          value: 13,
+                          message: "Giá trị nhập không quá 13 ký tự",
                         },
                         required: "Giá trị giảm giá tối đa không được trống",
                       })}
@@ -197,6 +209,10 @@ const Reward = (props) => {
                               min: {
                                 value: 1,
                                 message: "Số lượng tặng tối thiếu 1",
+                              },
+                              maxLength: {
+                                value: 13,
+                                message: "Số lượng nhập không quá 13 ký tự",
                               },
                               required: "Vui lòng chọn số lượng",
                             })}

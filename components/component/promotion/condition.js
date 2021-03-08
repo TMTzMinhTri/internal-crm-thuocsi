@@ -47,7 +47,13 @@ const Condition = (props) => {
             }}
             fullWidth
             error={!!errors.minOrderValue}
-            inputRef={register()}
+            inputRef={register({
+              validate: (value) => {
+                if (value < 0) {
+                  return "Giá trị không được âm";
+                }
+              },
+            })}
           />
         </Grid>
         <Grid item container>
@@ -128,6 +134,10 @@ const Condition = (props) => {
                           value: 1,
                           message: "Số lượng tối thiểu 1",
                         },
+                        maxLength: {
+                          value: 13,
+                          message: "Số lượng nhập không quá 13 ký tự",
+                        },
                         required: "Số lượng không được trống",
                         validate: (value) => {
                           if (value % 1 != 0) return "Số lượng là số nguyên";
@@ -149,7 +159,17 @@ const Condition = (props) => {
                       }}
                       fullWidth
                       error={!!errors["minTotalValue" + index]}
-                      inputRef={register()}
+                      inputRef={register({
+                        validate: (value) => {
+                          if (value < 0) {
+                            return "Giá trị không được âm";
+                          }
+                        },
+                        maxLength: {
+                          value: 13,
+                          message: "Số lượng nhập không quá 13 ký tự",
+                        },
+                      })}
                     />
                   </Grid>{" "}
                   {!disabled && length > 1 && (
