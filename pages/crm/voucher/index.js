@@ -194,7 +194,7 @@ function render(props) {
     if (checked) {
       let voucherResponse = await updateVoucher(
         voucherId,
-        defaultPromotionStatus.EXPIRED?.ACTIVE
+        defaultPromotionStatus  .ACTIVE
       );
       if (!voucherResponse || voucherResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
@@ -202,7 +202,7 @@ function render(props) {
       } else {
         props.voucher.forEach((d) => {
           if (d.voucherId === voucherId) {
-            return (d.status = defaultPromotionStatus.EXPIRED?.ACTIVE);
+            return (d.status = defaultPromotionStatus.ACTIVE);
           }
         });
         setOpenModal({ ...openModal, open: false });

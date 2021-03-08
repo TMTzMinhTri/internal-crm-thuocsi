@@ -149,13 +149,13 @@ function render(props) {
 
   if (voucher.startTime) {
     startTime = formatUTCTime(voucher.startTime);
+    compareTimeFlag = compareTime(new Date(), new Date(startTime)) === 1;
   }
   if (voucher.endTime) {
     endTime = formatUTCTime(voucher.endTime);
   }
   if (voucher.publicTime) {
     publicTime = formatUTCTime(voucher.publicTime);
-    compareTimeFlag = compareTime(new Date(), new Date(publicTime)) === 1;
   }
 
   const {
