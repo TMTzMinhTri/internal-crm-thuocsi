@@ -90,8 +90,8 @@ const Reward = (props) => {
                         : "Số điểm tặng tối thiếu 1",
                   },
                   maxLength: {
-                    value: 13,
-                    message: "Giá trị nhập không quá 13 ký tự",
+                    value: 10,
+                    message: "Giá trị nhập không quá 10 ký tự",
                   },
                   required:
                     selectField == "ABSOLUTE"
@@ -130,8 +130,8 @@ const Reward = (props) => {
                           message: "Giá trị nhỏ nhất là 1",
                         },
                         maxLength: {
-                          value: 13,
-                          message: "Giá trị nhập không quá 13 ký tự",
+                          value: 10,
+                          message: "Giá trị nhập không quá 10 ký tự",
                         },
                       })}
                     />
@@ -157,8 +157,8 @@ const Reward = (props) => {
                           message: "Giá trị tối thiếu 1000",
                         },
                         maxLength: {
-                          value: 13,
-                          message: "Giá trị nhập không quá 13 ký tự",
+                          value: 10,
+                          message: "Giá trị nhập không quá 10 ký tự",
                         },
                         required: "Giá trị giảm giá tối đa không được trống",
                       })}
@@ -211,8 +211,8 @@ const Reward = (props) => {
                                 message: "Số lượng tặng tối thiếu 1",
                               },
                               maxLength: {
-                                value: 13,
-                                message: "Số lượng nhập không quá 13 ký tự",
+                                value: 10,
+                                message: "Số lượng nhập không quá 10 ký tự",
                               },
                               required: "Vui lòng chọn số lượng",
                             })}

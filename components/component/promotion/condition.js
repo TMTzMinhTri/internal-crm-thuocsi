@@ -53,6 +53,10 @@ const Condition = (props) => {
                   return "Giá trị không được âm";
                 }
               },
+              maxLength: {
+                value: 10,
+                message: "Không vượt quá 10 ký tự",
+              },
             })}
           />
         </Grid>
@@ -135,8 +139,8 @@ const Condition = (props) => {
                           message: "Số lượng tối thiểu 1",
                         },
                         maxLength: {
-                          value: 13,
-                          message: "Số lượng nhập không quá 13 ký tự",
+                          value: 10,
+                          message: "Số lượng nhập không quá 10 ký tự",
                         },
                         required: "Số lượng không được trống",
                         validate: (value) => {
@@ -166,8 +170,8 @@ const Condition = (props) => {
                           }
                         },
                         maxLength: {
-                          value: 13,
-                          message: "Số lượng nhập không quá 13 ký tự",
+                          value: 10,
+                          message: "Số lượng nhập không quá 10 ký tự",
                         },
                       })}
                     />
