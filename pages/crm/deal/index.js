@@ -68,7 +68,6 @@ async function loadDealData(ctx) {
             props,
         };
     }
-    console.log(dealsResp);
     props.deals = dealsResp.data ?? [];
     props.count = dealsResp.total ?? 0;
 

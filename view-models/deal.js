@@ -47,3 +47,49 @@ export const DiscountTypeOptions = Object.keys(DiscountType).map((key) => ({
     value: DiscountType[key],
     label: DiscountTypeLabel[DiscountType[key]],
 }));
+
+export const DealValidation = {
+    startTime: {
+        required: "Thời gian bắt đầu không được để trống.",
+    },
+    endTime: {
+        required: "Thời gian kết thúc không được để trống.",
+    },
+    readyTime: {
+        required: "Thời gian cho phép hiển thị không được để trống.",
+    },
+    name: {
+        required: "Tên deal không được để trống.",
+    },
+    maxQuantity: {
+        required: "Số lượng được phép bán không được để trống.",
+        min: {
+            value: 1,
+            message: "Số lượng được phép bán không được nhỏ hơn 1.",
+        }
+    },
+    price: {
+        required: "Giá không được để trống.",
+        min: {
+            value: 1,
+            message: "Giá không được nhỏ hơn 1.",
+        }
+    },
+    skus: {
+        select: {
+            required: "Vui lòng chọn sku.",
+        },
+        quantity: (sum, total) => ({
+            required: "Số lượng không được để trống.",
+            min: {
+                value: 1,
+                message: "Số lượng không được nhỏ hơn 1.",
+            },
+            validate: (value) => {
+                if (sum + value > total) {
+                    return "Số lượng vượt quá tối đa."
+                }
+            }
+        }),
+    }
+}

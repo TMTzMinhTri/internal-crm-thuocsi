@@ -1,36 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import {
     MyCard,
     MyCardActions,
     MyCardContent,
     MyCardHeader,
 } from "@thuocsi/nextjs-components/my-card/my-card";
+import LabelBox from "@thuocsi/nextjs-components/editor/label-box/index";
 import {
     Button,
     FormControl,
     FormControlLabel,
     FormLabel,
     Grid,
+    IconButton,
     MenuItem,
     Switch,
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableRow,
     TextField,
     Typography,
 } from "@material-ui/core";
+import { Add as AddIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import Link from "next/link";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
+import { Controller, useController, useForm } from "react-hook-form";
+
 import {
     DealFlashSaleLabel,
     DealStatus,
     DealStatusLabel,
     DealType,
     DealTypeOptions,
-    DiscountType,
-    DiscountTypeOptions,
+    DealValidation,
 } from "view-models/deal";
 import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
 import { getPricingClient } from "client/pricing";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { unknownErrorText } from "components/commonErrors";
+import ImageUploadField from "components/image-upload-field";
+import { getProductClient } from "client/product";
+import { getDealClient } from "client/deal";
+import { useRouter } from "next/router";
 
 
 const defaultValuesDealForm = {
@@ -45,37 +57,42 @@ const defaultValuesDealForm = {
     imageUrls: [],
     isFlashSale: false,
     maxQuantity: 0,
-    discount: {
-        type: DiscountType.ABSOLUTE,
-        percentageDiscount: 0,
-        maxPercentageDiscount: 0,
-        absoluteDiscount: 0,
-    },
+    price: 1,
+    // discount: {
+    //     type: DiscountType.ABSOLUTE,
+    //     percentageDiscount: 0,
+    //     maxPercentageDiscount: 0,
+    //     absoluteDiscount: 0,
+    // },
     skus: [],
 }
-export const DealForm = ({ isUpdate, deal }) => {
+export const DealForm = (props) => {
+    const router = useRouter();
     const toast = useToast();
     const dealForm = useForm({
         defaultValues: defaultValuesDealForm,
         mode: "onChange",
     });
-    const { discount } = dealForm.watch();
-    const dealSkusField = useFieldArray({
+    const { dealType, maxQuantity } = dealForm.watch();
+    useController({
+        name: "imageUrls",
         control: dealForm.control,
-        name: "skus",
-    })
-
+        defaultValue: defaultValuesDealForm.imageUrls,
+    });
+    const [skuOptions, setSkuOptions] = useState(props.skuOptions ?? []);
+    const [skus, setSkus] = useState([]);
+    const [skuQuantitySum, setSkuQuantitySum] = useState(0);
     const skuForm = useForm({
         defaultValues: {
-            sku: "",
-            sellerCode: "",
+            pricing: null,
             quantity: 0,
         }
     });
+    const [productImages, setProductImages] = useState([]);
 
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
-        const skusResp = await pricingClient.getListPricingByFilterFromClient({ q: text });
+        const skusResp = await pricingClient.getListPricingByFilterFromClient({ q: text, limit: 100 });
         if (skusResp.status !== "OK") {
             if (skusResp.status === "NOT_FOUND") {
                 toast.error("Không tìm thấy sku.")
@@ -85,20 +102,27 @@ export const DealForm = ({ isUpdate, deal }) => {
             return;
         }
         const skuOptions = skusResp.data?.map(({ sellerCode, sku }) => ({ value: sku, label: sku, sellerCode, sku })) ?? [];
-        return skuOptions
-    }
-
-    async function addSku(formData) {
-        console.log(formData);
-        dealSkusField.append({
-            sku: formData.sku,
-            sellerCode: formData.sellerCode,
-            quantity: formData.quantity,
-        });
+        setSkuOptions(skuOptions);
+        return skuOptions;
     }
 
     async function createOrUpdateDeal(formData) {
-        console.log(formData);
+        const dealClient = getDealClient();
+        let resp;
+        if (props.isUpdate) {
+            resp = await dealClient.updateDeal({ ...formData, skus });
+        } else {
+            resp = await dealClient.createDeal({ ...formData, skus });
+        }
+        if (resp.status !== "OK") {
+            throw new Error(resp.message);
+        }
+        return resp.data[0];
+    }
+
+    async function uploadImage(formData) {
+        const productClient = getProductClient();
+        return await productClient.uploadProductImage(formData);
     }
 
     const handleSearchSkus = async (text) => {
@@ -106,14 +130,69 @@ export const DealForm = ({ isUpdate, deal }) => {
             return await searchSkus(text);
         } catch (e) {
             toast.error(e.message);
-            return [];
+        }
+    }
+
+    const handleAddSku = async (formData) => {
+        const { pricing: { sku, sellerCode }, quantity } = formData;
+        console.log({ formData });
+        if (dealType === DealType.COMBO) {
+            setSkus([...skus, { sku, sellerCode, quantity }]);
+            setSkuQuantitySum(skuQuantitySum + quantity);
+            skuForm.reset({
+                pricing: null,
+                quantity: 0,
+            });
+        } else {
+            setSkus([{ sku, sellerCode, quantity }]);
+        }
+    }
+
+    const handleRemoveSku = async (sku) => {
+        const arr = [...skus];
+        const idx = arr.findIndex(item => item.sku === sku);
+        setSkuQuantitySum(skuQuantitySum - arr[idx].quantity);
+        arr.splice(idx, 1);
+        setSkus(arr);
+    }
+
+    async function handleCropCallback(value) {
+        try {
+            let result = await uploadImage({
+                data: value,
+            });
+            const images = [...dealForm.getValues("imageUrls"), result.data[0]];
+            dealForm.setValue("imageUrls", images);
+            setProductImages(images);
+        } catch (err) {
+            toast.error(err.message || err.toString());
+        }
+    }
+
+    const handleRemoveImage = (url) => {
+        const images = [...dealForm.getValues("imageUrls").filter((imgUrl) => imgUrl !== url)];
+        dealForm.setValue("imageUrls", images);
+        setProductImages(images);
+    };
+
+    const handleSubmitDealForm = async (formData) => {
+        try {
+            const deal = await createOrUpdateDeal(formData);
+            router.push({
+                href: "/crm/deal/edit",
+                query: {
+                    dealCode: deal.code,
+                }
+            })
+        } catch (e) {
+            toast(e.message);
         }
     }
 
     return (
         <MyCard>
             <form>
-                <MyCardHeader title={isUpdate ? `Deal #${deal.code}` : "Tạo mới deal"} />
+                <MyCardHeader title={props.isUpdate ? `Deal #${props.deal.code}` : "Tạo mới deal"} />
                 <MyCardContent>
                     <Grid container spacing={8}>
                         <Grid item xs={12} md={5} container spacing={3}>
@@ -122,7 +201,7 @@ export const DealForm = ({ isUpdate, deal }) => {
                                     name="dealType"
                                     control={dealForm.control}
                                     defaultValue={DealType.DEAL}
-                                    as={
+                                    render={({ onChange, ...field }) => (
                                         <TextField
                                             variant="outlined"
                                             size="small"
@@ -133,12 +212,18 @@ export const DealForm = ({ isUpdate, deal }) => {
                                             InputLabelProps={{
                                                 shrink: true,
                                             }}
+                                            {...field}
+                                            onChange={(e) => {
+                                                onChange(e);
+                                                // clear skus
+                                                setSkus([]);
+                                            }}
                                         >
                                             {DealTypeOptions.map(({ value, label }) => (
                                                 <MenuItem key={value} value={value}>{label}</MenuItem>
                                             ))}
                                         </TextField>
-                                    }
+                                    )}
                                 />
                             </Grid>
                             <Grid item xs={12}>
@@ -152,7 +237,9 @@ export const DealForm = ({ isUpdate, deal }) => {
                                         shrink: true,
                                     }}
                                     required
-                                    inputRef={dealForm.register}
+                                    error={!!dealForm.errors.name}
+                                    helperText={dealForm.errors.name?.message}
+                                    inputRef={dealForm.register(DealValidation.name)}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -167,7 +254,9 @@ export const DealForm = ({ isUpdate, deal }) => {
                                         shrink: true,
                                     }}
                                     required
-                                    inputRef={dealForm.register}
+                                    error={!!dealForm.errors.startTime}
+                                    helperText={dealForm.errors.startTime?.message}
+                                    inputRef={dealForm.register(DealValidation.startTime)}
                                 />
                             </Grid>
                             <Grid item xs={12} md={6}>
@@ -182,10 +271,31 @@ export const DealForm = ({ isUpdate, deal }) => {
                                         shrink: true,
                                     }}
                                     required
-                                    inputRef={dealForm.register}
+                                    error={!!dealForm.errors.endTime}
+                                    helperText={dealForm.errors.endTime?.message}
+                                    inputRef={dealForm.register(DealValidation.endTime)}
                                 />
                             </Grid>
-                            <Grid item xs={12}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    name="price"
+                                    variant="outlined"
+                                    size="small"
+                                    label="Giá"
+                                    fullWidth
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    inputProps={{
+                                        min: 1,
+                                    }}
+                                    required
+                                    error={!!dealForm.errors.price}
+                                    helperText={dealForm.errors.price?.message}
+                                    inputRef={dealForm.register(DealValidation.price)}
+                                />
+                            </Grid>
+                            {/* <Grid item xs={12}>
                                 <Controller
                                     name="discount.type"
                                     control={dealForm.control}
@@ -267,9 +377,8 @@ export const DealForm = ({ isUpdate, deal }) => {
                                             />
                                         </Grid>
                                     </>
-                                )}
+                                )} */}
                         </Grid>
-
                         <Grid item xs={12} md={5} container spacing={3}>
                             <Grid item xs={12} md={6}>
                                 <FormControl>
@@ -329,7 +438,9 @@ export const DealForm = ({ isUpdate, deal }) => {
                                         shrink: true,
                                     }}
                                     required
-                                    inputRef={dealForm.register}
+                                    error={!!dealForm.errors.readyTime}
+                                    helperText={dealForm.errors.readyTime?.message}
+                                    inputRef={dealForm.register(DealValidation.readyTime)}
                                 />
                             </Grid>
                             <Grid item xs={6}>
@@ -346,50 +457,116 @@ export const DealForm = ({ isUpdate, deal }) => {
                                     inputProps={{
                                         min: 0
                                     }}
-                                    inputRef={dealForm.register}
+                                    error={!!dealForm.errors.maxQuantity}
+                                    helperText={dealForm.errors.maxQuantity?.message}
+                                    inputRef={dealForm.register(DealValidation.maxQuantity)}
                                 />
                             </Grid>
+                            {/* Keep to not break layout */}
                             <Grid item xs={12} />
                             <Grid item xs={12} />
                         </Grid>
-                        <Grid item xs={12} md={5} container spacing={3}>
+                        <Grid item xs={12} md={5} container spacing={3} alignItems="center">
                             <Grid item xs={12}>
                                 <Typography variant="h6">Danh sách sản phẩm thuộc deal</Typography>
                             </Grid>
-
-                            <Grid item xs={12} md={6}>
-                                <MuiSingleAuto
-                                    name="sku"
-                                    options={[]}
-                                    label="sku"
-                                    placeholder="Tìm kiếm sku"
-                                    required
-                                    control={skuForm.control}
-                                    errors={skuForm.errors}
-                                    onFieldChange={handleSearchSkus}
-                                    onValueChange={skuForm.handleSubmit(addSku)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    name="quantity"
-                                    variant="outlined"
-                                    size="small"
-                                    label="Số lượng"
-                                    type="number"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    inputProps={{
-                                        min: 0
-                                    }}
-                                    required
-                                    inputRef={dealForm.register}
-                                />
+                            {dealType === DealType.COMBO && (
+                                <Table size="small">
+                                    <colgroup>
+                                        <col width="45%" />
+                                        <col width="40%" />
+                                        <col width="15%" />
+                                    </colgroup>
+                                    <TableHead>
+                                        <TableCell>sku</TableCell>
+                                        <TableCell>Số lượng</TableCell>
+                                        <TableCell align="center">Thao tác</TableCell>
+                                    </TableHead>
+                                    <TableBody>
+                                        {skus.map((item, index) => (
+                                            <TableRow key={index}>
+                                                <TableCell>{item.sku}</TableCell>
+                                                <TableCell>{item.quantity}</TableCell>
+                                                <TableCell align="center">
+                                                    <IconButton
+                                                        onClick={() => handleRemoveSku(item.sku)}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                        <TableRow style={{ verticalAlign: "top" }}>
+                                            <TableCell>
+                                                <MuiSingleAuto
+                                                    name="pricing"
+                                                    options={skuOptions}
+                                                    placeholder="Tìm kiếm sku"
+                                                    required
+                                                    control={skuForm.control}
+                                                    errors={skuForm.errors}
+                                                    message={skuForm.errors.pricing?.message}
+                                                    onFieldChange={handleSearchSkus}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    name="quantity"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    type="number"
+                                                    fullWidth
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    inputProps={{
+                                                        min: 1
+                                                    }}
+                                                    required
+                                                    error={!!skuForm.errors.quantity}
+                                                    helperText={skuForm.errors.quantity?.message}
+                                                    inputRef={skuForm.register(DealValidation.skus.quantity(skuQuantitySum, maxQuantity))}
+                                                />
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <IconButton
+                                                    onClick={skuForm.handleSubmit(handleAddSku)}
+                                                >
+                                                    <AddIcon />
+                                                </IconButton>
+                                            </TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                </Table>
+                            )}
+                            {dealType === DealType.DEAL && (
+                                <Grid item xs={12} md={5}>
+                                    <MuiSingleAuto
+                                        name="pricing"
+                                        options={skuOptions}
+                                        label="sku"
+                                        placeholder="Tìm kiếm sku"
+                                        required
+                                        control={skuForm.control}
+                                        errors={skuForm.errors}
+                                        message={skuForm.errors.pricing?.message}
+                                        onFieldChange={handleSearchSkus}
+                                        onValueChange={skuForm.handleSubmit(handleAddSku)}
+                                    />
+                                </Grid>
+                            )}
+                        </Grid>
+                        <Grid item xs={12} md={5} container spacing={3} alignItems="center">
+                            <Grid item xs={12}>
+                                <LabelBox label="Hình ảnh sản phẩm" padding={1}>
+                                    <ImageUploadField
+                                        title="Cập nhật hình ảnh sản phẩm"
+                                        images={productImages}
+                                        handleCropCallback={handleCropCallback}
+                                        handleRemoveImage={handleRemoveImage} />
+                                </LabelBox>
                             </Grid>
                         </Grid>
-
                     </Grid>
                 </MyCardContent>
                 <MyCardActions>
@@ -403,7 +580,7 @@ export const DealForm = ({ isUpdate, deal }) => {
                     <Button
                         variant="contained"
                         color="primary"
-                        onClick={dealForm.handleSubmit(createOrUpdateDeal)}
+                        onClick={dealForm.handleSubmit(handleSubmitDealForm)}
                     >
                         Lưu
                     </Button>

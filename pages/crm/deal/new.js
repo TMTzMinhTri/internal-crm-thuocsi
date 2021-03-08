@@ -3,9 +3,22 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 
 import AppCRM from "pages/_layout";
 import { DealForm } from "containers/crm/deal/DealForm";
+import { getPricingClient } from "client/pricing";
+
+async function loadDealData(ctx) {
+    const props = {
+        skuOptions: []
+    };
+    const pricingClient = getPricingClient(ctx, {});
+    const skuResp = await pricingClient.getListPricingByFilter({});
+    props.skuOptions = skuResp.data?.map(({ sellerCode, sku }) => ({ value: sku, label: sku, sellerCode, sku })) ?? [];
+    return {
+        props,
+    }
+}
 
 export function getServerSideProps(ctx) {
-    return doWithLoggedInUser(ctx, () => { })
+    return doWithLoggedInUser(ctx, () => loadDealData(ctx))
 }
 
 const breadcrumb = [
@@ -25,7 +38,7 @@ const render = props => {
 
     return (
         <AppCRM breadcrumb={breadcrumb}>
-            <DealForm />
+            <DealForm {...props}/>
         </AppCRM>
     )
 }
