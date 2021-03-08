@@ -81,6 +81,11 @@ const menu = [{
             ]
         },
         {
+            key: "DEAL",
+            name: "Deal",
+            link: "/crm/deal",
+        },
+        {
             key:"DELIVERY",
             name:"Giao hàng",
             link:"/crm/delivery/time",
