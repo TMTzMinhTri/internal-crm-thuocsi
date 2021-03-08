@@ -126,7 +126,7 @@ function render(props) {
 
   const [page, setPage] = useState(parseInt(router.query.page || 0));
   const [rowsPerPage, setRowsPerPage] = useState(
-    parseInt(router.query.perPage) || 20
+    parseInt(router.query.limit) || 20
   );
   let [openModal, setOpenModal] = useState({
     open: false,
@@ -136,7 +136,7 @@ function render(props) {
     voucherStatus: "",
   });
 
-  function searchPromotion() {
+  function searchVoucher() {
     let value = getValues();
     router.query.page = 0;
     setPage(0);
@@ -152,14 +152,12 @@ function render(props) {
   const handleChangePage = (event, newPage, rowsPerPage) => {
     setPage(newPage);
     setRowsPerPage(rowsPerPage);
-
     router.push({
       pathname: "/crm/voucher",
       query: {
         ...router.query,
         limit: rowsPerPage,
         page: newPage,
-        perPage: rowsPerPage,
         offset: newPage * rowsPerPage,
       },
     });
@@ -213,7 +211,7 @@ function render(props) {
     } else {
       let voucherResponse = await updateVoucher(
         voucherId,
-        defaultPromotionStatus.EXPIRED?.WAITING
+        defaultPromotionStatus.HIDE
       );
       if (!voucherResponse || voucherResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
@@ -221,7 +219,7 @@ function render(props) {
       } else {
         props.voucher.forEach((d) => {
           if (d.voucherId === voucherId) {
-            return (d.status = defaultPromotionStatus.EXPIRED?.EXPIRED);
+            return (d.status = defaultPromotionStatus.HIDE);
           }
         });
         setOpenModal({ ...openModal, open: false });
@@ -257,7 +255,7 @@ function render(props) {
                     defaultValue={textSearch}
                     onKeyDown={(event) => {
                       if (event.key === "Enter") {
-                        searchPromotion();
+                        searchVoucher();
                       }
                     }}
                     placeholder="Tìm kiếm mã khuyến mãi"
@@ -267,7 +265,7 @@ function render(props) {
                   <IconButton
                     className={styles.iconButton}
                     aria-label="search"
-                    onClick={searchPromotion}
+                    onClick={searchVoucher}
                   >
                     <SearchIcon />
                   </IconButton>
