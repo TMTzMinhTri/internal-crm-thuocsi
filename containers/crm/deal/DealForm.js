@@ -86,7 +86,8 @@ export const DealForm = (props) => {
         defaultValues: {
             pricing: null,
             quantity: 0,
-        }
+        },
+        mode: "onChange",
     });
     const [productImages, setProductImages] = useState([]);
 
@@ -185,117 +186,116 @@ export const DealForm = (props) => {
                 }
             })
         } catch (e) {
-            toast(e.message);
+            toast.error(e.message);
         }
     }
 
     return (
         <MyCard>
-            <form>
-                <MyCardHeader title={props.isUpdate ? `Deal #${props.deal.code}` : "Tạo mới deal"} />
-                <MyCardContent>
-                    <Grid container spacing={8}>
-                        <Grid item xs={12} md={5} container spacing={3}>
-                            <Grid item xs={12}>
-                                <Controller
-                                    name="dealType"
-                                    control={dealForm.control}
-                                    defaultValue={DealType.DEAL}
-                                    render={({ onChange, ...field }) => (
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            label="Loại deal"
-                                            placeholder="Chọn loại deal"
-                                            fullWidth
-                                            select
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            {...field}
-                                            onChange={(e) => {
-                                                onChange(e);
-                                                // clear skus
-                                                setSkus([]);
-                                            }}
-                                        >
-                                            {DealTypeOptions.map(({ value, label }) => (
-                                                <MenuItem key={value} value={value}>{label}</MenuItem>
-                                            ))}
-                                        </TextField>
-                                    )}
-                                />
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    name="name"
-                                    variant="outlined"
-                                    size="small"
-                                    label="Tên deal"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    required
-                                    error={!!dealForm.errors.name}
-                                    helperText={dealForm.errors.name?.message}
-                                    inputRef={dealForm.register(DealValidation.name)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    name="startTime"
-                                    variant="outlined"
-                                    size="small"
-                                    label="Thời gian bắt đầu"
-                                    type="datetime-local"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    required
-                                    error={!!dealForm.errors.startTime}
-                                    helperText={dealForm.errors.startTime?.message}
-                                    inputRef={dealForm.register(DealValidation.startTime)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    name="endTime"
-                                    variant="outlined"
-                                    size="small"
-                                    label="Thời gian kết thúc"
-                                    type="datetime-local"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    required
-                                    error={!!dealForm.errors.endTime}
-                                    helperText={dealForm.errors.endTime?.message}
-                                    inputRef={dealForm.register(DealValidation.endTime)}
-                                />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <TextField
-                                    name="price"
-                                    variant="outlined"
-                                    size="small"
-                                    label="Giá"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    inputProps={{
-                                        min: 1,
-                                    }}
-                                    required
-                                    error={!!dealForm.errors.price}
-                                    helperText={dealForm.errors.price?.message}
-                                    inputRef={dealForm.register(DealValidation.price)}
-                                />
-                            </Grid>
-                            {/* <Grid item xs={12}>
+            <MyCardHeader title={props.isUpdate ? `Deal #${props.deal.code}` : "Tạo mới deal"} />
+            <MyCardContent>
+                <Grid container spacing={8}>
+                    <Grid item xs={12} md={5} container spacing={3}>
+                        <Grid item xs={12}>
+                            <Controller
+                                name="dealType"
+                                control={dealForm.control}
+                                defaultValue={DealType.DEAL}
+                                render={({ onChange, ...field }) => (
+                                    <TextField
+                                        variant="outlined"
+                                        size="small"
+                                        label="Loại deal"
+                                        placeholder="Chọn loại deal"
+                                        fullWidth
+                                        select
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        {...field}
+                                        onChange={(e) => {
+                                            onChange(e);
+                                            // clear skus
+                                            setSkus([]);
+                                        }}
+                                    >
+                                        {DealTypeOptions.map(({ value, label }) => (
+                                            <MenuItem key={value} value={value}>{label}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                )}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                name="name"
+                                variant="outlined"
+                                size="small"
+                                label="Tên deal"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                required
+                                error={!!dealForm.errors.name}
+                                helperText={dealForm.errors.name?.message}
+                                inputRef={dealForm.register(DealValidation.name)}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                name="startTime"
+                                variant="outlined"
+                                size="small"
+                                label="Thời gian bắt đầu"
+                                type="datetime-local"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                required
+                                error={!!dealForm.errors.startTime}
+                                helperText={dealForm.errors.startTime?.message}
+                                inputRef={dealForm.register(DealValidation.startTime)}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                name="endTime"
+                                variant="outlined"
+                                size="small"
+                                label="Thời gian kết thúc"
+                                type="datetime-local"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                required
+                                error={!!dealForm.errors.endTime}
+                                helperText={dealForm.errors.endTime?.message}
+                                inputRef={dealForm.register(DealValidation.endTime)}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <TextField
+                                name="price"
+                                variant="outlined"
+                                size="small"
+                                label="Giá"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                inputProps={{
+                                    min: 1,
+                                }}
+                                required
+                                error={!!dealForm.errors.price}
+                                helperText={dealForm.errors.price?.message}
+                                inputRef={dealForm.register(DealValidation.price)}
+                            />
+                        </Grid>
+                        {/* <Grid item xs={12}>
                                 <Controller
                                     name="discount.type"
                                     control={dealForm.control}
@@ -378,214 +378,216 @@ export const DealForm = (props) => {
                                         </Grid>
                                     </>
                                 )} */}
-                        </Grid>
-                        <Grid item xs={12} md={5} container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                                <FormControl>
-                                    <FormLabel>Trạng thái</FormLabel>
-                                    <Controller
-                                        name="status"
-                                        control={dealForm.control}
-                                        defaultValue={defaultValuesDealForm.status}
-                                        render={({ name, value }) => (
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        color="primary"
-                                                        checked={value === DealStatus.ACTIVE}
-                                                        onChange={(_, checked) => dealForm.setValue(name, checked ? DealStatus.ACTIVE : DealStatus.INACTIVE)}
-                                                    />
-                                                }
-                                                color={value === DealStatus.ACTIVE ? "primary" : "default"}
-                                                label={DealStatusLabel[value]}
-                                            />
-                                        )}
-                                    />
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <FormControl>
-                                    <FormLabel component="div">Flash sale</FormLabel>
-                                    <Controller
-                                        name="isFlashSale"
-                                        control={dealForm.control}
-                                        defaultValue={defaultValuesDealForm.isFlashSale}
-                                        render={({ name, value }) => (
-                                            <FormControlLabel
-                                                control={
-                                                    <Switch
-                                                        color="primary"
-                                                        checked={value}
-                                                        onChange={(_, checked) => dealForm.setValue(name, checked)}
-                                                    />
-                                                }
-                                                color={value ? "primary" : "default"}
-                                                label={DealFlashSaleLabel[value]}
-                                            />
-                                        )}
-                                    />
-                                </FormControl>
-                            </Grid>
-                            <Grid item xs={12}>
-                                <TextField
-                                    name="readyTime"
-                                    variant="outlined"
-                                    size="small"
-                                    label="Thời gian cho phép hiển thị"
-                                    type="datetime-local"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    required
-                                    error={!!dealForm.errors.readyTime}
-                                    helperText={dealForm.errors.readyTime?.message}
-                                    inputRef={dealForm.register(DealValidation.readyTime)}
-                                />
-                            </Grid>
-                            <Grid item xs={6}>
-                                <TextField
-                                    name="maxQuantity"
-                                    variant="outlined"
-                                    size="small"
-                                    label="Số lượng được phép bán trong deal"
-                                    fullWidth
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    type="number"
-                                    inputProps={{
-                                        min: 0
-                                    }}
-                                    error={!!dealForm.errors.maxQuantity}
-                                    helperText={dealForm.errors.maxQuantity?.message}
-                                    inputRef={dealForm.register(DealValidation.maxQuantity)}
-                                />
-                            </Grid>
-                            {/* Keep to not break layout */}
-                            <Grid item xs={12} />
-                            <Grid item xs={12} />
-                        </Grid>
-                        <Grid item xs={12} md={5} container spacing={3} alignItems="center">
-                            <Grid item xs={12}>
-                                <Typography variant="h6">Danh sách sản phẩm thuộc deal</Typography>
-                            </Grid>
-                            {dealType === DealType.COMBO && (
-                                <Table size="small">
-                                    <colgroup>
-                                        <col width="45%" />
-                                        <col width="40%" />
-                                        <col width="15%" />
-                                    </colgroup>
-                                    <TableHead>
-                                        <TableCell>sku</TableCell>
-                                        <TableCell>Số lượng</TableCell>
-                                        <TableCell align="center">Thao tác</TableCell>
-                                    </TableHead>
-                                    <TableBody>
-                                        {skus.map((item, index) => (
-                                            <TableRow key={index}>
-                                                <TableCell>{item.sku}</TableCell>
-                                                <TableCell>{item.quantity}</TableCell>
-                                                <TableCell align="center">
-                                                    <IconButton
-                                                        onClick={() => handleRemoveSku(item.sku)}
-                                                    >
-                                                        <DeleteIcon />
-                                                    </IconButton>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                        <TableRow style={{ verticalAlign: "top" }}>
-                                            <TableCell>
-                                                <MuiSingleAuto
-                                                    name="pricing"
-                                                    options={skuOptions}
-                                                    placeholder="Tìm kiếm sku"
-                                                    required
-                                                    control={skuForm.control}
-                                                    errors={skuForm.errors}
-                                                    message={skuForm.errors.pricing?.message}
-                                                    onFieldChange={handleSearchSkus}
+                    </Grid>
+                    <Grid item xs={12} md={5} container spacing={3}>
+                        <Grid item xs={12} md={6}>
+                            <FormControl>
+                                <FormLabel>Trạng thái</FormLabel>
+                                <Controller
+                                    name="status"
+                                    control={dealForm.control}
+                                    defaultValue={defaultValuesDealForm.status}
+                                    render={({ name, value }) => (
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    color="primary"
+                                                    checked={value === DealStatus.ACTIVE}
+                                                    onChange={(_, checked) => dealForm.setValue(name, checked ? DealStatus.ACTIVE : DealStatus.INACTIVE)}
                                                 />
-                                            </TableCell>
-                                            <TableCell>
-                                                <TextField
-                                                    name="quantity"
-                                                    variant="outlined"
-                                                    size="small"
-                                                    type="number"
-                                                    fullWidth
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    inputProps={{
-                                                        min: 1
-                                                    }}
-                                                    required
-                                                    error={!!skuForm.errors.quantity}
-                                                    helperText={skuForm.errors.quantity?.message}
-                                                    inputRef={skuForm.register(DealValidation.skus.quantity(skuQuantitySum, maxQuantity))}
+                                            }
+                                            color={value === DealStatus.ACTIVE ? "primary" : "default"}
+                                            label={DealStatusLabel[value]}
+                                        />
+                                    )}
+                                />
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <FormControl>
+                                <FormLabel component="div">Flash sale</FormLabel>
+                                <Controller
+                                    name="isFlashSale"
+                                    control={dealForm.control}
+                                    defaultValue={defaultValuesDealForm.isFlashSale}
+                                    render={({ name, value }) => (
+                                        <FormControlLabel
+                                            control={
+                                                <Switch
+                                                    color="primary"
+                                                    checked={value}
+                                                    onChange={(_, checked) => dealForm.setValue(name, checked)}
                                                 />
-                                            </TableCell>
+                                            }
+                                            color={value ? "primary" : "default"}
+                                            label={DealFlashSaleLabel[value]}
+                                        />
+                                    )}
+                                />
+                            </FormControl>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                name="readyTime"
+                                variant="outlined"
+                                size="small"
+                                label="Thời gian cho phép hiển thị"
+                                type="datetime-local"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                required
+                                error={!!dealForm.errors.readyTime}
+                                helperText={dealForm.errors.readyTime?.message}
+                                inputRef={dealForm.register(DealValidation.readyTime)}
+                            />
+                        </Grid>
+                        <Grid item xs={6}>
+                            <TextField
+                                name="maxQuantity"
+                                variant="outlined"
+                                size="small"
+                                label="Số lượng được phép bán trong deal"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                type="number"
+                                inputProps={{
+                                    min: 0
+                                }}
+                                error={!!dealForm.errors.maxQuantity}
+                                helperText={dealForm.errors.maxQuantity?.message}
+                                inputRef={dealForm.register({
+                                    ...DealValidation.maxQuantity,
+                                    valueAsNumber: true,
+                                })}
+                            />
+                        </Grid>
+                        {/* Keep to not break layout */}
+                        <Grid item xs={12} />
+                        <Grid item xs={12} />
+                    </Grid>
+                    <Grid item xs={12} md={5} container spacing={3} alignItems="center">
+                        <Grid item xs={12}>
+                            <Typography variant="h6">Danh sách sản phẩm thuộc deal</Typography>
+                        </Grid>
+                        {dealType === DealType.COMBO && (
+                            <Table size="small">
+                                <colgroup>
+                                    <col width="45%" />
+                                    <col width="40%" />
+                                    <col width="15%" />
+                                </colgroup>
+                                <TableHead>
+                                    <TableCell>sku</TableCell>
+                                    <TableCell>Số lượng</TableCell>
+                                    <TableCell align="center">Thao tác</TableCell>
+                                </TableHead>
+                                <TableBody>
+                                    {skus.map((item, index) => (
+                                        <TableRow key={index}>
+                                            <TableCell>{item.sku}</TableCell>
+                                            <TableCell>{item.quantity}</TableCell>
                                             <TableCell align="center">
                                                 <IconButton
-                                                    onClick={skuForm.handleSubmit(handleAddSku)}
+                                                    onClick={() => handleRemoveSku(item.sku)}
                                                 >
-                                                    <AddIcon />
+                                                    <DeleteIcon />
                                                 </IconButton>
                                             </TableCell>
                                         </TableRow>
-                                    </TableBody>
-                                </Table>
-                            )}
-                            {dealType === DealType.DEAL && (
-                                <Grid item xs={12} md={5}>
-                                    <MuiSingleAuto
-                                        name="pricing"
-                                        options={skuOptions}
-                                        label="sku"
-                                        placeholder="Tìm kiếm sku"
-                                        required
-                                        control={skuForm.control}
-                                        errors={skuForm.errors}
-                                        message={skuForm.errors.pricing?.message}
-                                        onFieldChange={handleSearchSkus}
-                                        onValueChange={skuForm.handleSubmit(handleAddSku)}
-                                    />
-                                </Grid>
-                            )}
-                        </Grid>
-                        <Grid item xs={12} md={5} container spacing={3} alignItems="center">
-                            <Grid item xs={12}>
-                                <LabelBox label="Hình ảnh sản phẩm" padding={1}>
-                                    <ImageUploadField
-                                        title="Cập nhật hình ảnh sản phẩm"
-                                        images={productImages}
-                                        handleCropCallback={handleCropCallback}
-                                        handleRemoveImage={handleRemoveImage} />
-                                </LabelBox>
+                                    ))}
+                                    <TableRow style={{ verticalAlign: "top" }}>
+                                        <TableCell>
+                                            <MuiSingleAuto
+                                                name="pricing"
+                                                options={skuOptions}
+                                                placeholder="Tìm kiếm sku"
+                                                required
+                                                control={skuForm.control}
+                                                errors={skuForm.errors}
+                                                message={skuForm.errors.pricing?.message}
+                                                onFieldChange={handleSearchSkus}
+                                            />
+                                        </TableCell>
+                                        <TableCell>
+                                            <TextField
+                                                name="quantity"
+                                                variant="outlined"
+                                                size="small"
+                                                type="number"
+                                                fullWidth
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                inputProps={{
+                                                    min: 1
+                                                }}
+                                                required
+                                                error={!!skuForm.errors.quantity}
+                                                helperText={skuForm.errors.quantity?.message}
+                                                inputRef={skuForm.register(DealValidation.skus.quantity(skuQuantitySum, maxQuantity))}
+                                            />
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <IconButton
+                                                onClick={skuForm.handleSubmit(handleAddSku)}
+                                            >
+                                                <AddIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            </Table>
+                        )}
+                        {dealType === DealType.DEAL && (
+                            <Grid item xs={12} md={5}>
+                                <MuiSingleAuto
+                                    name="pricing"
+                                    options={skuOptions}
+                                    label="sku"
+                                    placeholder="Tìm kiếm sku"
+                                    required
+                                    control={skuForm.control}
+                                    errors={skuForm.errors}
+                                    message={skuForm.errors.pricing?.message}
+                                    onFieldChange={handleSearchSkus}
+                                    onValueChange={skuForm.handleSubmit(handleAddSku)}
+                                />
                             </Grid>
+                        )}
+                    </Grid>
+                    <Grid item xs={12} md={5} container spacing={3} alignItems="center">
+                        <Grid item xs={12}>
+                            <LabelBox label="Hình ảnh sản phẩm" padding={1}>
+                                <ImageUploadField
+                                    title="Cập nhật hình ảnh sản phẩm"
+                                    images={productImages}
+                                    handleCropCallback={handleCropCallback}
+                                    handleRemoveImage={handleRemoveImage} />
+                            </LabelBox>
                         </Grid>
                     </Grid>
-                </MyCardContent>
-                <MyCardActions>
-                    <Link href="/crm/deal">
-                        <Button
-                            variant="contained"
-                        >
-                            Quay lại
-                        </Button>
-                    </Link>
+                </Grid>
+            </MyCardContent>
+            <MyCardActions>
+                <Link href="/crm/deal">
                     <Button
                         variant="contained"
-                        color="primary"
-                        onClick={dealForm.handleSubmit(handleSubmitDealForm)}
                     >
-                        Lưu
+                        Quay lại
+                        </Button>
+                </Link>
+                <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={dealForm.handleSubmit(handleSubmitDealForm)}
+                >
+                    Lưu
                     </Button>
-                </MyCardActions>
-            </form>
+            </MyCardActions>
         </MyCard>
     );
 }
