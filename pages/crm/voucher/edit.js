@@ -277,14 +277,17 @@ function render(props) {
         </MyCardContent>
         <MyCardActions>
           <ButtonGroup>
-            <Button
-              variant="contained"
-              color="primary"
-              style={{ margin: 8 }}
-              onClick={handleSubmit(onSubmit)}
-            >
-              CẬP NHẬT
-            </Button>
+              {
+                voucher.status === defaultPromotionStatus.EXPIRED ? (
+                    <Button variant="contained" color="primary" onClick={() => router.push('/crm/voucher')}>
+                      Quay về
+                    </Button>
+                ): (
+                    <Button variant="contained" color="primary" onClick={handleSubmit(onSubmit)}>
+                      Cập nhật
+                    </Button>
+                )
+              }
           </ButtonGroup>
         </MyCardActions>
       </MyCard>
