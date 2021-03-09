@@ -133,7 +133,7 @@ export default function renderForm(props, toast) {
     const isDistrict = ((props.province === undefined) || (Object.keys(props.province).length === 0 && props.province.constructor === Object)) ? true : false;
     const [isDisabledDistrict, setDisabledDistrict] = useState(isDistrict);
     const [isDisabledWard, setDisabledWard] = useState(isWard);
-    const [isDisableStatus, setIsDisableStatus] = useState(editObject.status == 'ACTIVE');
+    // const [isDisableStatus, setIsDisableStatus] = useState(editObject.status == 'ACTIVE');
     const router = useRouter();
     const { register, handleSubmit, errors, control, getValues, reset, watch } = useForm({
         defaultValues: editObject,
@@ -257,7 +257,7 @@ export default function renderForm(props, toast) {
             if (resp.status !== 'OK') {
                 error(resp.message ?? unknownErrorText);
             } else {
-                setIsDisableStatus(formData.status == 'ACTIVE' ? true : false);
+                // setIsDisableStatus(formData.status == 'ACTIVE' ? true : false);
                 success(pageTitle + ' thành công');
             }
         } catch (err) {
@@ -611,7 +611,7 @@ export default function renderForm(props, toast) {
                                                 <Controller
                                                     name="status"
                                                     control={control}
-                                                    disabled={isDisableStatus}
+                                                    // disabled={isDisableStatus}
                                                     defaultValue={statuses ? statuses[0].value : ''}
                                                     rules={{ required: true }}
                                                     error={!!errors.status}

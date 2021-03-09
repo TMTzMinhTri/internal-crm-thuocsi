@@ -141,6 +141,14 @@ class ProductClient extends APIClient {
       ids,
     });
   }
+
+  async uploadProductImage(formData) {
+    const res = await fetch(`/backend/marketplace/product/v1/upload`, {
+      method: "POST",
+      body: JSON.stringify(formData),
+    });
+    return await res.json();
+  }
 }
 
 export function getProductClient(ctx, data) {
