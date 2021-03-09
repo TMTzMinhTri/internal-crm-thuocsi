@@ -28,6 +28,16 @@ class DealClient extends APIClient {
         )
     }
 
+    getDealByCode(code) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/deal`,
+            {
+                dealCode: code
+            }
+        )
+    }
+
     createDeal({
         startTime,
         endTime,

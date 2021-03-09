@@ -26,6 +26,7 @@ import {
 import { Add as AddIcon, Delete as DeleteIcon } from "@material-ui/icons";
 import Link from "next/link";
 import { Controller, useController, useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 
 import {
     DealFlashSaleLabel,
@@ -42,7 +43,7 @@ import { unknownErrorText } from "components/commonErrors";
 import ImageUploadField from "components/image-upload-field";
 import { getProductClient } from "client/product";
 import { getDealClient } from "client/deal";
-import { useRouter } from "next/router";
+import moment from "moment";
 
 
 const defaultValuesDealForm = {
@@ -56,21 +57,15 @@ const defaultValuesDealForm = {
     tags: [],
     imageUrls: [],
     isFlashSale: false,
-    maxQuantity: 0,
+    maxQuantity: 1,
     price: 1,
-    // discount: {
-    //     type: DiscountType.ABSOLUTE,
-    //     percentageDiscount: 0,
-    //     maxPercentageDiscount: 0,
-    //     absoluteDiscount: 0,
-    // },
     skus: [],
 }
 export const DealForm = (props) => {
     const router = useRouter();
     const toast = useToast();
     const dealForm = useForm({
-        defaultValues: defaultValuesDealForm,
+        defaultValues: props.isUpdate ? props.deal : defaultValuesDealForm,
         mode: "onChange",
     });
     const { dealType, maxQuantity } = dealForm.watch();
@@ -108,12 +103,17 @@ export const DealForm = (props) => {
     }
 
     async function createOrUpdateDeal(formData) {
+        const data = formData;
+        data.startTime = moment(formData.startTime).toISOString();
+        data.endTime = moment(formData.endTime).toISOString();
+        data.readyTime = moment(formData.readyTime).toISOString();
+
         const dealClient = getDealClient();
         let resp;
         if (props.isUpdate) {
-            resp = await dealClient.updateDeal({ ...formData, skus });
+            resp = await dealClient.updateDeal({ ...data, skus });
         } else {
-            resp = await dealClient.createDeal({ ...formData, skus });
+            resp = await dealClient.createDeal({ ...data, skus });
         }
         if (resp.status !== "OK") {
             throw new Error(resp.message);
@@ -136,7 +136,6 @@ export const DealForm = (props) => {
 
     const handleAddSku = async (formData) => {
         const { pricing: { sku, sellerCode }, quantity } = formData;
-        console.log({ formData });
         if (dealType === DealType.COMBO) {
             setSkus([...skus, { sku, sellerCode, quantity }]);
             setSkuQuantitySum(skuQuantitySum + quantity);
@@ -145,7 +144,7 @@ export const DealForm = (props) => {
                 quantity: 0,
             });
         } else {
-            setSkus([{ sku, sellerCode, quantity }]);
+            setSkus([{ sku, sellerCode, quantity: 1 }]);
         }
     }
 
@@ -179,8 +178,9 @@ export const DealForm = (props) => {
     const handleSubmitDealForm = async (formData) => {
         try {
             const deal = await createOrUpdateDeal(formData);
+            toast.success("Tạo deal thành công.")
             router.push({
-                href: "/crm/deal/edit",
+                pathname: "/crm/deal/edit",
                 query: {
                     dealCode: deal.code,
                 }
@@ -292,92 +292,12 @@ export const DealForm = (props) => {
                                 required
                                 error={!!dealForm.errors.price}
                                 helperText={dealForm.errors.price?.message}
-                                inputRef={dealForm.register(DealValidation.price)}
+                                inputRef={dealForm.register({
+                                    ...DealValidation.price,
+                                    valueAsNumber: true,
+                                })}
                             />
                         </Grid>
-                        {/* <Grid item xs={12}>
-                                <Controller
-                                    name="discount.type"
-                                    control={dealForm.control}
-                                    defaultValue={defaultValuesDealForm.discount.type}
-                                    as={
-                                        <TextField
-                                            variant="outlined"
-                                            size="small"
-                                            label=""
-                                            placeholder=""
-                                            select
-                                            fullWidth
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                        >
-                                            {DiscountTypeOptions.map(({ value, label }) => (
-                                                <MenuItem key={value} value={value} >{label}</MenuItem>
-                                            ))}
-                                        </TextField>
-                                    }
-                                />
-                            </Grid>
-                            {discount.type === DiscountType.ABSOLUTE ?
-                                (
-                                    <Grid item xs={12} md={6}>
-                                        <TextField
-                                            name="discount.absoluteDiscount"
-                                            variant="outlined"
-                                            size="small"
-                                            label="Giá trị giảm giá tuyệt đối"
-                                            placeholder=""
-                                            fullWidth
-                                            type="number"
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            inputProps={{
-                                                min: 0
-                                            }}
-                                            inputRef={dealForm.register}
-                                        />
-                                    </Grid>
-                                ) : (
-                                    <>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
-                                                name="discount.percentageDiscount"
-                                                variant="outlined"
-                                                size="small"
-                                                label="Giá trị giảm giá theo %"
-                                                fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                inputProps={{
-                                                    min: 0
-                                                }}
-                                                inputRef={dealForm.register}
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
-                                                name="discount.maxPercentageDiscount"
-                                                variant="outlined"
-                                                size="small"
-                                                label="Giá trị giảm tối đa"
-                                                placeholder=""
-                                                fullWidth
-                                                type="number"
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                inputProps={{
-                                                    min: 0
-                                                }}
-                                                inputRef={dealForm.register}
-                                            />
-                                        </Grid>
-                                    </>
-                                )} */}
                     </Grid>
                     <Grid item xs={12} md={5} container spacing={3}>
                         <Grid item xs={12} md={6}>
@@ -528,7 +448,10 @@ export const DealForm = (props) => {
                                                 required
                                                 error={!!skuForm.errors.quantity}
                                                 helperText={skuForm.errors.quantity?.message}
-                                                inputRef={skuForm.register(DealValidation.skus.quantity(skuQuantitySum, maxQuantity))}
+                                                inputRef={skuForm.register({
+                                                    ...DealValidation.skus.quantity(skuQuantitySum, maxQuantity),
+                                                    valueAsNumber: true,
+                                                })}
                                             />
                                         </TableCell>
                                         <TableCell align="center">
