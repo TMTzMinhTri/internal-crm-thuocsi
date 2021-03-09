@@ -275,10 +275,7 @@ function render(props) {
                         searchPromotion();
                       }
                     }}
-                    placeholder="Tìm kiếm chương trình khuyến mãi"
-                    inputProps={{
-                      "aria-label": "Tìm kiếm chương trình khuyến mãi",
-                    }}
+                    placeholder="Nhập mã hoặc tên chương trình cần tìm"
                     inputRef={register}
                   />
                   <IconButton
@@ -323,7 +320,6 @@ function render(props) {
                     <TableRow key={row.promotionId}>
                       <TableCell align="left">{row.promotionId}</TableCell>
                       <TableCell align="left">
-                        {" "}
                         {limitText(row.promotionName, 50)}
                       </TableCell>
                       <TableCell align="left">

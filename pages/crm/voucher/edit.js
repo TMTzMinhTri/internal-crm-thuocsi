@@ -73,7 +73,7 @@ export async function loadVoucherCode(ctx) {
     5,
     0,
     false,
-      defaultPromotionStatus.ACTIVE,
+      [defaultPromotionStatus.ACTIVE,defaultPromotionStatus.WAITING],
   );
   if (promotionDefaultResponse && promotionDefaultResponse.status === "OK") {
     returnObject.props.listPromotionDefault = promotionDefaultResponse.data;
@@ -149,13 +149,13 @@ function render(props) {
 
   if (voucher.startTime) {
     startTime = formatUTCTime(voucher.startTime);
+    compareTimeFlag = compareTime(new Date(), new Date(startTime)) === 1;
   }
   if (voucher.endTime) {
     endTime = formatUTCTime(voucher.endTime);
   }
   if (voucher.publicTime) {
     publicTime = formatUTCTime(voucher.publicTime);
-    compareTimeFlag = compareTime(new Date(), new Date(publicTime)) === 1;
   }
 
   const {
@@ -211,7 +211,7 @@ function render(props) {
       parseInt(maxUsagePerCustomer),
       customerIds,
       promotionId.label,
-      status ? defaultPromotionStatus.ACTIVE : defaultPromotionStatus.EXPIRED
+      status ? defaultPromotionStatus.ACTIVE : defaultPromotionStatus.HIDE
     );
     if (createVoucherResponse && createVoucherResponse.status === "OK") {
       toast.success("Cập nhật mã khuyến mãi thành công");
