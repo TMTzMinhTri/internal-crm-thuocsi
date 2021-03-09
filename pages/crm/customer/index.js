@@ -287,8 +287,7 @@ function render(props) {
     return (
         <AppCRM select="/crm/customer" breadcrumb={breadcrumb}>
             <Head>
-                <title>Danh sách khách hàng</title><TableCell align="left">Tên công ty</TableCell>
-                                <TableCell align="left">Địa chỉ công ty</TableCell>
+                <title>Danh sách khách hàng</title>
             </Head>
             <ConfirmApproveDialog
                 open={openApproveAccountDialog}
