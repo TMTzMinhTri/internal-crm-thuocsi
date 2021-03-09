@@ -13,6 +13,7 @@ class DealClient extends APIClient {
         limit,
         q,
         dealType,
+        status,
         getTotal = false,
     }) {
         return this.callFromNextJS(
@@ -23,6 +24,7 @@ class DealClient extends APIClient {
                 limit,
                 q,
                 dealType,
+                status,
                 getTotal,
             }
         )
@@ -106,6 +108,20 @@ class DealClient extends APIClient {
                 maxQuantity,
                 price,
                 skus,
+            }
+        )
+    }
+
+    updateDealStatus({
+        code,
+        status,
+    }) {
+        return this.callFromClient(
+            "PUT",
+            `${PREFIX}/deal/status`,
+            {
+                code,
+                status,
             }
         )
     }
