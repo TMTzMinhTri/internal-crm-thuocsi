@@ -256,6 +256,7 @@ function render(props) {
             setValue={setValue}
             getValue={getValues}
             defaultStatus={props.voucher.status === "ACTIVE"}
+            voucher={voucher}
             promotion={props.promotion}
             listPromotionDefault={props.listPromotionDefault || []}
             control={control}
