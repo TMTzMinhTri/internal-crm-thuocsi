@@ -320,7 +320,6 @@ function render(props) {
                     <TableRow key={row.promotionId}>
                       <TableCell align="left">{row.promotionId}</TableCell>
                       <TableCell align="left">
-                        {" "}
                         {limitText(row.promotionName, 50)}
                       </TableCell>
                       <TableCell align="left">
