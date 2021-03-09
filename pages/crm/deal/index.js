@@ -39,7 +39,6 @@ import AppCRM from "pages/_layout";
 import { getDealClient } from "client/deal";
 import {
     DealStatus,
-    DealStatusLabel,
     DealStatusOptions,
     DealTypeLabel,
     DealTypeOptions,
@@ -253,24 +252,6 @@ const render = (props) => {
                                 </IconButton>
                             </Paper>
                         </Grid>
-                        {/* <Grid item xs={12} sm={2}>
-                            <TextField
-                                variant="outlined"
-                                size="small"
-                                type="date"
-                                placeholder="Hạn sử dụng"
-                                label="Hạn sử dụng"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    style: {
-                                        background: "white"
-                                    }
-                                }}
-                                fullWidth
-                            />
-                        </Grid> */}
                         <Grid item xs={12} sm={2}>
                             <Controller
                                 control={filterForm.control}
@@ -295,7 +276,7 @@ const render = (props) => {
                                         }}
                                         fullWidth
                                     >
-                                        <MenuItem value="">Tất cả trạng thái</MenuItem>
+                                        <MenuItem value="">Tất cả loại deal</MenuItem>
                                         {DealTypeOptions.map(({ value, label }) => (
                                             <MenuItem key={value} value={value}>{label}</MenuItem>
                                         ))}

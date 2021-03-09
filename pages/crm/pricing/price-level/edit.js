@@ -70,8 +70,6 @@ const render = ({ priceLevelData, message, status }) => {
     const createNewPriceLevel = async (formData) => {
         try {
             const priceLevelClient = getPriceLevelClient();
-            console.log(priceLevelData?.data?.[0]);
-            console.log(formData);
             const resp = await priceLevelClient.updatePriceLevel(formData);
             if (resp.status === 'OK') {
                 toast.success("Cập nhật cài đặt thành công");

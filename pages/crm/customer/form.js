@@ -694,7 +694,6 @@ export default function renderForm(props, toast) {
                                     disabled={loading}
                                     onClick={() => {
                                         reset({});
-                                        console.log(getValues());
                                     }}
                                 >
                                     {loading && <CircularProgress size={20} />}
