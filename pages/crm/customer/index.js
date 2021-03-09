@@ -30,7 +30,6 @@ import { formatEllipsisText, formatUrlSearch, statuses } from 'components/global
 import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
 import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
 import { CustomerFilter } from "containers/crm/customer/CustomerFilter";
-import { ConfirmActiveDialog } from "containers/crm/customer/ConfirmActiveDialog";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -376,8 +375,6 @@ function render(props) {
                                 <TableCell align="left">Mã khách hàng</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Email</TableCell>
-                                <TableCell align="left">Tên công ty</TableCell>
-                                <TableCell align="left">Địa chỉ công ty</TableCell>
                                 <TableCell align="left">Cấp độ</TableCell>
                                 <TableCell align="right">Điểm</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
