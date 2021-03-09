@@ -30,6 +30,7 @@ import { formatEllipsisText, formatUrlSearch, statuses } from 'components/global
 import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
 import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
 import { CustomerFilter } from "containers/crm/customer/CustomerFilter";
+import { ConfirmActiveDialog } from "containers/crm/customer/ConfirmActiveDialog";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -239,10 +240,10 @@ function render(props) {
                 <TableCell component="th" scope="row">
                     {row.code}
                 </TableCell>
-                <TableCell align="left">{row.name}</TableCell>
-                <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.email || '-'}</TableCell>
-                <TableCell align="left">{formatEllipsisText(row.companyName ?? "-", 50)}</TableCell>
-                <TableCell align="left">{formatEllipsisText(row.companyAddress ?? "-", 50)}</TableCell>
+                <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.name, 30)}</TableCell>
+                <TableCell className={styles.cellWrap} align="left">{row.email || '-'}</TableCell>
+                <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyName ?? "-", 50)}</TableCell>
+                <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyAddress ?? "-", 50)}</TableCell>
                 <TableCell align="left">{props.condUserType.find(e => e.value === row.level)?.label || '-'}</TableCell>
                 <TableCell align="right">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
@@ -359,14 +360,12 @@ function render(props) {
                 <TableContainer>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col />
-                            <col />
+                            <col width="10%" />
+                            <col width="10%" />
                             <col width="13%" />
                             <col width="10%" />
                             <col width="10%" />
                             <col width="10%" />
-                            <col />
-                            <col />
                             <col />
                             <col />
                         </colgroup>
@@ -375,6 +374,8 @@ function render(props) {
                                 <TableCell align="left">Mã khách hàng</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Email</TableCell>
+                                <TableCell align="left">Tên công ty</TableCell>
+                                <TableCell align="left">Địa chỉ công ty</TableCell>
                                 <TableCell align="left">Cấp độ</TableCell>
                                 <TableCell align="right">Điểm</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
