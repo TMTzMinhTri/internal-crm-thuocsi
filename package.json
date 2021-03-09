@@ -23,6 +23,7 @@
     "next-compose-plugins": "^2.2.0",
     "next-transpile-modules": "^4.1.0",
     "react": "16.13.1",
+    "react-cropper": "^2.1.7",
     "react-dom": "16.13.1",
     "react-hook-form": "^6.15.1",
     "react-select": "^3.2.0"

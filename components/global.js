@@ -167,6 +167,13 @@ export function formatDateTime(datetime) {
     return ''
 }
 
+export function formatDatetimeFormType(datetime) {
+    if (datetime) {
+        return moment(datetime).utcOffset('+0700').format("YYYY-MM-DDThh:mm")
+    }
+    return ''
+}
+
 export function filterObjectName(obj) {
     let tags = []
     if (typeof (obj) == 'undefined') {
