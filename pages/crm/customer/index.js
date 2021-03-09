@@ -27,10 +27,10 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCommonAPI } from 'client/common';
 import { getCustomerClient } from "client/customer";
 import { formatUrlSearch, statuses } from 'components/global';
+import { ConfirmActiveDialog } from "containers/crm/customer/ConfirmActiveDialog";
 import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
 import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
 import { CustomerFilter } from "containers/crm/customer/CustomerFilter";
-import { ConfirmActiveDialog } from "containers/crm/customer/ConfirmActiveDialog";
 import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
@@ -242,8 +242,6 @@ function render(props) {
                 </TableCell>
                 <TableCell align="left">{row.name}</TableCell>
                 <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.email || '-'}</TableCell>
-                <TableCell align="left">{row.companyName ?? "-"}</TableCell>
-                <TableCell align="left">{row.companyAddress ?? "-"}</TableCell>
                 <TableCell align="left">{props.condUserType.find(e => e.value === row.level)?.label || '-'}</TableCell>
                 <TableCell align="right">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
@@ -364,8 +362,6 @@ function render(props) {
                             <col minWidth="10%"/>
                             <col minWidth="15%"/>
                             <col minWidth="10%"/>
-                            <col minWidth="10%"/>
-                            <col minWidth="10%"/>
                             <col/>
                             <col/>
                             <col/>
@@ -376,8 +372,6 @@ function render(props) {
                                 <TableCell align="left">Mã khách hàng</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Email</TableCell>
-                                <TableCell align="left">Tên công ty</TableCell>
-                                <TableCell align="left">Địa chỉ công ty</TableCell>
                                 <TableCell align="left">Cấp độ</TableCell>
                                 <TableCell align="right">Điểm</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
