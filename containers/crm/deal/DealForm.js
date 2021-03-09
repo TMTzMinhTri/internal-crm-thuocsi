@@ -44,6 +44,7 @@ import ImageUploadField from "components/image-upload-field";
 import { getProductClient } from "client/product";
 import { getDealClient } from "client/deal";
 import moment from "moment";
+import { formatDatetimeFormType } from "components/global";
 
 
 const defaultValuesDealForm = {
@@ -61,30 +62,50 @@ const defaultValuesDealForm = {
     price: 1,
     skus: [],
 }
+const defaultValuesSkuForm = {
+    pricing: null,
+    quantity: 0,
+}
 export const DealForm = (props) => {
     const router = useRouter();
     const toast = useToast();
     const dealForm = useForm({
-        defaultValues: props.isUpdate ? props.deal : defaultValuesDealForm,
+        defaultValues: props.isUpdate ? {
+            ...props.deal,
+            startTime: formatDatetimeFormType(props.deal.startTime),
+            endTime: formatDatetimeFormType(props.deal.endTime),
+            readyTime: formatDatetimeFormType(props.deal.readyTime),
+        } : defaultValuesDealForm,
         mode: "onChange",
     });
     const { dealType, maxQuantity } = dealForm.watch();
+    console.log(dealForm.watch());
     useController({
         name: "imageUrls",
         control: dealForm.control,
         defaultValue: defaultValuesDealForm.imageUrls,
     });
     const [skuOptions, setSkuOptions] = useState(props.skuOptions ?? []);
-    const [skus, setSkus] = useState([]);
-    const [skuQuantitySum, setSkuQuantitySum] = useState(0);
+    const [skus, setSkus] = useState(props.deal?.skus ?? []);
+    const [skuQuantitySum, setSkuQuantitySum] = useState(
+        props.deal?.skus.reduce((acc, cur) => {
+            acc += cur.quantity;
+            return acc;
+        }, 0) ?? 0
+    );
     const skuForm = useForm({
-        defaultValues: {
-            pricing: null,
-            quantity: 0,
-        },
+        defaultValues: props.isUpdate ? {
+            pricing: {
+                value: props.deal.skus[0].sku,
+                label: props.deal.skus[0].sku,
+                sku: props.deal.skus[0].sku,
+                sellerCode: props.deal.skus[0].sellerCode,
+            },
+            quantity: props.deal.skus[0].quantity,
+        } : defaultValuesSkuForm,
         mode: "onChange",
     });
-    const [productImages, setProductImages] = useState([]);
+    const [productImages, setProductImages] = useState(props.deal?.imageUrls ?? []);
 
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
