@@ -59,7 +59,7 @@ export async function searchPromotion(promotionName) {
     5,
     0,
     false,
-    defaultPromotionStatus.ACTIVE
+    [defaultPromotionStatus.ACTIVE,defaultPromotionStatus.WAITING]
   );
 }
 
@@ -157,6 +157,7 @@ export default function VoucherCodeBody(props) {
 
   const handleSearchPromotion = async (value) => {
     let listPromationResponse = await searchPromotion(value);
+    console.log(listPromationResponse)
     if (listPromationResponse && listPromationResponse.status === "OK") {
       setListPromotionSearch(listPromationResponse.data);
       return listPromationResponse.data.map((item) => {
