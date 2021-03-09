@@ -397,15 +397,15 @@ function render(props) {
             <TableContainer component={Paper}>
                 <Table size="small" aria-label="a dense table">
                     <colgroup>
-                        <col width="5%" />
+                        <col />
                         <col width="10%" />
                         <col width="20%" />
                         <col width="20%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="10%" />
-                        <col width="5%" />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
+                        <col />
                     </colgroup>
                     <TableHead>
                         <TableRow>
@@ -415,8 +415,8 @@ function render(props) {
                             <TableCell align="left">Nhà bán hàng</TableCell>
                             <TableCell align="left">Loại</TableCell>
                             <TableCell align="right">Giá bán lẻ</TableCell>
-                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="left">Ngày cập nhật</TableCell>
+                            <TableCell align="center">Trạng thái</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -426,7 +426,7 @@ function render(props) {
                                 <TableRow key={i}>
                                     <TableCell align="left">{row.sku}</TableCell>
                                     <TableCell align="center">
-                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} objectFit="contain"/>
+                                        <Image src={getFirstImage(row.product.imageUrls)} title="image" alt="image" width={100} height={100} objectFit="contain" />
                                     </TableCell>
                                     <TableCell align="left">{row.product.name || '-'}</TableCell>
                                     <TableCell>{row.seller?.code ? (row.seller?.code + ' - ' + row.seller?.name) : row.sellerCode}</TableCell>
@@ -434,6 +434,7 @@ function render(props) {
                                         showType(row.retailPrice.type)
                                     }</TableCell>
                                     <TableCell align="right">{formatNumber(row.retailPrice.price)}</TableCell>
+                                    <TableCell align="left">{formatDateTime(row.lastUpdatedTime)}</TableCell>
                                     <TableCell align="center">
                                         {row.ticketCode && (
                                             <Button
@@ -449,12 +450,11 @@ function render(props) {
                                                     row.product,
                                                     row.sku,
                                                 )}
-                                            >
+                                                >
                                                 {ProductStatus.NEW}
                                             </Button>
                                         )}
                                     </TableCell>
-                                    <TableCell align="left">{formatDateTime(row.lastUpdatedTime)}</TableCell>
                                     <TableCell align="center">
                                         <Link href={`/crm/sku/edit?sellPriceCode=${row.sellPriceCode}`}>
                                             <Tooltip title="Cập nhật thông tin">
@@ -468,12 +468,12 @@ function render(props) {
                             ))}
                         </TableBody>
                     ) : (
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{message}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        )}
+                        <TableBody>
+                            <TableRow>
+                                <TableCell colSpan={3} align="left">{message}</TableCell>
+                            </TableRow>
+                        </TableBody>
+                    )}
 
                     <ModalCustom open={open} name="simple-dialog" title="Cập nhật trạng thái" onClose={handleClose} onExcute={handleSubmit(onUpdateStatus)}>
                         <Grid container spacing={2}>
