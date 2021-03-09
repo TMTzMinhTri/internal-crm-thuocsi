@@ -26,7 +26,7 @@ import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagin
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getCommonAPI } from 'client/common';
 import { getCustomerClient } from "client/customer";
-import { formatUrlSearch, statuses } from 'components/global';
+import { formatEllipsisText, formatUrlSearch, statuses } from 'components/global';
 import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
 import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
 import { CustomerFilter } from "containers/crm/customer/CustomerFilter";
@@ -242,8 +242,8 @@ function render(props) {
                 </TableCell>
                 <TableCell align="left">{row.name}</TableCell>
                 <TableCell align="left" style={{ overflowWrap: 'anywhere' }}>{row.email || '-'}</TableCell>
-                <TableCell align="left">{row.companyName ?? "-"}</TableCell>
-                <TableCell align="left">{row.companyAddress ?? "-"}</TableCell>
+                <TableCell align="left">{formatEllipsisText(row.companyName ?? "-", 50)}</TableCell>
+                <TableCell align="left">{formatEllipsisText(row.companyAddress ?? "-", 50)}</TableCell>
                 <TableCell align="left">{props.condUserType.find(e => e.value === row.level)?.label || '-'}</TableCell>
                 <TableCell align="right">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
@@ -360,16 +360,16 @@ function render(props) {
                 <TableContainer>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col minWidth="10%"/>
-                            <col minWidth="10%"/>
-                            <col minWidth="15%"/>
-                            <col minWidth="10%"/>
-                            <col minWidth="10%"/>
-                            <col minWidth="10%"/>
-                            <col/>
-                            <col/>
-                            <col/>
-                            <col/>
+                            <col />
+                            <col />
+                            <col width="13%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col />
+                            <col />
+                            <col />
+                            <col />
                         </colgroup>
                         <TableHead>
                             <TableRow>
@@ -392,12 +392,12 @@ function render(props) {
                                 ))}
                             </TableBody>
                         ) : (
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell colSpan={3} align="left">{message}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            )}
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="left">{message}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        )}
 
                         <MyTablePagination
                             labelUnit="khách hàng"
