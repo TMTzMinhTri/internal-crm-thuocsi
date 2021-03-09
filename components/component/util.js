@@ -484,7 +484,9 @@ export async function onSubmitPromotion(
     endTime: new Date(value.endTime).toISOString(),
     status: value.status
       ? defaultPromotionStatus.ACTIVE
-      : defaultPromotionStatus.EXPIRED,
+      : isCreate
+      ? defaultPromotionStatus.WAITING
+      : defaultPromotionStatus.HIDE,
     scopes,
     conditions,
     rewards,

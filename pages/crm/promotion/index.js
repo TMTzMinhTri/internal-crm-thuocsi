@@ -275,10 +275,7 @@ function render(props) {
                         searchPromotion();
                       }
                     }}
-                    placeholder="Tìm kiếm chương trình khuyến mãi"
-                    inputProps={{
-                      "aria-label": "Tìm kiếm chương trình khuyến mãi",
-                    }}
+                    placeholder="Nhập mã hoặc tên chương trình cần tìm"
                     inputRef={register}
                   />
                   <IconButton
