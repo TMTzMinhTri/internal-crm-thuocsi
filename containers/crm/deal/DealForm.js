@@ -79,7 +79,6 @@ export const DealForm = (props) => {
         mode: "onChange",
     });
     const { dealType, maxQuantity } = dealForm.watch();
-    console.log(dealForm.watch());
     useController({
         name: "imageUrls",
         control: dealForm.control,
