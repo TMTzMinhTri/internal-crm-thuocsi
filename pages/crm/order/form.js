@@ -74,7 +74,6 @@ export async function loadData(ctx) {
 
         // Get list delivery
         let deliveryClient = getDeliveryClient(ctx, data)
-        console.log(order);
         let deliveryResp = await deliveryClient.getListDeliveryByCode(order.deliveryPlatform);
         if (deliveryResp.status == 'OK') {
             data.props.order.deliveryPlatform = deliveryResp.data[0];
