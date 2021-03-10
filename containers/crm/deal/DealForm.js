@@ -78,7 +78,7 @@ export const DealForm = (props) => {
         } : defaultValuesDealForm,
         mode: "onChange",
     });
-    const { dealType, maxQuantity } = dealForm.watch();
+    const { dealType } = dealForm.watch();
     useController({
         name: "imageUrls",
         control: dealForm.control,
@@ -86,12 +86,6 @@ export const DealForm = (props) => {
     });
     const [skuOptions, setSkuOptions] = useState(props.skuOptions ?? []);
     const [skus, setSkus] = useState(props.deal?.skus ?? []);
-    const [skuQuantitySum, setSkuQuantitySum] = useState(
-        props.deal?.skus.reduce((acc, cur) => {
-            acc += cur.quantity;
-            return acc;
-        }, 0) ?? 0
-    );
     const skuForm = useForm({
         defaultValues: props.isUpdate ? {
             pricing: {
@@ -158,7 +152,6 @@ export const DealForm = (props) => {
         const { pricing: { sku, sellerCode }, quantity } = formData;
         if (dealType === DealType.COMBO) {
             setSkus([...skus, { sku, sellerCode, quantity }]);
-            setSkuQuantitySum(skuQuantitySum + quantity);
             skuForm.reset({
                 pricing: null,
                 quantity: 0,
@@ -171,7 +164,6 @@ export const DealForm = (props) => {
     const handleRemoveSku = async (sku) => {
         const arr = [...skus];
         const idx = arr.findIndex(item => item.sku === sku);
-        setSkuQuantitySum(skuQuantitySum - arr[idx].quantity);
         arr.splice(idx, 1);
         setSkus(arr);
     }
@@ -275,7 +267,7 @@ export const DealForm = (props) => {
                                 }}
                                 required
                                 error={!!dealForm.errors.startTime}
-                                helperText={dealForm.errors.startTime?.message}
+                                helperText={dealForm.errors.startTime?.message ?? "Tới thời gian này sẽ áp dụng cho deal"}
                                 inputRef={dealForm.register(DealValidation.startTime)}
                             />
                         </Grid>
@@ -379,7 +371,7 @@ export const DealForm = (props) => {
                                 }}
                                 required
                                 error={!!dealForm.errors.readyTime}
-                                helperText={dealForm.errors.readyTime?.message}
+                                helperText={dealForm.errors.readyTime?.message ?? "Tới thời gian này sẽ cho hiển thị trên app/web thuocsi"}
                                 inputRef={dealForm.register(DealValidation.readyTime)}
                             />
                         </Grid>
@@ -398,7 +390,7 @@ export const DealForm = (props) => {
                                     min: 0
                                 }}
                                 error={!!dealForm.errors.maxQuantity}
-                                helperText={dealForm.errors.maxQuantity?.message}
+                                helperText={dealForm.errors.maxQuantity?.message ?? "Nhập = 0 là không giới hạn"}
                                 inputRef={dealForm.register({
                                     ...DealValidation.maxQuantity,
                                     valueAsNumber: true,
@@ -469,7 +461,7 @@ export const DealForm = (props) => {
                                                 error={!!skuForm.errors.quantity}
                                                 helperText={skuForm.errors.quantity?.message}
                                                 inputRef={skuForm.register({
-                                                    ...DealValidation.skus.quantity(skuQuantitySum, maxQuantity),
+                                                    ...DealValidation.skus.quantity,
                                                     valueAsNumber: true,
                                                 })}
                                             />
