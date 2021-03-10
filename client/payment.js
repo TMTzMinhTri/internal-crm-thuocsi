@@ -22,6 +22,15 @@ class PaymentClient extends APIClient {
             })
     }
 
+    getPaymentMethodByCode(paymentMethodCode) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/payment-method`,
+            {
+                paymentMethodCode
+            })
+    }
+
 }
 
 export function getPaymentClient(ctx, data = { props: {} }) {

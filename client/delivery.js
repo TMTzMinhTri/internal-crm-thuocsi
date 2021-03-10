@@ -22,6 +22,15 @@ class DeliveryClient extends APIClient {
             })
     }
 
+    getListDeliveryByCode(deliveryPlatformCode) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/delivery-platform`,
+            {
+                deliveryPlatformCode
+            })
+    }
+
 }
 
 export function getDeliveryClient(ctx, data = { props: {} }) {
