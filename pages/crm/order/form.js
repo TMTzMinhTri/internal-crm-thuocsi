@@ -322,58 +322,233 @@ export default function renderForm(props, toast) {
 
                 </MyCardHeader>
                 <MyCardContent>
-                    <Card
-                        variant="outlined"
-                        style={{
-                            borderRadius: "1rem",
-                            backgroundColor: "#f6f6f6",
-                            border: "none",
-                        }}
-                    >
-                        <CardHeader title="Thông tin đơn hàng" />
-                        <CardContent>
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td align="right"><b>Tên khách hàng:</b></td>
-                                        <td align="left">{props.order.customerName}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>ID khách hàng:</b></td>
-                                        <td align="left">{`${props.order.customerID} `}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>Số điện thoại:</b></td>
-                                        <td align="left">{props.order.customerPhone}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>Địa chỉ:</b></td>
-                                        <td align="left">{props.order.customerShippingAddress}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>Tỉnh/Thành phố:</b></td>
-                                        <td align="left">{props.order.customerProvinceCode}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>Quận/Huyện:</b></td>
-                                        <td align="left">{props.order.customerDistrictCode}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>Phường/Xã:</b></td>
-                                        <td align="left">{props.order.customerWardCode}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>Hình thức vận chuyển:</b></td>
-                                        <td align="left">{props.order.deliveryPlatform.name}</td>
-                                    </tr>
-                                    <tr>
-                                        <td align="right"><b>Phương thức thanh toán:</b></td>
-                                        <td align="left">{props.order.paymentMethod.name}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </CardContent>
-                    </Card>
+                    <Grid spacing={3} container>
+                        <Grid item xs={12} sm={4} md={4}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Tên khách hàng
+                                            </Typography>
+                            <TextField
+                                id="customerName"
+                                name="customerName"
+                                size="small"
+                                placeholder=""
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                helperText={errors.name?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                style={{ width: '100%' }}
+                                error={!!errors.customerName}
+                                required
+                                inputRef={
+                                    register()
+                                }
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={4} md={4}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                ID khách hàng
+                                            </Typography>
+                            <TextField
+                                id="customerID"
+                                name="customerID"
+                                size="small"
+                                placeholder=""
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                helperText={errors.customerID?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                style={{ width: '100%' }}
+                                error={!!errors.customerID}
+                                required
+                                inputRef={
+                                    register()
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid spacing={3} container>
+                        <Grid item xs={12} sm={3} md={3}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Số điện thoại
+                                            </Typography>
+                            <TextField
+                                id="customerPhone"
+                                name="customerPhone"
+                                size="small"
+                                placeholder=""
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                type="number"
+                                helperText={errors.customerPhone?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                style={{ width: '100%' }}
+                                error={!!errors.customerPhone}
+                                required
+                                inputRef={
+                                    register()
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid spacing={3} container>
+                        <Grid item xs={12} sm={6} md={6}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Địa chỉ
+                                            </Typography>
+                            <TextField
+                                id="customerShippingAddress"
+                                name="customerShippingAddress"
+                                size="small"
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                placeholder=""
+                                helperText={errors.customerShippingAddress?.message}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                style={{ width: '100%' }}
+                                error={!!errors.customerShippingAddress}
+                                required
+                                inputRef={
+                                    register()
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid spacing={3} container>
+                        <Grid item xs={12} sm={3} md={3}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Tỉnh/Thành phố
+                                            </Typography>
+                            <TextField
+                                id="customerProvinceCode"
+                                name="customerProvinceCode"
+                                size="small"
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                inputRef={
+                                    register()
+                                }
+                                style={{ width: '100%' }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={3} md={3}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Quận/Huyện
+                                            </Typography>
+                            <TextField
+                                id="customerDistrictCode"
+                                name="customerDistrictCode"
+                                size="small"
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                placeholder=""
+                                style={{ width: '100%' }}
+                                inputRef={
+                                    register()
+                                }
+                                required
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={3} md={3}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Phường/Xã
+                                            </Typography>
+                            <TextField
+                                id="customerWardCode"
+                                name="customerWardCode"
+                                size="small"
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                style={{ width: '100%' }}
+                                inputRef={
+                                    register()
+                                }
+                            />
+                        </Grid>
+                    </Grid>
+                    <Grid spacing={3} container>
+                        <Grid item xs={12} sm={3} md={3}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Hình thức vận chuyển
+                                            </Typography>
+                            <TextField
+                                id="deliveryPlatform.name"
+                                name="deliveryPlatform.name"
+                                size="small"
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                inputRef={
+                                    register()
+                                }
+                                style={{ width: '100%' }}
+                            />
+                        </Grid>
+                        <Grid item xs={12} sm={3} md={3}>
+                            <Typography variant="h6" component="h6"
+                                style={{ marginBottom: '10px', fontSize: 16, fontWeight: 'bold' }}>
+                                Phương thức thanh toán
+                                            </Typography>
+                            <TextField
+                                id="paymentMethod.name"
+                                name="paymentMethod.name"
+                                size="small"
+                                inputProps={{
+                                    readOnly: true,
+                                    disabled: true,
+                                }}
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                inputRef={
+                                    register()
+                                }
+                                style={{ width: '100%' }}
+                            />
+                        </Grid>
+                    </Grid>
                 </MyCardContent>
                 <MyCardContent>
                     <ConfirmDialog
