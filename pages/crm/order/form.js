@@ -42,6 +42,7 @@ import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/
 import Head from "next/head";
 import { getPaymentClient } from "client/payment";
 import { getDeliveryClient } from "client/delivery";
+import { OrderPaymentMethod } from "view-models/order";
 
 export async function loadData(ctx) {
     let data = {
@@ -610,34 +611,32 @@ export default function renderForm(props, toast) {
                                                 ))}
                                             </TableBody>
                                         ) : (
-                                                <TableBody>
-                                                    <TableRow>
-                                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                                    </TableRow>
-                                                </TableBody>
-                                            )}
+                                            <TableBody>
+                                                <TableRow>
+                                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                                </TableRow>
+                                            </TableBody>
+                                        )}
                                         <TableFooter>
                                             <TableRow>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
+                                                <TableCell colSpan={4} />
                                                 <TableCell align="right">Phí vận chuyển</TableCell>
                                                 <TableCell align="right">{props.order?.shippingFee}</TableCell>
                                             </TableRow>
                                             <TableRow>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
+                                                <TableCell colSpan={4} />
                                                 <TableCell align="right">Giảm giá</TableCell>
                                                 <TableCell align="right">{props.order?.totalDiscount}</TableCell>
                                             </TableRow>
+                                            {props.order?.paymentMethod === OrderPaymentMethod.PAYMENT_METHOD_BANK &&(
+                                                <TableRow>
+                                                    <TableCell colSpan={4} />
+                                                <TableCell align="right">Giảm giá phương thức thanh toán</TableCell>
+                                                <TableCell align="right">{props.order?.paymentMethodFee}</TableCell>
+                                                </TableRow>
+                                            )}
                                             <TableRow>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
-                                                <TableCell align="left"></TableCell>
+                                                <TableCell colSpan={4} />
                                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
                                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order?.totalPrice)}</TableCell>
                                             </TableRow>
