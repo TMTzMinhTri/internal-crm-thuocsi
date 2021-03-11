@@ -198,7 +198,7 @@ function render(props) {
     } else {
       let promotionResponse = await updatePromotion(
         promotionId,
-        defaultPromotionStatus.WAITING
+        defaultPromotionStatus.HIDE
       );
       if (!promotionResponse || promotionResponse.status !== "OK") {
         setOpenModal({ ...openModal, open: false });
