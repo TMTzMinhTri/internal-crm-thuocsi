@@ -107,7 +107,7 @@ const PromotionForm = (props, type) => {
         scopes: null,
         conditions: null,
         rewards: null,
-        status: true,
+        status: "ACTIVE",
       };
 
   const {
@@ -127,9 +127,19 @@ const PromotionForm = (props, type) => {
       promotionOrganizer: promotionOrganizer,
       promotionType: promotionType,
       status: status == "ACTIVE" ? true : false,
-      customerLevel: [{ name: "Chọn tất cả" }],
-      area: [{ name: "Chọn tất cả" }],
       minOrderValue: conditions ? conditions[0].minOrderValue : "",
+      registeredBefore:
+        scopes && scopes[0].registeredBefore
+          ? formatUTCTime(scopes[0].registeredBefore)
+          : new Date(),
+      registeredAfter:
+        scopes && scopes[0].registeredAfter
+          ? formatUTCTime(scopes[0].registeredAfter)
+          : new Date(),
+      percentageDiscount: rewards && rewards[0]?.percentageDiscount,
+      absoluteDiscount: rewards && rewards[0]?.absoluteDiscount,
+      maxDiscount: rewards && rewards[0]?.maxDiscount,
+      pointValue: rewards && rewards[0]?.pointValue,
     },
   });
 
@@ -158,11 +168,11 @@ const PromotionForm = (props, type) => {
       selectField: defaultScope.customerLevel,
       registeredBefore: new Date(),
       registeredAfter: new Date(),
-      list: [],
+      list: [{ name: "Chọn tất cả" }],
     },
     {
       selectField: defaultScope.area,
-      list: [],
+      list: [{ name: "Chọn tất cả" }],
     },
   ]);
 
@@ -249,19 +259,6 @@ const PromotionForm = (props, type) => {
     setIsLoadingPage(true);
     //---------- Scope ---------
 
-    setValue(
-      "registeredBefore",
-      scopes[0].registeredBefore
-        ? formatUTCTime(scopes[0].registeredBefore)
-        : new Date()
-    );
-    setValue(
-      "registeredAfter",
-      scopes[0].registeredAfter
-        ? formatUTCTime(scopes[0].registeredAfter)
-        : new Date()
-    );
-
     // ** CustomerLevel
     if (scopes[0].quantityType == "ALL") {
       setValue("customerLevel", [{ name: "Chọn tất cả" }]);
@@ -272,7 +269,8 @@ const PromotionForm = (props, type) => {
         scopes[0].customerLevelCodes.map((code) =>
           arr.unshift(res.data.find((v) => v.code == code))
         );
-        setValue("customerLevel", arr);
+        console.log(arr, "arrrrr");
+        scopeObject[0].list = arr;
       }
     }
 
@@ -286,15 +284,15 @@ const PromotionForm = (props, type) => {
         scopes[1].areaCodes.map((code) =>
           arr.unshift(res.data.find((v) => v.code == code))
         );
-        setValue("area", arr);
+        scopeObject[1].list = arr;
       }
     }
+
+    setScopeObject([...scopeObject]);
 
     //---------- Condition ---------
 
     conditions.map(async (o) => {
-      let code;
-
       if (o.type != defaultCondition.noRule) {
         let res;
 
@@ -340,7 +338,6 @@ const PromotionForm = (props, type) => {
             case defaultCondition.producer:
               res = await getListProducerByCodesClient([ob.producerCode]);
               if (res?.status == "OK") {
-                console.log();
                 setValue("producer" + i, res.data[0]);
               }
               break;
@@ -361,11 +358,6 @@ const PromotionForm = (props, type) => {
           setValue("gift" + index, res.data[0]);
         }
       });
-    } else {
-      setValue("percentageDiscount", rewards[0]?.percentageDiscount);
-      setValue("absoluteDiscount", rewards[0]?.absoluteDiscount);
-      setValue("maxDiscount", rewards[0]?.maxDiscount);
-      setValue("pointValue", rewards[0]?.pointValue);
     }
     setIsLoadingPage(false);
     return;

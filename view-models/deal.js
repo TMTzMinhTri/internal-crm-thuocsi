@@ -64,8 +64,8 @@ export const DealValidation = {
     maxQuantity: {
         required: "Số lượng được phép bán không được để trống.",
         min: {
-            value: 1,
-            message: "Số lượng được phép bán không được nhỏ hơn 1.",
+            value: 0,
+            message: "Số lượng được phép bán không được nhỏ hơn 0.",
         }
     },
     price: {
@@ -79,17 +79,12 @@ export const DealValidation = {
         select: {
             required: "Vui lòng chọn sku.",
         },
-        quantity: (sum, total) => ({
+        quantity: {
             required: "Số lượng không được để trống.",
             min: {
                 value: 1,
                 message: "Số lượng không được nhỏ hơn 1.",
             },
-            validate: (value) => {
-                if (sum + value > total) {
-                    return "Số lượng vượt quá tối đa."
-                }
-            }
-        }),
+        },
     }
 }

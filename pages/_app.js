@@ -15,48 +15,6 @@ const menu = [{
             icon: faUsers
         },
         {
-            key: "PRICING",
-            name: "Sản phẩm",
-            link: "/crm/sku",
-            icon: faDollarSign,
-            subMenu: [
-                {
-                    key: "PRICING_ACTIVE",
-                    name: "Sản phẩm đang hoạt động",
-                    link: "/crm/sku",
-                },
-                {
-                    key: "PRICING_REQUEST",
-                    name: "Sản phẩm chờ duyệt",
-                    link: "/crm/sku/request",
-                },
-            ]
-        },
-        {
-            key: "FEE",
-            name: "Cài đặt phí",
-            link: "/crm/fee",
-            icon: faDollarSign,
-            subMenu: [
-                {   
-                    key: "FEE",
-                    name: "Công thức phí",
-                    link: "/crm/fee",
-                },
-                {
-                    key: "CONFIGPRICING",
-                    name: "Hệ số phí",
-                    link: "/crm/pricing",
-                },
-            ]
-        },
-        {
-            key:"SELLER",
-            name:"Nhà bán hàng",
-            link:"/crm/seller",
-            icon:faUsers,
-        },
-        {
             key:"ORDER",
             name:"Đơn hàng",
             link:"/crm/order",
@@ -78,18 +36,6 @@ const menu = [{
                     name: "Mã khuyến mãi",
                     link: "/crm/voucher"
                 }
-            ]
-        },
-        {
-            key:"DELIVERY",
-            name:"Giao hàng",
-            link:"/crm/delivery/time",
-            subMenu: [
-                {
-                    key:"DELIVERY",
-                    name:"Thời gian giao hàng",
-                    link:"/crm/delivery/time",
-                },
             ]
         },
     ]

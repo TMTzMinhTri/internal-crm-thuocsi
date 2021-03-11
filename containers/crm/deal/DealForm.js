@@ -45,6 +45,7 @@ import { getProductClient } from "client/product";
 import { getDealClient } from "client/deal";
 import moment from "moment";
 import { formatDatetimeFormType } from "components/global";
+import { getSellerClient } from "client/seller";
 
 
 const defaultValuesDealForm = {
@@ -78,7 +79,7 @@ export const DealForm = (props) => {
         } : defaultValuesDealForm,
         mode: "onChange",
     });
-    const { dealType, maxQuantity } = dealForm.watch();
+    const { dealType } = dealForm.watch();
     useController({
         name: "imageUrls",
         control: dealForm.control,
@@ -86,12 +87,6 @@ export const DealForm = (props) => {
     });
     const [skuOptions, setSkuOptions] = useState(props.skuOptions ?? []);
     const [skus, setSkus] = useState(props.deal?.skus ?? []);
-    const [skuQuantitySum, setSkuQuantitySum] = useState(
-        props.deal?.skus.reduce((acc, cur) => {
-            acc += cur.quantity;
-            return acc;
-        }, 0) ?? 0
-    );
     const skuForm = useForm({
         defaultValues: props.isUpdate ? {
             pricing: {
@@ -108,6 +103,7 @@ export const DealForm = (props) => {
 
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
+        const sellerClient = getSellerClient();
         const skusResp = await pricingClient.getListPricingByFilterFromClient({ q: text, limit: 100 });
         if (skusResp.status !== "OK") {
             if (skusResp.status === "NOT_FOUND") {
@@ -115,9 +111,31 @@ export const DealForm = (props) => {
             } else {
                 toast.error(skusResp.message ?? unknownErrorText);
             }
-            return;
+            return [];
         }
-        const skuOptions = skusResp.data?.map(({ sellerCode, sku }) => ({ value: sku, label: sku, sellerCode, sku })) ?? [];
+        const productMap = {};
+        const productCodes = [];
+        const sellerMap = {};
+        const sellerCodes = [];
+        skusResp.data.forEach(({ productCode, sellerCode }) => {
+            if (!productMap[productCode]) {
+                productCodes.push(productCode);
+                productMap[productCode] = true;
+            }
+            if (!sellerMap[sellerCode]) {
+                sellerCodes.push(sellerCode);
+                sellerMap[sellerCode] = true;
+            }
+        });
+        const [productResp, sellerResp] = await Promise.all([
+            pricingClient.getListProductByProductCodeFromClient(productCodes),
+            sellerClient.getSellerBySellerCodesClient(sellerCodes),
+        ])
+        const skuOptions = skusResp.data?.map(({ sellerCode, sku, productCode }) => {
+            const product = productResp.data?.find(prd => prd.code === productCode);
+            const seller = sellerResp.data?.find(seller => seller.code === sellerCode);
+            return ({ value: sku, label: `${product?.name} - ${seller?.name ?? sellerCode}`, sellerCode, sku })
+        }) ?? [];
         setSkuOptions(skuOptions);
         return skuOptions;
     }
@@ -131,7 +149,7 @@ export const DealForm = (props) => {
         const dealClient = getDealClient();
         let resp;
         if (props.isUpdate) {
-            resp = await dealClient.updateDeal({ ...data, skus });
+            resp = await dealClient.updateDeal({ code: props.deal?.code, ...data, skus });
         } else {
             resp = await dealClient.createDeal({ ...data, skus });
         }
@@ -158,7 +176,6 @@ export const DealForm = (props) => {
         const { pricing: { sku, sellerCode }, quantity } = formData;
         if (dealType === DealType.COMBO) {
             setSkus([...skus, { sku, sellerCode, quantity }]);
-            setSkuQuantitySum(skuQuantitySum + quantity);
             skuForm.reset({
                 pricing: null,
                 quantity: 0,
@@ -171,7 +188,6 @@ export const DealForm = (props) => {
     const handleRemoveSku = async (sku) => {
         const arr = [...skus];
         const idx = arr.findIndex(item => item.sku === sku);
-        setSkuQuantitySum(skuQuantitySum - arr[idx].quantity);
         arr.splice(idx, 1);
         setSkus(arr);
     }
@@ -198,13 +214,15 @@ export const DealForm = (props) => {
     const handleSubmitDealForm = async (formData) => {
         try {
             const deal = await createOrUpdateDeal(formData);
-            toast.success("Tạo deal thành công.")
-            router.push({
-                pathname: "/crm/deal/edit",
-                query: {
-                    dealCode: deal.code,
-                }
-            })
+            toast.success(props.isUpdate ? "Cập nhật deal thành công." : "Tạo deal thành công.")
+            if (!props.isUpdate) {
+                router.push({
+                    pathname: "/crm/deal/edit",
+                    query: {
+                        dealCode: deal.code,
+                    }
+                })
+            }
         } catch (e) {
             toast.error(e.message);
         }
@@ -275,7 +293,7 @@ export const DealForm = (props) => {
                                 }}
                                 required
                                 error={!!dealForm.errors.startTime}
-                                helperText={dealForm.errors.startTime?.message}
+                                helperText={dealForm.errors.startTime?.message ?? "Tới thời gian này sẽ áp dụng cho deal"}
                                 inputRef={dealForm.register(DealValidation.startTime)}
                             />
                         </Grid>
@@ -379,7 +397,7 @@ export const DealForm = (props) => {
                                 }}
                                 required
                                 error={!!dealForm.errors.readyTime}
-                                helperText={dealForm.errors.readyTime?.message}
+                                helperText={dealForm.errors.readyTime?.message ?? "Tới thời gian này sẽ cho hiển thị trên app/web thuocsi"}
                                 inputRef={dealForm.register(DealValidation.readyTime)}
                             />
                         </Grid>
@@ -398,7 +416,7 @@ export const DealForm = (props) => {
                                     min: 0
                                 }}
                                 error={!!dealForm.errors.maxQuantity}
-                                helperText={dealForm.errors.maxQuantity?.message}
+                                helperText={dealForm.errors.maxQuantity?.message ?? "Nhập = 0 là không giới hạn"}
                                 inputRef={dealForm.register({
                                     ...DealValidation.maxQuantity,
                                     valueAsNumber: true,
@@ -416,9 +434,9 @@ export const DealForm = (props) => {
                         {dealType === DealType.COMBO && (
                             <Table size="small">
                                 <colgroup>
-                                    <col width="45%" />
-                                    <col width="40%" />
-                                    <col width="15%" />
+                                    <col width="70%" />
+                                    <col width="20%" />
+                                    <col width="10%" />
                                 </colgroup>
                                 <TableHead>
                                     <TableCell>sku</TableCell>
@@ -469,7 +487,7 @@ export const DealForm = (props) => {
                                                 error={!!skuForm.errors.quantity}
                                                 helperText={skuForm.errors.quantity?.message}
                                                 inputRef={skuForm.register({
-                                                    ...DealValidation.skus.quantity(skuQuantitySum, maxQuantity),
+                                                    ...DealValidation.skus.quantity,
                                                     valueAsNumber: true,
                                                 })}
                                             />
@@ -486,7 +504,7 @@ export const DealForm = (props) => {
                             </Table>
                         )}
                         {dealType === DealType.DEAL && (
-                            <Grid item xs={12} md={5}>
+                            <Grid item xs={12} md={7}>
                                 <MuiSingleAuto
                                     name="pricing"
                                     options={skuOptions}

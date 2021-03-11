@@ -4,14 +4,38 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 import AppCRM from "pages/_layout";
 import { DealForm } from "containers/crm/deal/DealForm";
 import { getPricingClient } from "client/pricing";
+import { getSellerClient } from "client/seller";
 
 async function loadDealData(ctx) {
     const props = {
         skuOptions: []
     };
     const pricingClient = getPricingClient(ctx, {});
-    const skuResp = await pricingClient.getListPricingByFilter({});
-    props.skuOptions = skuResp.data?.map(({ sellerCode, sku }) => ({ value: sku, label: sku, sellerCode, sku })) ?? [];
+    const sellerClient = getSellerClient(ctx, {});
+    const skusResp = await pricingClient.getListPricingByFilter({ offset: 0, limit: 100 });
+    const productMap = {};
+    const productCodes = [];
+    const sellerMap = {};
+    const sellerCodes = [];
+    skusResp.data?.forEach(({ productCode, sellerCode }) => {
+        if (!productMap[productCode]) {
+            productCodes.push(productCode);
+            productMap[productCode] = true;
+        }
+        if (!sellerMap[sellerCode]) {
+            sellerCodes.push(sellerCode);
+            sellerMap[sellerCode] = true;
+        }
+    });
+    const [productResp, sellerResp] = await Promise.all([
+        pricingClient.getListProductByProductCode(productCodes),
+        sellerClient.getSellerBySellerCodes(sellerCodes),
+    ])
+    props.skuOptions = skusResp.data?.map(({ sellerCode, sku, productCode }) => {
+        const product = productResp.data?.find(prd => prd.code === productCode);
+        const seller = sellerResp.data?.find(seller => seller.code === sellerCode);
+        return ({ value: sku, label: `${product?.name} - ${seller?.name ?? sellerCode}`, sellerCode, sku })
+    }) ?? [];
     return {
         props,
     }

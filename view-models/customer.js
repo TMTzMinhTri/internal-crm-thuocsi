@@ -64,6 +64,36 @@ export const customerValidation = {
             message: "Người đại diện không hợp lệ (không được dư khoảng trắng)."
         }
     },
+    companyName: {
+        validate: (value) => {
+            const validators = [
+                {
+                    value: /^(.*[ ]{2})|^ /,
+                    message: "Tên công ty không hợp lệ (dư ký tự khoảng trắng).",
+                }
+            ]
+            for (let i = 0; i < validators.length; i++) {
+                if (validators[i].value?.test(value)) {
+                    return validators[i].message;
+                }
+            }
+        }
+    },
+    companyAddress: {
+        validate: (value) => {
+            const validators = [
+                {
+                    value: /^(.*[ ]{2})|^ /,
+                    message: "Địa chỉ công ty không hợp lệ (dư ký tự khoảng trắng).",
+                }
+            ]
+            for (let i = 0; i < validators.length; i++) {
+                if (validators[i].value?.test(value)) {
+                    return validators[i].message;
+                }
+            }
+        }
+    },
     mst: {
         required: "Mã số thuế không thể để trống",
         maxLength: {
