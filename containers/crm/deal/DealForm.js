@@ -137,7 +137,6 @@ export const DealForm = (props) => {
             return ({ value: sku, label: `${product?.name} - ${seller?.name ?? sellerCode}`, sellerCode, sku })
         }) ?? [];
         setSkuOptions(skuOptions);
-        console.log(skuOptions);
         return skuOptions;
     }
 
@@ -150,7 +149,6 @@ export const DealForm = (props) => {
         const dealClient = getDealClient();
         let resp;
         if (props.isUpdate) {
-            console.log(data);
             resp = await dealClient.updateDeal({ code: props.deal?.code, ...data, skus });
         } else {
             resp = await dealClient.createDeal({ ...data, skus });
