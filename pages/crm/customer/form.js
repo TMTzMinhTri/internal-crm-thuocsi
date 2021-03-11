@@ -533,7 +533,7 @@ export default function renderForm(props, toast) {
                                                 shrink: true,
                                             }}
                                             autoComplete={false}
-                                            inputRef={register}
+                                            inputRef={register(customerValidation.companyName)}
                                         />
                                     </Grid>
                                     <Grid item xs={12} md={6}>
@@ -551,7 +551,7 @@ export default function renderForm(props, toast) {
                                                 shrink: true,
                                             }}
                                             autoComplete={false}
-                                            inputRef={register}
+                                            inputRef={register(customerValidation.companyAddress)}
                                         />
                                     </Grid>
                                 </Grid>

@@ -77,6 +77,7 @@ class DealClient extends APIClient {
     }
 
     updateDeal({
+        code,
         startTime,
         endTime,
         readyTime,
@@ -95,6 +96,7 @@ class DealClient extends APIClient {
             "PUT",
             `${PREFIX}/deal`,
             {
+                code,
                 startTime,
                 endTime,
                 readyTime,

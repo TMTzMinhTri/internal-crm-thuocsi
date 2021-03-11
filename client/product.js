@@ -1,7 +1,9 @@
 import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
+import { constURL } from "./constrant";
 import { queryParamGetProductGift } from "../components/component/constant";
+
 const PREFIX = `/marketplace/product/v1`;
-// const PREFIX = ``
+const { PREFIX_PRODUCT } = constURL;
 
 class ProductClient extends APIClient {
   constructor(ctx, data) {
@@ -148,6 +150,16 @@ class ProductClient extends APIClient {
       body: JSON.stringify(formData),
     });
     return await res.json();
+  }
+
+  async SearchProductCache({ offset, limit, q }) {
+    return this.callFromNextJS(
+      "GET",
+      `${PREFIX_PRODUCT}/products/list`,
+      {
+        offset, limit, q
+      }
+    )
   }
 }
 
