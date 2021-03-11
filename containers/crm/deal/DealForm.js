@@ -125,7 +125,8 @@ export const DealForm = (props) => {
         const dealClient = getDealClient();
         let resp;
         if (props.isUpdate) {
-            resp = await dealClient.updateDeal({ ...data, skus });
+            console.log(data);
+            resp = await dealClient.updateDeal({ code: props.deal?.code, ...data, skus });
         } else {
             resp = await dealClient.createDeal({ ...data, skus });
         }
@@ -190,13 +191,15 @@ export const DealForm = (props) => {
     const handleSubmitDealForm = async (formData) => {
         try {
             const deal = await createOrUpdateDeal(formData);
-            toast.success("Tạo deal thành công.")
-            router.push({
-                pathname: "/crm/deal/edit",
-                query: {
-                    dealCode: deal.code,
-                }
-            })
+            toast.success(props.isUpdate ? "Cập nhật deal thành công." : "Tạo deal thành công.")
+            if (!props.isUpdate) {
+                router.push({
+                    pathname: "/crm/deal/edit",
+                    query: {
+                        dealCode: deal.code,
+                    }
+                })
+            }
         } catch (e) {
             toast.error(e.message);
         }
