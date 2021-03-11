@@ -45,6 +45,7 @@ import { getProductClient } from "client/product";
 import { getDealClient } from "client/deal";
 import moment from "moment";
 import { formatDatetimeFormType } from "components/global";
+import { getSellerClient } from "client/seller";
 
 
 const defaultValuesDealForm = {
@@ -102,6 +103,7 @@ export const DealForm = (props) => {
 
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
+        const sellerClient = getSellerClient();
         const skusResp = await pricingClient.getListPricingByFilterFromClient({ q: text, limit: 100 });
         if (skusResp.status !== "OK") {
             if (skusResp.status === "NOT_FOUND") {
@@ -109,10 +111,33 @@ export const DealForm = (props) => {
             } else {
                 toast.error(skusResp.message ?? unknownErrorText);
             }
-            return;
+            return [];
         }
-        const skuOptions = skusResp.data?.map(({ sellerCode, sku }) => ({ value: sku, label: sku, sellerCode, sku })) ?? [];
+        const productMap = {};
+        const productCodes = [];
+        const sellerMap = {};
+        const sellerCodes = [];
+        skusResp.data.forEach(({ productCode, sellerCode }) => {
+            if (!productMap[productCode]) {
+                productCodes.push(productCode);
+                productMap[productCode] = true;
+            }
+            if (!sellerMap[sellerCode]) {
+                sellerCodes.push(sellerCode);
+                sellerMap[sellerCode] = true;
+            }
+        });
+        const [productResp, sellerResp] = await Promise.all([
+            pricingClient.getListProductByProductCodeFromClient(productCodes),
+            sellerClient.getSellerBySellerCodesClient(sellerCodes),
+        ])
+        const skuOptions = skusResp.data?.map(({ sellerCode, sku, productCode }) => {
+            const product = productResp.data?.find(prd => prd.code === productCode);
+            const seller = sellerResp.data?.find(seller => seller.code === sellerCode);
+            return ({ value: sku, label: `${product?.name} - ${seller?.name ?? sellerCode}`, sellerCode, sku })
+        }) ?? [];
         setSkuOptions(skuOptions);
+        console.log(skuOptions);
         return skuOptions;
     }
 
@@ -411,9 +436,9 @@ export const DealForm = (props) => {
                         {dealType === DealType.COMBO && (
                             <Table size="small">
                                 <colgroup>
-                                    <col width="45%" />
-                                    <col width="40%" />
-                                    <col width="15%" />
+                                    <col width="70%" />
+                                    <col width="20%" />
+                                    <col width="10%" />
                                 </colgroup>
                                 <TableHead>
                                     <TableCell>sku</TableCell>
@@ -481,7 +506,7 @@ export const DealForm = (props) => {
                             </Table>
                         )}
                         {dealType === DealType.DEAL && (
-                            <Grid item xs={12} md={5}>
+                            <Grid item xs={12} md={7}>
                                 <MuiSingleAuto
                                     name="pricing"
                                     options={skuOptions}

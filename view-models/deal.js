@@ -64,8 +64,8 @@ export const DealValidation = {
     maxQuantity: {
         required: "Số lượng được phép bán không được để trống.",
         min: {
-            value: 1,
-            message: "Số lượng được phép bán không được nhỏ hơn 1.",
+            value: 0,
+            message: "Số lượng được phép bán không được nhỏ hơn 0.",
         }
     },
     price: {
