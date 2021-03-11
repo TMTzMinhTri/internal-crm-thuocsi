@@ -44,22 +44,14 @@ const InfomationFields = (props) => {
 
   const { errors, register, getValues, control, setValue } = useForm;
 
-  let value = getValues();
-
   const { promotionOrganizer, promotionType } = textField;
 
-  const [active, setActive] = useState(value.status ? value.status : false);
+  const [active, setActive] = useState(status == "ACTIVE" ? true : false);
 
   const switchActive = async () => {
     setActive(!active);
     setValue("status", !active);
   };
-
-  useEffect(() => {
-    setActive(value.status ? value.status : false);
-  }, [value.status]);
-
-  console.log(value.status, "status");
 
   return (
     <Paper
