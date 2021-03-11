@@ -65,7 +65,7 @@ class OrderClient extends APIClient {
             "GET",
             `${URI}/order`,
             {
-                order_no: orderNo
+   orderNo
             })
     }
 
@@ -74,7 +74,7 @@ class OrderClient extends APIClient {
             "GET",
             `${URI}/order-item`,
             {
-                order_no: orderNo
+ orderNo
             })
     }
 
