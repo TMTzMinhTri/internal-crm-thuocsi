@@ -18,6 +18,8 @@ const Scope = (props) => {
 
   const { register, errors, getValues } = useForm;
 
+  console.log(getValues("customerLevel"), "customerLevel");
+
   return (
     <Paper
       elevation={3}
@@ -29,7 +31,7 @@ const Scope = (props) => {
         </Grid>
         <Grid item container spacing={4}>
           {scopeObject.map(
-            ({ selectField }, index) =>
+            ({ selectField, list }, index) =>
               selectField != "" && (
                 <Grid
                   item
@@ -47,7 +49,7 @@ const Scope = (props) => {
                         placeholder=""
                         multiple
                         required
-                        defaultValue={[]}
+                        defaultValue={list}
                         options={[{ name: "" }]}
                         type={selectField}
                         useForm={useForm}
