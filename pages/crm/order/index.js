@@ -122,7 +122,7 @@ const RenderRow = (row, i) => (
             </Button>
         </TableCell>
         <TableCell align="center">
-            <Link href={`/crm/order/edit?order_no=${row.data.orderNo}`}>
+            <Link href={`/crm/order/edit?orderNo=${row.data.orderNo}`}>
                 <Tooltip title="Cập nhật thông tin">
                     <IconButton>
                         <EditIcon fontSize="small" />

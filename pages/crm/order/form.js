@@ -48,7 +48,7 @@ export async function loadData(ctx) {
     }
 
     let query = ctx.query
-    let order_no = typeof (query.order_no) === "undefined" ? '' : query.order_no
+    let order_no = typeof (query.orderNo) === "undefined" ? '' : query.orderNo
     data.props.isUpdate = false
     if (order_no !== '') {
         data.props.isUpdate = true
@@ -608,12 +608,12 @@ export default function renderForm(props, toast) {
                                     ))}
                                 </TableBody>
                             ) : (
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            )}
+                                    <TableBody>
+                                        <TableRow>
+                                            <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                        </TableRow>
+                                    </TableBody>
+                                )}
                             <TableFooter>
                                 <TableRow>
                                     <TableCell colSpan={4} />
