@@ -43,7 +43,7 @@ import {
     DealTypeLabel,
     DealTypeOptions,
 } from "view-models/deal";
-import ModalCustom from "components/modal/dialogs";
+import ModalCustom from "@thuocsi/nextjs-components/simple-dialog/dialogs";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 
 async function loadDealData(ctx) {
@@ -136,6 +136,8 @@ const render = (props) => {
     });
     const { searchText, status, dealType } = filterForm.watch();
     const [selectedDeal, setSelectedDeal] = useState(null);
+    const [openStatusChangeDialog, setOpenStatusChangeDialog] = useState(false);
+    const [openFlashSaleChangeDialog, setOpenFlashSaleChangeDialog] = useState(false);
 
     const search = useCallback(() => {
         router.push({
@@ -149,15 +151,10 @@ const render = (props) => {
         });
     }, [searchText, status, dealType]);
 
-    const updateStatus = useCallback(async () => {
-        let { code, status } = selectedDeal;
-        if (status === DealStatus.ACTIVE) {
-            status = DealStatus.INACTIVE;
-        } else {
-            status = DealStatus.ACTIVE;
-        }
+    const updateDeal = useCallback(async () => {
+        let { code, status, isFlashSale } = selectedDeal;
         const dealClient = getDealClient();
-        const resp = await dealClient.updateDealStatus({ code, status });
+        const resp = await dealClient.updateDeal({ code, status, isFlashSale });
         if (resp.status !== "OK") {
             throw new Error(resp.message);
         }
@@ -199,7 +196,7 @@ const render = (props) => {
 
     const handleUpdateDealStatus = async () => {
         try {
-            await updateStatus();
+            await updateDeal();
             setSelectedDeal(null);
             changePage(page, limit);
         } catch (e) {
@@ -368,15 +365,29 @@ const render = (props) => {
                                         </TableCell>
                                         <TableCell align="left">{formatDateTime(row.readyTime)}</TableCell>
                                         <TableCell align="center">
-                                            <Button variant="outlined" style={FlashSaleStyles[row.isFlashSale]} disabled>
-                                                {FlashSaleLabel[row.isFlashSale ?? ""]}
-                                            </Button>
+                                            <Switch
+                                                color="primary"
+                                                checked={row.isFlashSale}
+                                                onClick={() => {
+                                                    const { code, status, isFlashSale } = row;
+                                                    setSelectedDeal({ code, status, isFlashSale: !isFlashSale })
+                                                    setOpenFlashSaleChangeDialog(true);
+                                                }}
+                                            />
                                         </TableCell>
                                         <TableCell align="center">
                                             <Switch
                                                 color="primary"
                                                 checked={row.status === DealStatus.ACTIVE}
-                                                onClick={() => setSelectedDeal(row)}
+                                                onClick={() => {
+                                                    const { code, status, isFlashSale } = row;
+                                                    setSelectedDeal({
+                                                        code,
+                                                        status: status === DealStatus.ACTIVE ? DealStatus.INACTIVE : DealStatus.ACTIVE,
+                                                        isFlashSale,
+                                                    })
+                                                    setOpenStatusChangeDialog(true);
+                                                }}
                                             />
                                         </TableCell>
                                         <TableCell align="center">
@@ -413,14 +424,24 @@ const render = (props) => {
                     </Table>
                 </TableContainer>
                 <ModalCustom
-                    open={!!selectedDeal}
+                    open={openStatusChangeDialog}
                     title="Thông báo"
-                    onClose={() => setSelectedDeal(null)}
+                    onClose={setOpenStatusChangeDialog}
                     onExcute={handleUpdateDealStatus}
                 >
                     Bạn có muốn&nbsp;
                     <strong>{selectedDeal?.status === DealStatus.ACTIVE ? "Bật" : "Tắt"}</strong>
                     &nbsp;trạng thái của <strong>{selectedDeal?.name}</strong> này không?
+                </ModalCustom>
+                <ModalCustom
+                    open={openFlashSaleChangeDialog}
+                    title="Thông báo"
+                    onClose={setOpenFlashSaleChangeDialog}
+                    onExcute={handleUpdateDealStatus}
+                >
+                    Bạn có muốn&nbsp;
+                    <strong>{selectedDeal?.isFlashSale ? "Bật" : "Tắt"}</strong>
+                    &nbsp;flash sale của <strong>{selectedDeal?.name}</strong> này không?
                 </ModalCustom>
             </MyCard>
         </AppCRM>
