@@ -108,7 +108,6 @@ export async function updateVoucher(
   maxUsage,
   maxUsagePerCustomer,
   appliedCustomers,
-  promotionName,
   status
 ) {
   let data = {
@@ -117,7 +116,6 @@ export async function updateVoucher(
     type,
     maxUsage,
     maxUsagePerCustomer,
-    promotionName,
     status,
   };
   if (appliedCustomers && appliedCustomers.length > 0) {
@@ -210,7 +208,6 @@ function render(props) {
       parseInt(maxUsage),
       parseInt(maxUsagePerCustomer),
       customerIds,
-      promotionId.label,
       status ? defaultPromotionStatus.ACTIVE : defaultPromotionStatus.HIDE
     );
     if (createVoucherResponse && createVoucherResponse.status === "OK") {

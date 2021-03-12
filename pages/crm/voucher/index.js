@@ -91,15 +91,18 @@ export async function loadPromoData(ctx) {
   let search = query.search || "";
 
   let _voucherClient = getVoucherClient(ctx, {});
-  let getVoucherResponse = await _voucherClient.getVoucherCode(
-    search,
-    limit,
-    offset,
-    true
-  );
+  let getVoucherResponse = await _voucherClient.getVoucherCode(search, limit, offset, true);
   if (getVoucherResponse && getVoucherResponse.status === "OK") {
     returnObject.props.voucher = getVoucherResponse.data;
     returnObject.props.voucherCount = getVoucherResponse.total;
+    let listPromotionIds = []
+    getVoucherResponse.data.forEach(v => {
+      listPromotionIds.push(v.promotionId)
+    })
+    let listPromotion = await getPromoClient(ctx,{}).getPromotion("",query.limit,0,true,[],listPromotionIds)
+    if (listPromotion.status === "OK") {
+      returnObject.props.promotion = listPromotion.data
+    }
   }
   // Pass data to the page via props
   return returnObject;
@@ -188,6 +191,7 @@ function render(props) {
       });
     }
   }
+
 
   const handleActiveVoucher = async () => {
     let { checked, voucherId } = openModal;
@@ -312,7 +316,7 @@ function render(props) {
                         <div>{limitText(row.code, 20)}</div>
                       </TableCell>
                       <TableCell align="left">
-                        {limitText(row.promotionName, 50)}
+                        {limitText(props.promotion.filter(promo => promo.promotionId === row.promotionId)[0].promotionName || "", 50)}
                       </TableCell>
                       <TableCell align="left">{row.type}</TableCell>
                       <TableCell align="center">
