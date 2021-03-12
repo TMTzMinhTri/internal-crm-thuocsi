@@ -14,6 +14,14 @@ class ProductClient extends APIClient {
     return this.callFromNextJS("GET", `${PREFIX}/product/list`, query);
   }
 
+  getProductByCodeClient(productCode) {
+    return this.callFromClient(
+      "GET",
+      `${PREFIX}/product`,
+      { productCode }
+    )
+  }
+
   getListProductByIdsOrCodes(ids, codes) {
     return this.callFromNextJS("POST", `${PREFIX}/product/list`, {
       productIds: ids,
