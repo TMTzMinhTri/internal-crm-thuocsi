@@ -65,8 +65,19 @@ class OrderClient extends APIClient {
             "GET",
             `${URI}/order`,
             {
-   orderNo
-            })
+                orderNo
+            }
+        )
+    }
+
+    getOrderByOrderNoFromClient(orderNo) {
+        return this.callFromClient(
+            "GET",
+            `${URI}/order`,
+            {
+                orderNo
+            }
+        )
     }
 
     getOrderItemByOrderNo(orderNo) {
@@ -74,8 +85,19 @@ class OrderClient extends APIClient {
             "GET",
             `${URI}/order-item`,
             {
- orderNo
-            })
+                orderNo
+            }
+        )
+    }
+
+    getOrderItemByOrderNoFromClient(orderNo) {
+        return this.callFromClient(
+            "GET",
+            `${URI}/order-item`,
+            {
+                orderNo
+            }
+        )
     }
 
     updateOrder(data) {
