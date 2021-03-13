@@ -567,7 +567,7 @@ export const OrderForm = props => {
                         <colgroup>
                             <col />
                             <col />
-                            <col width="30%" />
+                            <col width="10%" />
                             <col width="30%" />
                             <col width="15%" />
                             <col />
