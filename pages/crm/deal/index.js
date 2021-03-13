@@ -94,27 +94,6 @@ const breadcrumb = [
     },
 ];
 
-const FlashSaleLabel = {
-    [true]: "Đã bật",
-    [false]: "Đã tắt",
-    "": "Không xác định"
-};
-
-const FlashSaleStyles = {
-    [true]: {
-        borderColor: "green",
-        color: "green",
-    },
-    [false]: {
-        borderColor: "blue",
-        color: "blue",
-    },
-    "": {
-        borderColor: "grey",
-        color: "grey",
-    }
-}
-
 const render = (props) => {
     const router = useRouter();
     const toast = useToast();
@@ -320,6 +299,7 @@ const render = (props) => {
                 <TableContainer>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
+                            <col />
                             <col width="15%" />
                             <col />
                             <col />
@@ -333,6 +313,7 @@ const render = (props) => {
                         </colgroup>
                         <TableHead>
                             <TableRow>
+                                <TableCell align="left">Mã deal</TableCell>
                                 <TableCell align="left">Tên deal</TableCell>
                                 <TableCell align="left">Loại deal</TableCell>
                                 <TableCell align="right">Đã bán</TableCell>
@@ -353,6 +334,7 @@ const render = (props) => {
                             <TableBody>
                                 {deals.map((row, i) => (
                                     <TableRow key={i} row={row} i={i}>
+                                        <TableCell>{row.code}</TableCell>
                                         <TableCell>{row.name}</TableCell>
                                         <TableCell>{DealTypeLabel[row.dealType]}</TableCell>
                                         <TableCell align="right">{row.quantity}</TableCell>
@@ -369,8 +351,8 @@ const render = (props) => {
                                                 color="primary"
                                                 checked={row.isFlashSale}
                                                 onClick={() => {
-                                                    const { code, status, isFlashSale } = row;
-                                                    setSelectedDeal({ code, status, isFlashSale: !isFlashSale })
+                                                    const { isFlashSale, ...others } = row;
+                                                    setSelectedDeal({ ...others, isFlashSale: !isFlashSale })
                                                     setOpenFlashSaleChangeDialog(true);
                                                 }}
                                             />
@@ -380,11 +362,10 @@ const render = (props) => {
                                                 color="primary"
                                                 checked={row.status === DealStatus.ACTIVE}
                                                 onClick={() => {
-                                                    const { code, status, isFlashSale } = row;
+                                                    const { status, ...others } = row;
                                                     setSelectedDeal({
-                                                        code,
+                                                        ...others,
                                                         status: status === DealStatus.ACTIVE ? DealStatus.INACTIVE : DealStatus.ACTIVE,
-                                                        isFlashSale,
                                                     })
                                                     setOpenStatusChangeDialog(true);
                                                 }}
@@ -431,7 +412,7 @@ const render = (props) => {
                 >
                     Bạn có muốn&nbsp;
                     <strong>{selectedDeal?.status === DealStatus.ACTIVE ? "Bật" : "Tắt"}</strong>
-                    &nbsp;trạng thái của <strong>{selectedDeal?.name}</strong> này không?
+                    &nbsp;trạng thái của <strong>{selectedDeal?.name}</strong> không?
                 </ModalCustom>
                 <ModalCustom
                     open={openFlashSaleChangeDialog}
@@ -441,7 +422,7 @@ const render = (props) => {
                 >
                     Bạn có muốn&nbsp;
                     <strong>{selectedDeal?.isFlashSale ? "Bật" : "Tắt"}</strong>
-                    &nbsp;flash sale của <strong>{selectedDeal?.name}</strong> này không?
+                    &nbsp;flash sale của <strong>{selectedDeal?.name}</strong> không?
                 </ModalCustom>
             </MyCard>
         </AppCRM>
