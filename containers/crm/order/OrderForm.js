@@ -629,18 +629,18 @@ export const OrderForm = props => {
                             <TableRow>
                                 <TableCell colSpan={4} />
                                 <TableCell align="right">Phí vận chuyển</TableCell>
-                                <TableCell align="right">{props.order?.shippingFee}</TableCell>
+                                <TableCell align="right">{formatNumber(props.order?.shippingFee)}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell colSpan={4} />
                                 <TableCell align="right">Giảm giá</TableCell>
-                                <TableCell align="right">{props.order?.totalDiscount}</TableCell>
+                                <TableCell align="right">{formatNumber(props.order?.totalDiscount)}</TableCell>
                             </TableRow>
                             {props.order?.paymentMethod.code === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
                                 <TableRow>
                                     <TableCell colSpan={4} />
                                     <TableCell align="right">{props.order?.paymentMethod.subTitle}</TableCell>
-                                    <TableCell align="right">{props.order?.paymentMethodFee}</TableCell>
+                                    <TableCell align="right">{formatNumber(props.order?.paymentMethodFee)}</TableCell>
                                 </TableRow>
                             )}
                             <TableRow>
