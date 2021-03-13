@@ -69,7 +69,7 @@ async function loadOrderFormDataClient(orderNo) {
         districtsResp,
         wardsResp,
     ] = await Promise.all([
-        masterDataClient.getProvinceFromClient(0, 100),
+        masterDataClient.getProvinceFromClient(0, 100, ""),
         masterDataClient.getDistrictByProvinceCode(props.order.customerProvinceCode),
         masterDataClient.getWardByDistrictCode(props.order.customerDistrictCode),
     ])
@@ -423,7 +423,7 @@ export const OrderForm = props => {
                             <Controller
                                 control={orderForm.control}
                                 name="customerDistrictCode"
-                                // rules={OrderValidation.district}
+                                rules={OrderValidation.district}
                                 as={
                                     <TextField
                                         variant="outlined"
@@ -434,8 +434,8 @@ export const OrderForm = props => {
                                         SelectProps={{
                                             displayEmpty: true,
                                         }}
-                                        error={!!orderForm.errors.customerDistrictCode}
-                                        helperText={orderForm.errors.customerDistrictCode?.message}
+                                        error={customerProvinceCode && !!orderForm.errors.customerDistrictCode}
+                                        helperText={customerProvinceCode ? orderForm.errors.customerDistrictCode?.message : ""}
                                         fullWidth
                                         required
                                         select
@@ -466,8 +466,8 @@ export const OrderForm = props => {
                                         SelectProps={{
                                             displayEmpty: true,
                                         }}
-                                        error={!!orderForm.errors.customerWardCode}
-                                        helperText={orderForm.errors.customerWardCode?.message}
+                                        error={customerDistrictCode && !!orderForm.errors.customerWardCode}
+                                        helperText={customerDistrictCode ? orderForm.errors.customerWardCode?.message : ""}
                                         fullWidth
                                         required
                                         select
@@ -610,6 +610,7 @@ export const OrderForm = props => {
                                                         </IconButton>
                                                     )
                                                 }}
+                                                inputProps={{ min: 0, style: { textAlign: 'right' } }}
                                                 onChange={e => handleOrderItemQuantityChange(row.orderItemNo, +e.target.value)}
                                             />
                                         </TableCell>
