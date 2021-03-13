@@ -10,6 +10,7 @@ import { getPaymentClient } from "client/payment";
 import { getSellerClient } from "client/seller";
 import { getProductClient } from "client/product";
 import { OrderForm } from 'containers/crm/order/OrderForm';
+import { getPricingClient } from 'client/pricing';
 
 async function loadOrderFormData(ctx) {
     const props = {
@@ -20,6 +21,11 @@ async function loadOrderFormData(ctx) {
         productCodes: [],
         sellerMap: {},
         sellerCodes: [],
+        provinces: [],
+        districts: [],
+        wards: [],
+        paymentMethods: [],
+        deliveryPlatforms: [],
     };
 
     const orderNo = ctx.query.orderNo;
@@ -40,33 +46,34 @@ async function loadOrderFormData(ctx) {
     const order = orderResp.data[0];
     props.order = order;
 
-    //Get Master Data Client
+    //Get Master Data
     const masterDataClient = getMasterDataClient(ctx, {});
-    const wardResp = await masterDataClient.getWardByWardCode(
-        order.customerWardCode
-    );
-    if (wardResp.status === "OK") {
-        props.order.customerProvinceCode = wardResp.data[0].provinceName;
-        props.order.customerDistrictCode = wardResp.data[0].districtName;
-        props.order.customerWardCode = wardResp.data[0].name;
-    }
+    // Pre-load provinces, distrists, wards for selector.
+    const [
+        provincesResp,
+        districtsResp,
+        wardsResp,
+    ] = await Promise.all([
+        masterDataClient.getProvince(0, 100, "", false),
+        masterDataClient.getDistrictByProvinceCodeFromNextJs(props.order.customerProvinceCode),
+        masterDataClient.getWardByDistrictCodeFromNextJS(props.order.customerDistrictCode),
+    ])
+    props.provinces = provincesResp.data ?? [];
+    props.districts = districtsResp.data ?? [];
+    props.wards = wardsResp.data ?? [];
 
     // Get list delivery
     const deliveryClient = getDeliveryClient(ctx, {});
-    const deliveryResp = await deliveryClient.getListDeliveryByCode(
-        order.deliveryPlatform
-    );
+    const deliveryResp = await deliveryClient.getListDelivery(0, 100, "");
     if (deliveryResp.status == "OK") {
-        props.order.deliveryPlatform = deliveryResp.data[0];
+        props.deliveryPlatforms = deliveryResp.data;
     }
 
     // Get list payment method
     const paymentClient = getPaymentClient(ctx, {});
-    const paymentResp = await paymentClient.getPaymentMethodByCode(
-        order.paymentMethod
-    );
+    const paymentResp = await paymentClient.getListPaymentMethod();
     if (paymentResp.status == "OK") {
-        props.order.paymentMethod = paymentResp.data[0];
+        props.paymentMethods = paymentResp.data;
     }
 
     //get list order-item
@@ -77,27 +84,38 @@ async function loadOrderFormData(ctx) {
         return { props };
     }
 
+    const pricingClient = getPricingClient(ctx, {});
     const productClient = getProductClient(ctx, {});
     const sellerClient = getSellerClient(ctx, {});
+    const skuMap = {};
+    const skuCodes = [];
     const productMap = {};
     const productCodes = [];
     const sellerMap = {};
     const sellerCodes = [];
-    orderItemResp.data.forEach(({ productCode, sellerCode }) => {
-        if (productCode && !productMap[productCode]) {
-            productMap[productCode] = true;
-            productCodes.push(productCode);
+    orderItemResp.data.forEach(({ productSku, sellerCode }) => {
+        if (productSku && !skuMap[productSku]) {
+            skuMap[productSku] = true;
+            skuCodes.push(productSku);
         }
         if (sellerCode && !sellerMap[sellerCode]) {
             sellerMap[sellerCode] = true;
             sellerCodes.push(sellerCode);
         }
     });
-    const [productResp, sellerResp] = await Promise.all([
-        productClient.getListProductByIdsOrCodes([], productCodes),
+    const [skuResp, sellerResp] = await Promise.all([
+        pricingClient.getPricingByCodesOrSKUs({ skus: skuCodes }),
         sellerClient.getSellerBySellerCodes(sellerCodes)
     ])
-
+    skuResp.data?.forEach((sku) => {
+        const { productCode } = sku;
+        skuMap[sku.sku] = sku;
+        if (productCode && !productMap[productCode]) {
+            productMap[productCode] = true;
+            productCodes.push(productCode);
+        }
+    })
+    const productResp = await productClient.getListProductByIdsOrCodes([], productCodes);
     productResp.data?.forEach(product => {
         productMap[product.code] = product;
     });
@@ -107,7 +125,7 @@ async function loadOrderFormData(ctx) {
 
     props.orderItems = orderItemResp.data.map(orderItem => ({
         ...orderItem,
-        product: productMap[orderItem.productCode] ?? null,
+        product: productMap[skuMap[orderItem.productSku].productCode] ?? null,
         seller: sellerMap[orderItem.sellerCode] ?? null,
     }))
     props.productMap = productMap;
