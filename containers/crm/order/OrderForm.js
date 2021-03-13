@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
     MyCard,
     MyCardActions,
@@ -25,7 +25,7 @@ import { Controller, useForm } from "react-hook-form";
 import Link from "next/link";
 import { Save as SaveIcon } from "@material-ui/icons";
 
-import { OrderPaymentMethod, OrderStatus } from "view-models/order";
+import { OrderPaymentMethod, OrderStatus, OrderValidation } from "view-models/order";
 import { formatNumber, orderStatus } from "components/global";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { actionErrorText } from "components/commonErrors";
@@ -36,6 +36,7 @@ import { getOrderClient } from "client/order";
 import { getPaymentClient } from "client/payment";
 import { getSellerClient } from "client/seller";
 import { getProductClient } from "client/product";
+import { getPricingClient } from "client/pricing";
 
 async function loadOrderFormDataClient(orderNo) {
     const props = {
@@ -51,7 +52,7 @@ async function loadOrderFormDataClient(orderNo) {
 
 
     const orderClient = getOrderClient();
-    const orderResp = await orderClient.getOrderByOrderNo(orderNo);
+    const orderResp = await orderClient.getOrderByOrderNoFromClient(orderNo);
     if (orderResp.status !== "OK") {
         props.message = orderResp.message;
         props.status = orderResp.status;
@@ -60,20 +61,25 @@ async function loadOrderFormDataClient(orderNo) {
     const order = orderResp.data[0];
     props.order = order;
 
-    //Get Master Data Client
+    //Get Master Data
     const masterDataClient = getMasterDataClient();
-    const wardResp = await masterDataClient.getWardByWardCode(
-        order.customerWardCode
-    );
-    if (wardResp.status === "OK") {
-        props.order.customerProvinceCode = wardResp.data[0].provinceName;
-        props.order.customerDistrictCode = wardResp.data[0].districtName;
-        props.order.customerWardCode = wardResp.data[0].name;
-    }
+    // Pre-load provinces, distrists, wards for selector.
+    const [
+        provincesResp,
+        districtsResp,
+        wardsResp,
+    ] = await Promise.all([
+        masterDataClient.getProvinceFromClient(0, 100),
+        masterDataClient.getDistrictByProvinceCode(props.order.customerProvinceCode),
+        masterDataClient.getWardByDistrictCode(props.order.customerDistrictCode),
+    ])
+    props.provinces = provincesResp.data ?? [];
+    props.districts = districtsResp.data ?? [];
+    props.wards = wardsResp.data ?? [];
 
     // Get list delivery
     const deliveryClient = getDeliveryClient();
-    const deliveryResp = await deliveryClient.getListDeliveryByCode(
+    const deliveryResp = await deliveryClient.getListDeliveryByCodeFromClient(
         order.deliveryPlatform
     );
     if (deliveryResp.status == "OK") {
@@ -82,7 +88,7 @@ async function loadOrderFormDataClient(orderNo) {
 
     // Get list payment method
     const paymentClient = getPaymentClient();
-    const paymentResp = await paymentClient.getPaymentMethodByCode(
+    const paymentResp = await paymentClient.getPaymentMethodByCodeFromClient(
         order.paymentMethod
     );
     if (paymentResp.status == "OK") {
@@ -90,40 +96,61 @@ async function loadOrderFormDataClient(orderNo) {
     }
 
     //get list order-item
-    const orderItemResp = await orderClient.getOrderItemByOrderNo(orderNo);
+    const orderItemResp = await orderClient.getOrderItemByOrderNoFromClient(orderNo);
     if (orderItemResp.status !== "OK") {
         props.message = orderItemResp.message;
         props.status = orderItemResp.status;
         return props;
     }
 
+    const pricingClient = getPricingClient();
     const productClient = getProductClient();
     const sellerClient = getSellerClient();
+    const skuMap = {};
+    const skuCodes = [];
     const productMap = {};
     const productCodes = [];
     const sellerMap = {};
     const sellerCodes = [];
-    orderItemResp.data.forEach(({ productCode, sellerCode }) => {
-        if (!productMap[productCode]) {
-            productMap[productCode] = true;
-            productCodes.push(productCode);
+    orderItemResp.data.forEach(({ productSku, sellerCode }) => {
+        if (productSku && !skuMap[productSku]) {
+            skuMap[productSku] = true;
+            skuCodes.push(productSku);
         }
-        if (!sellerMap[sellerCode]) {
+        if (sellerCode && !sellerMap[sellerCode]) {
             sellerMap[sellerCode] = true;
             sellerCodes.push(sellerCode);
         }
     });
-    const [productResp, sellerResp] = await Promise.all([
-        productClient.getListProductByIdsOrCodes([], productCodes),
-        sellerClient.getSellerBySellerCodes(sellerCodes)
+    const [skuResp, sellerResp] = await Promise.all([
+        pricingClient.getPricingByCodesOrSKUsFromClient({ skus: skuCodes }),
+        sellerClient.getSellerBySellerCodesClient(sellerCodes)
     ])
+    skuResp.data?.forEach((sku) => {
+        const { productCode } = sku;
+        skuMap[sku.sku] = sku;
+        if (productCode && !productMap[productCode]) {
+            productMap[productCode] = true;
+            productCodes.push(productCode);
+        }
+    })
+    const productResp = await productClient.getListProductByIdsOrCodesFromClient([], productCodes);
+    productResp.data?.forEach(product => {
+        productMap[product.code] = product;
+    });
+    sellerResp.data?.forEach(seller => {
+        sellerMap[seller.code] = seller;
+    });
 
     props.orderItems = orderItemResp.data.map(orderItem => ({
         ...orderItem,
-        product: productResp.data?.find(product => product.code === orderItem.productCode) ?? null,
-        seller: sellerResp.data?.find(seller => seller.code === orderItem.sellerCode) ?? null,
+        product: productMap[skuMap[orderItem.productSku].productCode] ?? null,
+        seller: sellerMap[orderItem.sellerCode] ?? null,
     }))
-
+    props.productMap = productMap;
+    props.productCodes = productCodes;
+    props.sellerMap = sellerMap;
+    props.sellerCodes = sellerCodes;
     return props;
 }
 
@@ -131,11 +158,13 @@ export const OrderForm = props => {
     const toast = useToast();
     const styles = useFormStyles();
 
+    const [districts, setDistricts] = useState(props.districts);
+    const [wards, setWards] = useState(props.wards);
     const orderForm = useForm({
         defaultValues: props.order,
         mode: "onChange"
     });
-    const { status } = orderForm.watch();
+    const { status, customerProvinceCode, customerDistrictCode } = orderForm.watch();
     // Prevent item object reference
     const [orderItems, setOrderItems] = useState(props.orderItems.map(values => ({ ...values })) ?? []);
     // For logging old value of Order item quantity to compare
@@ -145,10 +174,25 @@ export const OrderForm = props => {
     }, {}));
     const [loading, setLoading] = useState(false);
 
+    const loadDistrictByProvinceCode = useCallback(async () => {
+        const masterDataClient = getMasterDataClient();
+        const resp = await masterDataClient.getDistrictByProvinceCode(customerProvinceCode);
+        if (resp.status !== "OK") {
+            throw new Error(resp.message);
+        }
+        return resp.data;
+    }, [customerProvinceCode]);
 
-    const reloadOrder = useCallback(async ({
-        includeOderItems = false
-    }) => {
+    const loadWardsByDistrictCode = useCallback(async () => {
+        const masterDataClient = getMasterDataClient();
+        const resp = await masterDataClient.getWardByDistrictCode(customerDistrictCode);
+        if (resp.status !== "OK") {
+            throw new Error(resp.message);
+        }
+        return resp.data;
+    }, [customerDistrictCode]);
+
+    const reloadOrder = useCallback(async (includeOderItems = false) => {
         const { message, order, orderItems } = await loadOrderFormDataClient(props.order.orderNo)
         if (message) {
             throw new Error(message)
@@ -201,6 +245,41 @@ export const OrderForm = props => {
         }
     }
 
+    useEffect(() => {
+        (async () => {
+            try {
+                if (
+                    !customerProvinceCode ||
+                    customerProvinceCode === props.order.customerProvinceCode
+                )
+                    return;
+                const data = await loadDistrictByProvinceCode();
+                setDistricts(data);
+                orderForm.setValue("customerDistrictCode", null);
+                orderForm.setValue("customerWardCode", null);
+            } catch (e) {
+                toast.error(e.message);
+            }
+        })();
+    }, [customerProvinceCode]);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                if (
+                    !customerDistrictCode ||
+                    customerDistrictCode === props.order.customerDistrictCode
+                )
+                    return;
+                const data = await loadWardsByDistrictCode();
+                setWards(data);
+                orderForm.setValue("customerWardCode", null);
+            } catch (e) {
+                toast.error(e.message);
+            }
+        })();
+    }, [customerDistrictCode]);
+
     const handleOrderItemQuantityChange = (orderItemNo, value) => {
         const arr = [...orderItems];
         const index = arr.findIndex(orderItem => orderItem.orderItemNo === orderItemNo);
@@ -221,13 +300,11 @@ export const OrderForm = props => {
         }
     }
 
-    const handleSubmitOrder = async ({ status }) => {
+    const handleSubmitOrder = async (formData) => {
         try {
+            const data = {...formData};
             setLoading(true);
-            const data = {
-                orderNo: props.order.orderNo,
-                status,
-            };
+            data.orderNo = props.order.orderNo;
             await updateOrder(data);
             toast.success("Cập nhật đơn hàng thành công");
             reloadOrder();
@@ -263,9 +340,6 @@ export const OrderForm = props => {
                                 variant="outlined"
                                 size="small"
                                 placeholder=""
-                                InputProps={{
-                                    readOnly: true,
-                                }}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -285,9 +359,6 @@ export const OrderForm = props => {
                                 size="small"
                                 placeholder=""
                                 type="number"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -306,9 +377,6 @@ export const OrderForm = props => {
                                 variant="outlined"
                                 size="small"
                                 placeholder=""
-                                InputProps={{
-                                    readOnly: true,
-                                }}
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
@@ -321,102 +389,147 @@ export const OrderForm = props => {
                         </Grid>
                         <Grid item xs={12} md={4}>
                             <Typography className={`${styles.fieldLabel} ${styles.required}`} >Tỉnh/Thành phố</Typography>
-                            <TextField
-                                id="customerProvinceCode"
+                            <Controller
+                                control={orderForm.control}
                                 name="customerProvinceCode"
-                                variant="outlined"
-                                size="small"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.customerProvinceCode}
-                                helperText={orderForm.errors.customerProvinceCode?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
+                                rules={OrderValidation.province}
+                                as={
+                                    <TextField
+                                        variant="outlined"
+                                        size="small"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        SelectProps={{
+                                            displayEmpty: true,
+                                        }}
+                                        error={!!orderForm.errors.customerProvinceCode}
+                                        helperText={orderForm.errors.customerProvinceCode?.message}
+                                        fullWidth
+                                        required
+                                        select
+                                    >
+                                        <MenuItem value={null}>Chọn tỉnh/thành</MenuItem>
+                                        {props.provinces.map(({ code, name }) => (
+                                            <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                }
                             />
+
                         </Grid>
                         <Grid item xs={12} md={4}>
                             <Typography className={`${styles.fieldLabel} ${styles.required}`} >Quận/Huyện</Typography>
-                            <TextField
-                                id="customerDistrictCode"
+                            <Controller
+                                control={orderForm.control}
                                 name="customerDistrictCode"
-                                variant="outlined"
-                                size="small"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.customerDistrictCode}
-                                helperText={orderForm.errors.customerDistrictCode?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
+                                // rules={OrderValidation.district}
+                                as={
+                                    <TextField
+                                        variant="outlined"
+                                        size="small"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        SelectProps={{
+                                            displayEmpty: true,
+                                        }}
+                                        error={!!orderForm.errors.customerDistrictCode}
+                                        helperText={orderForm.errors.customerDistrictCode?.message}
+                                        fullWidth
+                                        required
+                                        select
+                                        disabled={!customerProvinceCode}
+                                    >
+                                        <MenuItem value={null}>Chọn quận/huyện</MenuItem>
+                                        {districts.map(({ code, name }) => (
+                                            <MenuItem key={`dt_${code}`} value={code}>{name}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                }
                             />
+
                         </Grid>
                         <Grid item xs={12} md={4}>
                             <Typography className={`${styles.fieldLabel} ${styles.required}`} >Phường/Xã</Typography>
-                            <TextField
-                                id="customerWardCode"
+                            <Controller
+                                control={orderForm.control}
                                 name="customerWardCode"
-                                variant="outlined"
-                                size="small"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.customerWardCode}
-                                helperText={orderForm.errors.customerWardCode?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
+                                rules={OrderValidation.ward}
+                                as={
+                                    <TextField
+                                        variant="outlined"
+                                        size="small"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        SelectProps={{
+                                            displayEmpty: true,
+                                        }}
+                                        error={!!orderForm.errors.customerWardCode}
+                                        helperText={orderForm.errors.customerWardCode?.message}
+                                        fullWidth
+                                        required
+                                        select
+                                        disabled={!customerDistrictCode}
+                                    >
+                                        <MenuItem value={null}>Chọn phường/xã</MenuItem>
+                                        {wards.map(({ code, name }) => (
+                                            <MenuItem key={`dt_${code}`} value={code}>{name}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                }
                             />
                         </Grid>
                         <Grid item xs={12} md={4}>
                             <Typography className={`${styles.fieldLabel} ${styles.required}`} >Hình thức vận chuyển</Typography>
-                            <TextField
-                                id="deliveryPlatform.name"
-                                name="deliveryPlatform.name"
-                                variant="outlined"
-                                size="small"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.deliveryPlatform?.name}
-                                helperText={orderForm.errors.deliveryPlatform?.name?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
+                            <Controller
+                                control={orderForm.control}
+                                name="deliveryPlatform"
+                                as={
+                                    <TextField
+                                        variant="outlined"
+                                        size="small"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        error={!!orderForm.errors.deliveryPlatform}
+                                        helperText={orderForm.errors.deliveryPlatform?.message}
+                                        fullWidth
+                                        required
+                                        select
+                                    >
+                                        {props.deliveryPlatforms.map(({ code, name }) => (
+                                            <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                }
                             />
+
                         </Grid>
                         <Grid item xs={12} md={4}>
                             <Typography className={`${styles.fieldLabel} ${styles.required}`} >Phương thức thanh toán</Typography>
-                            <TextField
-                                id="paymentMethod.name"
-                                name="paymentMethod.name"
-                                variant="outlined"
-                                size="small"
-                                InputProps={{
-                                    readOnly: true,
-                                }}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.paymentMethod?.name}
-                                helperText={orderForm.errors.paymentMethod?.name?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
+                            <Controller
+                                control={orderForm.control}
+                                name="paymentMethod"
+                                as={
+                                    <TextField
+                                        variant="outlined"
+                                        size="small"
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        error={!!orderForm.errors.paymentMethod?.name}
+                                        helperText={orderForm.errors.paymentMethod?.name?.message}
+                                        fullWidth
+                                        required
+                                        select
+                                    >
+                                        {props.paymentMethods.map(({ code, name }) => (
+                                            <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
+                                        ))}
+                                    </TextField>
+                                }
                             />
                         </Grid>
                         <Grid item xs={12} md={4}>

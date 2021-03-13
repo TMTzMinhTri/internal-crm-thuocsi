@@ -29,6 +29,13 @@ class ProductClient extends APIClient {
     });
   }
 
+  getListProductByIdsOrCodesFromClient(ids, codes) {
+    return this.callFromClient("POST", `${PREFIX}/product/list`, {
+      productIds: ids,
+      productCodes: codes,
+    });
+  }
+
   getListProductByIdsClient(ids) {
     return this.callFromClient("POST", `${PREFIX}/product/list`, {
       productIds: ids,

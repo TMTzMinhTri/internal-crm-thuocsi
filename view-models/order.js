@@ -4,6 +4,18 @@ export const OrderPaymentMethod = {
 
 export const OrderStatus = {
     WAIT_CONFIRM: "WaitConfirm",
-	CONFIRMED: "Confirmed",
-	CANCELED: "Canceled",
+    CONFIRMED: "Confirmed",
+    CANCELED: "Canceled",
+}
+
+export const OrderValidation = {
+    province: {
+        required: "Vui lòng chọn."
+    },
+    district: {
+        required: "Vui lòng chọn."
+    },
+    ward: {
+        required: "Vui lòng chọn."
+    }
 }
