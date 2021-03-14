@@ -1,10 +1,3 @@
-import React, { useCallback, useEffect, useState } from "react";
-import {
-    MyCard,
-    MyCardActions,
-    MyCardContent,
-    MyCardHeader,
-} from "@thuocsi/nextjs-components/my-card/my-card";
 import {
     Button,
     CircularProgress,
@@ -19,24 +12,31 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Typography,
+    Typography
 } from "@material-ui/core";
-import { Controller, useForm } from "react-hook-form";
-import Link from "next/link";
 import { Save as SaveIcon } from "@material-ui/icons";
-
-import { OrderPaymentMethod, OrderStatus, OrderValidation } from "view-models/order";
-import { formatNumber, orderStatus } from "components/global";
+import {
+    MyCard,
+    MyCardActions,
+    MyCardContent,
+    MyCardHeader
+} from "@thuocsi/nextjs-components/my-card/my-card";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { actionErrorText } from "components/commonErrors";
-import { useFormStyles } from "components/MuiStyles";
 import { getDeliveryClient } from "client/delivery";
 import { getMasterDataClient } from "client/master-data";
 import { getOrderClient } from "client/order";
 import { getPaymentClient } from "client/payment";
-import { getSellerClient } from "client/seller";
-import { getProductClient } from "client/product";
 import { getPricingClient } from "client/pricing";
+import { getProductClient } from "client/product";
+import { getSellerClient } from "client/seller";
+import { actionErrorText } from "components/commonErrors";
+import { formatNumber, orderStatus } from "components/global";
+import { useFormStyles } from "components/MuiStyles";
+import Link from "next/link";
+import React, { useCallback, useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { OrderPaymentMethod, OrderStatus, OrderValidation } from "view-models/order";
+
 
 async function loadOrderFormDataClient(orderNo) {
     const props = {
@@ -570,15 +570,17 @@ export const OrderForm = props => {
                             <col width="10%" />
                             <col width="30%" />
                             <col width="15%" />
+                            <col width="10%" />
                             <col />
                         </colgroup>
                         <TableHead>
                             <TableRow>
-                                <TableCell align="center">Số thứ tự</TableCell>
+                                <TableCell align="center">STT</TableCell>
                                 <TableCell align="left">SKU</TableCell>
                                 <TableCell align="left">Tên người bán</TableCell>
                                 <TableCell align="left">Tên sản phẩm</TableCell>
                                 <TableCell align="right">Số lượng</TableCell>
+                                <TableCell align="right">Giá</TableCell>
                                 <TableCell align="right">Thành tiền</TableCell>
                             </TableRow>
                         </TableHead>
@@ -614,6 +616,7 @@ export const OrderForm = props => {
                                                 onChange={e => handleOrderItemQuantityChange(row.orderItemNo, +e.target.value)}
                                             />
                                         </TableCell>
+                                        <TableCell align="right">{formatNumber(row.price)}</TableCell>
                                         <TableCell align="right">{formatNumber(row.totalPrice)}</TableCell>
                                     </TableRow>
                                 ))}
@@ -627,24 +630,24 @@ export const OrderForm = props => {
                         )}
                         <TableFooter>
                             <TableRow>
-                                <TableCell colSpan={4} />
+                                <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
                                 <TableCell align="right">Phí vận chuyển</TableCell>
                                 <TableCell align="right">{formatNumber(props.order?.shippingFee)}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell colSpan={4} />
+                                <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
                                 <TableCell align="right">Giảm giá</TableCell>
                                 <TableCell align="right">{formatNumber(props.order?.totalDiscount)}</TableCell>
                             </TableRow>
                             {props.order?.paymentMethod.code === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
                                 <TableRow>
-                                    <TableCell colSpan={4} />
+                                    <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
                                     <TableCell align="right">{props.order?.paymentMethod.subTitle}</TableCell>
                                     <TableCell align="right">{formatNumber(props.order?.paymentMethodFee)}</TableCell>
                                 </TableRow>
                             )}
                             <TableRow>
-                                <TableCell colSpan={4} />
+                                <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order?.totalPrice)}</TableCell>
                             </TableRow>
