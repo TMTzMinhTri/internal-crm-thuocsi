@@ -1,0 +1,74 @@
+.rightGroup {
+    float: right;
+}
+
+.contentPadding {
+    padding: 12px;
+    display: block !important;
+}
+
+.form {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.formControl {
+    width: 200px;
+    margin: 10px;
+}
+
+.input {
+    flex: 1;
+    margin-left: 3px;
+}
+
+.search {
+    padding: 9px;
+    display: flex;
+    align-items: center;
+    width: 40%;
+    min-width: 280px;
+}
+
+.iconButton {
+    padding: 6px !important;
+}
+
+.departmentLink {
+    display: block;
+    color: #444;
+    text-decoration: none;
+    padding: 5px;
+}
+
+.selectedDepartment {
+    font-weight: bold;
+}
+
+.employeeCount {
+    float: right;
+}
+
+.departmentLink:hover {
+    background-color: #ddd;
+}
+
+@media only screen and (min-width: 600px) {
+    .flexContainer {
+        display: flex;
+        flex-direction: row;
+    }
+    .departmentList {
+        width: 20%;
+        padding-right: 10px;
+    }
+    .employeeList {
+        width: 80%;
+    }
+}
+
+@media only screen and (max-width: 599.99px) {
+    .flexContainer {
+        display: block;
+    }
+}
