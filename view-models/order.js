@@ -9,7 +9,7 @@ export const OrderStatus = {
 }
 
 export const OrderValidation = {
-    name: {
+    customerName: {
         required: "Tên khách hàng không thể để trống",
         maxLength: {
             value: 50,
@@ -24,14 +24,14 @@ export const OrderValidation = {
             message: "Tên không hợp lệ (không được dư khoảng trắng)."
         }
     },
-    phone: {
+    customerPhone: {
         required: "Số điện thoại không thể để trống",
         pattern: {
             value: /^[0-9]{10,12}$/,
             message: "Số điện thoại không hợp lệ"
         },
     },
-    address: {
+    customerShippingAddress: {
         required: "Địa chỉ không thể để trống",
         maxLength: {
             value: 250,

@@ -107,7 +107,7 @@ export const CustomerCard = (props) => {
                                 error={!!orderForm.errors.customerName}
                                 helperText={orderForm.errors.customerName?.message}
                                 fullWidth
-                                inputRef={orderForm.register(OrderValidation.name)}
+                                inputRef={orderForm.register(OrderValidation.customerName)}
                             />
                         </Grid>
                     </Grid>
@@ -129,7 +129,7 @@ export const CustomerCard = (props) => {
                                 error={!!orderForm.errors.customerPhone}
                                 helperText={orderForm.errors.customerPhone?.message}
                                 fullWidth
-                                inputRef={orderForm.register(OrderValidation.phone)}
+                                inputRef={orderForm.register(OrderValidation.customerPhone)}
                             />
                         </Grid>
                     </Grid>
@@ -151,7 +151,7 @@ export const CustomerCard = (props) => {
                                     error={!!orderForm.errors.customerShippingAddress}
                                     helperText={orderForm.errors.customerShippingAddress?.message}
                                     fullWidth
-                                    inputRef={orderForm.register}
+                                    inputRef={orderForm.register(OrderValidation.customerShippingAddress)}
                                 />
                             </Grid>
                             <Grid item xs={4}>
