@@ -1,9 +1,15 @@
 import {
+    Box,
     Button,
+    Card,
+    CardContent,
+    CardHeader,
     CircularProgress,
     Grid,
     IconButton,
+    makeStyles,
     MenuItem,
+    Tab,
     Table,
     TableBody,
     TableCell,
@@ -11,6 +17,7 @@ import {
     TableFooter,
     TableHead,
     TableRow,
+    Tabs,
     TextField,
     Typography
 } from "@material-ui/core";
@@ -36,6 +43,7 @@ import Link from "next/link";
 import React, { useCallback, useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { OrderPaymentMethod, OrderStatus, OrderValidation } from "view-models/order";
+import { DeliveryPlatformCard } from "./DeliveryPlatformCard";
 
 
 async function loadOrderFormDataClient(orderNo) {
@@ -154,17 +162,23 @@ async function loadOrderFormDataClient(orderNo) {
     return props;
 }
 
+const useStyles = makeStyles({
+    section: {
+        minHeight: 324,
+    }
+})
+
 export const OrderForm = props => {
     const toast = useToast();
-    const styles = useFormStyles();
-
+    const formStyles = useFormStyles();
+    const styles = useStyles();
     const [districts, setDistricts] = useState(props.districts);
     const [wards, setWards] = useState(props.wards);
     const orderForm = useForm({
         defaultValues: props.order,
         mode: "onChange"
     });
-    const { status, customerProvinceCode, customerDistrictCode } = orderForm.watch();
+    const { status, customerProvinceCode, customerDistrictCode, deliveryPlatform } = orderForm.watch();
     // Prevent item object reference
     const [orderItems, setOrderItems] = useState(props.orderItems.map(values => ({ ...values })) ?? []);
     // For logging old value of Order item quantity to compare
@@ -302,7 +316,7 @@ export const OrderForm = props => {
 
     const handleSubmitOrder = async (formData) => {
         try {
-            const data = {...formData};
+            const data = { ...formData };
             setLoading(true);
             data.orderNo = props.order.orderNo;
             await updateOrder(data);
@@ -327,239 +341,278 @@ export const OrderForm = props => {
 
             </MyCardHeader>
             <MyCardContent>
-                <Grid container>
-                    <Grid container spacing={3} item xs={12} md={8}>
-                        <Grid item xs={12}>
-                            <Typography className={`${styles.fieldLabel}`} >ID khách hàng: {props.order.customerID}</Typography>
-                        </Grid>
-                        <Grid item xs={12} sm={4} md={4}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Tên khách hàng</Typography>
-                            <TextField
-                                id="customerName"
-                                name="customerName"
-                                variant="outlined"
-                                size="small"
-                                placeholder=""
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.customerName}
-                                helperText={orderForm.errors.customerName?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
-                            />
-                        </Grid>
-                        <Grid item xs={12} sm={3} md={3}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Số điện thoại</Typography>
-                            <TextField
-                                id="customerPhone"
-                                name="customerPhone"
-                                variant="outlined"
-                                size="small"
-                                placeholder=""
-                                type="number"
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.customerPhone}
-                                helperText={orderForm.errors.customerPhone?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
-                            />
-                        </Grid>
-                        <Grid item xs={12}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Địa chỉ</Typography>
-                            <TextField
-                                id="customerShippingAddress"
-                                name="customerShippingAddress"
-                                variant="outlined"
-                                size="small"
-                                placeholder=""
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                error={!!orderForm.errors.customerShippingAddress}
-                                helperText={orderForm.errors.customerShippingAddress?.message}
-                                fullWidth
-                                required
-                                inputRef={orderForm.register}
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Tỉnh/Thành phố</Typography>
-                            <Controller
-                                control={orderForm.control}
-                                name="customerProvinceCode"
-                                rules={OrderValidation.province}
-                                as={
-                                    <TextField
-                                        variant="outlined"
-                                        size="small"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        SelectProps={{
-                                            displayEmpty: true,
-                                        }}
-                                        error={!!orderForm.errors.customerProvinceCode}
-                                        helperText={orderForm.errors.customerProvinceCode?.message}
-                                        fullWidth
-                                        required
-                                        select
-                                    >
-                                        <MenuItem value={null}>Chọn tỉnh/thành</MenuItem>
-                                        {props.provinces.map(({ code, name }) => (
-                                            <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                }
-                            />
-
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Quận/Huyện</Typography>
-                            <Controller
-                                control={orderForm.control}
-                                name="customerDistrictCode"
-                                rules={OrderValidation.district}
-                                as={
-                                    <TextField
-                                        variant="outlined"
-                                        size="small"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        SelectProps={{
-                                            displayEmpty: true,
-                                        }}
-                                        error={customerProvinceCode && !!orderForm.errors.customerDistrictCode}
-                                        helperText={customerProvinceCode ? orderForm.errors.customerDistrictCode?.message : ""}
-                                        fullWidth
-                                        required
-                                        select
-                                        disabled={!customerProvinceCode}
-                                    >
-                                        <MenuItem value={null}>Chọn quận/huyện</MenuItem>
-                                        {districts.map(({ code, name }) => (
-                                            <MenuItem key={`dt_${code}`} value={code}>{name}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                }
-                            />
-
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Phường/Xã</Typography>
-                            <Controller
-                                control={orderForm.control}
-                                name="customerWardCode"
-                                rules={OrderValidation.ward}
-                                as={
-                                    <TextField
-                                        variant="outlined"
-                                        size="small"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        SelectProps={{
-                                            displayEmpty: true,
-                                        }}
-                                        error={customerDistrictCode && !!orderForm.errors.customerWardCode}
-                                        helperText={customerDistrictCode ? orderForm.errors.customerWardCode?.message : ""}
-                                        fullWidth
-                                        required
-                                        select
-                                        disabled={!customerDistrictCode}
-                                    >
-                                        <MenuItem value={null}>Chọn phường/xã</MenuItem>
-                                        {wards.map(({ code, name }) => (
-                                            <MenuItem key={`dt_${code}`} value={code}>{name}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Hình thức vận chuyển</Typography>
-                            <Controller
-                                control={orderForm.control}
-                                name="deliveryPlatform"
-                                as={
-                                    <TextField
-                                        variant="outlined"
-                                        size="small"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        error={!!orderForm.errors.deliveryPlatform}
-                                        helperText={orderForm.errors.deliveryPlatform?.message}
-                                        fullWidth
-                                        required
-                                        select
-                                    >
-                                        {props.deliveryPlatforms.map(({ code, name }) => (
-                                            <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                }
-                            />
-
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Phương thức thanh toán</Typography>
-                            <Controller
-                                control={orderForm.control}
-                                name="paymentMethod"
-                                as={
-                                    <TextField
-                                        variant="outlined"
-                                        size="small"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        error={!!orderForm.errors.paymentMethod?.name}
-                                        helperText={orderForm.errors.paymentMethod?.name?.message}
-                                        fullWidth
-                                        required
-                                        select
-                                    >
-                                        {props.paymentMethods.map(({ code, name }) => (
-                                            <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                }
-                            />
-                        </Grid>
-                        <Grid item xs={12} md={4}>
-                            <Typography className={`${styles.fieldLabel} ${styles.required}`} >Trạng thái</Typography>
-                            <Controller
-                                control={orderForm.control}
-                                name="status"
-                                as={
-                                    <TextField
-                                        variant="outlined"
-                                        size="small"
-                                        InputLabelProps={{
-                                            shrink: true,
-                                        }}
-                                        error={!!orderForm.errors.status}
-                                        helperText={orderForm.errors.status?.message}
-                                        fullWidth
-                                        select
-                                        disabled={status === OrderStatus.CANCELED}
-                                    >
-                                        {orderStatus.map(({ value, label }) => (
-                                            <MenuItem key={value} value={value}>{label}</MenuItem>
-                                        ))}
-                                    </TextField>
-                                }
-                            />
-                        </Grid>
+                <Grid container spacing={3}>
+                    <Grid item xs={6}>
+                        <Card className={styles.section} variant="outlined">
+                            <CardContent>
+                                <Grid container spacing={3}>
+                                    <Grid container spacing={1} item xs={12}>
+                                        <Grid item xs={12} md={2}>
+                                            <Typography className={`${formStyles.fieldLabel}`}>ID khách hàng:</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={4}>
+                                            <Typography className={`${formStyles.fieldLabel}`} >{props.order.customerID}</Typography>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container spacing={1} item xs={12}>
+                                        <Grid item xs={12} md={2}>
+                                            <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Tên khách hàng</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={4}>
+                                            <TextField
+                                                id="customerName"
+                                                name="customerName"
+                                                variant="outlined"
+                                                size="small"
+                                                placeholder=""
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                error={!!orderForm.errors.customerName}
+                                                helperText={orderForm.errors.customerName?.message}
+                                                fullWidth
+                                                required
+                                                inputRef={orderForm.register(OrderValidation.name)}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container spacing={1} item xs={12}>
+                                        <Grid item xs={12} md={2}>
+                                            <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Số điện thoại</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={4}>
+                                            <TextField
+                                                id="customerPhone"
+                                                name="customerPhone"
+                                                variant="outlined"
+                                                size="small"
+                                                placeholder=""
+                                                type="number"
+                                                InputLabelProps={{
+                                                    shrink: true,
+                                                }}
+                                                error={!!orderForm.errors.customerPhone}
+                                                helperText={orderForm.errors.customerPhone?.message}
+                                                fullWidth
+                                                required
+                                                inputRef={orderForm.register(OrderValidation.phone)}
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container spacing={1} item xs={12}>
+                                        <Grid item xs={12} md={2}>
+                                            <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Địa chỉ</Typography>
+                                        </Grid>
+                                        <Grid container spacing={3} item xs={12} md={10}>
+                                            <Grid item xs={12}>
+                                                <TextField
+                                                    id="customerShippingAddress"
+                                                    name="customerShippingAddress"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    placeholder=""
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    error={!!orderForm.errors.customerShippingAddress}
+                                                    helperText={orderForm.errors.customerShippingAddress?.message}
+                                                    fullWidth
+                                                    required
+                                                    inputRef={orderForm.register}
+                                                />
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Controller
+                                                    control={orderForm.control}
+                                                    name="customerProvinceCode"
+                                                    rules={OrderValidation.province}
+                                                    as={
+                                                        <TextField
+                                                            variant="outlined"
+                                                            size="small"
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            SelectProps={{
+                                                                displayEmpty: true,
+                                                            }}
+                                                            error={!!orderForm.errors.customerProvinceCode}
+                                                            helperText={orderForm.errors.customerProvinceCode?.message}
+                                                            fullWidth
+                                                            required
+                                                            select
+                                                        >
+                                                            <MenuItem value={null}>Chọn tỉnh/thành</MenuItem>
+                                                            {props.provinces.map(({ code, name }) => (
+                                                                <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                    }
+                                                />
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Controller
+                                                    control={orderForm.control}
+                                                    name="customerDistrictCode"
+                                                    rules={OrderValidation.district}
+                                                    as={
+                                                        <TextField
+                                                            variant="outlined"
+                                                            size="small"
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            SelectProps={{
+                                                                displayEmpty: true,
+                                                            }}
+                                                            error={customerProvinceCode && !!orderForm.errors.customerDistrictCode}
+                                                            helperText={customerProvinceCode ? orderForm.errors.customerDistrictCode?.message : ""}
+                                                            fullWidth
+                                                            required
+                                                            select
+                                                            disabled={!customerProvinceCode}
+                                                        >
+                                                            <MenuItem value={null}>Chọn quận/huyện</MenuItem>
+                                                            {districts.map(({ code, name }) => (
+                                                                <MenuItem key={`dt_${code}`} value={code}>{name}</MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                    }
+                                                />
+                                            </Grid>
+                                            <Grid item xs={4}>
+                                                <Controller
+                                                    control={orderForm.control}
+                                                    name="customerWardCode"
+                                                    rules={OrderValidation.ward}
+                                                    as={
+                                                        <TextField
+                                                            variant="outlined"
+                                                            size="small"
+                                                            InputLabelProps={{
+                                                                shrink: true,
+                                                            }}
+                                                            SelectProps={{
+                                                                displayEmpty: true,
+                                                            }}
+                                                            error={customerDistrictCode && !!orderForm.errors.customerWardCode}
+                                                            helperText={customerDistrictCode ? orderForm.errors.customerWardCode?.message : ""}
+                                                            fullWidth
+                                                            required
+                                                            select
+                                                            disabled={!customerDistrictCode}
+                                                        >
+                                                            <MenuItem value={null}>Chọn phường/xã</MenuItem>
+                                                            {wards.map(({ code, name }) => (
+                                                                <MenuItem key={`dt_${code}`} value={code}>{name}</MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                    }
+                                                />
+                                            </Grid>
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={6}>
+                        <Card className={styles.section} variant="outlined">
+                            <CardContent>
+                                <Grid container spacing={3}>
+                                    <Grid container spacing={3} item xs={12}>
+                                        <Grid item xs={12} md={3}>
+                                            <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Hình thức vận chuyển</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <Controller
+                                                control={orderForm.control}
+                                                name="deliveryPlatform"
+                                                as={
+                                                    <TextField
+                                                        variant="outlined"
+                                                        size="small"
+                                                        InputLabelProps={{
+                                                            shrink: true,
+                                                        }}
+                                                        error={!!orderForm.errors.deliveryPlatform}
+                                                        helperText={orderForm.errors.deliveryPlatform?.message}
+                                                        fullWidth
+                                                        required
+                                                        select
+                                                    >
+                                                        {props.deliveryPlatforms.map(({ code, name, feeValue }) => (
+                                                            <MenuItem key={`pv_${code}`} value={code}>{name} - {feeValue}đ</MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                }
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container spacing={3} item xs={12}>
+                                        <Grid item xs={12} md={3}>
+                                            <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Phương thức thanh toán</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <Controller
+                                                control={orderForm.control}
+                                                name="paymentMethod"
+                                                as={
+                                                    <TextField
+                                                        variant="outlined"
+                                                        size="small"
+                                                        InputLabelProps={{
+                                                            shrink: true,
+                                                        }}
+                                                        error={!!orderForm.errors.paymentMethod?.name}
+                                                        helperText={orderForm.errors.paymentMethod?.name?.message}
+                                                        fullWidth
+                                                        required
+                                                        select
+                                                    >
+                                                        {props.paymentMethods.map(({ code, name }) => (
+                                                            <MenuItem key={`pv_${code}`} value={code}>{name}</MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                }
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container spacing={3} item xs={12}>
+                                        <Grid item xs={12} md={3}>
+                                            <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Trạng thái</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <Controller
+                                                control={orderForm.control}
+                                                name="status"
+                                                as={
+                                                    <TextField
+                                                        variant="outlined"
+                                                        size="small"
+                                                        InputLabelProps={{
+                                                            shrink: true,
+                                                        }}
+                                                        error={!!orderForm.errors.status}
+                                                        helperText={orderForm.errors.status?.message}
+                                                        fullWidth
+                                                        select
+                                                        disabled={status === OrderStatus.CANCELED}
+                                                    >
+                                                        {orderStatus.map(({ value, label }) => (
+                                                            <MenuItem key={value} value={value}>{label}</MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                }
+                                            />
+                                        </Grid>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
                     </Grid>
                 </Grid>
-            </MyCardContent>
+            </MyCardContent >
             <MyCardContent>
                 <TableContainer>
                     <Table variant="outlined"
@@ -630,24 +683,24 @@ export const OrderForm = props => {
                         )}
                         <TableFooter>
                             <TableRow>
-                                <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
+                                <TableCell colSpan={5} style={{ borderBottom: 'none !important' }} />
                                 <TableCell align="right">Phí vận chuyển</TableCell>
                                 <TableCell align="right">{formatNumber(props.order?.shippingFee)}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
+                                <TableCell colSpan={5} style={{ borderBottom: 'none !important' }} />
                                 <TableCell align="right">Giảm giá</TableCell>
                                 <TableCell align="right">{formatNumber(props.order?.totalDiscount)}</TableCell>
                             </TableRow>
                             {props.order?.paymentMethod.code === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
                                 <TableRow>
-                                    <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
+                                    <TableCell colSpan={5} style={{ borderBottom: 'none !important' }} />
                                     <TableCell align="right">{props.order?.paymentMethod.subTitle}</TableCell>
                                     <TableCell align="right">{formatNumber(props.order?.paymentMethodFee)}</TableCell>
                                 </TableRow>
                             )}
                             <TableRow>
-                                <TableCell colSpan={5} style={{borderBottom: 'none !important'}}/>
+                                <TableCell colSpan={5} style={{ borderBottom: 'none !important' }} />
                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>Tổng tiền</TableCell>
                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} >{formatNumber(props.order?.totalPrice)}</TableCell>
                             </TableRow>
@@ -670,6 +723,6 @@ export const OrderForm = props => {
                     <Button variant="contained" color="default">Quay lại</Button>
                 </Link>
             </MyCardActions>
-        </MyCard>
+        </MyCard >
     )
 };
