@@ -76,6 +76,38 @@ class PricingClient extends APIClient {
         );
     }
 
+    getPricingByCodesOrSKUs({codes, skus}) {
+        return this.callFromNextJS(
+            "POST",
+            `${prefix}/selling/list`,
+            {
+                codes,
+                skus,
+            }
+        );
+    }
+
+    getPricingByCodesOrSKUsFromClient({codes, skus}) {
+        return this.callFromClient(
+            "POST",
+            `${prefix}/selling/list`,
+            {
+                codes,
+                skus,
+            }
+        );
+    }
+
+    getPricingByCodesFromClient(codes) {
+        return this.callFromClient(
+            "POST",
+            `${prefix}/selling/list`,
+            {
+                sellPriceCodes: codes,
+            }
+        );
+    }
+
     getListProductByProductCode(productCodes) {
         return this.callFromNextJS(
             "POST",

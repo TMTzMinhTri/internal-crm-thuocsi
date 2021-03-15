@@ -8,7 +8,7 @@ class MasterDataClient extends APIClient {
         super(ctx, data)
     }
 
-    getProvince(offset, limit, q) {
+    getProvince(offset, limit, q, getTotal = true) {
         return this.callFromNextJS(
             "GET",
             `${URI}/province/list`,
@@ -16,7 +16,19 @@ class MasterDataClient extends APIClient {
                 q:q,
                 offset: offset,
                 limit: limit,
-                getTotal: true
+                getTotal,
+            })
+    }
+
+    getProvinceFromClient(offset, limit, q, getTotal = true) {
+        return this.callFromClient(
+            "GET",
+            `${URI}/province/list`,
+            {
+                q:q,
+                offset: offset,
+                limit: limit,
+                getTotal,
             })
     }
 
@@ -76,6 +88,15 @@ class MasterDataClient extends APIClient {
 
     getWardByWardCode(wardCode) {
         return this.callFromNextJS(
+            "GET",
+            `${URI}/administrative/list`,
+            {
+                wardCode: wardCode
+            })
+    }
+
+    getWardByWardCodeFromClient(wardCode) {
+        return this.callFromClient(
             "GET",
             `${URI}/administrative/list`,
             {
