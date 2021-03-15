@@ -167,14 +167,16 @@ class ProductClient extends APIClient {
     return await res.json();
   }
 
-  async SearchProductCache({ offset, limit, q }) {
-    return this.callFromNextJS(
-      "GET",
-      `${PREFIX_PRODUCT}/products/list`,
-      {
-        offset, limit, q
-      }
-    )
+  async getProductBySKUs(codes) {
+    return this.callFromNextJS("POST", `${PREFIX}/sku/info`, {
+      codes,
+    });
+  }
+
+  async getProductBySKUsFromClient(codes) {
+    return this.callFromClient("POST", `${PREFIX}/sku/info`, {
+      codes,
+    });
   }
 }
 

@@ -28,7 +28,6 @@ import { getDeliveryClient } from "client/delivery";
 import { getMasterDataClient } from "client/master-data";
 import { getOrderClient } from "client/order";
 import { getPaymentClient } from "client/payment";
-import { getPricingClient } from "client/pricing";
 import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
@@ -107,7 +106,6 @@ async function loadOrderFormDataClient(orderNo) {
         return props;
     }
 
-    const pricingClient = getPricingClient();
     const productClient = getProductClient();
     const sellerClient = getSellerClient();
     const skuMap = {};
@@ -126,19 +124,10 @@ async function loadOrderFormDataClient(orderNo) {
             sellerCodes.push(sellerCode);
         }
     });
-    const [skuResp, sellerResp] = await Promise.all([
-        pricingClient.getPricingByCodesOrSKUsFromClient({ skus: skuCodes }),
+    const [productResp, sellerResp] = await Promise.all([
+        productClient.getProductBySKUsFromClient(skuCodes),
         sellerClient.getSellerBySellerCodesClient(sellerCodes)
     ])
-    skuResp.data?.forEach((sku) => {
-        const { productCode } = sku;
-        skuMap[sku.sku] = sku;
-        if (productCode && !productMap[productCode]) {
-            productMap[productCode] = true;
-            productCodes.push(productCode);
-        }
-    })
-    const productResp = await productClient.getListProductByIdsOrCodesFromClient([], productCodes);
     productResp.data?.forEach(product => {
         productMap[product.code] = product;
     });

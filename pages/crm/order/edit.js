@@ -10,7 +10,6 @@ import { getPaymentClient } from "client/payment";
 import { getSellerClient } from "client/seller";
 import { getProductClient } from "client/product";
 import { OrderForm } from 'containers/crm/order/edit/OrderForm';
-import { getPricingClient } from 'client/pricing';
 
 async function loadOrderFormData(ctx) {
     const props = {
@@ -84,7 +83,6 @@ async function loadOrderFormData(ctx) {
         return { props };
     }
 
-    const pricingClient = getPricingClient(ctx, {});
     const productClient = getProductClient(ctx, {});
     const sellerClient = getSellerClient(ctx, {});
     const skuMap = {};
@@ -103,19 +101,10 @@ async function loadOrderFormData(ctx) {
             sellerCodes.push(sellerCode);
         }
     });
-    const [skuResp, sellerResp] = await Promise.all([
-        pricingClient.getPricingByCodesOrSKUs({ skus: skuCodes }),
+    const [productResp, sellerResp] = await Promise.all([
+        productClient.getProductBySKUs(skuCodes),
         sellerClient.getSellerBySellerCodes(sellerCodes)
     ])
-    skuResp.data?.forEach((sku) => {
-        const { productCode } = sku;
-        skuMap[sku.sku] = sku;
-        if (productCode && !productMap[productCode]) {
-            productMap[productCode] = true;
-            productCodes.push(productCode);
-        }
-    })
-    const productResp = await productClient.getListProductByIdsOrCodes([], productCodes);
     productResp.data?.forEach(product => {
         productMap[product.code] = product;
     });
