@@ -14,5 +14,14 @@ export const useFormStyles = makeStyles(theme => ({
         borderRadius: 16,
         border: "none",
         backgroundColor: theme.palette.grey[100]
+    },
+    tableFooter: {
+        "& td": {
+            borderBottom: "none",
+        },
+        "& tr:last-child td": {
+            borderBottom: "1px solid",
+            borderBottomColor: theme.palette.divider,
+        }
     }
 }));

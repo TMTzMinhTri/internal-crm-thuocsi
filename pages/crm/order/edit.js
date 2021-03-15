@@ -9,7 +9,7 @@ import { getOrderClient } from "client/order";
 import { getPaymentClient } from "client/payment";
 import { getSellerClient } from "client/seller";
 import { getProductClient } from "client/product";
-import { OrderForm } from 'containers/crm/order/OrderForm';
+import { OrderForm } from 'containers/crm/order/edit/OrderForm';
 import { getPricingClient } from 'client/pricing';
 
 async function loadOrderFormData(ctx) {
