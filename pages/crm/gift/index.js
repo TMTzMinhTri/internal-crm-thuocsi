@@ -30,7 +30,7 @@ export async function loadGiftData(ctx) {
     const voucherClient = getVoucherClient(ctx, {})
     const voucherResp = await voucherClient.getVoucherCode("", 20, 0, true);
     if (voucherResp.status === "OK") {
-        data.props.listVoucher = voucherResp.data.map(voucher => ({ value: voucher.code, label: voucher.promotionName }))
+        data.props.listVoucher = voucherResp.data.map(voucher => ({ value: voucher.code, label: voucher.code + " - " + voucher.promotionName }))
     }
 
     // get gift setting
@@ -50,19 +50,19 @@ export async function loadGiftData(ctx) {
         giftResp.data[0].customerGift?.map(code => {
             let index = listVouchers.findIndex(voucher => voucher.code == code)
             if (index != -1) {
-                customerGift.push({ value: code, label: listVouchers[index].promotionName })
+                customerGift.push({ value: code, label: code + " - " + listVouchers[index].promotionName })
             }
         })
         giftResp.data[0].friendGift?.invitePerson?.map(code => {
             let index = listVouchers.findIndex(voucher => voucher.code == code)
             if (index != -1) {
-                invitePersonGift.push({ value: code, label: listVouchers[index].promotionName })
+                invitePersonGift.push({ value: code, label: code + " - " + listVouchers[index].promotionName })
             }
         })
         giftResp.data[0].friendGift?.invitedPerson?.map(code => {
             let index = listVouchers.findIndex(voucher => voucher.code == code)
             if (index != -1) {
-                invitedPersonGift.push({ value: code, label: listVouchers[index].promotionName })
+                invitedPersonGift.push({ value: code, label: code + " - " + listVouchers[index].promotionName })
             }
         })
         data.props.customerGift = { customerGift }
@@ -72,7 +72,6 @@ export async function loadGiftData(ctx) {
             invitePersonGift: invitePersonGift,
         }
     }
-
     return data
 }
 
@@ -83,7 +82,7 @@ function render(props) {
     const { register: register2, handleSubmit: handleSubmit2, errors: errors2, control: control2 } = useForm({
         mode: "onChange", defaultValues: props.customerGift || {}
     });
-  
+
     const _client = getVoucherClient()
     const { error, warn, info, success } = useToast();
     const [loading, setLoading] = useState(false);
@@ -140,7 +139,7 @@ function render(props) {
         const voucherClient = getVoucherClient()
         const voucherResp = await voucherClient.getVoucherFromClient(search, 20, 0, true);
         if (voucherResp.status === "OK") {
-            data = voucherResp.data.map(voucher => ({ value: voucher.code, label: voucher.promotionName }))
+            data = voucherResp.data.map(voucher => ({ value: voucher.code, label: voucher.code + " - " + voucher.promotionName }))
         }
         return data
     }
@@ -151,18 +150,14 @@ function render(props) {
             link: "/crm"
         },
         {
-            name: "Danh sách gift",
-            link: "/crm/gift",
-        },
-        {
-            name: "Thêm gift mới",
+            name: "Cài đặt quà tặng",
         },
     ];
 
     return (
         <AppCRM select="/crm/gift" breadcrumb={breadcrumb}>
             <Head>
-                <title>Thêm gift mới</title>
+                <title>Cài đặt quà tặng</title>
             </Head>
             <MyCard>
                 <Grid container direction="column" xs={12} sm={12} md={12} spacing={1}>
