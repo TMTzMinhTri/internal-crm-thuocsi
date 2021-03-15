@@ -206,7 +206,7 @@ function render(props) {
       } else {
         props.promotion.forEach((d) => {
           if (d.promotionId === promotionId) {
-            return (d.status = defaultPromotionStatus.EXPIRED);
+            return (d.status = defaultPromotionStatus.HIDE);
           }
         });
         setOpenModal({ ...openModal, open: false });
