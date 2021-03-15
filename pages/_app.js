@@ -9,36 +9,48 @@ import React, { useEffect } from 'react';
 import styles from "./global.css";
 
 const menu = [{
+    key: "CUSTOMER",
+    name: "Khách hàng",
+    link: "/crm/customer",
+    icon: faUsers,
+    subMenu: [
+        {
             key: "CUSTOMER",
             name: "Khách hàng",
-            link: "/crm/customer",
-            icon: faUsers
+            link: "/crm/customer"
         },
         {
-            key:"ORDER",
-            name:"Đơn hàng",
-            link:"/crm/order",
-            icon:faDollarSign,
-        },
+            key: "ACCOUNT",
+            name: "Tài khoản",
+            link: "/crm/account"
+        }
+    ]
+},
+{
+    key: "ORDER",
+    name: "Đơn hàng",
+    link: "/crm/order",
+    icon: faDollarSign,
+},
+{
+    key: "DISCOUNT",
+    name: "Khuyến mãi",
+    link: "/crm/promotion",
+    icon: faPercentage,
+    subMenu: [
         {
             key: "DISCOUNT",
-            name: "Khuyến mãi",
-            link: "/crm/promotion",
-            icon: faPercentage,
-            subMenu: [
-                {
-                    key: "DISCOUNT",
-                    name: "Chương trình khuyến mãi",
-                    link: "/crm/promotion"
-                },
-                {
-                    key: "VOUCHER",
-                    name: "Mã khuyến mãi",
-                    link: "/crm/voucher"
-                }
-            ]
+            name: "Chương trình khuyến mãi",
+            link: "/crm/promotion"
         },
+        {
+            key: "VOUCHER",
+            name: "Mã khuyến mãi",
+            link: "/crm/voucher"
+        }
     ]
+},
+]
 
 export var theme = createMuiTheme({
     palette: {
@@ -58,7 +70,7 @@ export default function App(props) {
     useEffect(() => {
         let routeChangeStart = () => setShowBackdrop(true);
         let routeChangeComplete = () => setShowBackdrop(false);
-    
+
         router.events.on("routeChangeStart", routeChangeStart);
         router.events.on("routeChangeComplete", routeChangeComplete);
         router.events.on("routeChangeError", routeChangeComplete);
@@ -66,13 +78,13 @@ export default function App(props) {
             setShowLoader(false)
         }, 500)
         return () => {
-                router.events.off("routeChangeStart", routeChangeStart);
-                router.events.off("routeChangeComplete", routeChangeComplete);
-                router.events.off("routeChangeError", routeChangeComplete);
-            }
-        }, []
+            router.events.off("routeChangeStart", routeChangeStart);
+            router.events.off("routeChangeComplete", routeChangeComplete);
+            router.events.off("routeChangeError", routeChangeComplete);
+        }
+    }, []
     )
-    const {Component, pageProps} = props
+    const { Component, pageProps } = props
 
     if (pageProps.loggedIn) {
         return (
@@ -81,7 +93,7 @@ export default function App(props) {
                 <ToastProvider>
                     <Layout className={styles.blank} loggedInUserInfo={pageProps.loggedInUserInfo} menu={menu} title="CRM">
                         <Component {...pageProps} />
-                        <Backdrop style={{zIndex: theme.zIndex.drawer + 1, color: '#fff'}} className={styles.backdrop} open={showBackdrop}>
+                        <Backdrop style={{ zIndex: theme.zIndex.drawer + 1, color: '#fff' }} className={styles.backdrop} open={showBackdrop}>
                             <CircularProgress color="inherit" />
                         </Backdrop>
                     </Layout>
