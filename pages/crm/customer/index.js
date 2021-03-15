@@ -242,8 +242,8 @@ function render(props) {
                 </TableCell>
                 <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.name, 30)}</TableCell>
                 <TableCell className={styles.cellWrap} align="left">{row.email || '-'}</TableCell>
-                <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyName ?? "-", 50)}</TableCell>
-                <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyAddress ?? "-", 50)}</TableCell>
+                {/* <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyName ?? "-", 50)}</TableCell>
+                <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyAddress ?? "-", 50)}</TableCell> */}
                 <TableCell align="left">{props.condUserType.find(e => e.value === row.level)?.label || '-'}</TableCell>
                 <TableCell align="right">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
@@ -363,8 +363,8 @@ function render(props) {
                             <col width="10%" />
                             <col width="10%" />
                             <col width="13%" />
-                            <col width="10%" />
-                            <col width="10%" />
+                            {/* <col width="10%" />
+                            <col width="10%" /> */}
                             <col width="10%" />
                             <col />
                             <col />
@@ -374,8 +374,8 @@ function render(props) {
                                 <TableCell align="left">Mã khách hàng</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Email</TableCell>
-                                <TableCell align="left">Tên công ty</TableCell>
-                                <TableCell align="left">Địa chỉ công ty</TableCell>
+                                {/* <TableCell align="left">Tên công ty</TableCell>
+                                <TableCell align="left">Địa chỉ công ty</TableCell> */}
                                 <TableCell align="left">Cấp độ</TableCell>
                                 <TableCell align="right">Điểm</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
