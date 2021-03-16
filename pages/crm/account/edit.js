@@ -1,5 +1,5 @@
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
-import AppHRM from "../../_layout";
+import AppCRM from "pages/_layout";
 import Head from "next/head";
 import {
     Box, Button, CircularProgress,
@@ -8,7 +8,7 @@ import {
 } from "@material-ui/core";
 import styles from "./account.module.css";
 import { getAccountClient } from "client/account";
-import React, { useEffect } from "react";
+import React from "react";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/router";
@@ -27,7 +27,6 @@ export async function loadData(ctx) {
     let query = ctx.query
 
     // load data from backend API
-    let reqs = []
     let accClient = getAccountClient(ctx, data)
     data.props.account = await accClient.getAccountByUsername(query.username)
 
@@ -40,6 +39,7 @@ export default function EditPage(props) {
 
 export function renderEditPage(props) {
 
+    // if fail to load data of account
     if (!props.account || props.account.status != "OK") {
         return <NotFound></NotFound>
     }
@@ -190,7 +190,7 @@ export function renderEditPage(props) {
         }
     ]
     return (
-        <AppHRM select="/crm/account/edit"
+        <AppCRM select="/crm/account/edit"
             breadcrumb={breadcrumb}>
             <Head>
                 <title >{editObject ? "Cập nhật thông tin" : "Thêm"}  tài khoản</title>
@@ -307,6 +307,6 @@ export function renderEditPage(props) {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </AppHRM>
+        </AppCRM>
     )
 }
