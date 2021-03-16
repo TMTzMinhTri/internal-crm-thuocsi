@@ -79,7 +79,7 @@ export const CustomerCard = (props) => {
     }, [customerDistrictCode]);
 
     return (
-        <Card className={styles.section} variant="outlined">
+        <Card className={styles.section1} variant="outlined">
             <CardContent>
                 <Grid container spacing={3}>
                     <Grid container spacing={1} item xs={12}>
