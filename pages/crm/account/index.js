@@ -44,6 +44,19 @@ export default function AccountPage(props) {
     return renderWithLoggedInUser(props, render)
 }
 
+function displayFullTime(time) {
+    let d = new Date(time)
+    let m = d.getMonth() + 1
+    m = m > 9 ? m : "0" + m
+    let h = d.getHours()
+    h = h > 9 ? h : "0" + h
+    let min = d.getMinutes()
+    min = min > 9 ? min : "0" + min
+    let sec = d.getSeconds()
+    sec = sec > 9 ? sec : "0" + sec
+    return `${d.getDate()}-${m}-${d.getFullYear()} ${h}:${min}:${sec}`
+}
+
 // render page after logged in
 function render(props) {
     let router = useRouter()
@@ -172,6 +185,8 @@ function render(props) {
                         <col style={{ minWidth: 160 }} />
                         <col />
                         <col />
+                        <col />
+                        <col />
                         <col style={{ width: 180 }} />
                     </colgroup>
                     <TableHead>
@@ -180,6 +195,8 @@ function render(props) {
                             <TableCell align="left">Họ tên</TableCell>
                             <TableCell align="left">Email</TableCell>
                             <TableCell align="left">SĐT</TableCell>
+                            <TableCell align="left">Ngày tạo</TableCell>
+                            <TableCell align="left">Đăng nhập lần cuối</TableCell>
                             <TableCell align="center">Thao tác</TableCell>
                         </TableRow>
                     </TableHead>
@@ -192,6 +209,8 @@ function render(props) {
                                 <TableCell align="left">{row.fullname}</TableCell>
                                 <TableCell align="left">{row.email}</TableCell>
                                 <TableCell align="left">{row.phoneNumber}</TableCell>
+                                <TableCell>{displayFullTime(row.createdTime)}</TableCell>
+                                <TableCell>{row.loginTime && displayFullTime(row.loginTime)}</TableCell>
                                 <TableCell align="left">
                                     <Tooltip title={row.status != "INACTIVE" ? "Nhấn để khóa tài khoản" : "Nhấn để mở lại tài khoản"}>
                                         <Switch
