@@ -23,5 +23,9 @@ export const useFormStyles = makeStyles(theme => ({
             borderBottom: "1px solid",
             borderBottomColor: theme.palette.divider,
         }
+    },
+    helperText: {
+        ...theme.typography.body2,
+        fontStyle: "italic",
     }
 }));

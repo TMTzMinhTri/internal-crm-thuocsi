@@ -2,6 +2,7 @@ import {
     Button,
     Card,
     CardContent,
+    Chip,
     CircularProgress,
     Grid,
     IconButton,
@@ -17,6 +18,8 @@ import {
     Typography
 } from "@material-ui/core";
 import { Save as SaveIcon } from "@material-ui/icons";
+import LabelBox from "@thuocsi/nextjs-components/editor/label-box";
+import MuiMultipleAuto from "@thuocsi/nextjs-components/muiauto/multiple";
 import {
     MyCard,
     MyCardActions,
@@ -33,9 +36,10 @@ import { getSellerClient } from "client/seller";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
 import { formatDatetimeFormType, formatNumber, orderStatus } from "components/global";
 import { useFormStyles } from "components/MuiStyles";
+import moment from "moment";
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useController, useForm } from "react-hook-form";
 import { OrderPaymentMethod, OrderStatus } from "view-models/order";
 import { CustomerCard } from "./CustomerCard";
 import { useStyles } from "./Styles";
@@ -147,6 +151,22 @@ async function loadOrderFormDataClient(orderNo) {
     return props;
 }
 
+/**
+ * @param {object} props 
+ * @param {*} props.order
+ * @param {*} props.message
+ * @param {*} props.order
+ * @param {*} props.orderItems
+ * @param {*} props.productMap
+ * @param {*} props.productCodes
+ * @param {*} props.sellerMap
+ * @param {*} props.sellerCodes
+ * @param {*} props.provinces
+ * @param {*} props.districts
+ * @param {*} props.wards
+ * @param {*} props.paymentMethods
+ * @param {*} props.deliveryPlatforms
+ */
 export const OrderForm = props => {
     const toast = useToast();
     const formStyles = useFormStyles();
@@ -156,11 +176,14 @@ export const OrderForm = props => {
         defaultValues: {
             ...props.order,
             deliveryDate: formatDatetimeFormType(props.order.deliveryDate),
-            note: "",
         },
         mode: "onChange"
     });
-    const { status, deliveryTrackingNumber } = orderForm.watch();
+    useController({
+        name: "redeemCode",
+        control: orderForm.control,
+    })
+    const { status, deliveryTrackingNumber, redeemCode } = orderForm.watch();
     // Prevent item object reference
     const [orderItems, setOrderItems] = useState(props.orderItems?.map(values => ({ ...values })) ?? []);
     // For logging old value of Order item quantity to compare
@@ -251,6 +274,7 @@ export const OrderForm = props => {
             const data = { ...formData };
             setLoading(true);
             data.orderNo = props.order.orderNo;
+            data.deliveryDate = moment(formData.deliveryDate).toISOString();
             data.note = props.order.note + data.note;
             await updateOrder(data);
             toast.success("Cập nhật đơn hàng thành công");
@@ -276,7 +300,7 @@ export const OrderForm = props => {
             </MyCardHeader>
             <MyCardContent>
                 <Grid container spacing={3}>
-                    <Grid item xs={7}>
+                    <Grid item xs={12} md={7}>
                         <CustomerCard
                             orderForm={orderForm}
                             order={props.order}
@@ -285,8 +309,8 @@ export const OrderForm = props => {
                             wards={props.wards}
                         />
                     </Grid>
-                    <Grid item xs={5}>
-                        <Card className={styles.section} variant="outlined">
+                    <Grid item xs={12} md={5}>
+                        <Card className={styles.section1} variant="outlined">
                             <CardContent>
                                 <Grid container spacing={3}>
                                     <Grid container spacing={3} item xs={12}>
@@ -380,9 +404,7 @@ export const OrderForm = props => {
                                                 fullWidth
                                                 required
                                                 type="datetime-local"
-                                                inputRef={orderForm.register({
-                                                    valueAsDate: true,
-                                                })}
+                                                inputRef={orderForm.register}
                                             />
                                         </Grid>
                                     </Grid>
@@ -443,6 +465,49 @@ export const OrderForm = props => {
                                                 }
                                             />
                                         </Grid>
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={7}>
+                        <Card className={styles.section2} variant="outlined">
+                            <CardContent>
+                                <Typography variant="h6">Mã giảm giá</Typography>
+                                {!redeemCode?.length && (
+                                    <Typography className={formStyles.helperText}>Không có mã giảm giá nào</Typography>
+                                )}
+                                <ul>
+                                    {redeemCode?.map?.(code => (
+                                        <Typography key={code} component="li" >{code}</Typography>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={5}>
+                        <Card className={styles.section2} variant="outlined">
+                            <CardContent>
+                                <Typography variant="h6">Ghi chú đơn hàng</Typography>
+                                <Grid container>
+                                    <Grid spacing={3} item xs={12}>
+                                        <TextField
+                                            id="note"
+                                            name="note"
+                                            variant="outlined"
+                                            size="small"
+                                            placeholder=""
+                                            multiline
+                                            rows={3}
+                                            rowsMax={6}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            error={!!orderForm.errors.note}
+                                            helperText={orderForm.errors.note?.message}
+                                            fullWidth
+                                            inputRef={orderForm.register}
+                                        />
                                     </Grid>
                                 </Grid>
                             </CardContent>
@@ -543,28 +608,6 @@ export const OrderForm = props => {
                     </Table>
                 </TableContainer>
             </MyCardContent>
-            <MyCardContent>
-                <Typography variant="h6">Ghi chú đơn hàng</Typography>
-                <Grid container>
-                    <Grid spacing={3} item xs={12} md={4}>
-                        <TextField
-                            id="note"
-                            name="note"
-                            variant="outlined"
-                            size="small"
-                            placeholder=""
-                            multiline
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            error={!!orderForm.errors.note}
-                            helperText={orderForm.errors.note?.message}
-                            fullWidth
-                            inputRef={orderForm.register}
-                        />
-                    </Grid>
-                </Grid>
-            </MyCardContent>
             <MyCardActions>
                 <Link href={`/crm/order`}>
                     <Button variant="contained" color="default">Quay lại</Button>
@@ -573,7 +616,7 @@ export const OrderForm = props => {
                     variant="contained"
                     color="primary"
                     onClick={orderForm.handleSubmit(handleSubmitOrder)}
-                    disabled={status != 'WaitConfirm'}
+                    disabled={props.order.status != 'WaitConfirm'}
                     style={{ margin: 8 }}
                 >
                     {loading && <CircularProgress size={20} />}
