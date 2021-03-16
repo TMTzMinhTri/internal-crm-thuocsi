@@ -67,6 +67,10 @@ const MuiSingleAuto = ({
         }
     }, [debouncedSearch, q]);
 
+    useEffect(() => {
+        setQOptions(options)
+    }, [options])
+
     // useEffect(() => {
     //   setQOptions(options)
     // },[options]);

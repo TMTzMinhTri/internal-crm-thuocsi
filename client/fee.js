@@ -157,7 +157,7 @@ class FeeClient extends APIClient {
                 code,
                 feeValue: fee,
             }
-        )
+        )  
     }
 
     updateDistrictFee(code, fee) {
