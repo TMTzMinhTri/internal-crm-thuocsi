@@ -85,14 +85,15 @@ function render(props) {
 
     const _client = getVoucherClient()
     const { error, warn, info, success } = useToast();
-    const [loading, setLoading] = useState(false);
+    const [friendLoading, setFriendLoading] = useState(false);
+    const [customerLoading, setCustomerLoading] = useState(false);
     const router = useRouter();
 
     async function createCustomerGift(formData) {
-        setLoading(true);
+        setCustomerLoading(true);
         formData.customerGift = formData.customerGift.map(gift => gift.value)
         const result = await _client.createGift(formData);
-        setLoading(false);
+        setCustomerLoading(false);
         if (result.status === "OK") {
             success("Áp dụng mã quà tặng cho khách hàng mới thành công")
         } else {
@@ -101,14 +102,14 @@ function render(props) {
     }
 
     async function createFriendGift(formData) {
-        setLoading(true);
+        setFriendLoading(true);
         let friendGift = {
             orderQuantity: +formData.orderQuantity,
             invitePerson: formData.invitePersonGift?.map(gift => gift.value),
             invitedPerson: formData.invitedPersonGift?.map(gift => gift.value),
         }
         const result = await _client.createGift({ friendGift });
-        setLoading(false);
+        setFriendLoading(false);
         if (result.status === "OK") {
             success("Áp dụng mã quà tặng khi giới thiệu bạn bè thành công")
         } else {
@@ -120,7 +121,7 @@ function render(props) {
         try {
             await createFriendGift(formData);
         } catch (err) {
-            setLoading(false);
+            setFriendLoading(false);
             error(err.message || err.toString());
         }
     }
@@ -129,7 +130,7 @@ function render(props) {
         try {
             await createCustomerGift(formData);
         } catch (err) {
-            setLoading(false);
+            setCustomerLoading(false);
             error(err.message || err.toString());
         }
     }
@@ -221,7 +222,8 @@ function render(props) {
                                         </Grid>
                                     </Grid>
                                     <Grid item xs={12} sm={12} md={12}>
-                                        <Button variant="contained" color="primary" onClick={handleSubmit(onSubmit)} style={{ margin: 8 }}>
+                                        <Button disabled={friendLoading} variant="contained" color="primary" onClick={handleSubmit(onSubmit)} style={{ margin: 8 }}>
+                                            {friendLoading && <CircularProgress size={20} />}
                                             ÁP DỤNG
                                       </Button>
                                     </Grid>
@@ -253,7 +255,8 @@ function render(props) {
 
                                     </Grid>
                                     <Grid item xs={12} sm={12} md={12}>
-                                        <Button variant="contained" color="primary" onClick={handleSubmit2(onSubmit2)} style={{ margin: 8 }}>
+                                        <Button disabled={customerLoading} variant="contained" color="primary" onClick={handleSubmit2(onSubmit2)} style={{ margin: 8 }}>
+                                            {customerLoading && <CircularProgress size={20} />}
                                             ÁP DỤNG
                                       </Button>
                                     </Grid>
