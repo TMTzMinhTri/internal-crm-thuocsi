@@ -6,7 +6,7 @@ import Head from "next/head";
 import Link from "next/link";
 import Router, { useRouter } from "next/router";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
-import AppHRM from "pages/_layout"
+import AppCRM from "pages/_layout"
 import styles from "./account.module.css"
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
 import { getAccountClient } from "client/account";
@@ -134,7 +134,7 @@ function render(props) {
         }
     ]
     return (
-        <AppHRM select="/crm/account" breadcrumb={breadcrumb}>
+        <AppCRM select="/crm/account" breadcrumb={breadcrumb}>
             <Head>
                 <title>Danh sách tài khoản khách hàng</title>
             </Head>
@@ -280,6 +280,6 @@ function render(props) {
                     </Button>}
                 </DialogActions>
             </Dialog>
-        </AppHRM>
+        </AppCRM>
     )
 }
