@@ -1,5 +1,5 @@
-import {constURL} from "../components/component/constant";
-import {APIClient} from "@thuocsi/nextjs-components/lib/utils";
+import { constURL } from "../components/component/constant";
+import { APIClient } from "@thuocsi/nextjs-components/lib/utils";
 
 class VoucherClient extends APIClient {
     constructor(ctx, data) {
@@ -9,21 +9,21 @@ class VoucherClient extends APIClient {
     createVoucher(data) {
         return this.callFromClient(
             "POST",
-            `${constURL.PREFIX_PROMOTION}/voucher`,data
+            `${constURL.PREFIX_PROMOTION}/voucher`, data
         )
     }
 
     updateVoucher(data) {
         return this.callFromClient(
             "PUT",
-            `${constURL.PREFIX_PROMOTION}/voucher`,data
+            `${constURL.PREFIX_PROMOTION}/voucher`, data
         )
     }
 
-    updateVoucherStatus(voucherId,status) {
+    updateVoucherStatus(voucherId, status) {
         return this.callFromClient(
             "PUT",
-            `${constURL.PREFIX_PROMOTION}/voucher/status`, {voucherId,status}
+            `${constURL.PREFIX_PROMOTION}/voucher/status`, { voucherId, status }
         )
     }
 
@@ -31,34 +31,57 @@ class VoucherClient extends APIClient {
         return this.callFromNextJS(
             "GET",
             `${constURL.PREFIX_PROMOTION}/voucher`,
-            {voucherId}
+            { voucherId }
         )
     }
 
-    getVoucherCode(code,limit,offset,getTotal) {
-        let q = JSON.stringify({code})
-        console.log('data',q)
+    getVoucherCode(code, limit, offset, getTotal) {
+        let q = JSON.stringify({ code })
+        console.log('data', q)
         return this.callFromNextJS(
             "GET",
             `${constURL.PREFIX_PROMOTION}/voucher`,
             {
-                q:q,limit,getTotal,offset
+                q: q, limit, getTotal, offset
             }
         )
     }
 
-    getVoucherFromClient(code,limit,offset,getTotal) {
-        let q = JSON.stringify({code})
+    getVoucherFromClient(code, limit, offset, getTotal) {
+        let q = JSON.stringify({ code })
         return this.callFromClient(
             "GET",
             `${constURL.PREFIX_PROMOTION}/voucher`,
             {
-                q:q,limit,getTotal,offset
+                q: q, limit, getTotal, offset
             }
+        )
+    }
+
+    createGift(data) {
+        return this.callFromClient(
+            "POST",
+            `${constURL.PREFIX_PROMOTION}/gift-setting`,
+            data
+        )
+    }
+
+    getGiftSetting() {
+        return this.callFromNextJS(
+            "GET",
+            `${constURL.PREFIX_PROMOTION}/gift-setting`,
+        )
+    }
+
+    getListVouchersByCodes(voucherCodes) {
+        return this.callFromNextJS(
+            "POST",
+            `${constURL.PREFIX_PROMOTION}/voucher/list`,
+            { voucherCodes }
         )
     }
 }
 
-export function getVoucherClient(ctx,data) {
-    return new VoucherClient(ctx,data)
+export function getVoucherClient(ctx, data) {
+    return new VoucherClient(ctx, data)
 }
