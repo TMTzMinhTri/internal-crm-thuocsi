@@ -151,17 +151,16 @@ export const OrderForm = props => {
         if (message) {
             throw new Error(message);
         }
-        console.log({ order });
         orderForm.setValue("customerName", order.customerName);
         orderForm.setValue("customerPhone", order.customerPhone);
         orderForm.setValue("customerShippingAddress", order.customerShippingAddress);
         orderForm.setValue("customerProvinceCode", order.customerProvinceCode);
         orderForm.setValue("customerDistrictCode", order.customerDistrictCode);
         orderForm.setValue("customerWardCode", order.customerWardCode);
-        orderForm.setValue("deliveryPlatform", order.deliveryPlatform.code);
-        orderForm.setValue("deliveryStatus", order.deliveryStatus?.code);
+        orderForm.setValue("deliveryPlatform", order.deliveryPlatform);
+        orderForm.setValue("deliveryStatus", order.deliveryStatus);
         orderForm.setValue("deliveryDate", formatDatetimeFormType(order.deliveryDate));
-        orderForm.setValue("paymentMethod", order.paymentMethod.code);
+        orderForm.setValue("paymentMethod", order.paymentMethod);
         orderForm.setValue("paymentMethodFee", order.paymentMethodFee);
         orderForm.setValue("status", order.status);
         if (includeOderItems) {
