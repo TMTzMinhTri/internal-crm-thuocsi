@@ -1,6 +1,6 @@
 import { makeStyles } from "@material-ui/core";
 
-export const useFormStyles = makeStyles({
+export const useFormStyles = makeStyles(theme => ({
     fieldLabel: {
         fontWeight: "bold",
     },
@@ -9,5 +9,19 @@ export const useFormStyles = makeStyles({
             content: ` "*"`,
             color: "red",
         }
+    },
+    readOnlyInfoCard: {
+        borderRadius: 16,
+        border: "none",
+        backgroundColor: theme.palette.grey[100]
+    },
+    tableFooter: {
+        "& td": {
+            borderBottom: "none",
+        },
+        "& tr:last-child td": {
+            borderBottom: "1px solid",
+            borderBottomColor: theme.palette.divider,
+        }
     }
-})
+}));

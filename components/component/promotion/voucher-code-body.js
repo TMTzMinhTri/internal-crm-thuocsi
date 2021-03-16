@@ -531,6 +531,7 @@ export default function VoucherCodeBody(props) {
                             disabled={compareTime}
                             loadingText="Không tìm thấy danh sách khách hàng được sử dụng"
                             onOpen={() => {
+                                setListCustomer(customer)
                                 setShowAutoComplete(true);
                             }}
                             onClose={() => {
