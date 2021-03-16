@@ -2,7 +2,6 @@ import {
     Button,
     Card,
     CardContent,
-    Chip,
     CircularProgress,
     Grid,
     IconButton,
@@ -18,8 +17,6 @@ import {
     Typography
 } from "@material-ui/core";
 import { Save as SaveIcon } from "@material-ui/icons";
-import LabelBox from "@thuocsi/nextjs-components/editor/label-box";
-import MuiMultipleAuto from "@thuocsi/nextjs-components/muiauto/multiple";
 import {
     MyCard,
     MyCardActions,
@@ -27,10 +24,7 @@ import {
     MyCardHeader
 } from "@thuocsi/nextjs-components/my-card/my-card";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { getDeliveryClient } from "client/delivery";
-import { getMasterDataClient } from "client/master-data";
 import { getOrderClient } from "client/order";
-import { getPaymentClient } from "client/payment";
 import { getProductClient } from "client/product";
 import { getSellerClient } from "client/seller";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
@@ -45,7 +39,7 @@ import { CustomerCard } from "./CustomerCard";
 import { useStyles } from "./Styles";
 
 
-async function loadOrderFormDataClient(orderNo) {
+async function loadOrderFormDataClient({ orderNo }) {
     const props = {
         message: "",
         order: null,
@@ -68,40 +62,6 @@ async function loadOrderFormDataClient(orderNo) {
     const order = orderResp.data[0];
     props.order = order;
 
-    //Get Master Data
-    const masterDataClient = getMasterDataClient();
-    // Pre-load provinces, distrists, wards for selector.
-    const [
-        provincesResp,
-        districtsResp,
-        wardsResp,
-    ] = await Promise.all([
-        masterDataClient.getProvinceFromClient(0, 100, ""),
-        masterDataClient.getDistrictByProvinceCode(props.order.customerProvinceCode),
-        masterDataClient.getWardByDistrictCode(props.order.customerDistrictCode),
-    ])
-    props.provinces = provincesResp.data ?? [];
-    props.districts = districtsResp.data ?? [];
-    props.wards = wardsResp.data ?? [];
-
-    // Get list delivery
-    const deliveryClient = getDeliveryClient();
-    const deliveryResp = await deliveryClient.getListDeliveryByCodeFromClient(
-        order.deliveryPlatform
-    );
-    if (deliveryResp.status == "OK") {
-        props.order.deliveryPlatform = deliveryResp.data[0];
-    }
-
-    // Get list payment method
-    const paymentClient = getPaymentClient();
-    const paymentResp = await paymentClient.getPaymentMethodByCodeFromClient(
-        order.paymentMethod
-    );
-    if (paymentResp.status == "OK") {
-        props.order.paymentMethod = paymentResp.data[0];
-    }
-
     //get list order-item
     const orderItemResp = await orderClient.getOrderItemByOrderNoFromClient(orderNo);
     if (orderItemResp.status !== "OK") {
@@ -115,7 +75,6 @@ async function loadOrderFormDataClient(orderNo) {
     const skuMap = {};
     const skuCodes = [];
     const productMap = {};
-    const productCodes = [];
     const sellerMap = {};
     const sellerCodes = [];
     orderItemResp.data.forEach(({ productSku, sellerCode }) => {
@@ -144,10 +103,6 @@ async function loadOrderFormDataClient(orderNo) {
         product: productMap[skuMap[orderItem.productSku].productCode] ?? null,
         seller: sellerMap[orderItem.sellerCode] ?? null,
     }))
-    props.productMap = productMap;
-    props.productCodes = productCodes;
-    props.sellerMap = sellerMap;
-    props.sellerCodes = sellerCodes;
     return props;
 }
 
@@ -179,11 +134,9 @@ export const OrderForm = props => {
         },
         mode: "onChange"
     });
-    useController({
-        name: "redeemCode",
-        control: orderForm.control,
-    })
-    const { status, deliveryTrackingNumber, redeemCode } = orderForm.watch();
+    useController({ name: "redeemCode", control: orderForm.control, });
+    useController({ name: "paymentMethodFee", control: orderForm.control, });
+    const { status, deliveryTrackingNumber, redeemCode, paymentMethod, paymentMethodFee } = orderForm.watch();
     // Prevent item object reference
     const [orderItems, setOrderItems] = useState(props.orderItems?.map(values => ({ ...values })) ?? []);
     // For logging old value of Order item quantity to compare
@@ -194,10 +147,11 @@ export const OrderForm = props => {
     const [loading, setLoading] = useState(false);
 
     const reloadOrder = useCallback(async (includeOderItems = false) => {
-        const { message, order, orderItems } = await loadOrderFormDataClient(props.order.orderNo)
+        const { message, order, orderItems } = await loadOrderFormDataClient({ orderNo: props.order.orderNo })
         if (message) {
-            throw new Error(message)
+            throw new Error(message);
         }
+        console.log({ order });
         orderForm.setValue("customerName", order.customerName);
         orderForm.setValue("customerPhone", order.customerPhone);
         orderForm.setValue("customerShippingAddress", order.customerShippingAddress);
@@ -208,6 +162,7 @@ export const OrderForm = props => {
         orderForm.setValue("deliveryStatus", order.deliveryStatus?.code);
         orderForm.setValue("deliveryDate", formatDatetimeFormType(order.deliveryDate));
         orderForm.setValue("paymentMethod", order.paymentMethod.code);
+        orderForm.setValue("paymentMethodFee", order.paymentMethodFee);
         orderForm.setValue("status", order.status);
         if (includeOderItems) {
             setOrderItems(orderItems);
@@ -216,11 +171,11 @@ export const OrderForm = props => {
                 return acc;
             }, {}));
         }
-    }, [props.order.orderNo]);
+    }, [props.order.orderNo, orderItems.length]);
 
-    const updateOrderItem = ({ orderItemNo, quantity }) => {
+    const updateOrderItem = async ({ orderNo, orderItemNo, quantity }) => {
         const orderClient = getOrderClient();
-        const resp = orderClient.updateOrderItem({ orderItemNo, quantity });
+        const resp = await orderClient.updateOrderItem({ orderNo, orderItemNo, quantity });
         if (resp.status !== "OK") {
             throw new Error(resp.message);
         }
@@ -255,18 +210,15 @@ export const OrderForm = props => {
         setOrderItems(arr);
     }
 
-    const handleOderItemQuantityUpdate = (orderItemNo, value) => {
+    const handleOderItemQuantityUpdate = async (orderItemNo, value) => {
+        setLoading(true);
         try {
-            const orderItem = updateOrderItem({ orderItemNo, quantity: value });
-            const arr = [...orderItems];
-            const index = arr.findIndex(({ orderItemNo }) => orderItemNo === orderItemNo);
-            arr[index] = orderItem;
-            setOrderItems(arr);
-            setOrderItemQuantyMap({ ...orderItemQuantyMap, [orderItemNo]: value });
-            reloadOrder();
+            await updateOrderItem({ orderNo: props.order.orderNo, orderItemNo, quantity: value });
+            await reloadOrder(true);
         } catch (e) {
             toast.error(e.message ?? unknownErrorText);
         }
+        setLoading(false);
     }
 
     const handleSubmitOrder = async (formData) => {
@@ -288,8 +240,7 @@ export const OrderForm = props => {
 
     const getOrderItemQuantityStyle = useCallback(({ orderItemNo, quantity }) => {
         const oldValue = orderItemQuantyMap[orderItemNo];
-        if (!oldValue) return "none";
-        if (oldValue == quantity) return "none";
+        if (!oldValue || oldValue == quantity) return "none";
         else return "block";
     }, [orderItemQuantyMap])
 
@@ -548,28 +499,34 @@ export const OrderForm = props => {
                                         <TableCell align="left">{row.seller?.name ?? row.sellerCode}</TableCell>
                                         <TableCell align="left">{row.product?.name ?? row.productCode}</TableCell>
                                         <TableCell align="right">
-                                            <TextField
-                                                variant="outlined"
-                                                size="small"
-                                                value={row.quantity}
-                                                type="number"
-                                                InputProps={{
-                                                    endAdornment: (
-                                                        <IconButton
-                                                            size="small"
-                                                            color="primary"
-                                                            style={{
-                                                                display: getOrderItemQuantityStyle(row)
-                                                            }}
-                                                            onClick={() => handleOderItemQuantityUpdate(row.orderItemNo, row.quantity)}
-                                                        >
-                                                            <SaveIcon fontSize="small" />
-                                                        </IconButton>
-                                                    )
-                                                }}
-                                                inputProps={{ min: 0, style: { textAlign: 'right' } }}
-                                                onChange={e => handleOrderItemQuantityChange(row.orderItemNo, +e.target.value)}
-                                            />
+                                            {row.product?.deal && (
+                                                row.quantity
+                                            )}
+                                            {!row.product?.deal && (
+                                                <TextField
+                                                    variant="outlined"
+                                                    size="small"
+                                                    value={row.quantity}
+                                                    type="number"
+                                                    InputProps={{
+                                                        endAdornment: (
+                                                            <IconButton
+                                                                size="small"
+                                                                color="primary"
+                                                                style={{
+                                                                    display: getOrderItemQuantityStyle(row)
+                                                                }}
+                                                                disabled={loading}
+                                                                onClick={() => handleOderItemQuantityUpdate(row.orderItemNo, row.quantity)}
+                                                            >
+                                                                <SaveIcon fontSize="small" />
+                                                            </IconButton>
+                                                        )
+                                                    }}
+                                                    inputProps={{ min: 0, style: { textAlign: 'right' } }}
+                                                    onChange={e => handleOrderItemQuantityChange(row.orderItemNo, +e.target.value)}
+                                                />
+                                            )}
                                         </TableCell>
                                         <TableCell align="right">{formatNumber(row.price)}</TableCell>
                                         <TableCell align="right">{formatNumber(row.totalPrice)}</TableCell>
@@ -592,10 +549,12 @@ export const OrderForm = props => {
                                 <TableCell colSpan={6} align="right">Giảm giá</TableCell>
                                 <TableCell align="right">{formatNumber(props.order?.totalDiscount)}</TableCell>
                             </TableRow>
-                            {props.order?.paymentMethod.code === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
+                            {paymentMethod === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
                                 <TableRow>
-                                    <TableCell colSpan={6} align="right">{props.order?.paymentMethod.subTitle}</TableCell>
-                                    <TableCell align="right">{formatNumber(props.order?.paymentMethodFee)}</TableCell>
+                                    <TableCell colSpan={6} align="right">
+                                        {props.paymentMethods?.find(method => method.code === paymentMethod).subTitle}
+                                    </TableCell>
+                                    <TableCell align="right">{formatNumber(paymentMethodFee)}</TableCell>
                                 </TableRow>
                             )}
                             <TableRow>
