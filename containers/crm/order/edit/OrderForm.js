@@ -627,13 +627,13 @@ export const OrderForm = props => {
                         </TableFooter>
                     </Table>
                     <ModalCustom
-                        title="Xóa sản phẩm"
+                        title="Thông báo"
                         primaryText="Xóa"
                         open={deletedOrderItem}
                         onExcute={handleRemoveOderItem}
                         onClose={setDeletedOrderItem}
                     >
-                        <Typography>Bạn có chắc muốn xóa sản phẩm <b>{deletedOrderItem?.product?.name ?? deletedOrderItem?.productCode}</b>?</Typography>
+                        <Typography>Bạn có chắc muốn <b>xóa</b> sản phẩm <b>{deletedOrderItem?.product?.name ?? deletedOrderItem?.productCode}</b>?</Typography>
                     </ModalCustom>
                 </TableContainer>
             </MyCardContent>
