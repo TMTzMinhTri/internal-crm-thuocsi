@@ -116,13 +116,11 @@ class OrderClient extends APIClient {
         )
     }
 
-    removeOrderItem(orderItemNo) {
+    removeOrderItem(data) {
         return this.callFromClient(
             'PUT',
             `${URI}/order-item/remove`,
-            {
-                orderItemNo
-            }
+            data
         )
     }
 

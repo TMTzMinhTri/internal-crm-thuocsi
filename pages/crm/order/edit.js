@@ -10,6 +10,7 @@ import { getPaymentClient } from "client/payment";
 import { getSellerClient } from "client/seller";
 import { getProductClient } from "client/product";
 import { OrderForm } from 'containers/crm/order/edit/OrderForm';
+import { NotFound } from 'components/components-global';
 
 async function loadOrderFormData(ctx) {
     const props = {
@@ -142,6 +143,9 @@ const breadcrumb = [
     }
 ]
 export function render(props) {
+    if (!props.order) {
+        return <NotFound titlePage="Thông tin đơn hàng" labelLink="Danh sách đơn hàng" link="/crm/order"/>
+    }
     return (
         <AppCRM select="/crm/order" breadcrumb={breadcrumb}>
             <Head>
