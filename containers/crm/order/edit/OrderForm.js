@@ -230,7 +230,7 @@ export const OrderForm = props => {
             ],
             orderForm.setValue,
         );
-        const items = orderItems.filter( item => item.orderItemNo !== orderItemNo);
+        const items = orderItems.filter(item => item.orderItemNo !== orderItemNo);
         setOrderItems(items);
         setOrderItemQuantyMap(items.reduce((acc, cur) => {
             acc[cur.orderItemNo] = cur.quantity;
@@ -558,6 +558,7 @@ export const OrderForm = props => {
                                                             size="small"
                                                             value={row.quantity}
                                                             type="number"
+                                                            fullWidth
                                                             InputProps={{
                                                                 endAdornment: (
                                                                     <IconButton
@@ -573,7 +574,11 @@ export const OrderForm = props => {
                                                                     </IconButton>
                                                                 )
                                                             }}
-                                                            inputProps={{ min: 1, style: { textAlign: 'right' } }}
+                                                            inputProps={{
+                                                                min: 1,
+                                                                max: orderItemQuantyMap[row.orderItemNo],
+                                                                style: { textAlign: 'right' }
+                                                            }}
                                                             onChange={e => handleOrderItemQuantityChange(row.orderItemNo, +e.target.value)}
                                                         />
                                                     </Grid>
