@@ -137,7 +137,7 @@ export const OrderForm = props => {
         mode: "onChange",
     });
     useController({ name: "redeemCode", control: orderForm.control, });
-    useController({ name: "shippingFee", control: orderForm.control, });
+    useController({ name: "deliveryPlatformFee", control: orderForm.control, });
     useController({ name: "totalDiscount", control: orderForm.control, });
     useController({ name: "paymentMethodFee", control: orderForm.control, });
     useController({ name: "totalPrice", control: orderForm.control, });
@@ -572,7 +572,7 @@ export const OrderForm = props => {
                         <TableFooter className={formStyles.tableFooter}>
                             <TableRow>
                                 <TableCell colSpan={5} align="right">Phí vận chuyển</TableCell>
-                                <TableCell align="right">{formatNumber(order.shippingFee)}</TableCell>
+                                <TableCell align="right">{formatNumber(order.deliveryPlatformFee)}</TableCell>
                             </TableRow>
                             <TableRow>
                                 <TableCell colSpan={5} align="right">Giảm giá</TableCell>
@@ -583,7 +583,7 @@ export const OrderForm = props => {
                                     <TableCell colSpan={5} align="right">
                                         {props.paymentMethods?.find(method => method.code === order.paymentMethod).subTitle}
                                     </TableCell>
-                                    <TableCell align="right">{formatNumber(order.paymentMethodFee)}</TableCell>
+                                    <TableCell align="right">{formatNumber(Math.abs(order.paymentMethodFee))}</TableCell>
                                 </TableRow>
                             )}
                             <TableRow>
