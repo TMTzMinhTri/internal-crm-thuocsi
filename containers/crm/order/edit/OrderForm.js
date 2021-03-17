@@ -150,7 +150,7 @@ export const OrderForm = props => {
         return acc;
     }, {}));
     const [loading, setLoading] = useState(false);
-    const [deleteOrderItem, setDeleteOrderItem] = useState(null);
+    const [deletedOrderItem, setDeletedOrderItem] = useState(null);
 
     const reloadOrder = useCallback(async (includeOderItems = false) => {
         const { message, order, orderItems } = await loadOrderFormDataClient({ orderNo: props.order.orderNo })
@@ -204,11 +204,33 @@ export const OrderForm = props => {
             orderForm.setValue,
         );
         const items = [...orderItems];
-        console.log(order);
         order.orderItems.forEach(item => {
             const index = items.findIndex(i => i.orderItemNo === item.orderItemNo);
             items[index] = { ...items[index], ...item };
         });
+        setOrderItems(items);
+        setOrderItemQuantyMap(items.reduce((acc, cur) => {
+            acc[cur.orderItemNo] = cur.quantity;
+            return acc;
+        }, {}));
+    }
+
+    const removeOrderItem = async ({ orderNo, orderItemNo }) => {
+        const orderClient = getOrderClient();
+        const resp = await orderClient.removeOrderItem({ orderNo, orderItemNo });
+        if (resp.status !== "OK") {
+            throw new Error(resp.message);
+        }
+        const order = resp.data[0];
+        formSetter(
+            order,
+            [
+                "status",
+                "totalPrice",
+            ],
+            orderForm.setValue,
+        );
+        const items = orderItems.filter( item => item.orderItemNo !== orderItemNo);
         setOrderItems(items);
         setOrderItemQuantyMap(items.reduce((acc, cur) => {
             acc[cur.orderItemNo] = cur.quantity;
@@ -235,6 +257,16 @@ export const OrderForm = props => {
         setLoading(true);
         try {
             await updateOrderItem({ orderNo: props.order.orderNo, orderItemNo, quantity: value });
+        } catch (e) {
+            toast.error(e.message ?? unknownErrorText);
+        }
+        setLoading(false);
+    }
+
+    const handleRemoveOderItem = async () => {
+        setLoading(true);
+        try {
+            await removeOrderItem({ orderNo: props.order.orderNo, orderItemNo: deletedOrderItem.orderItemNo });
         } catch (e) {
             toast.error(e.message ?? unknownErrorText);
         }
@@ -547,9 +579,9 @@ export const OrderForm = props => {
                                                     </Grid>
                                                     <Grid item xs={1}>
                                                         <IconButton
-                                                            color="secondary"
+                                                            className={formStyles.secondaryIconButton}
                                                             size="small"
-                                                            onClick={() => setDeleteOrderItem(row)}
+                                                            onClick={() => setDeletedOrderItem(row)}
                                                         >
                                                             <DeleteIcon />
                                                         </IconButton>
@@ -595,10 +627,13 @@ export const OrderForm = props => {
                         </TableFooter>
                     </Table>
                     <ModalCustom
-                        open={deleteOrderItem}
-                        onClose={() => setDeleteOrderItem(null)}
+                        title="Xóa sản phẩm"
+                        primaryText="Xóa"
+                        open={deletedOrderItem}
+                        onExcute={handleRemoveOderItem}
+                        onClose={setDeletedOrderItem}
                     >
-                        <Typography>Bank có chắc muốn xóa sản phẩm </Typography>
+                        <Typography>Bạn có chắc muốn xóa sản phẩm <b>{deletedOrderItem?.product?.name ?? deletedOrderItem?.productCode}</b>?</Typography>
                     </ModalCustom>
                 </TableContainer>
             </MyCardContent>
