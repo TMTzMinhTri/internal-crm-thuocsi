@@ -70,7 +70,7 @@ const defaultValuesSkuForm = {
 export const DealForm = (props) => {
     const router = useRouter();
     const toast = useToast();
-    const disableUpdate = props.isUpdate && moment(props.deal.startTime).isBefore(moment());
+    const isLateUpdate = props.isUpdate && moment(props.deal.startTime).isBefore(moment());
     const dealForm = useForm({
         defaultValues: props.isUpdate ? {
             ...props.deal,
@@ -252,7 +252,7 @@ export const DealForm = (props) => {
                                             shrink: true,
                                         }}
                                         SelectProps={{
-                                            readOnly: disableUpdate,
+                                            readOnly: isLateUpdate,
                                         }}
                                         {...field}
                                         onChange={(e) => {
@@ -279,7 +279,7 @@ export const DealForm = (props) => {
                                     shrink: true,
                                 }}
                                 InputProps={{
-                                    readOnly: disableUpdate,
+                                    readOnly: isLateUpdate,
                                 }}
                                 required
                                 error={!!dealForm.errors.name}
@@ -299,7 +299,7 @@ export const DealForm = (props) => {
                                     shrink: true,
                                 }}
                                 InputProps={{
-                                    readOnly: disableUpdate,
+                                    readOnly: isLateUpdate,
                                 }}
                                 required
                                 error={!!dealForm.errors.startTime}
@@ -324,7 +324,7 @@ export const DealForm = (props) => {
                                 inputRef={dealForm.register({
                                     ...DealValidation.endTime,
                                     validate: (data) => {
-                                        if (moment(data).isBefore(moment(props.deal.endTime))) {
+                                        if (isLateUpdate && moment(data).isBefore(moment(props.deal.endTime))) {
                                             return "Thời gian kết thúc mới phải sau thời gian kết thúc cũ"
                                         }
                                     }
@@ -342,7 +342,7 @@ export const DealForm = (props) => {
                                     shrink: true,
                                 }}
                                 InputProps={{
-                                    readOnly: disableUpdate,
+                                    readOnly: isLateUpdate,
                                 }}
                                 inputProps={{
                                     min: 1,
@@ -416,7 +416,7 @@ export const DealForm = (props) => {
                                     shrink: true,
                                 }}
                                 InputProps={{
-                                    readOnly: disableUpdate,
+                                    readOnly: isLateUpdate,
                                 }}
                                 required
                                 error={!!dealForm.errors.readyTime}
@@ -435,7 +435,7 @@ export const DealForm = (props) => {
                                     shrink: true,
                                 }}
                                 InputProps={{
-                                    readOnly: disableUpdate,
+                                    readOnly: isLateUpdate,
                                 }}
                                 type="number"
                                 inputProps={{
@@ -494,7 +494,7 @@ export const DealForm = (props) => {
                                                 errors={skuForm.errors}
                                                 message={skuForm.errors.pricing?.message}
                                                 onFieldChange={handleSearchSkus}
-                                                disabled={disableUpdate}
+                                                disabled={isLateUpdate}
                                             />
                                         </TableCell>
                                         <TableCell>
@@ -508,7 +508,7 @@ export const DealForm = (props) => {
                                                     shrink: true,
                                                 }}
                                                 InputProps={{
-                                                    readOnly: disableUpdate,
+                                                    readOnly: isLateUpdate,
                                                 }}
                                                 inputProps={{
                                                     min: 1
@@ -546,7 +546,7 @@ export const DealForm = (props) => {
                                     message={skuForm.errors.pricing?.message}
                                     onFieldChange={handleSearchSkus}
                                     onValueChange={skuForm.handleSubmit(handleAddSku)}
-                                    disabled={disableUpdate}
+                                    disabled={isLateUpdate}
                                 />
                             </Grid>
                         )}
@@ -559,7 +559,7 @@ export const DealForm = (props) => {
                                     images={productImages}
                                     handleCropCallback={handleCropCallback}
                                     handleRemoveImage={handleRemoveImage}
-                                    disabled={disableUpdate}
+                                    disabled={isLateUpdate}
                                 />
                             </LabelBox>
                         </Grid>
