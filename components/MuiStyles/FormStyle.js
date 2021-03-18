@@ -27,5 +27,11 @@ export const useFormStyles = makeStyles(theme => ({
     helperText: {
         ...theme.typography.body2,
         fontStyle: "italic",
-    }
+    },
+    secondaryIconButton: {
+        "&:hover": {
+            color: theme.palette.secondary.main,
+        }
+    },
+
 }));

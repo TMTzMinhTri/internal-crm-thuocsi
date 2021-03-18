@@ -198,7 +198,12 @@ function render(props) {
 
     async function onSearch() {
         q = formatUrlSearch(search);
-        router.push(`?q=${q}`);
+        router.push({
+            pathname: "/crm/customer",
+            query: {
+                q,
+            }
+        });
 
     }
 
@@ -360,14 +365,14 @@ function render(props) {
                 <TableContainer>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col width="10%" />
-                            <col width="10%" />
-                            <col width="13%" />
+                            <col/>
+                            <col width="20%" />
+                            <col width="20%" />
                             {/* <col width="10%" />
                             <col width="10%" /> */}
                             <col width="10%" />
-                            <col />
-                            <col />
+                            <col width="10%" />
+                            <col width="10%" />
                         </colgroup>
                         <TableHead>
                             <TableRow>
