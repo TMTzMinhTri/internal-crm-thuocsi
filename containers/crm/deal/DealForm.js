@@ -49,9 +49,9 @@ import { getSellerClient } from "client/seller";
 
 
 const defaultValuesDealForm = {
-    startTime: null,
-    endTime: null,
-    readyTime: null,
+    startTime: formatDatetimeFormType(moment().add(1, "d")),
+    endTime: formatDatetimeFormType(moment().add(10, "d")),
+    readyTime: formatDatetimeFormType(moment().add(5, "m")),
     name: "",
     dealType: DealType.DEAL,
     description: "",
