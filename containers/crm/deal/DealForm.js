@@ -477,6 +477,7 @@ export const DealForm = (props) => {
                                             <TableCell align="center">
                                                 <IconButton
                                                     onClick={() => handleRemoveSku(item.sku)}
+                                                    disabled={isLateUpdate}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
