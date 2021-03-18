@@ -28,6 +28,7 @@ export default function ImageUploadField({
     handleCropImage,
     handleCropCallback,
     handleRemoveImage,
+    disabled = false,
 }) {
     const [addProductImageModalOpen, setAddProductImageModalOpen] = useState(
         false
@@ -61,41 +62,45 @@ export default function ImageUploadField({
                             height={100}
                             objectFit="contain"
                         />
-                        <IconButton
-                            style={styles.removeButton}
-                            size="small"
-                            color="secondary"
-                            onClick={() => {
-                                handleRemoveImage?.(url);
-                            }}
-                        >
-                            <Close fontSize="small" />
-                        </IconButton>
+                        {!disabled && (
+                            <IconButton
+                                style={styles.removeButton}
+                                size="small"
+                                color="secondary"
+                                onClick={() => {
+                                    handleRemoveImage?.(url);
+                                }}
+                            >
+                                <Close fontSize="small" />
+                            </IconButton>
+                        )}
                     </Grid>
                 ))
                 }
-                <Grid item>
-                    <Box
-                        style={styles.addButton}
-                        border={2}
-                        borderColor="grey.500"
-                        borderRadius={6}
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        justifyContent="flex-end"
-                        color="grey.500"
-                        height={100}
-                        width={100}
-                        onClick={() => setAddProductImageModalOpen(true)}
-                    >
-                        <Box padding={0.5}>
-                            <AddAPhoto width={30} height={30} />
+                {!disabled && (
+                    <Grid item>
+                        <Box
+                            style={styles.addButton}
+                            border={2}
+                            borderColor="grey.500"
+                            borderRadius={6}
+                            display="flex"
+                            flexDirection="column"
+                            alignItems="center"
+                            justifyContent="flex-end"
+                            color="grey.500"
+                            height={100}
+                            width={100}
+                            onClick={() => setAddProductImageModalOpen(true)}
+                        >
+                            <Box padding={0.5}>
+                                <AddAPhoto width={30} height={30} />
+                            </Box>
+                            <Typography variant="caption" align="center">Thêm hình ảnh</Typography>
+                            <Typography variant="caption" align="center">(Không bắt buộc)</Typography>
                         </Box>
-                        <Typography variant="caption" align="center">Thêm hình ảnh</Typography>
-                        <Typography variant="caption" align="center">(Không bắt buộc)</Typography>
-                    </Box>
-                </Grid>
+                    </Grid>
+                )}
             </Grid >
         </Box>
     );

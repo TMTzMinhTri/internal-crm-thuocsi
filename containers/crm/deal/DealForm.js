@@ -49,9 +49,9 @@ import { getSellerClient } from "client/seller";
 
 
 const defaultValuesDealForm = {
-    startTime: null,
-    endTime: null,
-    readyTime: null,
+    startTime: formatDatetimeFormType(moment().add(1, "d")),
+    endTime: formatDatetimeFormType(moment().add(10, "d")),
+    readyTime: formatDatetimeFormType(moment().add(5, "m")),
     name: "",
     dealType: DealType.DEAL,
     description: "",
@@ -70,6 +70,7 @@ const defaultValuesSkuForm = {
 export const DealForm = (props) => {
     const router = useRouter();
     const toast = useToast();
+    const isLateUpdate = props.isUpdate && moment(props.deal.startTime).isBefore(moment());
     const dealForm = useForm({
         defaultValues: props.isUpdate ? {
             ...props.deal,
@@ -88,7 +89,7 @@ export const DealForm = (props) => {
     const [skuOptions, setSkuOptions] = useState(props.skuOptions ?? []);
     const [skus, setSkus] = useState(props.deal?.skus ?? []);
     const skuForm = useForm({
-        defaultValues: props.isUpdate ? {
+        defaultValues: props.isUpdate && props.deal.dealType === DealType.DEAL ? {
             pricing: {
                 value: props.deal.skus[0].sku,
                 label: props.deal.skus[0].sku,
@@ -250,6 +251,9 @@ export const DealForm = (props) => {
                                         InputLabelProps={{
                                             shrink: true,
                                         }}
+                                        SelectProps={{
+                                            readOnly: isLateUpdate,
+                                        }}
                                         {...field}
                                         onChange={(e) => {
                                             onChange(e);
@@ -274,6 +278,9 @@ export const DealForm = (props) => {
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
+                                InputProps={{
+                                    readOnly: isLateUpdate,
+                                }}
                                 required
                                 error={!!dealForm.errors.name}
                                 helperText={dealForm.errors.name?.message}
@@ -290,6 +297,9 @@ export const DealForm = (props) => {
                                 fullWidth
                                 InputLabelProps={{
                                     shrink: true,
+                                }}
+                                InputProps={{
+                                    readOnly: isLateUpdate,
                                 }}
                                 required
                                 error={!!dealForm.errors.startTime}
@@ -310,8 +320,15 @@ export const DealForm = (props) => {
                                 }}
                                 required
                                 error={!!dealForm.errors.endTime}
-                                helperText={dealForm.errors.endTime?.message}
-                                inputRef={dealForm.register(DealValidation.endTime)}
+                                helperText={dealForm.errors.endTime?.message ?? "Tới thời gian này sẽ kết thúc deal"}
+                                inputRef={dealForm.register({
+                                    ...DealValidation.endTime,
+                                    validate: (data) => {
+                                        if (isLateUpdate && moment(data).isBefore(moment(props.deal.endTime))) {
+                                            return "Thời gian kết thúc mới phải sau thời gian kết thúc cũ"
+                                        }
+                                    }
+                                })}
                             />
                         </Grid>
                         <Grid item xs={12} md={6}>
@@ -323,6 +340,9 @@ export const DealForm = (props) => {
                                 fullWidth
                                 InputLabelProps={{
                                     shrink: true,
+                                }}
+                                InputProps={{
+                                    readOnly: isLateUpdate,
                                 }}
                                 inputProps={{
                                     min: 1,
@@ -395,6 +415,9 @@ export const DealForm = (props) => {
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
+                                InputProps={{
+                                    readOnly: isLateUpdate,
+                                }}
                                 required
                                 error={!!dealForm.errors.readyTime}
                                 helperText={dealForm.errors.readyTime?.message ?? "Tới thời gian này sẽ cho hiển thị trên app/web thuocsi"}
@@ -410,6 +433,9 @@ export const DealForm = (props) => {
                                 fullWidth
                                 InputLabelProps={{
                                     shrink: true,
+                                }}
+                                InputProps={{
+                                    readOnly: isLateUpdate,
                                 }}
                                 type="number"
                                 inputProps={{
@@ -451,6 +477,7 @@ export const DealForm = (props) => {
                                             <TableCell align="center">
                                                 <IconButton
                                                     onClick={() => handleRemoveSku(item.sku)}
+                                                    disabled={isLateUpdate}
                                                 >
                                                     <DeleteIcon />
                                                 </IconButton>
@@ -468,6 +495,7 @@ export const DealForm = (props) => {
                                                 errors={skuForm.errors}
                                                 message={skuForm.errors.pricing?.message}
                                                 onFieldChange={handleSearchSkus}
+                                                disabled={isLateUpdate}
                                             />
                                         </TableCell>
                                         <TableCell>
@@ -479,6 +507,9 @@ export const DealForm = (props) => {
                                                 fullWidth
                                                 InputLabelProps={{
                                                     shrink: true,
+                                                }}
+                                                InputProps={{
+                                                    readOnly: isLateUpdate,
                                                 }}
                                                 inputProps={{
                                                     min: 1
@@ -516,6 +547,7 @@ export const DealForm = (props) => {
                                     message={skuForm.errors.pricing?.message}
                                     onFieldChange={handleSearchSkus}
                                     onValueChange={skuForm.handleSubmit(handleAddSku)}
+                                    disabled={isLateUpdate}
                                 />
                             </Grid>
                         )}
@@ -527,7 +559,9 @@ export const DealForm = (props) => {
                                     title="Cập nhật hình ảnh sản phẩm"
                                     images={productImages}
                                     handleCropCallback={handleCropCallback}
-                                    handleRemoveImage={handleRemoveImage} />
+                                    handleRemoveImage={handleRemoveImage}
+                                    disabled={isLateUpdate}
+                                />
                             </LabelBox>
                         </Grid>
                     </Grid>
@@ -539,7 +573,7 @@ export const DealForm = (props) => {
                         variant="contained"
                     >
                         Quay lại
-                        </Button>
+                    </Button>
                 </Link>
                 <Button
                     variant="contained"
@@ -547,7 +581,7 @@ export const DealForm = (props) => {
                     onClick={dealForm.handleSubmit(handleSubmitDealForm)}
                 >
                     Lưu
-                    </Button>
+                </Button>
             </MyCardActions>
         </MyCard>
     );
