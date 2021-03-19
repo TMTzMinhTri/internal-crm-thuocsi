@@ -71,7 +71,7 @@ async function loadOrderFormData(ctx) {
 
     // Get list payment method
     const paymentClient = getPaymentClient(ctx, {});
-    const paymentResp = await paymentClient.getListPaymentMethod();
+    const paymentResp = await paymentClient.getListPaymentMethod(0, 100, "");
     if (paymentResp.status == "OK") {
         props.paymentMethods = paymentResp.data;
     }

@@ -618,7 +618,7 @@ export const OrderForm = props => {
                             {order.paymentMethod === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
                                 <TableRow>
                                     <TableCell colSpan={5} align="right">
-                                        {props.paymentMethods?.find(method => method.code === order.paymentMethod).subTitle}
+                                        {props.paymentMethods?.find(method => method.code === order.paymentMethod)?.subTitle}
                                     </TableCell>
                                     <TableCell align="right">{formatNumber(Math.abs(order.paymentMethodFee))}</TableCell>
                                 </TableRow>
