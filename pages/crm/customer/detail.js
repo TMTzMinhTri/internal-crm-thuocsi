@@ -3,7 +3,6 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 import CustomerFullDetail, { getCustomerFullDetail } from 'containers/crm/customer/detail/CustomerFullDetail';
 import AppCRM from 'pages/_layout';
 import Head from 'next/head';
-import NotFound from '@thuocsi/nextjs-components/not-found/not-found';
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, loadData)
