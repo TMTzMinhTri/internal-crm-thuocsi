@@ -1,0 +1,48 @@
+.listHead {
+    display: flex;
+    padding: 5px 8px;
+    background: #eee;
+    margin: 0 -8px 4px -8px;
+    border-bottom: 1px solid #999;
+}
+
+.itemContainer {
+    display: flex;
+    padding-bottom: 4;
+}
+
+.orderNo {
+    width: 100px;
+}
+
+.orderNoHead {
+    width: 100px;
+}
+
+.createdTime {
+    width: 20%
+}
+
+.totalPrice {
+    width: 10%;
+    text-align: right;
+    margin-right: 20px;
+}
+
+.status {
+    width: 15%;
+}
+
+.infoLine {
+    display: flex;
+    padding-bottom: 8px;
+}
+
+.label {
+    width: 40%;
+    font-weight: bold;
+}
+
+.value {
+    width: 60%;
+}
