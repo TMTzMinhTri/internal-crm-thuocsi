@@ -1,4 +1,4 @@
-import { faFilter, faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faFilter, faKey, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
     Box,
@@ -276,6 +276,15 @@ function render(props) {
                             </Tooltip>
                         </a>
                     </Link>
+                    <Link href={`/crm/customer/detail?customerCode=${row.code}`}>
+                        <a>
+                            <Tooltip title="Xem thông tin hoạt động của khách hàng">
+                                <IconButton>
+                                    <FontAwesomeIcon icon={faEye} size="sm" />
+                                </IconButton>
+                            </Tooltip>
+                        </a>
+                    </Link>
                     {/* {row.isActive == '-1' ? <Tooltip title="Nhấp vào để mở khóa">
                         <IconButton onClick={() => { setOpenApproveAccountDialog(true); setApprovedCustomerCode(row) }}>
                             <LockIcon fontSize="small" />
@@ -365,7 +374,7 @@ function render(props) {
                 <TableContainer>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col/>
+                            <col />
                             <col width="20%" />
                             <col width="20%" />
                             {/* <col width="10%" />
@@ -395,12 +404,12 @@ function render(props) {
                                 ))}
                             </TableBody>
                         ) : (
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{message}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        )}
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{message}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
 
                         <MyTablePagination
                             labelUnit="khách hàng"
