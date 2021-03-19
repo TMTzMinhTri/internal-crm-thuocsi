@@ -30,7 +30,7 @@ class OrderClient extends APIClient {
         price,
         status,
         limit,
-        ofset,
+        offset,
     }) {
         return this.callFromClient(
             "POST",
@@ -45,8 +45,24 @@ class OrderClient extends APIClient {
                 price,
                 status,
                 limit,
-                ofset,
+                offset,
                 getTotal: true,
+            }
+        )
+    }
+
+    getOrderByFilterFromNextJS({
+        customerCode,
+        limit,
+        offset,
+    }) {
+        return this.callFromNextJS(
+            "POST",
+            `${URI}/order/search`,
+            {
+                customerCode,
+                limit,
+                offset,
             }
         )
     }
