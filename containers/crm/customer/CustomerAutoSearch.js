@@ -19,7 +19,7 @@ export function CustomerAutoSearch(props) {
     async function searchCustomer(q = "") {
         const customerClient = getCustomerClient();
         const customerResp = await customerClient.getCustomerByFilter({ q, limit: 10, offset: 0 });
-        setCustomerOptions(customerResp.data?.map(({ name, code }) => ({ label: name, value: code })) ?? []);
+        setCustomerOptions(customerResp.data?.map(({ name, code, phone }) => ({ label: `${code} - ${phone} - ${name}`, value: code })) ?? []);
     }
 
     return <Box style={{ marginBottom: 12 }}>

@@ -2,6 +2,7 @@ import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/
 import { Box } from '@material-ui/core';
 import { formatDateTime } from 'components/global';
 import styles from './detail.module.css'
+import { getTicketClient } from 'client/ticket';
 /**
  * Get ticket data of customer. This data is needed to use CustomerTicketList component.
  * @param {object} param.ctx
@@ -9,19 +10,12 @@ import styles from './detail.module.css'
  * @param {string} param.customerCode code of customer 
  */
 export async function getCustomerTicketList({ ctx, data, customerCode }) {
-    // return getOrderClient(ctx, data)
-    //     .getOrderByFilterFromNextJS({
-    //         offset: 0,
-    //         limit: 20,
-    //         customerCode: customerCode
-    //     })
-
-    // mock
-    return new Promise(function (resolve) {
-        resolve({
-            status: "NOT_FOUND",
+    return await getTicketClient(ctx, data)
+        .getTicketByFilter({
+            offset: 0,
+            limit: 20,
+            customerCode: customerCode
         })
-    })
 }
 
 /**
@@ -35,6 +29,8 @@ export default function CustomerTicketList({ ticketList }) {
             <MyCardContent>
                 <Box className={styles.listHead}>
                     <span className={styles.orderNoHead}>Mã yêu cầu</span>
+                    <span className={styles.saleOrderID}>ID đơn hàng</span>
+                    <span className={styles.orderNoHead}>Mã đơn hàng</span>
                     <span className={styles.createdTime}>Thời gian</span>
                     <span className={styles.totalPrice}>Người xử lý</span>
                     <span className={styles.status}>Trạng thái</span>
