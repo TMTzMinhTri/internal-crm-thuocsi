@@ -65,25 +65,21 @@ export var theme = createMuiTheme({
 export default function App(props) {
     const router = useRouter();
     const [showLoader, setShowLoader] = React.useState(true)
-    const [showBackdrop, setShowBackdrop] = React.useState(false)
+    const [showLoaderText, setShowLoaderText] = React.useState(true)
 
+    // do once
     useEffect(() => {
-        let routeChangeStart = () => setShowBackdrop(true);
-        let routeChangeComplete = () => setShowBackdrop(false);
 
-        router.events.on("routeChangeStart", routeChangeStart);
-        router.events.on("routeChangeComplete", routeChangeComplete);
-        router.events.on("routeChangeError", routeChangeComplete);
+        // setup first loading
         setTimeout(() => {
+            setShowLoaderText(false)
             setShowLoader(false)
         }, 500)
-        return () => {
-            router.events.off("routeChangeStart", routeChangeStart);
-            router.events.off("routeChangeComplete", routeChangeComplete);
-            router.events.off("routeChangeError", routeChangeComplete);
-        }
-    }, []
-    )
+
+        // setup loading when navigate
+        return setupLoading(router, setShowLoader)
+    }, [])
+
     const { Component, pageProps } = props
 
     if (pageProps.loggedIn) {
@@ -98,7 +94,7 @@ export default function App(props) {
                         </Backdrop>
                     </Layout>
                 </ToastProvider>
-                <Loader show={showLoader}></Loader>
+                <Loader show={showLoader} showText={showLoaderText}></Loader>
             </ThemeProvider>
         )
     } else {
