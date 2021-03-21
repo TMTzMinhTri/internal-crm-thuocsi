@@ -203,8 +203,8 @@ const render = (props) => {
                 </MyCardHeader>
                 <MyCardActions>
                     <Grid container spacing={3} alignItems="center">
-                        <Grid item xs={12} sm={4}>
-                            <Paper className={styles.search}>
+                        {/* <Grid item xs={12} sm={4}> */}
+                            {/* <Paper className={styles.search}>
                                 <InputBase
                                     id="q"
                                     name="q"
@@ -226,8 +226,8 @@ const render = (props) => {
                                 >
                                     <SearchIcon />
                                 </IconButton>
-                            </Paper>
-                        </Grid>
+                            </Paper> */}
+                        {/* </Grid> */}
                         <Grid item xs={12} sm={2}>
                             <Controller
                                 control={filterForm.control}

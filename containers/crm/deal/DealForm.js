@@ -60,12 +60,12 @@ const defaultValuesDealForm = {
     imageUrls: [],
     isFlashSale: false,
     maxQuantity: 1,
-    price: 1,
+    price: 10000,
     skus: [],
 }
 const defaultValuesSkuForm = {
     pricing: null,
-    quantity: 0,
+    quantity: 1,
 }
 export const DealForm = (props) => {
     const router = useRouter();
@@ -174,15 +174,16 @@ export const DealForm = (props) => {
     }
 
     const handleAddSku = async (formData) => {
-        const { pricing: { sku, sellerCode }, quantity } = formData;
+        console.log(formData)
+        const { pricing: { sku, label, sellerCode }, quantity } = formData;
         if (dealType === DealType.COMBO) {
-            setSkus([...skus, { sku, sellerCode, quantity }]);
+            setSkus([...skus, { sku, label, sellerCode, quantity }]);
             skuForm.reset({
                 pricing: null,
                 quantity: 0,
             });
         } else {
-            setSkus([{ sku, sellerCode, quantity: 1 }]);
+            setSkus([{ sku, label, sellerCode, quantity: 1 }]);
         }
     }
 
@@ -465,15 +466,17 @@ export const DealForm = (props) => {
                                     <col width="10%" />
                                 </colgroup>
                                 <TableHead>
-                                    <TableCell>sku</TableCell>
-                                    <TableCell>Số lượng</TableCell>
-                                    <TableCell align="center">Thao tác</TableCell>
+                                    <TableRow>
+                                        <TableCell>sku</TableCell>
+                                        <TableCell align="center">Số lượng</TableCell>
+                                        <TableCell align="center">Thao tác</TableCell>
+                                    </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {skus.map((item, index) => (
                                         <TableRow key={index}>
-                                            <TableCell>{item.sku}</TableCell>
-                                            <TableCell>{item.quantity}</TableCell>
+                                            <TableCell><b>{item.sku}</b> - {item.label}</TableCell>
+                                            <TableCell align="center">{item.quantity}</TableCell>
                                             <TableCell align="center">
                                                 <IconButton
                                                     onClick={() => handleRemoveSku(item.sku)}
