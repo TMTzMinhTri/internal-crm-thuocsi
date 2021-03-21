@@ -6,7 +6,7 @@ import { DealForm } from "containers/crm/deal/DealForm";
 import { getPricingClient } from "client/pricing";
 import { getDealClient } from "client/deal";
 import { unknownErrorText } from "components/commonErrors";
-import { getSellerClient } from "client/seller";
+import { getProductClient } from "client/product";
 
 async function loadDealData(ctx) {
     const dealCode = ctx.query.dealCode;
@@ -32,31 +32,31 @@ async function loadDealData(ctx) {
     props.deal = dealResp.data[0];
 
     const pricingClient = getPricingClient(ctx, {});
-    const sellerClient = getSellerClient(ctx, {});
-    const skusResp = await pricingClient.getListPricingByFilter({ offset: 0, limit: 100 });
-    const productMap = {};
-    const productCodes = [];
-    const sellerMap = {};
-    const sellerCodes = [];
-    skusResp.data?.forEach(({ productCode, sellerCode }) => {
-        if (!productMap[productCode]) {
-            productCodes.push(productCode);
-            productMap[productCode] = true;
-        }
-        if (!sellerMap[sellerCode]) {
-            sellerCodes.push(sellerCode);
-            sellerMap[sellerCode] = true;
+    const productClient = getProductClient(ctx, {});
+    const skusResp = await pricingClient.getListPricingByFilter({ offset: 0, limit: 100, q: "", status: "ACTIVE" });
+    const skuMap = {};
+    skusResp.data?.forEach(({ sku }) => {
+        if (!skuMap[sku]) {
+            skuMap[sku] = true;
         }
     });
-    const [productResp, sellerResp] = await Promise.all([
-        pricingClient.getListProductByProductCode(productCodes),
-        sellerClient.getSellerBySellerCodes(sellerCodes),
-    ])
-    props.skuOptions = skusResp.data?.map(({ sellerCode, sku, productCode }) => {
-        const product = productResp.data?.find(prd => prd.code === productCode);
-        const seller = sellerResp.data?.find(seller => seller.code === sellerCode);
-        return ({ value: sku, label: `${product?.name} - ${seller?.name ?? sellerCode}`, sellerCode, sku })
+
+    props.deal.skus.forEach(({ sku }) => {
+        if (!skuMap[sku]) {
+            skuMap[sku] = true;
+        }
+    });
+
+    const productResp = productClient.getProductBySKUs(Object.keys(skuMap));
+
+    props.skuOptions = productResp.data?.map(({ sku, seller, name }) => {
+        return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
     }) ?? [];
+
+    props.deal.skus = props.deal.skus.map((data) => {
+        const { label } = props.skuOptions.find(product => product.sku === data.sku);
+        return { ...data, label }
+    });
 
     return {
         props,
