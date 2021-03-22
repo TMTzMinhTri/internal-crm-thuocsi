@@ -1,5 +1,5 @@
 import { faDollarSign, faPercentage, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { Backdrop, CircularProgress, createMuiTheme, ThemeProvider } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
 import Loader from '@thuocsi/nextjs-components/loader/loader';
@@ -89,9 +89,6 @@ export default function App(props) {
                 <ToastProvider>
                     <Layout className={styles.blank} loggedInUserInfo={pageProps.loggedInUserInfo} menu={menu} title="CRM">
                         <Component {...pageProps} />
-                        <Backdrop style={{ zIndex: theme.zIndex.drawer + 1, color: '#fff' }} className={styles.backdrop} open={showBackdrop}>
-                            <CircularProgress color="inherit" />
-                        </Backdrop>
                     </Layout>
                 </ToastProvider>
                 <Loader show={showLoader} showText={showLoaderText}></Loader>
