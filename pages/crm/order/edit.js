@@ -7,7 +7,6 @@ import { getDeliveryClient } from "client/delivery";
 import { getMasterDataClient } from "client/master-data";
 import { getOrderClient } from "client/order";
 import { getPaymentClient } from "client/payment";
-import { getSellerClient } from "client/seller";
 import { getProductClient } from "client/product";
 import { OrderForm } from 'containers/crm/order/edit/OrderForm';
 import { NotFound } from 'components/components-global';
@@ -85,43 +84,26 @@ async function loadOrderFormData(ctx) {
     }
 
     const productClient = getProductClient(ctx, {});
-    const sellerClient = getSellerClient(ctx, {});
     const skuMap = {};
-    const skuCodes = [];
-    const productMap = {};
-    const productCodes = [];
-    const sellerMap = {};
-    const sellerCodes = [];
-    orderItemResp.data.forEach(({ productSku, sellerCode }) => {
+    orderItemResp.data.forEach(({ productSku }) => {
         if (productSku && !skuMap[productSku]) {
             skuMap[productSku] = true;
-            skuCodes.push(productSku);
-        }
-        if (sellerCode && !sellerMap[sellerCode]) {
-            sellerMap[sellerCode] = true;
-            sellerCodes.push(sellerCode);
         }
     });
-    const [productResp, sellerResp] = await Promise.all([
-        productClient.getProductBySKUs(skuCodes),
-        sellerClient.getSellerBySellerCodes(sellerCodes)
-    ])
-    productResp.data?.forEach(product => {
-        productMap[product.code] = product;
+    const productResp = await productClient.getProductBySKUs(Object.keys(skuMap));
+    productResp.data?.forEach((product) => {
+        const { sku } = product;
+        skuMap[sku] = product;
     });
-    sellerResp.data?.forEach(seller => {
-        sellerMap[seller.code] = seller;
-    });
+    props.orderItems = orderItemResp.data.map(orderItem => {
+        const {seller, ...product} = skuMap[orderItem.productSku];
+        return {
+            ...orderItem,
+            product,
+            seller,
+        }
+    })
 
-    props.orderItems = orderItemResp.data.map(orderItem => ({
-        ...orderItem,
-        product: productMap[skuMap[orderItem.productSku].productCode] ?? null,
-        seller: sellerMap[orderItem.sellerCode] ?? null,
-    }))
-    props.productMap = productMap;
-    props.productCodes = productCodes;
-    props.sellerMap = sellerMap;
-    props.sellerCodes = sellerCodes;
     return { props };
 }
 
@@ -144,7 +126,7 @@ const breadcrumb = [
 ]
 export function render(props) {
     if (!props.order) {
-        return <NotFound titlePage="Thông tin đơn hàng" labelLink="Danh sách đơn hàng" link="/crm/order"/>
+        return <NotFound titlePage="Thông tin đơn hàng" labelLink="Danh sách đơn hàng" link="/crm/order" />
     }
     return (
         <AppCRM select="/crm/order" breadcrumb={breadcrumb}>

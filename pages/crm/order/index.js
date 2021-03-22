@@ -34,7 +34,7 @@ import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/
 import { OrderFilter } from "containers/crm/order/OrderFilter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
-import { OrderStatus, OrderStatusColor } from "view-models/order";
+import { OrderStatusColor, OrderStatusLabel } from "view-models/order";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -112,7 +112,7 @@ const RenderRow = (row, i) => (
                 disabled
             >
                 {
-                    OrderStatus[row.data.status]
+                    OrderStatusLabel[row.data.status] ?? "Không xác định"
                 }
                 {/* {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
                     : row.data.status === "Canceled" ? "Hủy bỏ" : "-"} */}
