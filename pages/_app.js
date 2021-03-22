@@ -1,5 +1,5 @@
 import { faDollarSign, faPercentage, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { Backdrop, CircularProgress, createMuiTheme, ThemeProvider } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
 import Loader from '@thuocsi/nextjs-components/loader/loader';
@@ -65,25 +65,21 @@ export var theme = createMuiTheme({
 export default function App(props) {
     const router = useRouter();
     const [showLoader, setShowLoader] = React.useState(true)
-    const [showBackdrop, setShowBackdrop] = React.useState(false)
+    const [showLoaderText, setShowLoaderText] = React.useState(true)
 
+    // do once
     useEffect(() => {
-        let routeChangeStart = () => setShowBackdrop(true);
-        let routeChangeComplete = () => setShowBackdrop(false);
 
-        router.events.on("routeChangeStart", routeChangeStart);
-        router.events.on("routeChangeComplete", routeChangeComplete);
-        router.events.on("routeChangeError", routeChangeComplete);
+        // setup first loading
         setTimeout(() => {
+            setShowLoaderText(false)
             setShowLoader(false)
         }, 500)
-        return () => {
-            router.events.off("routeChangeStart", routeChangeStart);
-            router.events.off("routeChangeComplete", routeChangeComplete);
-            router.events.off("routeChangeError", routeChangeComplete);
-        }
-    }, []
-    )
+
+        // setup loading when navigate
+        return setupLoading(router, setShowLoader)
+    }, [])
+
     const { Component, pageProps } = props
 
     if (pageProps.loggedIn) {
@@ -93,12 +89,9 @@ export default function App(props) {
                 <ToastProvider>
                     <Layout className={styles.blank} loggedInUserInfo={pageProps.loggedInUserInfo} menu={menu} title="CRM">
                         <Component {...pageProps} />
-                        <Backdrop style={{ zIndex: theme.zIndex.drawer + 1, color: '#fff' }} className={styles.backdrop} open={showBackdrop}>
-                            <CircularProgress color="inherit" />
-                        </Backdrop>
                     </Layout>
                 </ToastProvider>
-                <Loader show={showLoader}></Loader>
+                <Loader show={showLoader} showText={showLoaderText}></Loader>
             </ThemeProvider>
         )
     } else {
