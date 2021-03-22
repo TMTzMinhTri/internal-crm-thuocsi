@@ -659,7 +659,7 @@ export const OrderForm = props => {
                     variant="contained"
                     color="primary"
                     onClick={orderForm.handleSubmit(handleSubmitOrder)}
-                    disabled={props.order.status != 'WaitConfirm'}
+                    disabled={props.order.status == OrderStatus.CONFIRMED}
                     style={{ margin: 8 }}
                 >
                     {loading && <CircularProgress size={20} />}
