@@ -13,7 +13,7 @@ class DeliveryClient extends APIClient {
     getListDelivery(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
-            `${PREFIX}/delivery-platform/list`,
+            `${PREFIX}/delivery-platforms/list`,
             {
                 q,
                 offset,
