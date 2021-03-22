@@ -13,7 +13,7 @@ class PaymentClient extends APIClient {
     getListPaymentMethod(offset, limit, q) {
         return this.callFromNextJS(
             "GET",
-            `${PREFIX}/payment-method/list`,
+            `${PREFIX}/payment-methods/list`,
             {
                 q,
                 offset,

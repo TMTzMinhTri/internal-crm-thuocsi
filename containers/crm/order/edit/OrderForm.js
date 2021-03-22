@@ -522,21 +522,25 @@ export const OrderForm = props => {
                     <Table variant="outlined"
                         size="small" aria-label="a dense table">
                         <colgroup>
-                            <col />
-                            <col width="30%" />
+                            <col width="3%"/>
                             <col width="20%" />
-                            <col width="20%" />
-                            <col width="15%" />
+                            <col width="10%" />
+                            <col width="5%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
                             <col width="10%" />
                         </colgroup>
                         <TableHead>
                             <TableRow>
                                 <TableCell align="center">STT</TableCell>
                                 <TableCell align="left">Sản phẩm</TableCell>
-                                <TableCell align="left">Tên người bán</TableCell>
-                                <TableCell align="right">Số lượng</TableCell>
-                                <TableCell align="right">Giá</TableCell>
-                                <TableCell align="right">Thành tiền</TableCell>
+                                <TableCell align="left">Tên nhà bán hàng</TableCell>
+                                <TableCell align="right">Số lượng (3)</TableCell>
+                                <TableCell align="right">Giá gốc (4)</TableCell>
+                                <TableCell align="right">Phí dịch vụ (5)</TableCell>
+                                <TableCell align="right">Giá bán (6)</TableCell>
+                                <TableCell align="right">Thành tiền (7 = 3 x 4 + 5)</TableCell>
                             </TableRow>
                         </TableHead>
                         {orderItems && orderItems.length > 0 ? (
@@ -544,7 +548,7 @@ export const OrderForm = props => {
                                 {orderItems.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell align="center">{i + 1}</TableCell>
-                                        <TableCell align="left">{row.productSku} - {row.product?.name ?? row.productCode}</TableCell>
+                                        <TableCell align="left"><b>{row.productSku}</b> - {row.product?.name ?? row.productCode}</TableCell>
                                         <TableCell align="left">{row.seller?.name ?? row.sellerCode}</TableCell>
                                         <TableCell align="right">
                                             {row.product?.deal && (
@@ -556,6 +560,7 @@ export const OrderForm = props => {
                                                         <TextField
                                                             variant="outlined"
                                                             size="small"
+                                                            style={{width: '100px'}}
                                                             value={row.quantity}
                                                             type="number"
                                                             fullWidth
@@ -595,6 +600,10 @@ export const OrderForm = props => {
                                             )}
                                         </TableCell>
                                         <TableCell align="right">{formatNumber(row.price)}</TableCell>
+                                        <TableCell align="right">
+                                            {formatNumber(row.feesApply?.total) || 0}   
+                                        </TableCell>
+                                        <TableCell align="right">{formatNumber(row.salePrice)}</TableCell>
                                         <TableCell align="right">{formatNumber(row.totalPrice)}</TableCell>
                                     </TableRow>
                                 ))}
@@ -608,23 +617,23 @@ export const OrderForm = props => {
                         )}
                         <TableFooter className={formStyles.tableFooter}>
                             <TableRow>
-                                <TableCell colSpan={5} align="right">Phí vận chuyển</TableCell>
+                                <TableCell colSpan={7} align="right">Phí vận chuyển</TableCell>
                                 <TableCell align="right">{formatNumber(order.deliveryPlatformFee)}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell colSpan={5} align="right">Giảm giá</TableCell>
+                                <TableCell colSpan={7} align="right">Giảm giá</TableCell>
                                 <TableCell align="right">{formatNumber(order.totalDiscount)}</TableCell>
                             </TableRow>
                             {order.paymentMethod === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
                                 <TableRow>
-                                    <TableCell colSpan={5} align="right">
+                                    <TableCell colSpan={7} align="right">
                                         {props.paymentMethods?.find(method => method.code === order.paymentMethod)?.subTitle}
                                     </TableCell>
                                     <TableCell align="right">{formatNumber(Math.abs(order.paymentMethodFee))}</TableCell>
                                 </TableRow>
                             )}
                             <TableRow>
-                                <TableCell colSpan={5} style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} align="right">Tổng tiền</TableCell>
+                                <TableCell colSpan={7} style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} align="right">Tổng tiền</TableCell>
                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>
                                     {formatNumber(order.totalPrice)}
                                 </TableCell>
