@@ -37,6 +37,7 @@ import Router, { useRouter } from "next/router";
 import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
 import styles from "./customer.module.css";
+import { CustomerDetailDrawer } from "containers/crm/order/CustomerDetailDrawer";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -142,6 +143,7 @@ function render(props) {
     });
     const { limit, page, count } = pagination;
     const { error, success } = useToast();
+    const [selectedCustomer, setSelectedCustomer] = useState(null);
 
     useEffect(() => {
         setPagination({
@@ -242,7 +244,7 @@ function render(props) {
         let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định";
         return (
             <TableRow>
-                <TableCell component="th" scope="row">
+                <TableCell component="th" scope="row" onClick={() => setSelectedCustomer(row)}>
                     {row.code}
                 </TableCell>
                 <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.name, 30)}</TableCell>
@@ -404,12 +406,12 @@ function render(props) {
                                 ))}
                             </TableBody>
                         ) : (
-                                <TableBody>
-                                    <TableRow>
-                                        <TableCell colSpan={3} align="left">{message}</TableCell>
-                                    </TableRow>
-                                </TableBody>
-                            )}
+                            <TableBody>
+                                <TableRow>
+                                    <TableCell colSpan={3} align="left">{message}</TableCell>
+                                </TableRow>
+                            </TableBody>
+                        )}
 
                         <MyTablePagination
                             labelUnit="khách hàng"
@@ -419,6 +421,7 @@ function render(props) {
                             onChangePage={handlePageChange}
                         />
                     </Table>
+                    <CustomerDetailDrawer customer={selectedCustomer} levels={props.condUserType} onClose={() => setSelectedCustomer(null)} />
                 </TableContainer>
             </MyCard>
         </AppCRM>
