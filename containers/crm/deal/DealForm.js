@@ -585,7 +585,7 @@ export const DealForm = (props) => {
                             />
                         </Grid>
                         <Grid item xs={12}>
-                            <LabelBox label="Hình ảnh sản phẩm" padding={1}>
+                            <LabelBox label="Hình ảnh sản phẩm" padding={1} minHeight={108}>
                                 <ImageUploadField
                                     title="Cập nhật hình ảnh sản phẩm"
                                     images={productImages}
