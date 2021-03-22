@@ -2,7 +2,7 @@ import { faDollarSign, faPercentage, faUsers } from '@fortawesome/free-solid-svg
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
-import Loader from '@thuocsi/nextjs-components/loader/loader';
+import Loader, { setupLoading } from '@thuocsi/nextjs-components/loader/loader';
 import { ToastProvider } from "@thuocsi/nextjs-components/toast/providers/ToastProvider";
 import { useRouter } from "next/router";
 import React, { useEffect } from 'react';
