@@ -3,9 +3,21 @@ export const OrderPaymentMethod = {
 }
 
 export const OrderStatus = {
-    WAIT_CONFIRM: "WaitConfirm",
-    CONFIRMED: "Confirmed",
-    CANCELED: "Canceled",
+    WAIT_TO_CONFIRM: "Chờ xác nhận",
+    CONFIRMED: "Đã xác nhận",
+    PROCESSING:"Đang xử lý",
+    DELIVERING:"Đang vận chuyển",
+    CANCEL:"Đã hủy",
+    COMPLETED:"Đã hoàn tất",
+}
+
+export const OrderStatusColor = {
+    WAIT_TO_CONFIRM: "green",
+    CONFIRMED: "blue",
+    PROCESSING:"blue",
+    DELIVERING:"blue",
+    CANCEL:"red",
+    COMPLETED:"blue",
 }
 
 export const OrderValidation = {

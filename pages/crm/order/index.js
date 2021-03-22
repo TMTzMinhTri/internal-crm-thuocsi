@@ -34,6 +34,7 @@ import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/
 import { OrderFilter } from "containers/crm/order/OrderFilter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { OrderStatus, OrderStatusColor } from "view-models/order";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -91,13 +92,6 @@ async function getOrderByFilter(data, limit, offset) {
     return res;
 }
 
-const statusColor = {
-    "WaitConfirm": "blue",
-    "Confirmed": "green",
-    "Canceled": "red",
-    "undefined": "grey",
-};
-
 const RenderRow = (row, i) => (
     <TableRow key={i}>
         <TableCell component="th" scope="row">{row.data.orderNo}</TableCell>
@@ -114,11 +108,14 @@ const RenderRow = (row, i) => (
             <Button
                 size="small"
                 variant="outlined"
-                style={{ color: statusColor[row.data.status], borderColor: statusColor[row.data.status] }}
+                style={{ color: OrderStatusColor[row.data.status], borderColor: OrderStatusColor[row.data.status] }}
                 disabled
             >
-                {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
-                    : row.data.status === "Canceled" ? "Hủy bỏ" : "-"}
+                {
+                    OrderStatus[row.data.status]
+                }
+                {/* {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
+                    : row.data.status === "Canceled" ? "Hủy bỏ" : "-"} */}
             </Button>
         </TableCell>
         <TableCell align="center">
