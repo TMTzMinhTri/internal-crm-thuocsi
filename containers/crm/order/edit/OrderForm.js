@@ -601,7 +601,7 @@ export const OrderForm = props => {
                                         </TableCell>
                                         <TableCell align="right">{formatNumber(row.price)}</TableCell>
                                         <TableCell align="right">
-                                            {formatNumber(row.feesApply.total)}   
+                                            {formatNumber(row.feesApply?.total) || 0}   
                                         </TableCell>
                                         <TableCell align="right">{formatNumber(row.salePrice)}</TableCell>
                                         <TableCell align="right">{formatNumber(row.totalPrice)}</TableCell>
