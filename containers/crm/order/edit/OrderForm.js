@@ -14,7 +14,6 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Chip,
     Typography
 } from "@material-ui/core";
 import { Save as SaveIcon, Delete as DeleteIcon } from "@material-ui/icons";
