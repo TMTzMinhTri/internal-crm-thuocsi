@@ -145,7 +145,6 @@ export const OrderForm = props => {
     const order = orderForm.watch();
     // Prevent item object reference
     const [orderItems, setOrderItems] = useState(props.orderItems?.map(values => ({ ...values })) ?? []);
-    console.log(orderItems)
     // For logging old value of Order item quantity to compare
     const [orderItemQuantyMap, setOrderItemQuantyMap] = useState(props.orderItems.reduce((acc, cur) => {
         acc[cur.orderItemNo] = cur.quantity;
