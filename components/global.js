@@ -91,15 +91,27 @@ export const scopes = [
 
 export const orderStatus = [
     {
-        value: "Confirmed",
+        value: "CONFIRMED",
         label: "Đã xác nhận",
     },
     {
-        value: "WaitConfirm",
+        value: "PROCESSING",
+        label: "Đang xử lý",
+    },
+    {
+        value: "DELIVERING",
+        label: "Đang giao hàng",
+    },
+    {
+        value: "COMPLETED",
+        label: "Hoàn tất",
+    },
+    {
+        value: "WAIT_TO_CONFIRM",
         label: "Chờ xác nhận",
     },
     {
-        value: "Canceled",
+        value: "CANCEL",
         label: "Hủy bỏ",
     }
 ]
