@@ -1,3 +1,25 @@
+export const CustomerStatus = {
+    ACTIVE: "ACTIVE",
+    INACTIVE: "INACTIVE"
+}
+
+export const CustomerStatusLabel = {
+    [CustomerStatus.ACTIVE]: "Đang hoạt động",
+    [CustomerStatus.INACTIVE]: "Chưa kích hoạt",
+}
+
+export const CustomerScope = {
+    PHARMACY: "PHARMACY",
+    CLINIC: "CLINIC",
+    DRUGSTORE: "DRUGSTORE"
+}
+
+export const CustomerScopeLabel = {
+    [CustomerScope.PHARMACY]: "Nhà thuốc",
+    [CustomerScope.CLINIC]: "Phòng khám",
+    [CustomerScope.DRUGSTORE]: "Quầy thuốc"
+}
+
 export const customerValidation = {
     point: {
         min: {
