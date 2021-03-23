@@ -1,3 +1,24 @@
+@media only screen and (min-width: 800px) {
+    .flexContainer {
+        display: flex;
+        flex-direction: row;
+        margin: 0 -10px;
+    }
+    .flexContainer .flexContent {
+        width: 50%;
+        padding: 0 10px;
+    }
+}
+
+.actionLink {
+    color: #aac !important;
+    text-decoration: none;
+}
+
+.actionLink:hover {
+    color: #fff !important;
+}
+
 .listHead {
     display: flex;
     padding: 5px 8px;
@@ -45,4 +66,16 @@
 
 .value {
     width: 60%;
+}
+
+.customerLevel {
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    padding: 4px 14px 1px 10px;
+    background: #666;
+    border: solid 1px #000;
+    border-left: solid 3px #000;
+    display: inline-block;
+    color: #fff;
+    width: 110px;
 }
