@@ -3,6 +3,10 @@ import { getCustomerClient } from 'client/customer';
 import { Box } from '@material-ui/core';
 import { getMasterDataClient } from 'client/master-data';
 import styles from './detail.module.css'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import Authorization from '@thuocsi/nextjs-components/authorization/authorization';
+import Link from "next/link";
 
 function InfoLine({ label, val }) {
     return <Box className={styles.infoLine}>
@@ -38,7 +42,15 @@ export default function CustomerSimpleDetail({ customerInfo }) {
     customerInfo = customerInfo[0]
     return (
         <MyCard>
-            <MyCardHeader title="Thông tin khách hàng" small={true}></MyCardHeader>
+            <MyCardHeader title="Thông tin khách hàng" small={true}>
+                <Authorization requiredScreen="/crm/customer/edit">
+                    <Link href={`/crm/customer/edit?customerCode=${customerInfo.code}`} prefetch={false}>
+                        <a target="_blank" prefetch={false} className={styles.actionLink}>
+                            <FontAwesomeIcon icon={faPencilAlt} /> Cập nhật
+                        </a>
+                    </Link>
+                </Authorization>
+            </MyCardHeader>
             <MyCardContent>
                 <InfoLine label="ID" val={customerInfo.customerID}></InfoLine>
                 <InfoLine label="Mã khách hàng" val={customerInfo.code}></InfoLine>
