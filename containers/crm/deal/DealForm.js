@@ -1,11 +1,3 @@
-import React, { useState } from "react";
-import {
-    MyCard,
-    MyCardActions,
-    MyCardContent,
-    MyCardHeader,
-} from "@thuocsi/nextjs-components/my-card/my-card";
-import LabelBox from "@thuocsi/nextjs-components/editor/label-box/index";
 import {
     Button,
     FormControl,
@@ -21,31 +13,39 @@ import {
     TableHead,
     TableRow,
     TextField,
-    Typography,
+    Typography
 } from "@material-ui/core";
 import { Add as AddIcon, Delete as DeleteIcon } from "@material-ui/icons";
+import LabelBox from "@thuocsi/nextjs-components/editor/label-box/index";
+import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
+import {
+    MyCard,
+    MyCardActions,
+    MyCardContent,
+    MyCardHeader
+} from "@thuocsi/nextjs-components/my-card/my-card";
+import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import { getDealClient } from "client/deal";
+import { getPricingClient } from "client/pricing";
+import { getProductClient } from "client/product";
+import { getSellerClient } from "client/seller";
+import { unknownErrorText } from "components/commonErrors";
+import { formatDatetimeFormType } from "components/global";
+import ImageUploadField from "components/image-upload-field";
+import moment from "moment";
 import Link from "next/link";
-import { Controller, useController, useForm } from "react-hook-form";
 import { useRouter } from "next/router";
-
+import React, { useState } from "react";
+import { Controller, useController, useForm } from "react-hook-form";
 import {
     DealFlashSaleLabel,
     DealStatus,
     DealStatusLabel,
     DealType,
     DealTypeOptions,
-    DealValidation,
+    DealValidation
 } from "view-models/deal";
-import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
-import { getPricingClient } from "client/pricing";
-import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
-import { unknownErrorText } from "components/commonErrors";
-import ImageUploadField from "components/image-upload-field";
-import { getProductClient } from "client/product";
-import { getDealClient } from "client/deal";
-import moment from "moment";
-import { formatDatetimeFormType } from "components/global";
-import { getSellerClient } from "client/seller";
+
 
 
 const defaultValuesDealForm = {
@@ -60,12 +60,12 @@ const defaultValuesDealForm = {
     imageUrls: [],
     isFlashSale: false,
     maxQuantity: 1,
-    price: 1,
+    price: 10000,
     skus: [],
 }
 const defaultValuesSkuForm = {
     pricing: null,
-    quantity: 0,
+    quantity: 1,
 }
 export const DealForm = (props) => {
     const router = useRouter();
@@ -174,15 +174,17 @@ export const DealForm = (props) => {
     }
 
     const handleAddSku = async (formData) => {
-        const { pricing: { sku, sellerCode }, quantity } = formData;
+        console.log(formData)
+        const { pricing: { sku, label, sellerCode }, quantity } = formData;
         if (dealType === DealType.COMBO) {
-            setSkus([...skus, { sku, sellerCode, quantity }]);
+            setSkus([...skus, { sku, label, sellerCode, quantity }]);
             skuForm.reset({
                 pricing: null,
                 quantity: 0,
             });
         } else {
-            setSkus([{ sku, sellerCode, quantity: 1 }]);
+            setSkus([{ sku, label, sellerCode, quantity: 1 }]);
+            dealForm.setValue("name", label)
         }
     }
 
@@ -234,7 +236,7 @@ export const DealForm = (props) => {
             <MyCardHeader title={props.isUpdate ? `Deal #${props.deal.code}` : "Tạo mới deal"} />
             <MyCardContent>
                 <Grid container spacing={8}>
-                    <Grid item xs={12} md={5} container spacing={3}>
+                    <Grid item xs={12} md={5} container spacing={2}>
                         <Grid item xs={12}>
                             <Controller
                                 name="dealType"
@@ -268,7 +270,7 @@ export const DealForm = (props) => {
                                 )}
                             />
                         </Grid>
-                        <Grid item xs={12}>
+                        {/* <Grid item xs={12}>
                             <TextField
                                 name="name"
                                 variant="outlined"
@@ -286,7 +288,7 @@ export const DealForm = (props) => {
                                 helperText={dealForm.errors.name?.message}
                                 inputRef={dealForm.register(DealValidation.name)}
                             />
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12} md={6}>
                             <TextField
                                 name="startTime"
@@ -349,7 +351,7 @@ export const DealForm = (props) => {
                                 }}
                                 required
                                 error={!!dealForm.errors.price}
-                                helperText={dealForm.errors.price?.message}
+                                helperText={dealForm.errors.price?.message ?? "Giá bán ra hiển thị trên website"}
                                 inputRef={dealForm.register({
                                     ...DealValidation.price,
                                     valueAsNumber: true,
@@ -370,6 +372,7 @@ export const DealForm = (props) => {
                                             control={
                                                 <Switch
                                                     color="primary"
+                                                    size="small"
                                                     checked={value === DealStatus.ACTIVE}
                                                     onChange={(_, checked) => dealForm.setValue(name, checked ? DealStatus.ACTIVE : DealStatus.INACTIVE)}
                                                 />
@@ -393,6 +396,7 @@ export const DealForm = (props) => {
                                             control={
                                                 <Switch
                                                     color="primary"
+                                                    size="small"
                                                     checked={value}
                                                     onChange={(_, checked) => dealForm.setValue(name, checked)}
                                                 />
@@ -453,7 +457,7 @@ export const DealForm = (props) => {
                         <Grid item xs={12} />
                         <Grid item xs={12} />
                     </Grid>
-                    <Grid item xs={12} md={5} container spacing={3} alignItems="center">
+                    <Grid item xs={12} md={5} container spacing={2} alignItems="center">
                         <Grid item xs={12}>
                             <Typography variant="h6">Danh sách sản phẩm thuộc deal</Typography>
                         </Grid>
@@ -465,15 +469,17 @@ export const DealForm = (props) => {
                                     <col width="10%" />
                                 </colgroup>
                                 <TableHead>
-                                    <TableCell>sku</TableCell>
-                                    <TableCell>Số lượng</TableCell>
-                                    <TableCell align="center">Thao tác</TableCell>
+                                    <TableRow>
+                                        <TableCell>sku</TableCell>
+                                        <TableCell align="center">Số lượng</TableCell>
+                                        <TableCell align="center">Thao tác</TableCell>
+                                    </TableRow>
                                 </TableHead>
                                 <TableBody>
                                     {skus.map((item, index) => (
                                         <TableRow key={index}>
-                                            <TableCell>{item.sku}</TableCell>
-                                            <TableCell>{item.quantity}</TableCell>
+                                            <TableCell><b>{item.sku}</b> - {item.label}</TableCell>
+                                            <TableCell align="center">{item.quantity}</TableCell>
                                             <TableCell align="center">
                                                 <IconButton
                                                     onClick={() => handleRemoveSku(item.sku)}
@@ -535,6 +541,7 @@ export const DealForm = (props) => {
                             </Table>
                         )}
                         {dealType === DealType.DEAL && (
+                            <>
                             <Grid item xs={12} md={7}>
                                 <MuiSingleAuto
                                     name="pricing"
@@ -550,11 +557,35 @@ export const DealForm = (props) => {
                                     disabled={isLateUpdate}
                                 />
                             </Grid>
+                            <Grid item xs={12}></Grid>
+                            </>
                         )}
                     </Grid>
-                    <Grid item xs={12} md={5} container spacing={3} alignItems="center">
+                    <Grid item xs={12} md={5} container spacing={2} alignItems="center">
                         <Grid item xs={12}>
-                            <LabelBox label="Hình ảnh sản phẩm" padding={1}>
+                            <Typography variant="h6">Tên deal</Typography>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <TextField
+                                name="name"
+                                variant="outlined"
+                                size="small"
+                                label="Tên deal"
+                                fullWidth
+                                InputLabelProps={{
+                                    shrink: true,
+                                }}
+                                InputProps={{
+                                    readOnly: isLateUpdate,
+                                }}
+                                required
+                                error={!!dealForm.errors.name}
+                                helperText={dealForm.errors.name?.message}
+                                inputRef={dealForm.register(DealValidation.name)}
+                            />
+                        </Grid>
+                        <Grid item xs={12}>
+                            <LabelBox label="Hình ảnh sản phẩm" padding={1} minHeight={108}>
                                 <ImageUploadField
                                     title="Cập nhật hình ảnh sản phẩm"
                                     images={productImages}

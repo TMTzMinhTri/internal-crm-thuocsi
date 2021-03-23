@@ -27,7 +27,6 @@ import ModalCustom from "@thuocsi/nextjs-components/simple-dialog/dialogs";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getOrderClient } from "client/order";
 import { getProductClient } from "client/product";
-import { getSellerClient } from "client/seller";
 import { actionErrorText, unknownErrorText } from "components/commonErrors";
 import { formatDatetimeFormType, formatNumber, orderStatus } from "components/global";
 import { useFormStyles } from "components/MuiStyles";
@@ -36,7 +35,7 @@ import Link from "next/link";
 import React, { useCallback, useState } from "react";
 import { Controller, useController, useForm } from "react-hook-form";
 import { formSetter } from "utils/HookForm";
-import { OrderPaymentMethod, OrderStatus } from "view-models/order";
+import { OrderItemValidation, OrderPaymentMethod, OrderStatus } from "view-models/order";
 import { CustomerCard } from "./CustomerCard";
 import { useStyles } from "./Styles";
 
@@ -73,38 +72,26 @@ async function loadOrderFormDataClient({ orderNo }) {
     }
 
     const productClient = getProductClient();
-    const sellerClient = getSellerClient();
     const skuMap = {};
-    const skuCodes = [];
-    const productMap = {};
-    const sellerMap = {};
-    const sellerCodes = [];
-    orderItemResp.data.forEach(({ productSku, sellerCode }) => {
+    orderItemResp.data.forEach(({ productSku }) => {
         if (productSku && !skuMap[productSku]) {
             skuMap[productSku] = true;
-            skuCodes.push(productSku);
-        }
-        if (sellerCode && !sellerMap[sellerCode]) {
-            sellerMap[sellerCode] = true;
-            sellerCodes.push(sellerCode);
         }
     });
-    const [productResp, sellerResp] = await Promise.all([
-        productClient.getProductBySKUsFromClient(skuCodes),
-        sellerClient.getSellerBySellerCodesClient(sellerCodes)
-    ])
-    productResp.data?.forEach(product => {
-        productMap[product.code] = product;
+    const productResp = await productClient.getProductBySKUsFromClient(Object.keys(skuMap));
+    productResp.data?.forEach((sku) => {
+        const { code } = sku;
+        skuMap[code] = sku;
     });
-    sellerResp.data?.forEach(seller => {
-        sellerMap[seller.code] = seller;
-    });
+    props.orderItems = orderItemResp.data.map(orderItem => {
+        const { seller, ...product } = skuMap[orderItem.productSku];
+        return {
+            ...orderItem,
+            product,
+            seller,
+        }
+    })
 
-    props.orderItems = orderItemResp.data.map(orderItem => ({
-        ...orderItem,
-        product: productMap[skuMap[orderItem.productSku].productCode] ?? null,
-        seller: sellerMap[orderItem.sellerCode] ?? null,
-    }))
     return props;
 }
 
@@ -114,10 +101,6 @@ async function loadOrderFormDataClient({ orderNo }) {
  * @param {*} props.message
  * @param {*} props.order
  * @param {*} props.orderItems
- * @param {*} props.productMap
- * @param {*} props.productCodes
- * @param {*} props.sellerMap
- * @param {*} props.sellerCodes
  * @param {*} props.provinces
  * @param {*} props.districts
  * @param {*} props.wards
@@ -129,6 +112,17 @@ export const OrderForm = props => {
     const formStyles = useFormStyles();
     const styles = useStyles();
 
+    const [isDisableUpdate, setIsDisableUpdate] = useState(
+        props.order.status !== OrderStatus.WAIT_TO_CONFIRM
+        && OrderStatus[props.order.status]
+    );
+    const [isDisableChangeStatus, setIsDisableChangeStatus] = useState(
+        (
+            props.order.status === OrderStatus.CANCEL
+            || props.order.status === OrderStatus.COMPLETED
+        )
+        && OrderStatus[props.order.status]
+    );
     const orderForm = useForm({
         defaultValues: {
             ...props.order,
@@ -144,6 +138,7 @@ export const OrderForm = props => {
     const order = orderForm.watch();
     // Prevent item object reference
     const [orderItems, setOrderItems] = useState(props.orderItems?.map(values => ({ ...values })) ?? []);
+    const [orderItemsError, setOrderItemsError] = useState({});
     // For logging old value of Order item quantity to compare
     const [orderItemQuantyMap, setOrderItemQuantyMap] = useState(props.orderItems.reduce((acc, cur) => {
         acc[cur.orderItemNo] = cur.quantity;
@@ -179,6 +174,13 @@ export const OrderForm = props => {
             ],
             orderForm.setValue,
         );
+        setIsDisableUpdate(order.status !== OrderStatus.WAIT_TO_CONFIRM && OrderStatus[order.status]);
+        if (
+            props.order.status === OrderStatus.CANCEL
+            || props.order.status === OrderStatus.COMPLETED
+        ) {
+            setIsDisableChangeStatus(true);
+        }
         if (includeOderItems) {
             setOrderItems(orderItems);
             setOrderItemQuantyMap(orderItems.reduce((acc, cur) => {
@@ -250,6 +252,7 @@ export const OrderForm = props => {
         const arr = [...orderItems];
         const index = arr.findIndex(orderItem => orderItem.orderItemNo === orderItemNo);
         arr[index].quantity = value;
+        setOrderItemsError({ ...orderItemsError, [orderItemNo]: OrderItemValidation.quanitity.validate(orderItemQuantyMap[orderItemNo])(value) })
         setOrderItems(arr);
     }
 
@@ -309,6 +312,7 @@ export const OrderForm = props => {
                             provinces={props.provinces}
                             districts={props.districts}
                             wards={props.wards}
+                            readOnly={isDisableUpdate}
                         />
                     </Grid>
                     <Grid item xs={12} md={5}>
@@ -329,6 +333,9 @@ export const OrderForm = props => {
                                                         size="small"
                                                         InputLabelProps={{
                                                             shrink: true,
+                                                        }}
+                                                        SelectProps={{
+                                                            readOnly: isDisableUpdate
                                                         }}
                                                         error={!!orderForm.errors.deliveryPlatform}
                                                         helperText={orderForm.errors.deliveryPlatform?.message}
@@ -401,6 +408,9 @@ export const OrderForm = props => {
                                                 InputLabelProps={{
                                                     shrink: true,
                                                 }}
+                                                InputProps={{
+                                                    readOnly: isDisableUpdate
+                                                }}
                                                 error={!!orderForm.errors.deliveryDate}
                                                 helperText={orderForm.errors.deliveryDate?.message}
                                                 fullWidth
@@ -424,6 +434,9 @@ export const OrderForm = props => {
                                                         size="small"
                                                         InputLabelProps={{
                                                             shrink: true,
+                                                        }}
+                                                        SelectProps={{
+                                                            readOnly: isDisableUpdate,
                                                         }}
                                                         error={!!orderForm.errors.paymentMethod?.name}
                                                         helperText={orderForm.errors.paymentMethod?.name?.message}
@@ -454,11 +467,13 @@ export const OrderForm = props => {
                                                         InputLabelProps={{
                                                             shrink: true,
                                                         }}
+                                                        SelectProps={{
+                                                            readOnly: isDisableChangeStatus
+                                                        }}
                                                         error={!!orderForm.errors.status}
                                                         helperText={orderForm.errors.status?.message}
                                                         fullWidth
                                                         select
-                                                        disabled={order.status === OrderStatus.CANCELED}
                                                     >
                                                         {orderStatus.map(({ value, label }) => (
                                                             <MenuItem key={value} value={value}>{label}</MenuItem>
@@ -505,6 +520,9 @@ export const OrderForm = props => {
                                             InputLabelProps={{
                                                 shrink: true,
                                             }}
+                                            InputProps={{
+                                                readOnly: isDisableUpdate
+                                            }}
                                             error={!!orderForm.errors.note}
                                             helperText={orderForm.errors.note?.message}
                                             fullWidth
@@ -522,21 +540,25 @@ export const OrderForm = props => {
                     <Table variant="outlined"
                         size="small" aria-label="a dense table">
                         <colgroup>
-                            <col />
-                            <col width="30%" />
+                            <col width="3%" />
                             <col width="20%" />
-                            <col width="20%" />
-                            <col width="15%" />
+                            <col width="10%" />
+                            <col width="7%" />
+                            <col width="10%" />
+                            <col width="10%" />
+                            <col width="10%" />
                             <col width="10%" />
                         </colgroup>
                         <TableHead>
                             <TableRow>
                                 <TableCell align="center">STT</TableCell>
                                 <TableCell align="left">Sản phẩm</TableCell>
-                                <TableCell align="left">Tên người bán</TableCell>
-                                <TableCell align="right">Số lượng</TableCell>
-                                <TableCell align="right">Giá</TableCell>
-                                <TableCell align="right">Thành tiền</TableCell>
+                                <TableCell align="left">Tên nhà bán hàng</TableCell>
+                                <TableCell align="right">Số lượng (3)</TableCell>
+                                <TableCell align="right">Giá gốc (4)</TableCell>
+                                <TableCell align="right">Phí dịch vụ (5)</TableCell>
+                                <TableCell align="right">Giá bán (6)</TableCell>
+                                <TableCell align="right">Thành tiền (7 = 3 x 4 + 5)</TableCell>
                             </TableRow>
                         </TableHead>
                         {orderItems && orderItems.length > 0 ? (
@@ -544,18 +566,19 @@ export const OrderForm = props => {
                                 {orderItems.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell align="center">{i + 1}</TableCell>
-                                        <TableCell align="left">{row.productSku} - {row.product?.name ?? row.productCode}</TableCell>
+                                        <TableCell align="left"><b>{row.productSku}</b> - {row.product?.name ?? row.productCode}</TableCell>
                                         <TableCell align="left">{row.seller?.name ?? row.sellerCode}</TableCell>
                                         <TableCell align="right">
-                                            {row.product?.deal && (
+                                            {(row.product?.deal || isDisableUpdate) && (
                                                 row.quantity
                                             )}
-                                            {!row.product?.deal && (
+                                            {(!row.product?.deal && !isDisableUpdate) && (
                                                 <Grid container spacing={1} alignItems="center">
                                                     <Grid item xs={11}>
                                                         <TextField
                                                             variant="outlined"
                                                             size="small"
+                                                            style={{ width: '100px' }}
                                                             value={row.quantity}
                                                             type="number"
                                                             fullWidth
@@ -567,7 +590,7 @@ export const OrderForm = props => {
                                                                         style={{
                                                                             display: getOrderItemQuantityStyle(row)
                                                                         }}
-                                                                        disabled={loading}
+                                                                        disabled={loading || !!orderItemsError[row.orderItemNo]}
                                                                         onClick={() => handleOderItemQuantityUpdate(row.orderItemNo, row.quantity)}
                                                                     >
                                                                         <SaveIcon fontSize="small" />
@@ -579,6 +602,8 @@ export const OrderForm = props => {
                                                                 max: orderItemQuantyMap[row.orderItemNo],
                                                                 style: { textAlign: 'right' }
                                                             }}
+                                                            error={!!orderItemsError[row.orderItemNo]}
+                                                            helperText={orderItemsError[row.orderItemNo]}
                                                             onChange={e => handleOrderItemQuantityChange(row.orderItemNo, +e.target.value)}
                                                         />
                                                     </Grid>
@@ -595,6 +620,10 @@ export const OrderForm = props => {
                                             )}
                                         </TableCell>
                                         <TableCell align="right">{formatNumber(row.price)}</TableCell>
+                                        <TableCell align="right">
+                                            {formatNumber(row.feesApply?.total) || 0}
+                                        </TableCell>
+                                        <TableCell align="right">{formatNumber(row.salePrice)}</TableCell>
                                         <TableCell align="right">{formatNumber(row.totalPrice)}</TableCell>
                                     </TableRow>
                                 ))}
@@ -608,23 +637,23 @@ export const OrderForm = props => {
                         )}
                         <TableFooter className={formStyles.tableFooter}>
                             <TableRow>
-                                <TableCell colSpan={5} align="right">Phí vận chuyển</TableCell>
+                                <TableCell colSpan={7} align="right">Phí vận chuyển</TableCell>
                                 <TableCell align="right">{formatNumber(order.deliveryPlatformFee)}</TableCell>
                             </TableRow>
                             <TableRow>
-                                <TableCell colSpan={5} align="right">Giảm giá</TableCell>
+                                <TableCell colSpan={7} align="right">Giảm giá</TableCell>
                                 <TableCell align="right">{formatNumber(order.totalDiscount)}</TableCell>
                             </TableRow>
                             {order.paymentMethod === OrderPaymentMethod.PAYMENT_METHOD_BANK && (
                                 <TableRow>
-                                    <TableCell colSpan={5} align="right">
-                                        {props.paymentMethods?.find(method => method.code === order.paymentMethod).subTitle}
+                                    <TableCell colSpan={7} align="right">
+                                        {props.paymentMethods?.find(method => method.code === order.paymentMethod)?.subTitle}
                                     </TableCell>
                                     <TableCell align="right">{formatNumber(Math.abs(order.paymentMethodFee))}</TableCell>
                                 </TableRow>
                             )}
                             <TableRow>
-                                <TableCell colSpan={5} style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} align="right">Tổng tiền</TableCell>
+                                <TableCell colSpan={7} style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }} align="right">Tổng tiền</TableCell>
                                 <TableCell align="right" style={{ fontWeight: 'bold', color: 'black', fontSize: '20px' }}>
                                     {formatNumber(order.totalPrice)}
                                 </TableCell>
@@ -650,7 +679,7 @@ export const OrderForm = props => {
                     variant="contained"
                     color="primary"
                     onClick={orderForm.handleSubmit(handleSubmitOrder)}
-                    disabled={props.order.status != 'WaitConfirm'}
+                    disabled={isDisableChangeStatus}
                     style={{ margin: 8 }}
                 >
                     {loading && <CircularProgress size={20} />}

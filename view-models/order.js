@@ -3,9 +3,30 @@ export const OrderPaymentMethod = {
 }
 
 export const OrderStatus = {
-    WAIT_CONFIRM: "WaitConfirm",
-    CONFIRMED: "Confirmed",
-    CANCELED: "Canceled",
+    WAIT_TO_CONFIRM: "WAIT_TO_CONFIRM",
+    CONFIRMED: "CONFIRMED",
+    PROCESSING: "PROCESSING",
+    DELIVERING: "DELIVERING",
+    CANCEL: "CANCEL",
+    COMPLETED: "COMPLETED",
+}
+
+export const OrderStatusLabel = {
+    [OrderStatus.WAIT_TO_CONFIRM]: "Chờ xác nhận",
+    [OrderStatus.CONFIRMED]: "Đã xác nhận",
+    [OrderStatus.PROCESSING]: "Đang xử lý",
+    [OrderStatus.DELIVERING]: "Đang vận chuyển",
+    [OrderStatus.CANCEL]: "Đã hủy",
+    [OrderStatus.COMPLETED]: "Đã hoàn tất",
+}
+
+export const OrderStatusColor = {
+    [OrderStatus.WAIT_TO_CONFIRM]: "green",
+    [OrderStatus.CONFIRMED]: "blue",
+    [OrderStatus.PROCESSING]: "blue",
+    [OrderStatus.DELIVERING]: "blue",
+    [OrderStatus.CANCEL]: "red",
+    [OrderStatus.COMPLETED]: "blue",
 }
 
 export const OrderValidation = {
@@ -54,5 +75,14 @@ export const OrderValidation = {
     },
     ward: {
         required: "Vui lòng chọn."
+    }
+}
+
+export const OrderItemValidation = {
+    quanitity: {
+        validate: (max) => (value) => {
+            if (value <= 0) return "Số lượng sản phẩm phải lớn hơn 0.";
+            if (value > max) return "Không được tăng số lượng sản phẩm.";
+        }
     }
 }

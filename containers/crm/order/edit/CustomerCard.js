@@ -15,7 +15,7 @@ import { OrderValidation } from "view-models/order";
 import { useStyles } from "./Styles";
 
 export const CustomerCard = (props) => {
-    const { orderForm } = props;
+    const { orderForm, readOnly = false } = props;
     const toast = useToast();
     const formStyles = useFormStyles();
     const styles = useStyles();
@@ -104,6 +104,9 @@ export const CustomerCard = (props) => {
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
+                                InputProps={{
+                                    readOnly,
+                                }}
                                 error={!!orderForm.errors.customerName}
                                 helperText={orderForm.errors.customerName?.message}
                                 fullWidth
@@ -125,6 +128,9 @@ export const CustomerCard = (props) => {
                                 type="number"
                                 InputLabelProps={{
                                     shrink: true,
+                                }}
+                                InputProps={{
+                                    readOnly,
                                 }}
                                 error={!!orderForm.errors.customerPhone}
                                 helperText={orderForm.errors.customerPhone?.message}
@@ -148,6 +154,9 @@ export const CustomerCard = (props) => {
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
+                                    InputProps={{
+                                        readOnly,
+                                    }}
                                     error={!!orderForm.errors.customerShippingAddress}
                                     helperText={orderForm.errors.customerShippingAddress?.message}
                                     fullWidth
@@ -168,6 +177,7 @@ export const CustomerCard = (props) => {
                                             }}
                                             SelectProps={{
                                                 displayEmpty: true,
+                                                readOnly,
                                             }}
                                             error={!!orderForm.errors.customerProvinceCode}
                                             helperText={orderForm.errors.customerProvinceCode?.message}
@@ -196,6 +206,7 @@ export const CustomerCard = (props) => {
                                             }}
                                             SelectProps={{
                                                 displayEmpty: true,
+                                                readOnly
                                             }}
                                             error={customerProvinceCode && !!orderForm.errors.customerDistrictCode}
                                             helperText={customerProvinceCode ? orderForm.errors.customerDistrictCode?.message : ""}
@@ -225,6 +236,7 @@ export const CustomerCard = (props) => {
                                             }}
                                             SelectProps={{
                                                 displayEmpty: true,
+                                                readOnly,
                                             }}
                                             error={customerDistrictCode && !!orderForm.errors.customerWardCode}
                                             helperText={customerDistrictCode ? orderForm.errors.customerWardCode?.message : ""}
