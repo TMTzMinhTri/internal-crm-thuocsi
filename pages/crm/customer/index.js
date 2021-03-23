@@ -38,6 +38,8 @@ import AppCRM from "pages/_layout";
 import React, { useEffect, useState } from "react";
 import styles from "./customer.module.css";
 import { CustomerDetailDrawer } from "containers/crm/order/CustomerDetailDrawer";
+import CustomerStatus from "containers/crm/customer/detail/CustomerStatus";
+import CustomerLevel from "containers/crm/customer/detail/CustomerLevel";
 
 export async function getServerSideProps(ctx) {
     return await doWithLoggedInUser(ctx, (ctx) => {
@@ -126,9 +128,9 @@ function render(props) {
     let router = useRouter();
     const [openApproveAccountDialog, setOpenApproveAccountDialog] = useState(false);
     const [openLockAccountDialog, setOpenLockAccountDialog] = useState(false);
-    const [openActiveAccountDialog, setOpenActiveAccountDialog] = useState(false);
+    // const [openActiveAccountDialog, setOpenActiveAccountDialog] = useState(false);
     const [approvedCustomerCode, setApprovedCustomerCode] = useState();
-    const [activeCustomerCode, setActiveCustomerCode] = useState();
+    // const [activeCustomerCode, setActiveCustomerCode] = useState();
     const [lockedCustomerCode] = useState();
     const [customers, setCustomers] = useState(props.data);
     const [message, setMessage] = useState(props.message);
@@ -172,18 +174,18 @@ function render(props) {
         }
     }
 
-    async function activeAccount() {
-        const _client = getCustomerClient();
-        setOpenActiveAccountDialog(false);
-        const resp = await _client.activeAccount({ code: activeCustomerCode.code, status: "ACTIVE" });
-        if (resp.status !== "OK") {
-            error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
-        } else {
-            props.data.filter(row => row.code === activeCustomerCode.code)[0].status = "ACTIVE";
-            setActiveCustomerCode(null);
-            success("Kích hoạt tài khoản thành công");
-        }
-    }
+    // async function activeAccount() {
+    //     const _client = getCustomerClient();
+    //     setOpenActiveAccountDialog(false);
+    //     const resp = await _client.activeAccount({ code: activeCustomerCode.code, status: "ACTIVE" });
+    //     if (resp.status !== "OK") {
+    //         error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
+    //     } else {
+    //         props.data.filter(row => row.code === activeCustomerCode.code)[0].status = "ACTIVE";
+    //         setActiveCustomerCode(null);
+    //         success("Kích hoạt tài khoản thành công");
+    //     }
+    // }
 
     async function lockAccount() {
         const _client = getCustomerClient();
@@ -240,8 +242,8 @@ function render(props) {
     };
 
     const RenderRow = ({ row }) => {
-        let mainColor = statuses.find((e) => e.value === row.status)?.color || "grey";
-        let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định";
+        // let mainColor = statuses.find((e) => e.value === row.status)?.color || "grey";
+        // let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định";
         return (
             <TableRow>
                 <TableCell component="th" scope="row" onClick={() => setSelectedCustomer(row)}>
@@ -251,11 +253,15 @@ function render(props) {
                 <TableCell className={styles.cellWrap} align="left">{row.email || '-'}</TableCell>
                 {/* <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyName ?? "-", 50)}</TableCell>
                 <TableCell className={styles.cellWrap} align="left">{formatEllipsisText(row.companyAddress ?? "-", 50)}</TableCell> */}
-                <TableCell align="left">{props.condUserType.find(e => e.value === row.level)?.label || '-'}</TableCell>
+                <TableCell align="left">
+                    <CustomerLevel level={row.level}></CustomerLevel>
+                    {/* {props.condUserType.find(e => e.value === row.level)?.label || '-'} */}
+                </TableCell>
                 <TableCell align="right">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
                 <TableCell align="center">
-                    <Button
+                    <CustomerStatus status={row.status} customerCode={row.code}></CustomerStatus>
+                    {/* <Button
                         disabled={row.status == "ACTIVE"}
                         onClick={() => {
                             setOpenActiveAccountDialog(true);
@@ -266,7 +272,7 @@ function render(props) {
                         style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}
                     >
                         {status}
-                    </Button>
+                    </Button> */}
                 </TableCell>
                 <TableCell align="center">
                     <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
@@ -312,11 +318,11 @@ function render(props) {
                 onClose={() => setOpenApproveAccountDialog(false)}
                 onConfirm={() => approveAccount()}
             />
-            <ConfirmActiveDialog
+            {/* <ConfirmActiveDialog
                 open={openActiveAccountDialog}
                 onClose={() => setOpenActiveAccountDialog(false)}
                 onConfirm={() => activeAccount()}
-            />
+            /> */}
             <ConfirmLockDialog
                 open={openLockAccountDialog}
                 onClose={() => setOpenLockAccountDialog(false)}
@@ -406,12 +412,12 @@ function render(props) {
                                 ))}
                             </TableBody>
                         ) : (
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{message}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        )}
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{message}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
 
                         <MyTablePagination
                             labelUnit="khách hàng"

@@ -20,6 +20,18 @@ class OrderClient extends APIClient {
             })
     }
 
+    getOrder(offset, limit, q) {
+        return this.callFromNextJS(
+            "GET",
+            `${URI}/order/list`,
+            {
+                q: q,
+                offset: offset,
+                limit: limit,
+                // getTotal: true
+            })
+    }
+
     getOrderByFilter({
         q,
         orderNo,

@@ -34,7 +34,7 @@ export async function getCustomerTicketList({ ctx, data, customerCode }) {
 export default function CustomerTicketList({ ticketList, customerCode }) {
     return (
         <MyCard>
-            <MyCardHeader title="Danh sách yêu cầu hỗ trợ gần đây" small={true}>
+            <MyCardHeader title="Danh sách phiếu hỗ trợ gần đây" small={true}>
                 <Authorization requiredScreen="/cs/ticket">
                     <Link href={`/cs/ticket?customerCode=${customerCode}`} prefetch={false}>
                         <a target="_blank" prefetch={false} className={styles.actionLink}>
