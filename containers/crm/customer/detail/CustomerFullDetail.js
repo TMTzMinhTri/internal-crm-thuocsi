@@ -1,5 +1,6 @@
 import { Box } from "@material-ui/core";
 import { CustomerAutoSearch } from "../CustomerAutoSearch";
+import CustomerCart, { getCustomerCart } from "./CustomerCart";
 import CustomerHistory, { getCustomerHistory } from "./CustomerHistory";
 import CustomerNote, { getCustomerNote } from "./CustomerNote";
 import CustomerOrderList, { getCustomerOrderList } from "./CustomerOrderList";
@@ -18,7 +19,8 @@ export async function getCustomerFullDetail({ ctx, data, customerCode }) {
         getCustomerHistory({ ctx, data, customerCode }),
         getCustomerOrderList({ ctx, data, customerCode }),
         getCustomerTicketList({ ctx, data, customerCode }),
-        getCustomerNote({ ctx, data, customerCode })
+        getCustomerNote({ ctx, data, customerCode }),
+        getCustomerCart({ ctx, data, customerCode }),
     ], result = {}
 
     // call API & wait parallely
@@ -28,7 +30,8 @@ export async function getCustomerFullDetail({ ctx, data, customerCode }) {
             activitiesData: values[1],
             orderList: values[2]?.data || [],
             ticketList: values[3]?.data || [],
-            noteList: values[4]?.data || []
+            noteList: values[4]?.data || [],
+            cartInfo: values[5]?.data || []
         }
     })
     return result
@@ -52,7 +55,7 @@ function FlexContent({ children }) {
  * @param {object} param.activitiesData
  * @param {object} param.orderList
  */
-export default function CustomerFullDetail({ activitiesData, orderList, customerInfo, ticketList, noteList, customerCode }) {
+export default function CustomerFullDetail({ activitiesData, orderList, customerInfo, ticketList, noteList, cartInfo, customerCode }) {
 
     return (
         <Box>
@@ -64,17 +67,18 @@ export default function CustomerFullDetail({ activitiesData, orderList, customer
                             <CustomerSimpleDetail customerInfo={customerInfo}></CustomerSimpleDetail>
                         </FlexContent>
                         <FlexContent>
-                            <CustomerOrderList orderList={orderList} customerCode={customerCode}></CustomerOrderList>
+                            <CustomerNote noteList={noteList}></CustomerNote>
                         </FlexContent>
                     </FlexContainer>
                     <FlexContainer>
                         <FlexContent>
-                            <CustomerTicketList ticketList={ticketList} customerCode={customerCode}></CustomerTicketList>
+                            <CustomerOrderList orderList={orderList} customerCode={customerCode}></CustomerOrderList>
                         </FlexContent>
                         <FlexContent>
-                            <CustomerNote noteList={noteList}></CustomerNote>
+                            <CustomerTicketList ticketList={ticketList} customerCode={customerCode}></CustomerTicketList>
                         </FlexContent>
                     </FlexContainer>
+                    <CustomerCart cartInfo={cartInfo} customerCode={customerCode}></CustomerCart>
                     <CustomerHistory activitiesData={activitiesData}></CustomerHistory>
                 </Box> : "Không tìm thấy thông tin khách hàng") : ""
             }

@@ -1,5 +1,4 @@
 import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card"
-import { getOrderClient } from "client/order"
 import { formatDateTime } from 'components/global';
 import { formatNumber } from 'components/global';
 import styles from './detail.module.css'
@@ -8,6 +7,7 @@ import { TableHead } from '@material-ui/core';
 import { TableRow } from '@material-ui/core';
 import { TableCell } from '@material-ui/core';
 import { TableBody } from '@material-ui/core';
+import { getCustomerClient } from 'client/customer';
 
 /**
  * Get order data of customer. This data is needed to use CustomerNote component.
@@ -16,8 +16,8 @@ import { TableBody } from '@material-ui/core';
  * @param {string} param.customerCode code of customer 
  */
 export async function getCustomerNote({ ctx, data, customerCode }) {
-    return getOrderClient(ctx, data)
-        .getOrderByFilterFromNextJS({
+    return getCustomerClient(ctx, data)
+        .getCustomerNoteList({
             offset: 0,
             limit: 10,
             customerCode: customerCode
@@ -29,13 +29,14 @@ export async function getCustomerNote({ ctx, data, customerCode }) {
  * @param {[]note} param.noteList
  */
 export default function CustomerNote({ noteList }) {
+    console.log(noteList)
     return (
         <MyCard>
             <MyCardHeader title="Ghi chú về khách hàng gần đây" small={true}></MyCardHeader>
             <MyCardContent>
                 <Table size="small">
                     <colgroup>
-                        <col style={{ width: 120 }} />
+                        <col style={{ width: 180 }} />
                         <col style={{ width: 120 }} />
                         <col />
                         <col />

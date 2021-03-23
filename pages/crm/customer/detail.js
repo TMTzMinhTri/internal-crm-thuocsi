@@ -25,7 +25,7 @@ async function loadData(ctx) {
 }
 
 // do render
-function render({ customerCode, customerInfo, orderList, activitiesData }) {
+function render({ customerCode, customerInfo, orderList, noteList, ticketList, activitiesData }) {
     const breadcrumb = [
         {
             name: "Trang chủ",
@@ -36,7 +36,7 @@ function render({ customerCode, customerInfo, orderList, activitiesData }) {
             link: "/crm/customer"
         },
         {
-            name: "Chi tiết khách hàng",
+            name: "Tra cứu khách hàng",
         },
     ];
 
@@ -50,6 +50,8 @@ function render({ customerCode, customerInfo, orderList, activitiesData }) {
                 customerInfo={customerInfo}
                 orderList={orderList}
                 activitiesData={activitiesData}
+                noteList={noteList}
+                ticketList={ticketList}
             >
             </CustomerFullDetail>
 
