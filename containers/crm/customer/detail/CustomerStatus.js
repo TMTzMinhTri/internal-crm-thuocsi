@@ -1,6 +1,7 @@
 import React from 'react'
 import { Box, Button, Tooltip } from '@material-ui/core';
 import { ConfirmActiveDialog } from 'containers/crm/customer/ConfirmActiveDialog';
+import { getCustomerClient } from 'client/customer';
 
 const statusMap = {
     ACTIVE: {
@@ -33,11 +34,12 @@ export default function CustomerStatus({ status, customerCode }) {
     // handler
     async function activeAccount() {
         const _client = getCustomerClient();
-        setOpenActiveAccountDialog(false);
+
         const resp = await _client.activeAccount({ code: activeCustomerCode.code, status: "ACTIVE" });
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
         } else {
+            setOpenActiveAccountDialog(false);
             props.data.filter(row => row.code === activeCustomerCode.code)[0].status = "ACTIVE";
             setActiveCustomerCode(null);
             success("Kích hoạt tài khoản thành công");
