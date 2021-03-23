@@ -1,4 +1,4 @@
-import { faDollarSign, faPercentage, faUsers } from '@fortawesome/free-solid-svg-icons';
+import { faDollarSign, faGift, faPercentage, faSearch, faStore, faTag, faUserCircle, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
@@ -11,18 +11,26 @@ import styles from "./global.css";
 const menu = [{
     key: "CUSTOMER",
     name: "Khách hàng",
-    link: "/crm/customer",
+    required: "/crm/customer",
     icon: faUsers,
     subMenu: [
         {
             key: "CUSTOMER",
             name: "Khách hàng",
-            link: "/crm/customer"
+            link: "/crm/customer",
+            icon: faStore,
+        },
+        {
+            key: "LOOKUP",
+            name: "Tra cứu",
+            link: "/crm/customer/detail",
+            icon: faSearch,
         },
         {
             key: "ACCOUNT",
             name: "Tài khoản",
-            link: "/crm/account"
+            link: "/crm/account",
+            icon: faUserCircle
         }
     ]
 },
@@ -35,18 +43,20 @@ const menu = [{
 {
     key: "DISCOUNT",
     name: "Khuyến mãi",
-    link: "/crm/promotion",
+    required: "/crm/promotion",
     icon: faPercentage,
     subMenu: [
         {
             key: "DISCOUNT",
             name: "Chương trình khuyến mãi",
-            link: "/crm/promotion"
+            link: "/crm/promotion",
+            icon: faGift
         },
         {
             key: "VOUCHER",
             name: "Mã khuyến mãi",
-            link: "/crm/voucher"
+            link: "/crm/voucher",
+            icon: faTag
         }
     ]
 },
