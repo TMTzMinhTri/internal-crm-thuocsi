@@ -181,7 +181,7 @@ export function formatDateTime(datetime) {
 
 export function formatDatetimeFormType(datetime) {
     if (datetime) {
-        return moment(datetime).utcOffset('+0700').format("YYYY-MM-DDThh:mm")
+        return moment(datetime).utcOffset('+0700').format("YYYY-MM-DDTHH:mm")
     }
     return ''
 }
