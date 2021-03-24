@@ -86,5 +86,15 @@ export const DealValidation = {
                 message: "Số lượng không được nhỏ hơn 1.",
             },
         },
+    },
+    imageUrls: {
+        combo: {
+            required: "Vui lòng chọn hình ảnh sản phẩm.",
+            validate: (value) => {
+                if (Array.isArray(value) && value.length < 2) {
+                    return "Combo phải có tối thiểu 2 hình ảnh sản phẩm.";
+                }
+            }
+        }
     }
 }
