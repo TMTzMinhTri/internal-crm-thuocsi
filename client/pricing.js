@@ -76,7 +76,7 @@ class PricingClient extends APIClient {
         );
     }
 
-    getPricingByCodesOrSKUs({codes, skus}) {
+    getPricingByCodesOrSKUs({ codes, skus }) {
         return this.callFromNextJS(
             "POST",
             `${prefix}/selling/list`,
@@ -87,7 +87,7 @@ class PricingClient extends APIClient {
         );
     }
 
-    getPricingByCodesOrSKUsFromClient({codes, skus}) {
+    getPricingByCodesOrSKUsFromClient({ codes, skus }) {
         return this.callFromClient(
             "POST",
             `${prefix}/selling/list`,
@@ -232,6 +232,16 @@ class PricingClient extends APIClient {
                 cancelCodes,
             }
         );
+    }
+
+    searchSellingSKUsByKeyword(q) {
+        return this.callFromClient(
+            "GET",
+            `${prefixProduct}/deal`,
+            {
+                q
+            }
+        )
     }
 }
 

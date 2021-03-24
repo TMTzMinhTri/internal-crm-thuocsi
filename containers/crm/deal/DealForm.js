@@ -110,7 +110,7 @@ export const DealForm = (props) => {
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
         const productClient = getProductClient();
-        const skusResp = await pricingClient.getListPricingByFilterFromClient({ q: text, limit: 100, status: props.isUpdate ? null : "ACTIVE" });
+        const skusResp = await pricingClient.searchSellingSKUsByKeyword(text);
         if (skusResp.status !== "OK") {
             if (skusResp.status === "NOT_FOUND") {
                 return [];
