@@ -45,9 +45,7 @@ import {
     DealTypeOptions,
     DealValidation
 } from "view-models/deal";
-
-
-
+import Head from "next/head";
 const defaultValuesDealForm = {
     startTime: formatDatetimeFormType(moment().add(1, "d")),
     endTime: formatDatetimeFormType(moment().add(10, "d")),
@@ -240,7 +238,11 @@ export const DealForm = (props) => {
 
     return (
         <MyCard>
+            <Head>
+                <title>{props.isUpdate ? `Cập nhật deal` : "Tạo mới deal"}</title>
+            </Head>
             <MyCardHeader title={props.isUpdate ? `Deal #${props.deal.code}` : "Tạo mới deal"} />
+
             <MyCardContent>
                 <Grid container spacing={8}>
                     <Grid item xs={12} md={5} container spacing={2}>
