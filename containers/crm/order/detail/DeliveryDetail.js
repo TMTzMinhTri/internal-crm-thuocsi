@@ -83,12 +83,24 @@ export default function DeliveryDetail({ order, orderNo }) {
                 </Authorization>
             </MyCardHeader>
             <MyCardContent>
-                <InfoLine label="Hình thức thanh toán" val={orderInfo.paymentMethod} type={EnumLineType.PAYMENT_METHOD}></InfoLine>
-                <InfoLine label="Đơn vị vận chuyển" val={orderInfo.deliveryPlatform} type={EnumLineType.DELIVERY_PLATFORM}></InfoLine>
+                <InfoLine
+                    label="Hình thức thanh toán"
+                    val={orderInfo.paymentMethod}
+                    type={EnumLineType.PAYMENT_METHOD}
+                ></InfoLine>
+                <InfoLine
+                    label="Đơn vị vận chuyển"
+                    val={orderInfo.deliveryPlatform}
+                    type={EnumLineType.DELIVERY_PLATFORM}
+                ></InfoLine>
                 <InfoLine label="Mã số giao hàng" val={orderInfo.deliveryTrackingNumber}></InfoLine>
                 <InfoLine label="Trạng thái giao hàng" val={orderInfo.deliveryStatus}></InfoLine>
                 <InfoLine label="Ngày giao" val={orderInfo.deliveryDate} type={EnumLineType.DATE}></InfoLine>
-                <InfoLine label="Trạng thái đơn hàng" val={orderInfo.status} type={EnumLineType.ORDER_STATUS}></InfoLine>
+                <InfoLine
+                    label="Trạng thái đơn hàng"
+                    val={orderInfo.status}
+                    type={EnumLineType.ORDER_STATUS}
+                ></InfoLine>
                 <InfoLine label="Ghi chú" val={orderInfo.note}></InfoLine>
             </MyCardContent>
         </MyCard>

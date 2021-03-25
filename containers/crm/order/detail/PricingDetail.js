@@ -44,8 +44,16 @@ export default function PricingDetail({ order, orderNo }) {
                 </Authorization>
             </MyCardHeader>
             <MyCardContent>
-                <InfoLine label="Giá theo hình thức thanh toán" val={orderInfo.paymentMethodFee} type={EnumLineType.CURRENCY}></InfoLine>
-                <InfoLine label="Giá theo đơn vị vận chuyển" val={orderInfo.deliveryPlatformFee} type={EnumLineType.CURRENCY}></InfoLine>
+                <InfoLine
+                    label="Giá theo hình thức thanh toán"
+                    val={orderInfo.paymentMethodFee}
+                    type={EnumLineType.CURRENCY}
+                ></InfoLine>
+                <InfoLine
+                    label="Giá theo đơn vị vận chuyển"
+                    val={orderInfo.deliveryPlatformFee}
+                    type={EnumLineType.CURRENCY}
+                ></InfoLine>
                 <InfoLine label="Phí vận chuyển" val={orderInfo.shippingFee} type={EnumLineType.CURRENCY}></InfoLine>
                 <InfoLine label="Tổng tiền" val={orderInfo.subTotalPrice} type={EnumLineType.CURRENCY}></InfoLine>
                 <InfoLine label="Giảm giá" val={orderInfo.totalDiscount} type={EnumLineType.CURRENCY}></InfoLine>

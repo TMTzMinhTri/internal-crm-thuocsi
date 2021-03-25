@@ -31,7 +31,10 @@ export default function OrderFullDetail({ order, activitiesData }) {
                     </FlexContainer>
                     <FlexContainer>
                         <FlexContent>
-                            <OrderItemList orderItemList={order.orderItemList} totalPrice={order.subTotalPrice}></OrderItemList>
+                            <OrderItemList
+                                orderItemList={order.orderItemList}
+                                totalPrice={order.subTotalPrice}
+                            ></OrderItemList>
                         </FlexContent>
                         <FlexContent>
                             <PricingDetail order={order}></PricingDetail>

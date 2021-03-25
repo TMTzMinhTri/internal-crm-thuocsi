@@ -23,7 +23,11 @@ export default function OrderHistory({ activitiesData }) {
         <MyCard>
             <MyCardHeader title="Lịch sử thao tác" small={true}></MyCardHeader>
             <MyCardContent>
-                {activitiesData && activitiesData.length ? <MyActivity data={activitiesData}></MyActivity> : "Không có thông tin thao tác liên quan"}
+                {activitiesData && activitiesData.length ? (
+                    <MyActivity data={activitiesData}></MyActivity>
+                ) : (
+                    "Không có thông tin thao tác liên quan"
+                )}
             </MyCardContent>
         </MyCard>
     );
