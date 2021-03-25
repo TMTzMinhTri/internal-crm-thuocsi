@@ -95,7 +95,7 @@ export const DealForm = (props) => {
         defaultValues: props.isUpdate && props.deal.dealType === DealType.DEAL ? {
             pricing: {
                 value: props.deal.skus[0].sku,
-                label: props.deal.skus[0].sku,
+                label: props.deal.skus[0].label,
                 sku: props.deal.skus[0].sku,
                 sellerCode: props.deal.skus[0].sellerCode,
             },
@@ -532,7 +532,7 @@ export const DealForm = (props) => {
                         )}
                         {dealType === DealType.DEAL && (
                             <>
-                                <Grid item xs={12} md={7}>
+                                <Grid item xs={12}>
                                     <MuiSingleAuto
                                         name="pricing"
                                         options={skuOptions}
@@ -544,7 +544,7 @@ export const DealForm = (props) => {
                                         message={skuForm.errors.pricing?.message}
                                         onFieldChange={handleSearchSkus}
                                         onValueChange={skuForm.handleSubmit(handleAddSku)}
-                                        disabled={isLateUpdate}
+                                        disabled={props.isUpdate}
                                     />
                                 </Grid>
                                 <Grid item xs={12}></Grid>
