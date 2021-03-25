@@ -75,7 +75,6 @@ async function loadData(ctx) {
     if (isValid(ticketsResult)) {
         tickets = ticketsResult.data;
     }
-    console.log(order);
     data.props.order = order;
     data.props.order.masteDataAddress = masterDataAddress;
     data.props.order.orderItemList = orderItems;
