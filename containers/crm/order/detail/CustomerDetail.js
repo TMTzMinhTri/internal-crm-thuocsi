@@ -1,14 +1,12 @@
 import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
-import { getCustomerClient } from "client/customer";
 import { Box } from "@material-ui/core";
-import { getMasterDataClient } from "client/master-data";
 import styles from "./detail.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
 
-function InfoLine({ label, val, type }) {
+function InfoLine({ label, val }) {
     return (
         <Box className={styles.infoLine}>
             <span className={styles.label}>{label}</span>
