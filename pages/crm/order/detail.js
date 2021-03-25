@@ -84,7 +84,7 @@ async function loadData(ctx) {
 }
 
 // do render
-function render({ order, orderNo, activitiesData }) {
+function render({ order, activitiesData }) {
     const breadcrumb = [
         {
             name: "Trang chủ",
