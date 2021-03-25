@@ -8,6 +8,10 @@ import { TableRow } from '@material-ui/core';
 import { TableCell } from '@material-ui/core';
 import { TableBody } from '@material-ui/core';
 import { getCustomerClient } from 'client/customer';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Link from 'next/link';
+import Authorization from '@thuocsi/nextjs-components/authorization/authorization';
 
 /**
  * Get order data of customer. This data is needed to use CustomerNote component.
@@ -28,11 +32,21 @@ export async function getCustomerNote({ ctx, data, customerCode }) {
  * Component that display note list of customer.
  * @param {[]note} param.noteList
  */
-export default function CustomerNote({ noteList }) {
+export default function CustomerNote({ noteList, customerCode }) {
     console.log(noteList)
     return (
         <MyCard>
-            <MyCardHeader title="Ghi chú về khách hàng gần đây" small={true}></MyCardHeader>
+            <MyCardHeader title="Ghi chú về khách hàng gần đây" small={true}>
+                <Authorization requiredScreen="/crm/order" >
+                    <Link
+                        href={`/crm/customer/note?customerCode=${customerCode}`}
+                        prefetch={false}>
+                        <a target="_blank" className={styles.actionLink}>
+                            <FontAwesomeIcon icon={faPlus} /> Thêm ghi chú
+                        </a>
+                    </Link>
+                </Authorization>
+            </MyCardHeader>
             <MyCardContent>
                 <Table size="small">
                     <colgroup>

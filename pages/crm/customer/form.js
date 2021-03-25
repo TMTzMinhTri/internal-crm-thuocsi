@@ -304,383 +304,378 @@ export default function renderForm(props, toast) {
                 onClose={() => setOpenLockAccountDialog(false)}
                 onConfirm={() => lockAccount()}
             />
-            <MyCard>
-                <form>
-                    <MyCardHeader title={props.isUpdate ? `Khách hàng #${props.customer.code}` : pageTitle} />
+            {/* <MyCard> */}
+            <form>
+                {/* <MyCardHeader title={props.isUpdate ? `Khách hàng #${props.customer.code}` : pageTitle} />
+                    <MyCardContent> */}
+                <MyCard>
+                    <MyCardHeader title="Thông tin cơ bản" small={true}></MyCardHeader>
                     <MyCardContent>
-                        <Card variant="outlined">
-                            <CardContent>
-                                <Typography variant="h6" style={{ marginBottom: '10px' }}>
-                                    Thông tin cơ bản
-                                    </Typography>
-                                <Grid spacing={3} container>
-                                    <Grid item xs={12} md={3}>
+                        <Grid spacing={3} container>
+                            <Grid item xs={12} md={3}>
+                                <TextField
+                                    id="name"
+                                    name="name"
+                                    variant="outlined"
+                                    size="small"
+                                    label="Tên khách hàng"
+                                    placeholder=""
+                                    helperText={errors.name?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    fullWidth
+                                    error={!!errors.name}
+                                    required
+                                    inputRef={
+                                        register(customerValidation.name)
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <TextField
+                                    id="email"
+                                    name="email"
+                                    label="Email"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder=""
+                                    type="email"
+                                    helperText={errors.email?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    fullWidth
+                                    error={!!errors.email}
+                                    required
+                                    inputRef={
+                                        register(customerValidation.email)
+                                    }
+                                />
+                            </Grid>
+                        </Grid>
+                        <Grid spacing={3} container>
+                            <Grid item xs={12} md={3}>
+                                <TextField
+                                    id="phone"
+                                    name="phone"
+                                    label="Số điện thoại"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder=""
+                                    type="number"
+                                    helperText={errors.phone?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    fullWidth
+                                    error={!!errors.phone}
+                                    required
+                                    inputRef={
+                                        register(customerValidation.phone)
+                                    }
+                                />
+                            </Grid>
+                        </Grid>
+                        <Grid spacing={3} container>
+                            <Grid item xs={12} sm={6} md={6}>
+                                <TextField
+                                    id="address"
+                                    name="address"
+                                    variant="outlined"
+                                    size="small"
+                                    label="Địa chỉ"
+                                    placeholder=""
+                                    helperText={errors.address?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    fullWidth
+                                    error={!!errors.address}
+                                    required
+                                    inputRef={
+                                        register(customerValidation.address)
+                                    }
+                                />
+                            </Grid>
+                        </Grid>
+                        <Grid spacing={3} container>
+                            <Grid item xs={12} md={3}>
+                                <MuiSingleAuto
+                                    id="provinceCode"
+                                    name="provinceCode"
+                                    noOptionsText={noOptionsText}
+                                    options={props.provinces?.map(province => ({ value: province.code, label: province.name, code: province.code })) ?? []}
+                                    onNotSearchFieldChange={onProvinceChange}
+                                    required={true}
+                                    label="Tỉnh/Thành phố"
+                                    control={control}
+                                    errors={errors}
+                                    message={'Vui lòng chọn tỉnh thành'}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <Autocomplete
+                                    options={districts}
+                                    size="small"
+                                    getOptionLabel={(option) => option.name}
+                                    value={district}
+                                    onChange={onDistrictChange}
+                                    noOptionsText={noOptionsText}
+                                    disabled={isDisabledDistrict}
+                                    renderInput={(params) =>
                                         <TextField
-                                            id="name"
-                                            name="name"
+                                            id="districtCode"
+                                            name="districtCode"
                                             variant="outlined"
-                                            size="small"
-                                            label="Tên khách hàng"
-                                            placeholder=""
-                                            helperText={errors.name?.message}
+                                            label="Quận/Huyện"
                                             InputLabelProps={{
                                                 shrink: true,
                                             }}
                                             fullWidth
-                                            error={!!errors.name}
-                                            required
                                             inputRef={
-                                                register(customerValidation.name)
+                                                register
                                             }
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={3}>
+                                            {...params} />}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <Autocomplete
+                                    size="small"
+                                    options={wards}
+                                    name={"ward"}
+                                    value={ward}
+                                    disabled={isDisabledWard}
+                                    onChange={onWardChange}
+                                    noOptionsText={noOptionsText}
+                                    getOptionLabel={(option) => option.name}
+                                    renderInput={(params) => (
                                         <TextField
-                                            id="email"
-                                            name="email"
-                                            label="Email"
+                                            id="wardCode"
+                                            name="wardCode"
                                             variant="outlined"
-                                            size="small"
-                                            placeholder=""
-                                            type="email"
-                                            helperText={errors.email?.message}
+                                            label="Phường/Xã"
                                             InputLabelProps={{
                                                 shrink: true,
                                             }}
                                             fullWidth
-                                            error={!!errors.email}
-                                            required
                                             inputRef={
-                                                register(customerValidation.email)
+                                                register
                                             }
+                                            {...params}
                                         />
-                                    </Grid>
-                                </Grid>
-                                <Grid spacing={3} container>
-                                    <Grid item xs={12} md={3}>
-                                        <TextField
-                                            id="phone"
-                                            name="phone"
-                                            label="Số điện thoại"
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder=""
-                                            type="number"
-                                            helperText={errors.phone?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            fullWidth
-                                            error={!!errors.phone}
-                                            required
-                                            inputRef={
-                                                register(customerValidation.phone)
-                                            }
-                                        />
-                                    </Grid>
-                                </Grid>
-                                <Grid spacing={3} container>
-                                    <Grid item xs={12} sm={6} md={6}>
-                                        <TextField
-                                            id="address"
-                                            name="address"
-                                            variant="outlined"
-                                            size="small"
-                                            label="Địa chỉ"
-                                            placeholder=""
-                                            helperText={errors.address?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            fullWidth
-                                            error={!!errors.address}
-                                            required
-                                            inputRef={
-                                                register(customerValidation.address)
-                                            }
-                                        />
-                                    </Grid>
-                                </Grid>
-                                <Grid spacing={3} container>
-                                    <Grid item xs={12} md={3}>
-                                        <MuiSingleAuto
-                                            id="provinceCode"
-                                            name="provinceCode"
-                                            noOptionsText={noOptionsText}
-                                            options={props.provinces?.map(province => ({ value: province.code, label: province.name, code: province.code })) ?? []}
-                                            onNotSearchFieldChange={onProvinceChange}
-                                            required={true}
-                                            label="Tỉnh/Thành phố"
-                                            control={control}
-                                            errors={errors}
-                                            message={'Vui lòng chọn tỉnh thành'}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={3}>
-                                        <Autocomplete
-                                            options={districts}
-                                            size="small"
-                                            getOptionLabel={(option) => option.name}
-                                            value={district}
-                                            onChange={onDistrictChange}
-                                            noOptionsText={noOptionsText}
-                                            disabled={isDisabledDistrict}
-                                            renderInput={(params) =>
-                                                <TextField
-                                                    id="districtCode"
-                                                    name="districtCode"
-                                                    variant="outlined"
-                                                    label="Quận/Huyện"
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    fullWidth
-                                                    inputRef={
-                                                        register
-                                                    }
-                                                    {...params} />}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={3}>
-                                        <Autocomplete
-                                            size="small"
-                                            options={wards}
-                                            name={"ward"}
-                                            value={ward}
-                                            disabled={isDisabledWard}
-                                            onChange={onWardChange}
-                                            noOptionsText={noOptionsText}
-                                            getOptionLabel={(option) => option.name}
-                                            renderInput={(params) => (
-                                                <TextField
-                                                    id="wardCode"
-                                                    name="wardCode"
-                                                    variant="outlined"
-                                                    label="Phường/Xã"
-                                                    InputLabelProps={{
-                                                        shrink: true,
-                                                    }}
-                                                    fullWidth
-                                                    inputRef={
-                                                        register
-                                                    }
-                                                    {...params}
-                                                />
-                                            )}
-                                        />
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                        <Card variant="outlined" style={{ marginTop: '10px' }}>
-                            <CardContent>
-                                <Typography variant="h6" style={{ marginBottom: '10px' }}>
-                                    Thông tin pháp lý
-                                    </Typography>
-                                <Grid spacing={3} container>
-                                    <Grid item xs={12} md={3}>
-                                        <TextField
-                                            id="legalRepresentative"
-                                            name="legalRepresentative"
-                                            label="Người đại diện"
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder=""
-                                            helperText={errors.legalRepresentative?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            fullWidth
-                                            error={!!errors.legalRepresentative}
-                                            required
-                                            inputRef={
-                                                register(customerValidation.legalRepresentative)
-                                            }
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={3}>
-                                        <TextField
-                                            id="mst"
-                                            name="mst"
-                                            label="Mã số thuế"
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder=""
-                                            helperText={errors.mst?.message}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            fullWidth
-                                            error={!!errors.mst}
-                                            required
-                                            inputRef={
-                                                register(customerValidation.mst)
-                                            }
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={3}>
-                                        <TextField
-                                            id="companyName"
-                                            name="companyName"
-                                            label="Tên công ty"
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder="Nhập tên công ty"
-                                            error={!!errors.companyName}
-                                            helperText={errors.companyName?.message}
-                                            fullWidth
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            autoComplete={false}
-                                            inputRef={register(customerValidation.companyName)}
-                                        />
-                                    </Grid>
-                                    <Grid item xs={12} md={6}>
-                                        <TextField
-                                            id="companyAddress"
-                                            name="companyAddress"
-                                            label="Địa chỉ công ty"
-                                            variant="outlined"
-                                            size="small"
-                                            placeholder="Nhập địa chỉ công ty"
-                                            error={!!errors.companyAddress}
-                                            helperText={errors.companyAddress?.message}
-                                            fullWidth
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            autoComplete={false}
-                                            inputRef={register(customerValidation.companyAddress)}
-                                        />
-                                    </Grid>
-                                </Grid>
-                            </CardContent>
-                        </Card>
-                        <Card variant="outlined" style={{ marginTop: '10px' }}>
-                            <CardContent>
-                                <Typography variant="h6" style={{ marginBottom: '10px' }}>
-                                    Thông tin tài khoản
-                                    </Typography>
-                                <Grid spacing={3} container>
-                                    <Grid item xs={12} md={3}>
-                                        <FormControl fullWidth size="small" variant="outlined">
-                                            <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
-                                            <Controller
-                                                name="scope"
-                                                control={control}
-                                                lable="Vai trò"
-                                                defaultValue={scopes ? scopes[0].value : ''}
-                                                rules={{ required: true }}
-                                                error={!!errors.scope}
-                                                as={
-                                                    <Select label="Vai trò">
-                                                        {scopes?.map(({ value, label }) => (
-                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                }
-                                            />
-                                        </FormControl>
-
-                                    </Grid>
-                                    <Grid item xs={12} md={3}>
-                                        <FormControl fullWidth size="small" variant="outlined">
-                                            <InputLabel id="department-select-label" sise="small">Cấp độ</InputLabel>
-                                            <Controller
-                                                name="level"
-                                                control={control}
-                                                lable="Cấp độ"
-                                                defaultValue={props.condUserType ? props.condUserType[0].value : ''}
-                                                rules={{ required: true }}
-                                                error={!!errors.level}
-                                                as={
-                                                    <Select label="Cấp độ">
-                                                        {props.condUserType?.map(({ value, label }) => (
-                                                            <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                        ))}
-                                                    </Select>
-                                                }
-                                            />
-                                        </FormControl>
-                                    </Grid>
-                                    {props.isUpdate && (
-                                        <Grid item xs={12} md={3}>
-                                            <FormControl fullWidth size="small" variant="outlined">
-                                                <InputLabel id="department-select-label">Trạng thái</InputLabel>
-                                                <Controller
-                                                    name="status"
-                                                    control={control}
-                                                    // disabled={isDisableStatus}
-                                                    defaultValue={statuses ? statuses[0].value : ''}
-                                                    rules={{ required: true }}
-                                                    error={!!errors.status}
-                                                    as={
-                                                        <Select label="Trạng thái">
-                                                            {statuses?.map(({ value, label }) => (
-                                                                <MenuItem value={value} key={value}>{label}</MenuItem>
-                                                            ))}
-                                                        </Select>
-                                                    }
-                                                />
-                                            </FormControl>
-                                        </Grid>
                                     )}
-                                </Grid>
-                                {!props.isUpdate && (
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} md={3}>
-                                            <TextField
-                                                id="password"
-                                                name="password"
-                                                label="Mật khẩu đăng nhập"
-                                                variant="outlined"
-                                                size="small"
-                                                placeholder=""
-                                                type="password"
-                                                helperText={errors.password?.message}
-                                                inputProps={{
-                                                    autoComplete: 'new-password',
-                                                }}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                fullWidth
-                                                error={!!errors.password}
-                                                required
-                                                inputRef={
-                                                    register(customerValidation.password)
-                                                }
-                                            />
-                                        </Grid>
-                                        <Grid item xs={12} md={3}>
-                                            <TextField
-                                                id="passwordConfirm"
-                                                name="passwordConfirm"
-                                                label="Xác nhận mật khẩu"
-                                                variant="outlined"
-                                                size="small"
-                                                type="password"
-                                                placeholder=""
-                                                helperText={errors.passwordConfirm?.message}
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                fullWidth
-                                                error={!!errors.passwordConfirm}
-                                                required
-                                                inputRef={
-                                                    register({
-                                                        validate: (value) => value === watch('password') || "Mật khẩu không khớp, vui lòng nhập lại."
-                                                    })
-                                                }
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                )}
-                            </CardContent>
-                        </Card>
+                                />
+                            </Grid>
+                        </Grid>
                     </MyCardContent>
+                </MyCard>
+                <MyCard>
+                    <MyCardHeader title="Thông tin pháp lý" small={true}></MyCardHeader>
+                    <MyCardContent>
+                        <Grid spacing={3} container>
+                            <Grid item xs={12} md={3}>
+                                <TextField
+                                    id="legalRepresentative"
+                                    name="legalRepresentative"
+                                    label="Người đại diện"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder=""
+                                    helperText={errors.legalRepresentative?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    fullWidth
+                                    error={!!errors.legalRepresentative}
+                                    required
+                                    inputRef={
+                                        register(customerValidation.legalRepresentative)
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <TextField
+                                    id="mst"
+                                    name="mst"
+                                    label="Mã số thuế"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder=""
+                                    helperText={errors.mst?.message}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    fullWidth
+                                    error={!!errors.mst}
+                                    required
+                                    inputRef={
+                                        register(customerValidation.mst)
+                                    }
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <TextField
+                                    id="companyName"
+                                    name="companyName"
+                                    label="Tên công ty"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder="Nhập tên công ty"
+                                    error={!!errors.companyName}
+                                    helperText={errors.companyName?.message}
+                                    fullWidth
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    autoComplete={false}
+                                    inputRef={register(customerValidation.companyName)}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    id="companyAddress"
+                                    name="companyAddress"
+                                    label="Địa chỉ công ty"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder="Nhập địa chỉ công ty"
+                                    error={!!errors.companyAddress}
+                                    helperText={errors.companyAddress?.message}
+                                    fullWidth
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    autoComplete={false}
+                                    inputRef={register(customerValidation.companyAddress)}
+                                />
+                            </Grid>
+                        </Grid>
+                    </MyCardContent>
+                </MyCard>
+                <MyCard>
+                    <MyCardHeader title="Thông tin tài khoản" small={true}></MyCardHeader>
+                    <MyCardContent>
+                        <Grid spacing={3} container>
+                            <Grid item xs={12} md={3}>
+                                <FormControl fullWidth size="small" variant="outlined">
+                                    <InputLabel id="department-select-label" sise="small">Vai trò</InputLabel>
+                                    <Controller
+                                        name="scope"
+                                        control={control}
+                                        lable="Vai trò"
+                                        defaultValue={scopes ? scopes[0].value : ''}
+                                        rules={{ required: true }}
+                                        error={!!errors.scope}
+                                        as={
+                                            <Select label="Vai trò">
+                                                {scopes?.map(({ value, label }) => (
+                                                    <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        }
+                                    />
+                                </FormControl>
+
+                            </Grid>
+                            <Grid item xs={12} md={3}>
+                                <FormControl fullWidth size="small" variant="outlined">
+                                    <InputLabel id="department-select-label" sise="small">Cấp độ</InputLabel>
+                                    <Controller
+                                        name="level"
+                                        control={control}
+                                        lable="Cấp độ"
+                                        defaultValue={props.condUserType ? props.condUserType[0].value : ''}
+                                        rules={{ required: true }}
+                                        error={!!errors.level}
+                                        as={
+                                            <Select label="Cấp độ">
+                                                {props.condUserType?.map(({ value, label }) => (
+                                                    <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        }
+                                    />
+                                </FormControl>
+                            </Grid>
+                            {props.isUpdate && (
+                                <Grid item xs={12} md={3}>
+                                    <FormControl fullWidth size="small" variant="outlined">
+                                        <InputLabel id="department-select-label">Trạng thái</InputLabel>
+                                        <Controller
+                                            name="status"
+                                            control={control}
+                                            // disabled={isDisableStatus}
+                                            defaultValue={statuses ? statuses[0].value : ''}
+                                            rules={{ required: true }}
+                                            error={!!errors.status}
+                                            as={
+                                                <Select label="Trạng thái">
+                                                    {statuses?.map(({ value, label }) => (
+                                                        <MenuItem value={value} key={value}>{label}</MenuItem>
+                                                    ))}
+                                                </Select>
+                                            }
+                                        />
+                                    </FormControl>
+                                </Grid>
+                            )}
+                        </Grid>
+                        {!props.isUpdate && (
+                            <Grid spacing={3} container>
+                                <Grid item xs={12} md={3}>
+                                    <TextField
+                                        id="password"
+                                        name="password"
+                                        label="Mật khẩu đăng nhập"
+                                        variant="outlined"
+                                        size="small"
+                                        placeholder=""
+                                        type="password"
+                                        helperText={errors.password?.message}
+                                        inputProps={{
+                                            autoComplete: 'new-password',
+                                        }}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        fullWidth
+                                        error={!!errors.password}
+                                        required
+                                        inputRef={
+                                            register(customerValidation.password)
+                                        }
+                                    />
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    <TextField
+                                        id="passwordConfirm"
+                                        name="passwordConfirm"
+                                        label="Xác nhận mật khẩu"
+                                        variant="outlined"
+                                        size="small"
+                                        type="password"
+                                        placeholder=""
+                                        helperText={errors.passwordConfirm?.message}
+                                        InputLabelProps={{
+                                            shrink: true,
+                                        }}
+                                        fullWidth
+                                        error={!!errors.passwordConfirm}
+                                        required
+                                        inputRef={
+                                            register({
+                                                validate: (value) => value === watch('password') || "Mật khẩu không khớp, vui lòng nhập lại."
+                                            })
+                                        }
+                                    />
+                                </Grid>
+                            </Grid>
+                        )}
+                    </MyCardContent>
+                </MyCard>
+
+                <MyCard>
                     <MyCardActions>
                         {props.isUpdate ? (
                             <Link href={`/crm/customer`}>
@@ -726,8 +721,9 @@ export default function renderForm(props, toast) {
                             Lưu
                         </Button>
                     </MyCardActions>
-                </form>
-            </MyCard>
+                </MyCard>
+            </form>
+            {/* </MyCard> */}
         </AppCRM >
     );
 }

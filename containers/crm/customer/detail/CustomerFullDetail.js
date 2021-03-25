@@ -67,7 +67,7 @@ export default function CustomerFullDetail({ activitiesData, orderList, customer
                             <CustomerSimpleDetail customerInfo={customerInfo}></CustomerSimpleDetail>
                         </FlexContent>
                         <FlexContent>
-                            <CustomerNote noteList={noteList}></CustomerNote>
+                            <CustomerNote noteList={noteList} customerCode={customerCode}></CustomerNote>
                         </FlexContent>
                     </FlexContainer>
                     <FlexContainer>
