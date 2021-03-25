@@ -92,6 +92,14 @@ export const CustomerCard = (props) => {
                     </Grid>
                     <Grid container spacing={1} item xs={12}>
                         <Grid item xs={12} md={2}>
+                            <Typography className={`${formStyles.fieldLabel}`}>Mã khách hàng:</Typography>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <Typography className={`${formStyles.fieldLabel}`} >{props.order.customerCode}</Typography>
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={1} item xs={12}>
+                        <Grid item xs={12} md={2}>
                             <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Tên khách hàng</Typography>
                         </Grid>
                         <Grid item xs={12} md={4}>

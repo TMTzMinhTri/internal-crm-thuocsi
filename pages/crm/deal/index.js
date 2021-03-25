@@ -45,6 +45,7 @@ import {
 } from "view-models/deal";
 import ModalCustom from "@thuocsi/nextjs-components/simple-dialog/dialogs";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
+import Head from "next/head";
 
 async function loadDealData(ctx) {
     const props = {
@@ -189,6 +190,9 @@ const render = (props) => {
 
     return (
         <AppCRM breadcrumb={breadcrumb}>
+             <Head>
+                <title>Danh sách deal</title>
+            </Head>
             <MyCard>
                 <MyCardHeader>
                     <Link href="/crm/deal/new">
