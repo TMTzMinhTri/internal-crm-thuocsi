@@ -91,7 +91,7 @@ const RenderRow = (row, i) => (
         <TableCell align="right">{formatNumber(row.data.totalPrice) || 0}</TableCell>
         <TableCell align="left">{formatDateTime(row.data.createdTime) || "-"}</TableCell>
         <TableCell align="left">{formatDateTime(row.data.confirmationDate) || "-"}</TableCell>
-        <TableCell align="right">{row.data.source ?? "-"}</TableCell>
+        {/* <TableCell align="right">{row.data.source ?? "-"}</TableCell> */}
         <TableCell align="center">
             <Button
                 size="small"
@@ -269,7 +269,6 @@ function render(props) {
                                 <TableCell align="right">Tổng tiền</TableCell>
                                 <TableCell align="left">Ngày mua</TableCell>
                                 <TableCell align="left">Ngày xác nhận</TableCell>
-                                <TableCell align="right">Nguồn</TableCell>
                                 <TableCell align="center">Trạng thái</TableCell>
                                 <TableCell align="center">Thao tác</TableCell>
                             </TableRow>

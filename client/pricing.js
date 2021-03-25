@@ -19,16 +19,7 @@ class PricingClient extends APIClient {
         });
     }
 
-    getListPricingByFilter({
-        q,
-        sku,
-        productCode,
-        type,
-        price,
-        status,
-        limit,
-        offset,
-    }) {
+    getListPricingByFilter({ q, sku, productCode, type, price, status, limit, offset }) {
         return this.callFromNextJS("POST", `${prefix}/selling/search`, {
             q,
             sku,
@@ -42,16 +33,7 @@ class PricingClient extends APIClient {
         });
     }
 
-    getListPricingByFilterFromClient({
-        q,
-        sku,
-        productCode,
-        type,
-        price,
-        status,
-        limit,
-        offset,
-    }) {
+    getListPricingByFilterFromClient({ q, sku, productCode, type, price, status, limit, offset }) {
         return this.callFromClient("POST", `${prefix}/selling/search`, {
             q,
             sku,
@@ -136,10 +118,7 @@ class PricingClient extends APIClient {
     }
 
     getConfigPriceByCode(code) {
-        return this.callFromNextJS(
-            "GET",
-            `${prefix}/product/config?priceCode=${code}`
-        );
+        return this.callFromNextJS("GET", `${prefix}/product/config?priceCode=${code}`);
     }
 
     getProvinceLists() {
@@ -181,6 +160,12 @@ class PricingClient extends APIClient {
 
     getListDeliveryMethod() {
         return this.callFromNextJS("GET", `${prefix}/delivery-platform/list`);
+    }
+
+    searchSellingSKUsByKeyword(q) {
+        return this.callFromClient("GET", `${prefixProduct}/deal`, {
+            q,
+        });
     }
 }
 

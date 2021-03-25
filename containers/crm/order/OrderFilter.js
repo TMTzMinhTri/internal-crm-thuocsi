@@ -72,7 +72,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
         }}>
             <MyCardActions>
                 <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
                             color="textPrimary"
@@ -91,7 +91,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             inputRef={filterForm.register}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
                             color="textPrimary"
@@ -110,7 +110,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             inputRef={filterForm.register}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
                             color="textPrimary"
@@ -129,7 +129,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             inputRef={filterForm.register}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
                             color="textPrimary"
@@ -148,7 +148,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             inputRef={filterForm.register}
                         />
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
                             color="textPrimary"
@@ -167,7 +167,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             inputRef={filterForm.register}
                         />
                     </Grid>
-                    <Grid container item xs={12} sm={6} md={3} lg={2}>
+                    <Grid container item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
                             color="textPrimary"
@@ -214,7 +214,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             </Grid>
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} sm={6} md={3} lg={2}>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
                             color="textPrimary"

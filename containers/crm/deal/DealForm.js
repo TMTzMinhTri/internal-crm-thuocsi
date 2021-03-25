@@ -2,6 +2,7 @@ import {
     Button,
     FormControl,
     FormControlLabel,
+    FormHelperText,
     FormLabel,
     Grid,
     IconButton,
@@ -28,7 +29,6 @@ import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import { getDealClient } from "client/deal";
 import { getPricingClient } from "client/pricing";
 import { getProductClient } from "client/product";
-import { getSellerClient } from "client/seller";
 import { unknownErrorText } from "components/commonErrors";
 import { formatDatetimeFormType } from "components/global";
 import ImageUploadField from "components/image-upload-field";
@@ -45,9 +45,7 @@ import {
     DealTypeOptions,
     DealValidation
 } from "view-models/deal";
-
-
-
+import Head from "next/head";
 const defaultValuesDealForm = {
     startTime: formatDatetimeFormType(moment().add(1, "d")),
     endTime: formatDatetimeFormType(moment().add(10, "d")),
@@ -84,15 +82,20 @@ export const DealForm = (props) => {
     useController({
         name: "imageUrls",
         control: dealForm.control,
+        rules: dealType === DealType.COMBO ? DealValidation.imageUrls.combo : {},
         defaultValue: defaultValuesDealForm.imageUrls,
     });
     const [skuOptions, setSkuOptions] = useState(props.skuOptions ?? []);
+    const [skuOptionMap, setSkuOptionMap] = useState(props.deal?.skus?.reduce((acc, cur) => {
+        acc[cur.sku] = true;
+        return acc;
+    }, {}) ?? {});
     const [skus, setSkus] = useState(props.deal?.skus ?? []);
     const skuForm = useForm({
         defaultValues: props.isUpdate && props.deal.dealType === DealType.DEAL ? {
             pricing: {
                 value: props.deal.skus[0].sku,
-                label: props.deal.skus[0].sku,
+                label: props.deal.skus[0].label,
                 sku: props.deal.skus[0].sku,
                 sellerCode: props.deal.skus[0].sellerCode,
             },
@@ -104,38 +107,24 @@ export const DealForm = (props) => {
 
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
-        const sellerClient = getSellerClient();
-        const skusResp = await pricingClient.getListPricingByFilterFromClient({ q: text, limit: 100 });
+        const productClient = getProductClient();
+        const skusResp = await pricingClient.searchSellingSKUsByKeyword(text);
         if (skusResp.status !== "OK") {
             if (skusResp.status === "NOT_FOUND") {
-                toast.error("Không tìm thấy sku.")
+                return [];
             } else {
                 toast.error(skusResp.message ?? unknownErrorText);
             }
-            return [];
         }
-        const productMap = {};
-        const productCodes = [];
-        const sellerMap = {};
-        const sellerCodes = [];
-        skusResp.data.forEach(({ productCode, sellerCode }) => {
-            if (!productMap[productCode]) {
-                productCodes.push(productCode);
-                productMap[productCode] = true;
-            }
-            if (!sellerMap[sellerCode]) {
-                sellerCodes.push(sellerCode);
-                sellerMap[sellerCode] = true;
+        const skuMap = {};
+        skusResp.data?.forEach(({ sku }) => {
+            if (!skuMap[sku] && !skuOptionMap[sku]) {
+                skuMap[sku] = true;
             }
         });
-        const [productResp, sellerResp] = await Promise.all([
-            pricingClient.getListProductByProductCodeFromClient(productCodes),
-            sellerClient.getSellerBySellerCodesClient(sellerCodes),
-        ])
-        const skuOptions = skusResp.data?.map(({ sellerCode, sku, productCode }) => {
-            const product = productResp.data?.find(prd => prd.code === productCode);
-            const seller = sellerResp.data?.find(seller => seller.code === sellerCode);
-            return ({ value: sku, label: `${product?.name} - ${seller?.name ?? sellerCode}`, sellerCode, sku })
+        const productResp = await productClient.getProductBySKUsFromClient(Object.keys(skuMap));
+        const skuOptions = productResp.data?.map(({ sku, seller, name }) => {
+            return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
         }) ?? [];
         setSkuOptions(skuOptions);
         return skuOptions;
@@ -182,17 +171,33 @@ export const DealForm = (props) => {
                 pricing: null,
                 quantity: 0,
             });
+            setSkuOptionMap({ ...skuOptionMap, [sku]: true });
         } else {
             setSkus([{ sku, label, sellerCode, quantity: 1 }]);
-            dealForm.setValue("name", label)
+            setSkuOptionMap({ [sku]: true });
+            dealForm.setValue("name", label);
         }
+        // Remove the option in Autocomplete
+        setSkuOptions(skuOptions.filter(option => option.sku !== sku));
     }
 
     const handleRemoveSku = async (sku) => {
         const arr = [...skus];
         const idx = arr.findIndex(item => item.sku === sku);
-        arr.splice(idx, 1);
+        const deleted = arr.splice(idx, 1)?.[0] ?? {};
         setSkus(arr);
+        if (dealType === DealType.COMBO) {
+            setSkuOptionMap({ ...skuOptionMap, [sku]: false });
+        } else {
+            setSkuOptionMap({ [sku]: false });
+        }
+        // Re-add the option in Autocomplete
+        setSkuOptions([...skuOptions, {
+            label: deleted.label,
+            sellerCode: deleted.sellerCode,
+            sku: deleted.sku,
+            value: deleted.sku,
+        }]);
     }
 
     async function handleCropCallback(value) {
@@ -233,7 +238,11 @@ export const DealForm = (props) => {
 
     return (
         <MyCard>
+            <Head>
+                <title>{props.isUpdate ? `Cập nhật deal` : "Tạo mới deal"}</title>
+            </Head>
             <MyCardHeader title={props.isUpdate ? `Deal #${props.deal.code}` : "Tạo mới deal"} />
+
             <MyCardContent>
                 <Grid container spacing={8}>
                     <Grid item xs={12} md={5} container spacing={2}>
@@ -270,25 +279,6 @@ export const DealForm = (props) => {
                                 )}
                             />
                         </Grid>
-                        {/* <Grid item xs={12}>
-                            <TextField
-                                name="name"
-                                variant="outlined"
-                                size="small"
-                                label="Tên deal"
-                                fullWidth
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                InputProps={{
-                                    readOnly: isLateUpdate,
-                                }}
-                                required
-                                error={!!dealForm.errors.name}
-                                helperText={dealForm.errors.name?.message}
-                                inputRef={dealForm.register(DealValidation.name)}
-                            />
-                        </Grid> */}
                         <Grid item xs={12} md={6}>
                             <TextField
                                 name="startTime"
@@ -457,7 +447,7 @@ export const DealForm = (props) => {
                         <Grid item xs={12} />
                         <Grid item xs={12} />
                     </Grid>
-                    <Grid item xs={12} md={5} container spacing={2} alignItems="center">
+                    <Grid item xs={12} md={5} container spacing={2}>
                         <Grid item xs={12}>
                             <Typography variant="h6">Danh sách sản phẩm thuộc deal</Typography>
                         </Grid>
@@ -542,22 +532,22 @@ export const DealForm = (props) => {
                         )}
                         {dealType === DealType.DEAL && (
                             <>
-                            <Grid item xs={12} md={7}>
-                                <MuiSingleAuto
-                                    name="pricing"
-                                    options={skuOptions}
-                                    label="sku"
-                                    placeholder="Tìm kiếm sku"
-                                    required
-                                    control={skuForm.control}
-                                    errors={skuForm.errors}
-                                    message={skuForm.errors.pricing?.message}
-                                    onFieldChange={handleSearchSkus}
-                                    onValueChange={skuForm.handleSubmit(handleAddSku)}
-                                    disabled={isLateUpdate}
-                                />
-                            </Grid>
-                            <Grid item xs={12}></Grid>
+                                <Grid item xs={12}>
+                                    <MuiSingleAuto
+                                        name="pricing"
+                                        options={skuOptions}
+                                        label="sku"
+                                        placeholder="Tìm kiếm sku"
+                                        required
+                                        control={skuForm.control}
+                                        errors={skuForm.errors}
+                                        message={skuForm.errors.pricing?.message}
+                                        onFieldChange={handleSearchSkus}
+                                        onValueChange={skuForm.handleSubmit(handleAddSku)}
+                                        disabled={props.isUpdate}
+                                    />
+                                </Grid>
+                                <Grid item xs={12}></Grid>
                             </>
                         )}
                     </Grid>
@@ -570,7 +560,6 @@ export const DealForm = (props) => {
                                 name="name"
                                 variant="outlined"
                                 size="small"
-                                label="Tên deal"
                                 fullWidth
                                 InputLabelProps={{
                                     shrink: true,
@@ -584,16 +573,26 @@ export const DealForm = (props) => {
                                 inputRef={dealForm.register(DealValidation.name)}
                             />
                         </Grid>
-                        <Grid item xs={12}>
-                            <LabelBox label="Hình ảnh sản phẩm" padding={1} minHeight={108}>
-                                <ImageUploadField
-                                    title="Cập nhật hình ảnh sản phẩm"
-                                    images={productImages}
-                                    handleCropCallback={handleCropCallback}
-                                    handleRemoveImage={handleRemoveImage}
-                                    disabled={isLateUpdate}
-                                />
-                            </LabelBox>
+                        <Grid container spacing={2} item xs={12}>
+                            <Grid item xs={12}>
+                                <Typography variant="h6">Hình ảnh sản phẩm</Typography>
+                            </Grid>
+                            <Grid item xs={12}>
+                                <LabelBox
+                                    padding={1}
+                                    minHeight={108}
+                                    {...(dealForm.errors.imageUrls ? { borderColor: "secondary.main" } : {})}>
+                                    <ImageUploadField
+                                        title="Cập nhật hình ảnh sản phẩm"
+                                        images={productImages}
+                                        handleCropCallback={handleCropCallback}
+                                        handleRemoveImage={handleRemoveImage}
+                                        disabled={isLateUpdate}
+                                        required={dealType === DealType.COMBO}
+                                    />
+                                </LabelBox>
+                                <FormHelperText error={dealForm.errors.imageUrls}>{dealForm.errors.imageUrls?.message}</FormHelperText>
+                            </Grid>
                         </Grid>
                     </Grid>
                 </Grid>

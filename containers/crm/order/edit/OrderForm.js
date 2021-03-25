@@ -555,9 +555,9 @@ export const OrderForm = props => {
                                 <TableCell align="left">Sản phẩm</TableCell>
                                 <TableCell align="left">Tên nhà bán hàng</TableCell>
                                 <TableCell align="right">Số lượng (3)</TableCell>
-                                <TableCell align="right">Giá gốc (4)</TableCell>
-                                <TableCell align="right">Phí dịch vụ (5)</TableCell>
-                                <TableCell align="right">Giá bán (6)</TableCell>
+                                <TableCell align="right">Giá bán (4)</TableCell>
+                                <TableCell align="right">Phí (5)</TableCell>
+                                <TableCell align="right">Giá hiển thị (6)</TableCell>
                                 <TableCell align="right">Thành tiền (7 = 3 x 4 + 5)</TableCell>
                             </TableRow>
                         </TableHead>
@@ -566,7 +566,7 @@ export const OrderForm = props => {
                                 {orderItems.map((row, i) => (
                                     <TableRow key={i}>
                                         <TableCell align="center">{i + 1}</TableCell>
-                                        <TableCell align="left"><b>{row.productSku}</b> - {row.product?.name ?? row.productCode}</TableCell>
+                                        <TableCell align="left">{row.product?.name ?? row.productCode}</TableCell>
                                         <TableCell align="left">{row.seller?.name ?? row.sellerCode}</TableCell>
                                         <TableCell align="right">
                                             {(row.product?.deal || isDisableUpdate) && (

@@ -29,6 +29,7 @@ export default function ImageUploadField({
     handleCropCallback,
     handleRemoveImage,
     disabled = false,
+    required = false,
 }) {
     const [addProductImageModalOpen, setAddProductImageModalOpen] = useState(
         false
@@ -97,7 +98,9 @@ export default function ImageUploadField({
                                 <AddAPhoto width={30} height={30} />
                             </Box>
                             <Typography variant="caption" align="center">Thêm hình ảnh</Typography>
-                            <Typography variant="caption" align="center">(Không bắt buộc)</Typography>
+                            <Typography variant="caption" align="center">
+                                {required ? "(Bắt buộc)" : "(Không bắt buộc)"}
+                            </Typography>
                         </Box>
                     </Grid>
                 )}
