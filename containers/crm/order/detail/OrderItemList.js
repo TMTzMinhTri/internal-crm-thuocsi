@@ -5,7 +5,29 @@ import { faListAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
+import { getProductClient } from "client/product";
+import { isValid } from "utils/ClientUtils";
 import styles from "./detail.module.css";
+
+export async function getOrderItemList({ ctx, data, orderItems }) {
+    const productClient = getProductClient(ctx, data);
+    const productSkus = orderItems?.map((orderItem) => orderItem.productSku) || [];
+    const productsResult = await productClient.getProductBySKUs(productSkus);
+    let mapInfoProduct = {};
+    if (isValid(productsResult)) {
+        productsResult.data.forEach((product) => {
+            mapInfoProduct[product.sku] = product;
+        });
+    }
+    const orderItemList =
+        orderItems?.map((orderItem) => {
+            return {
+                ...orderItem,
+                productInfo: mapInfoProduct[orderItem.productSku],
+            };
+        }) || [];
+    return orderItemList;
+}
 
 export default function OrderItemList({ orderItemList, totalPrice }) {
     const getQuantityProduct = () => {

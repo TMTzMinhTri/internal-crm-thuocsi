@@ -1,12 +1,42 @@
 import { Box } from "@material-ui/core";
+import { isValid } from "utils/ClientUtils";
+import { getOrderClient } from "client/order";
 import DeliveryDetail from "./DeliveryDetail";
-import CustomerDetail from "./CustomerDetail";
+import CustomerDetail, { getMasterDataAddress } from "./CustomerDetail";
 import PricingDetail from "./PricingDetail";
-import OrderItemList from "./OrderItemList";
+import OrderItemList, { getOrderItemList } from "./OrderItemList";
 import PromoDealDetail from "./PromoDealDetail";
-import OrderTicketList from "./OrderTicketList";
-import OrderHistory from "./OrderHistory";
+import OrderTicketList, { getTicketList } from "./OrderTicketList";
+import OrderHistory, { getOrderHistory } from "./OrderHistory";
 import styles from "./detail.module.css";
+
+export async function getOrderFullDetail({ ctx, data, orderNo }) {
+    const orderClient = getOrderClient(ctx, data);
+    const orderResult = await orderClient.getOrderByOrderNo(orderNo);
+    if (!isValid(orderResult)) return {};
+    const order = orderResult.data[0];
+    const [masterDataAddress, orderItemList, ticketList, activitiesData] = await Promise.all([
+        getMasterDataAddress({
+            ctx,
+            data,
+            wardCode: order.customerWardCode,
+            districtCode: order.customerDistrictCode,
+            provinceCode: order.customerProvinceCode,
+        }),
+        getOrderItemList({ ctx, data, orderItems: order.orderItems }),
+        getTicketList({ ctx, data, orderNo, orderId: order.orderId }),
+        getOrderHistory({ ctx, data, orderNo }),
+    ]);
+    return {
+        order: {
+            ...order,
+            masterDataAddress,
+            orderItemList,
+            ticketList,
+        },
+        activitiesData,
+    };
+}
 
 function FlexContainer({ children }) {
     return <Box className={styles.flexContainer}>{children}</Box>;
