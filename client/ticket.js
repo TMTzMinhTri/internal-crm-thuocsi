@@ -14,7 +14,7 @@ class TicketClient extends APIClient {
         offset,
     }) {
         return this.call(
-            "POST",
+            "GET",
             `${URI}/ticket/all`,
             {
                 q: JSON.stringify({ customerCode }),
