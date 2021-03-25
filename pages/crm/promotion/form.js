@@ -178,16 +178,16 @@ const PromotionForm = (props, type) => {
 
   const [conditionObject, setConditionObject] = useState({
     selectField:
-      conditions && conditions[0].type
-        ? conditions[0].type
+      conditions && conditions[1] && conditions[1].type
+        ? conditions[1].type
         : defaultCondition.noRule,
     minTotalValue: 0,
     seller: [""],
     productList: !conditions
       ? [""]
-      : conditions[0].type == defaultCondition.noRule
+      : conditions[1] && conditions[1].type == defaultCondition.noRule
       ? [""]
-      : conditions[0].productConditions?.map((o) => ""),
+      : conditions[1] && conditions[1].productConditions?.map((o) => ""),
     item: {},
   });
 
@@ -292,8 +292,8 @@ const PromotionForm = (props, type) => {
 
     //---------- Condition ---------
 
-    conditions.map(async (o) => {
-      if (o.type != defaultCondition.noRule) {
+    conditions.map(async (o, index) => {
+      if (o.type != defaultCondition.noRule && index != 0) {
         let res;
 
         o.productConditions.map(async (ob, i) => {
