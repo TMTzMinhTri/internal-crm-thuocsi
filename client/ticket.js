@@ -13,11 +13,11 @@ class TicketClient extends APIClient {
         limit,
         offset,
     }) {
-        return this.callFromNextJS(
+        return this.call(
             "POST",
-            `${URI}/tasks/list`,
+            `${URI}/ticket/all`,
             {
-                customerCode,
+                q: JSON.stringify({ customerCode }),
                 limit,
                 offset,
                 getTotal: true,
