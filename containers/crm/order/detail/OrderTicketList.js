@@ -5,7 +5,7 @@ import { faListAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
-import TicketStatus from "./TicketStatus";
+import { TicketStatus } from "containers/crm/ticket/ticket-display";
 import styles from "./detail.module.css";
 
 export default function OrderTicketList({ ticketList }) {
@@ -48,7 +48,7 @@ export default function OrderTicketList({ ticketList }) {
                                     <TableCell align="right">{formatDateTime(row.createdTime)}</TableCell>
                                     <TableCell align="center">{row.createdBy}</TableCell>
                                     <TableCell align="center">
-                                        <TicketStatus val={row.status} />
+                                        <TicketStatus status={row.status} />
                                     </TableCell>
                                 </TableRow>
                             ))
