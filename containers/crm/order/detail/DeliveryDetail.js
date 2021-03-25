@@ -7,12 +7,12 @@ import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
 import PaymentMethod from "./PaymentMethod";
-import DeliveryFlatform from "./DeliveryFlatform";
+import DeliveryPlatform from "./DeliveryPlatform";
 import OrderStatus from "./OrderStatus";
 
 const EnumLineType = {
     PAYMENT_METHOD: "payment_method",
-    DELIVERY_FLATFORM: "delivery_flatform",
+    DELIVERY_PLATFORM: "delivery_platform",
     ORDER_STATUS: "order_status",
     DATE: "date",
 };
@@ -24,19 +24,19 @@ function InfoLine({ label, val, type }) {
                 <span className={styles.label}>{label}</span>
 
                 <span className={styles.value}>
-                    <PaymentMethod paymentMethodCode={val} />
+                    <PaymentMethod val={val} />
                 </span>
             </Box>
         );
     }
 
-    if (type == EnumLineType.DELIVERY_FLATFORM) {
+    if (type === EnumLineType.DELIVERY_PLATFORM) {
         return (
             <Box className={styles.infoLine}>
                 <span className={styles.label}>{label}</span>
 
                 <span className={styles.value}>
-                    <DeliveryFlatform deliveryFlatformCode={val} />
+                    <DeliveryPlatform val={val} />
                 </span>
             </Box>
         );
@@ -48,7 +48,7 @@ function InfoLine({ label, val, type }) {
                 <span className={styles.label}>{label}</span>
 
                 <span className={styles.value}>
-                    <OrderStatus status={val} />
+                    <OrderStatus val={val} />
                 </span>
             </Box>
         );
@@ -84,7 +84,7 @@ export default function DeliveryDetail({ order, orderNo }) {
             </MyCardHeader>
             <MyCardContent>
                 <InfoLine label="Hình thức thanh toán" val={orderInfo.paymentMethod} type={EnumLineType.PAYMENT_METHOD}></InfoLine>
-                <InfoLine label="Đơn vị vận chuyển" val={orderInfo.deliveryPlatform} type={EnumLineType.DELIVERY_FLATFORM}></InfoLine>
+                <InfoLine label="Đơn vị vận chuyển" val={orderInfo.deliveryPlatform} type={EnumLineType.DELIVERY_PLATFORM}></InfoLine>
                 <InfoLine label="Mã số giao hàng" val={orderInfo.deliveryTrackingNumber}></InfoLine>
                 <InfoLine label="Trạng thái giao hàng" val={orderInfo.deliveryStatus}></InfoLine>
                 <InfoLine label="Ngày giao" val={orderInfo.deliveryDate} type={EnumLineType.DATE}></InfoLine>

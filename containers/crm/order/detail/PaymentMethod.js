@@ -1,6 +1,4 @@
-import { useEffect, useState } from "react";
 import { Box } from "@material-ui/core";
-import styles from "./detail.module.css";
 
 export const PAYMENT_METHOD = {
     PAYMENT_METHOD_NORMAL: {
@@ -13,6 +11,6 @@ export const PAYMENT_METHOD = {
     },
 };
 
-export default function PaymentMethod({ paymentMethodCode }) {
-    return <Box className={styles.paymentMethod}>{PAYMENT_METHOD[paymentMethodCode].label}</Box>;
+export default function PaymentMethod({ val }) {
+    return <Box>{PAYMENT_METHOD[val].label}</Box>;
 }

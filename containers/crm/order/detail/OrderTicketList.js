@@ -48,7 +48,7 @@ export default function OrderTicketList({ ticketList }) {
                                     <TableCell align="right">{formatDateTime(row.createdTime)}</TableCell>
                                     <TableCell align="center">{row.createdBy}</TableCell>
                                     <TableCell align="center">
-                                        <TicketStatus status={row.status} />
+                                        <TicketStatus val={row.status} />
                                     </TableCell>
                                 </TableRow>
                             ))
