@@ -2,6 +2,7 @@ import React from 'react'
 import { Box, Button, Tooltip } from '@material-ui/core';
 import { ConfirmActiveDialog } from 'containers/crm/customer/ConfirmActiveDialog';
 import { getCustomerClient } from 'client/customer';
+import { useToast } from '@thuocsi/nextjs-components/toast/useToast';
 
 const statusMap = {
     ACTIVE: {
@@ -17,6 +18,8 @@ const statusMap = {
 }
 
 export default function CustomerStatus({ status, customerCode }) {
+
+    const { error, success } = useToast();
 
     // setup display
     let statusInfo = statusMap[status]
@@ -35,12 +38,12 @@ export default function CustomerStatus({ status, customerCode }) {
     async function activeAccount() {
         const _client = getCustomerClient();
 
-        const resp = await _client.activeAccount({ code: activeCustomerCode.code, status: "ACTIVE" });
+        const resp = await _client.activeAccount({ code: customerCode, status: "ACTIVE" });
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
         } else {
             setOpenActiveAccountDialog(false);
-            props.data.filter(row => row.code === activeCustomerCode.code)[0].status = "ACTIVE";
+            resp.data.filter(row => row.code === customerCode)[0].status = "ACTIVE";
             setActiveCustomerCode(null);
             success("Kích hoạt tài khoản thành công");
         }
