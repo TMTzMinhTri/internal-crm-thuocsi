@@ -274,8 +274,8 @@ function render(props) {
                         </colgroup>
                         <TableHead>
                             <TableRow>
-                                <TableCell align="left">OrderNo</TableCell>
-                                <TableCell align="left">OrderID</TableCell>
+                                <TableCell align="left">Order No</TableCell>
+                                <TableCell align="left">Order ID</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
                                 {/* <TableCell align="left">Địa Chỉ</TableCell> */}
