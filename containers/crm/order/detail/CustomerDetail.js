@@ -36,13 +36,13 @@ export default function CustomerDetail({ order }) {
     return (
         <MyCard>
             <MyCardHeader title="Thông tin đặt hàng" small={true}>
-                <Authorization requiredScreen="/crm/order/edit">
+                {/* <Authorization requiredScreen="/crm/order/edit">
                     <Link href={`/crm/order/edit?orderNo=${order.orderNo}`} prefetch={false}>
                         <a target="_blank" prefetch={false} className={styles.actionLink}>
                             <FontAwesomeIcon icon={faPencilAlt} /> Cập nhật
                         </a>
                     </Link>
-                </Authorization>
+                </Authorization> */}
             </MyCardHeader>
             <MyCardContent>
                 <InfoLine label="ID" val={orderInfo.customerID}></InfoLine>

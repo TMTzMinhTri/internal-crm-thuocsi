@@ -27,13 +27,13 @@ export default function OrderTicketList({ ticketList }) {
     return (
         <MyCard>
             <MyCardHeader title="Danh sách phản hồi" small={true}>
-                <Authorization requiredScreen="/crm/order">
+                {/* <Authorization requiredScreen="/crm/order">
                     <Link href={`/crm/order?orderNo=`} prefetch={false}>
                         <a target="_blank" className={styles.actionLink}>
                             <FontAwesomeIcon icon={faListAlt} /> Xem tất cả phản hồi
                         </a>
                     </Link>
-                </Authorization>
+                </Authorization> */}
             </MyCardHeader>
             <MyCardContent>
                 <Table size="small">
