@@ -1,10 +1,23 @@
-import { Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, Grid } from "@material-ui/core";
-import IconButton from "@material-ui/core/IconButton";
+import {
+    Button,
+    Paper,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    Box,
+    Grid,
+} from "@material-ui/core";import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
 import SearchIcon from "@material-ui/icons/Search";
-import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login";
+import {
+    doWithLoggedInUser,
+    renderWithLoggedInUser,
+} from "@thuocsi/nextjs-components/lib/login";
 import MyTablePagination from "@thuocsi/nextjs-components/my-pagination/my-pagination";
 import { getOrderClient } from "client/order";
 import Head from "next/head";
@@ -15,7 +28,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "./order.module.css";
 import { formatDateTime, formatNumber } from "components/global";
-import { formatUrlSearch } from "components/global";
+import { formatUrlSearch } from 'components/global';
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { OrderFilter } from "containers/crm/order/OrderFilter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -38,9 +51,9 @@ export async function loadOrderData(ctx) {
 
     let orderClient = getOrderClient(ctx, data);
     let resp = await orderClient.getOrder(offset, limit, q);
-    if (resp.status !== "OK") {
-        if (resp.status === "NOT_FOUND") {
-            return { props: { data: [], count: 0, message: "Không tìm thấy đơn hàng" } };
+    if (resp.status !== 'OK') {
+        if (resp.status === 'NOT_FOUND') {
+            return { props: { data: [], count: 0, message: 'Không tìm thấy đơn hàng' } };
         }
         return { props: { data: [], count: 0, message: resp.message } };
     }
@@ -63,7 +76,7 @@ async function getOrderByFilter(data, limit, offset) {
         let orderClient = getOrderClient();
         const orderResp = await orderClient.getOrderByFilter({ ...data, limit, offset });
         if (orderResp.status !== "OK") {
-            if (orderResp.status === "NOT_FOUND") {
+            if (orderResp.status === 'NOT_FOUND') {
                 res.message = "Không tìm thấy kết quả phù hợp";
             } else {
                 res.message = orderResp.message;
