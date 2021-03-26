@@ -8,6 +8,7 @@ import OrderItemList, { getOrderItemList } from "./OrderItemList";
 import PromoDealDetail from "./PromoDealDetail";
 import OrderTicketList, { getTicketList } from "./OrderTicketList";
 import OrderHistory, { getOrderHistory } from "./OrderHistory";
+import { OrderAutoSearch } from './OrderAutoSearch';
 import styles from "./detail.module.css";
 
 export async function getOrderFullDetail({ ctx, data, orderNo }) {
@@ -60,6 +61,7 @@ function FlexContent({ children }) {
 export default function OrderFullDetail({ order, activitiesData }) {
     return (
         <Box>
+            <OrderAutoSearch orderInfo={order}></OrderAutoSearch>
             {order ? (
                 <Box>
                     <FlexContainer>

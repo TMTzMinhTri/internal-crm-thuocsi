@@ -74,7 +74,6 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                                     </TableCell>
                                     <TableCell align="right">{formatNumber(row.salePrice)}</TableCell>
                                     <TableCell align="right">{formatNumber(row.quantity)}</TableCell>
-
                                     <TableCell align="right">{formatNumber(row.totalPrice)}</TableCell>
                                 </TableRow>
                             ))
