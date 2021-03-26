@@ -370,58 +370,63 @@ export async function onSubmitPromotion(
     },
   ];
 
-  let conditions;
+  let conditions = [
+    { type: "ORDER_VALUE", minOrderValue: parseInt(value.minOrderValue) },
+  ];
 
-  if (value.condition == defaultCondition.noRule)
-    conditions = [
-      { type: value.condition, minOrderValue: parseInt(value.minOrderValue) },
-    ];
-  else {
-    conditions = [
-      {
-        type: value.condition,
-        minOrderValue: parseInt(value.minOrderValue),
-        productConditions: conditionObject.productList.map((o, index) => {
-          let sellerObject = {
-            sellerCodes: value["seller" + index].map((seller) => seller.code),
-            sellerQuantityType:
-              value["seller" + index][0].name == "Chọn tất cả" ? "ALL" : "MANY",
-            minQuantity: parseInt(value["minQuantity" + index]),
-            minTotalValue: parseInt(value["minTotalValue" + index]),
-          };
-          switch (value.condition) {
-            case defaultCondition.ingredient:
-              return {
-                ...sellerObject,
-                ingredientCode: value["ingredient" + index].code,
-              };
-            case defaultCondition.producer:
-              return {
-                ...sellerObject,
-                producerCode: value["producer" + index].code,
-              };
-            case defaultCondition.product:
-              return {
-                ...sellerObject,
-                productId: value["product" + index].productID,
-              };
-            case defaultCondition.productCategory:
-              return {
-                ...sellerObject,
-                categoryCode: value["productCategory" + index].code,
-              };
-            case defaultCondition.productTag:
-              return {
-                ...sellerObject,
-                productTag: value["productTag" + index].code,
-              };
-            default:
-              break;
-          }
-        }),
-      },
-    ];
-  }
+  // if (value.condition == defaultCondition.noRule)
+  //   conditions = [
+  //     { type: value.condition, minOrderValue: parseInt(value.minOrderValue) },
+  //   ];
+  // else
+  // if (value.condition != defaultCondition.noRule) {
+  conditions.push({
+    type: value.condition,
+    productConditions:
+      value.condition == defaultCondition.noRule
+        ? []
+        : conditionObject.productList.map((o, index) => {
+            let sellerObject = {
+              sellerCodes: value["seller" + index].map((seller) => seller.code),
+              sellerQuantityType:
+                value["seller" + index][0].name == "Chọn tất cả"
+                  ? "ALL"
+                  : "MANY",
+              minQuantity: parseInt(value["minQuantity" + index]),
+              minTotalValue: parseInt(value["minTotalValue" + index]),
+            };
+            switch (value.condition) {
+              case defaultCondition.ingredient:
+                return {
+                  ...sellerObject,
+                  ingredientCode: value["ingredient" + index].code,
+                };
+              case defaultCondition.producer:
+                return {
+                  ...sellerObject,
+                  producerCode: value["producer" + index].code,
+                };
+              case defaultCondition.product:
+                return {
+                  ...sellerObject,
+                  productId: value["product" + index].productID,
+                };
+              case defaultCondition.productCategory:
+                return {
+                  ...sellerObject,
+                  categoryCode: value["productCategory" + index].code,
+                };
+              case defaultCondition.productTag:
+                return {
+                  ...sellerObject,
+                  productTag: value["productTag" + index].code,
+                };
+              default:
+                break;
+            }
+          }),
+  });
+  // }
 
   let rewards;
 

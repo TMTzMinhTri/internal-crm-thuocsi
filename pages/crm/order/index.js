@@ -93,12 +93,11 @@ async function getOrderByFilter(data, limit, offset) {
 
 const RenderRow = (row, i) => (
     <TableRow key={i}>
-        <TableCell component="th" scope="row">
-            {row.data.orderNo}
-        </TableCell>
+        <TableCell component="th" scope="row">{row.data.orderNo}</TableCell>
+        <TableCell align="left">{row.data.orderId}</TableCell>
         <TableCell align="left">{row.data.customerName}</TableCell>
         <TableCell align="left">{row.data.customerPhone}</TableCell>
-        <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
+        {/* <TableCell align="left">{row.data.customerShippingAddress}</TableCell> */}
         <TableCell align="right">{formatNumber(row.data.totalFee) || 0}</TableCell>
         <TableCell align="right">{formatNumber(row.data.totalDiscount) || 0}</TableCell>
         <TableCell align="right">{formatNumber(row.data.totalPrice) || 0}</TableCell>
@@ -273,10 +272,11 @@ function render(props) {
                         </colgroup>
                         <TableHead>
                             <TableRow>
-                                <TableCell align="left">Mã đơn hàng</TableCell>
+                                <TableCell align="left">Order No</TableCell>
+                                <TableCell align="left">Order ID</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
-                                <TableCell align="left">Địa Chỉ</TableCell>
+                                {/* <TableCell align="left">Địa Chỉ</TableCell> */}
                                 <TableCell align="right">Phí dịch vụ</TableCell>
                                 <TableCell align="right">Khuyến mãi</TableCell>
                                 <TableCell align="right">Tổng tiền</TableCell>
