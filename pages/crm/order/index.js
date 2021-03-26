@@ -130,7 +130,7 @@ const RenderRow = (row, i) => (
             </Link>
             <Link href={`/crm/order/detail?orderNo=${row.data.orderNo}`}>
                 <a>
-                    <Tooltip title="Xem thông tin hoạt động của khách hàng">
+                    <Tooltip title="Xem thông tin đơn hàng">
                         <IconButton>
                             <FontAwesomeIcon icon={faEye} size="sm" />
                         </IconButton>
