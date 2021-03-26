@@ -9,7 +9,8 @@ import {
     TableRow,
     Box,
     Grid,
-} from "@material-ui/core";import IconButton from "@material-ui/core/IconButton";
+} from "@material-ui/core";
+import IconButton from "@material-ui/core/IconButton";
 import InputBase from "@material-ui/core/InputBase";
 import Tooltip from "@material-ui/core/Tooltip";
 import EditIcon from "@material-ui/icons/Edit";
@@ -44,7 +45,7 @@ export async function getServerSideProps(ctx) {
 export async function loadOrderData(ctx) {
     let data = { props: {} };
     let query = ctx.query;
-    let q = typeof query.q === "undefined" ? "" : query.q;
+    let q = typeof query.q === "undefined" ? '' : query.q;
     let page = query.page || 0;
     let limit = query.limit || 20;
     let offset = page * limit;
@@ -61,8 +62,8 @@ export async function loadOrderData(ctx) {
     return {
         props: {
             data: resp.data,
-            count: resp.total,
-        },
+            count: resp.total
+        }
     };
 }
 
@@ -111,7 +112,10 @@ const RenderRow = (row, i) => (
                 style={{ color: OrderStatusColor[row.data.status], borderColor: OrderStatusColor[row.data.status] }}
                 disabled
             >
-                {OrderStatusLabel[row.data.status] ?? "Không xác định"}
+                {
+                    OrderStatusLabel[row.data.status] ?? "Không xác định"
+                }
+
                 {/* {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
                     : row.data.status === "Canceled" ? "Hủy bỏ" : "-"} */}
             </Button>
@@ -140,7 +144,7 @@ const RenderRow = (row, i) => (
 const breadcrumb = [
     {
         name: "Trang chủ",
-        link: "/crm",
+        link: "/crm"
     },
     {
         name: "Danh sách đơn hàng",
@@ -218,7 +222,9 @@ function render(props) {
             </Head>
             <MyCard>
                 <MyCardHeader title="Danh sách đơn hàng">
-                    <Button variant="contained" color="primary" style={{ marginRight: 8 }} onClick={() => setOpenOrderFilter(!openOrderFilter)}>
+                <Button variant="contained" color="primary" style={{ marginRight: 8 }}
+                        onClick={() => setOpenOrderFilter(!openOrderFilter)}
+                    >
                         <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
                         Bộ lọc
                     </Button>
@@ -236,12 +242,12 @@ function render(props) {
                                         onChange={(e) => setSearch(e.target.value)}
                                         inputRef={register}
                                         onKeyPress={(event) => {
-                                            if (event.key === "Enter" || event.keyCode === 13) {
+                                            if (event.key === 'Enter' || event.keyCode === 13) {
                                                 onSearch();
                                             }
                                         }}
                                         placeholder="Nhập mã đơn hàng"
-                                        inputProps={{ "aria-label": "Nhập mã đơn hàng" }}
+                                        inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
                                     />
                                     <IconButton className={styles.iconButton} aria-label="search" onClick={handleSubmit(onSearch)}>
                                         <SearchIcon />
@@ -251,23 +257,28 @@ function render(props) {
                         </Grid>
                     </MyCardActions>
                 </Box>
-                <OrderFilter open={openOrderFilter} onFilterChange={handleApplyFilter} q={search} onClose={({ q }) => setSearch(q ?? "")} />
+                <OrderFilter
+                    open={openOrderFilter}
+                    onFilterChange={handleApplyFilter}
+                    q={search}
+                    onClose={({ q }) => setSearch(q ?? "")}
+                />
             </MyCard>
             <MyCard>
                 <TableContainer component={Paper}>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col />
-                            <col />
-                            <col />
+                            <col/>
+                            <col/>
+                            <col/>
                             <col width="15%" />
-                            <col />
-                            <col />
-                            <col />
-                            <col />
-                            <col />
-                            <col />
-                            <col />
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
+                            <col/>
                             <col width="10%" />
                         </colgroup>
                         <TableHead>
@@ -294,13 +305,11 @@ function render(props) {
                             </TableBody>
                         ) : (
                             <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">
-                                        {message}
-                                    </TableCell>
-                                </TableRow>
-                            </TableBody>
-                        )}
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{message}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
 
                         <MyTablePagination labelUnit="đơn hàng" count={count} rowsPerPage={limit} page={page} onChangePage={handlePageChange} />
                     </Table>

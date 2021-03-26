@@ -5,12 +5,15 @@ const prefixMaster = constURL.PREFIX_MASTER;
 const prefix = constURL.PREFIX_PRICING;
 const prefixProduct = `${constURL.PREFIX_PRODUCT}`;
 class PricingClient extends APIClient {
+
     constructor(ctx, data) {
         super(ctx, data);
     }
 
     getListPricing(offset, limit, q, waitConfirm) {
-        return this.callFromNextJS("GET", `${prefix}/selling/list`, {
+        return this.callFromNextJS(
+            "GET",
+            `${prefix}/selling/list`, {
             q,
             offset,
             limit,
@@ -138,7 +141,7 @@ class PricingClient extends APIClient {
             "GET",
             `${prefixProduct}/category/list`, {
             q,
-            getTotal: true,
+            getTotal: true
         });
     }
 
@@ -158,10 +161,9 @@ class PricingClient extends APIClient {
     }
 
     configPrice(data) {
-        console.log({ ...data });
-        return this.callFromClient("POST", `${prefix}/product/config`, {
-            ...data,
-        });
+        return this.callFromClient(
+            "POST",
+            `${prefix}/product/config`, { ...data });
     }
 
     getListConfigPrice(data) {
