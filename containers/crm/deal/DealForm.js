@@ -46,6 +46,7 @@ import {
     DealValidation
 } from "view-models/deal";
 import Head from "next/head";
+
 const defaultValuesDealForm = {
     startTime: formatDatetimeFormType(moment().add(1, "d")),
     endTime: formatDatetimeFormType(moment().add(10, "d")),
@@ -57,7 +58,7 @@ const defaultValuesDealForm = {
     tags: [],
     imageUrls: [],
     isFlashSale: false,
-    maxQuantity: 1,
+    maxQuantity: 100,
     price: 10000,
     skus: [],
 }
@@ -139,9 +140,9 @@ export const DealForm = (props) => {
         const dealClient = getDealClient();
         let resp;
         if (props.isUpdate) {
-            resp = await dealClient.updateDeal({ code: props.deal?.code, ...data, skus });
+            resp = await dealClient.updateDeal({ code: props.deal?.code, ...data });
         } else {
-            resp = await dealClient.createDeal({ ...data, skus });
+            resp = await dealClient.createDeal({ ...data });
         }
         if (resp.status !== "OK") {
             throw new Error(resp.message);
@@ -221,7 +222,7 @@ export const DealForm = (props) => {
 
     const handleSubmitDealForm = async (formData) => {
         try {
-            const deal = await createOrUpdateDeal(formData);
+            const deal = await createOrUpdateDeal({ ...formData, skus });
             toast.success(props.isUpdate ? "Cập nhật deal thành công." : "Tạo deal thành công.")
             if (!props.isUpdate) {
                 router.push({
@@ -329,6 +330,7 @@ export const DealForm = (props) => {
                                 variant="outlined"
                                 size="small"
                                 label="Giá"
+                                type="number"
                                 fullWidth
                                 InputLabelProps={{
                                     shrink: true,
