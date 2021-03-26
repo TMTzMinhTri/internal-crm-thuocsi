@@ -58,7 +58,7 @@ const defaultValuesDealForm = {
     tags: [],
     imageUrls: [],
     isFlashSale: false,
-    maxQuantity: 1,
+    maxQuantity: 100,
     price: 10000,
     skus: [],
 }
