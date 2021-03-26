@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
 import { getProductClient } from "client/product";
-import { isValid } from "utils/ClientUtils";
+import { isValid } from "components/global";
 import styles from "./detail.module.css";
 
 export async function getOrderItemList({ ctx, data, orderItems }) {

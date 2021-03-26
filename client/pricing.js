@@ -238,7 +238,7 @@ class PricingClient extends APIClient {
         return this.callFromNextJS("GET", `${prefix}/payment-method/list`);
     }
 
-    getListDeliveryMethod() {
+    getListDeliveryPlatform() {
         return this.callFromNextJS("GET", `${prefix}/delivery-platform/list`);
     }
 

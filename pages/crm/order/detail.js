@@ -23,7 +23,7 @@ async function loadData(ctx) {
 }
 
 // do render
-function render({ order, activitiesData }) {
+function render({ order, activitiesData, paymentMethodList, deliveryPlatformList }) {
     const breadcrumb = [
         {
             name: "Trang chủ",
@@ -43,7 +43,7 @@ function render({ order, activitiesData }) {
             <Head>
                 <title>Chi tiết đặt hàng</title>
             </Head>
-            <OrderFullDetail order={order} activitiesData={activitiesData} />
+            <OrderFullDetail order={order} activitiesData={activitiesData} paymentMethodList={paymentMethodList} deliveryPlatformList={deliveryPlatformList} />
         </AppCRM>
     );
 }

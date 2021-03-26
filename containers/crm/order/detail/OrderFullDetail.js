@@ -1,7 +1,7 @@
 import { Box } from "@material-ui/core";
-import { isValid } from "utils/ClientUtils";
+import { isValid } from "components/global";
 import { getOrderClient } from "client/order";
-import DeliveryDetail from "./DeliveryDetail";
+import DeliveryDetail, {getDeliveryPlatformName, getPaymentMethodName } from "./DeliveryDetail";
 import CustomerDetail, { getMasterDataAddress } from "./CustomerDetail";
 import PricingDetail from "./PricingDetail";
 import OrderItemList, { getOrderItemList } from "./OrderItemList";
@@ -15,7 +15,14 @@ export async function getOrderFullDetail({ ctx, data, orderNo }) {
     const orderResult = await orderClient.getOrderByOrderNo(orderNo);
     if (!isValid(orderResult)) return {};
     const order = orderResult.data[0];
-    const [masterDataAddress, orderItemList, ticketList, activitiesData] = await Promise.all([
+    const [
+        masterDataAddress,
+        orderItemList,
+        ticketList,
+        activitiesData,
+        paymentMethodName,
+        deliveryPlatformName,
+    ] = await Promise.all([
         getMasterDataAddress({
             ctx,
             data,
@@ -26,6 +33,8 @@ export async function getOrderFullDetail({ ctx, data, orderNo }) {
         getOrderItemList({ ctx, data, orderItems: order.orderItems }),
         getTicketList({ ctx, data, orderNo, orderId: order.orderId }),
         getOrderHistory({ ctx, data, orderNo }),
+        getPaymentMethodName({ ctx, data, paymentMethodCode: order.paymentMethod }),
+        getDeliveryPlatformName({ ctx, data, deliveryPlatformCode: order.deliveryPlatform }),
     ]);
     return {
         order: {
@@ -33,6 +42,8 @@ export async function getOrderFullDetail({ ctx, data, orderNo }) {
             masterDataAddress,
             orderItemList,
             ticketList,
+            paymentMethodName,
+            deliveryPlatformName,
         },
         activitiesData,
     };
@@ -56,7 +67,9 @@ export default function OrderFullDetail({ order, activitiesData }) {
                             <CustomerDetail order={order}></CustomerDetail>
                         </FlexContent>
                         <FlexContent>
-                            <DeliveryDetail order={order}></DeliveryDetail>
+                            <DeliveryDetail
+                                order={order}
+                            ></DeliveryDetail>
                         </FlexContent>
                     </FlexContainer>
                     <FlexContainer>

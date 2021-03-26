@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
 import { TicketStatus } from "containers/crm/ticket/ticket-display";
-import { isValid } from "utils/ClientUtils";
+import { isValid } from "components/global";
 import { getTicketClient } from "client/ticket";
 import styles from "./detail.module.css";
 

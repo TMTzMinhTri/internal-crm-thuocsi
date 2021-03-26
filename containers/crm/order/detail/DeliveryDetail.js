@@ -4,44 +4,35 @@ import { Box } from "@material-ui/core";
 import styles from "./detail.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
+import { getPricingClient } from 'client/pricing';
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
-import PaymentMethod from "./PaymentMethod";
-import DeliveryPlatform from "./DeliveryPlatform";
+import { isValid } from "components/global";
 import OrderStatus from "./OrderStatus";
 
+export async function getDeliveryPlatformName({ ctx, data, deliveryPlatformCode }) {
+    const pricingClient = getPricingClient(ctx, data);
+    const deliveryPlatformListResult = await pricingClient.getListDeliveryPlatform();
+    const list = isValid(deliveryPlatformListResult) ? deliveryPlatformListResult.data : [];
+    return list.find(deliveryPlatform => deliveryPlatform.code === deliveryPlatformCode)?.name || '';
+
+}
+
+export async function getPaymentMethodName({ ctx, data, paymentMethodCode }) {
+    const pricingClient = getPricingClient(ctx, data);
+    const paymentMethodListResult = await pricingClient.getListPaymentMethod();
+    const list =  isValid(paymentMethodListResult) ? paymentMethodListResult.data : [];
+    return list.find(paymentMethod => paymentMethod.code === paymentMethodCode)?.name || '';
+}
+
+
 const EnumLineType = {
-    PAYMENT_METHOD: "payment_method",
-    DELIVERY_PLATFORM: "delivery_platform",
     ORDER_STATUS: "order_status",
     DATE: "date",
 };
 
+
 function InfoLine({ label, val, type }) {
-    if (type == EnumLineType.PAYMENT_METHOD) {
-        return (
-            <Box className={styles.infoLine}>
-                <span className={styles.label}>{label}</span>
-
-                <span className={styles.value}>
-                    <PaymentMethod val={val} />
-                </span>
-            </Box>
-        );
-    }
-
-    if (type === EnumLineType.DELIVERY_PLATFORM) {
-        return (
-            <Box className={styles.infoLine}>
-                <span className={styles.label}>{label}</span>
-
-                <span className={styles.value}>
-                    <DeliveryPlatform val={val} />
-                </span>
-            </Box>
-        );
-    }
-
     if (type == EnumLineType.ORDER_STATUS) {
         return (
             <Box className={styles.infoLine}>
@@ -85,15 +76,13 @@ export default function DeliveryDetail({ order, orderNo }) {
             <MyCardContent>
                 <InfoLine
                     label="Hình thức thanh toán"
-                    val={orderInfo.paymentMethod}
-                    type={EnumLineType.PAYMENT_METHOD}
+                    val={orderInfo.paymentMethodName}
                 ></InfoLine>
                 <InfoLine
                     label="Đơn vị vận chuyển"
-                    val={orderInfo.deliveryPlatform}
-                    type={EnumLineType.DELIVERY_PLATFORM}
+                    val={orderInfo.deliveryPlatformName}
                 ></InfoLine>
-                <InfoLine label="Mã số giao hàng" val={orderInfo.deliveryTrackingNumber}></InfoLine>
+                <InfoLine label="Mã vận đơn" val={orderInfo.deliveryTrackingNumber}></InfoLine>
                 <InfoLine label="Trạng thái giao hàng" val={orderInfo.deliveryStatus}></InfoLine>
                 <InfoLine label="Ngày giao" val={orderInfo.deliveryDate} type={EnumLineType.DATE}></InfoLine>
                 <InfoLine

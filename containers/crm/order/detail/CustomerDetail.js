@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
-import { isValid } from "utils/ClientUtils";
+import { isValid } from "components/global";
 
 function InfoLine({ label, val }) {
     return (
@@ -51,7 +51,7 @@ export default function CustomerDetail({ order }) {
                 <InfoLine label="Email" val={orderInfo.customerEmail}></InfoLine>
                 <InfoLine label="Số điện thoại" val={orderInfo.customerPhone}></InfoLine>
                 <InfoLine label="Địa chỉ" val={orderInfo.customerShippingAddress}></InfoLine>
-                <InfoLine label="Địa chỉ hành chính" val={orderInfo.masteDataAddress}></InfoLine>
+                <InfoLine label="Khu vực" val={orderInfo.masterDataAddress}></InfoLine>
             </MyCardContent>
         </MyCard>
     );
