@@ -35,13 +35,13 @@ export default function PricingDetail({ order, orderNo }) {
     return (
         <MyCard>
             <MyCardHeader title="Thông tin khuyến mãi" small={true}>
-                <Authorization requiredScreen="/crm/order/edit">
+                {/* <Authorization requiredScreen="/crm/order/edit">
                     <Link href={`/crm/order/edit?orderNo=${orderNo}`} prefetch={false}>
                         <a target="_blank" prefetch={false} className={styles.actionLink}>
                             <FontAwesomeIcon icon={faPencilAlt} /> Cập nhật
                         </a>
                     </Link>
-                </Authorization>
+                </Authorization> */}
             </MyCardHeader>
             <MyCardContent>
                 <InfoLine label="Mã giảm giá" val={orderInfo.redeemCode[0]}></InfoLine>

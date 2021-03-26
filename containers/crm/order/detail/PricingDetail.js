@@ -33,13 +33,13 @@ export default function PricingDetail({ order, orderNo }) {
     return (
         <MyCard>
             <MyCardHeader title="Thông tin thành tiền" small={true}>
-                <Authorization requiredScreen="/crm/order/edit">
+                {/* <Authorization requiredScreen="/crm/order/edit">
                     <Link href={`/crm/order/edit?orderNo=${orderNo}`} prefetch={false}>
                         <a target="_blank" prefetch={false} className={styles.actionLink}>
                             <FontAwesomeIcon icon={faPencilAlt} /> Cập nhật
                         </a>
                     </Link>
-                </Authorization>
+                </Authorization> */}
             </MyCardHeader>
             <MyCardContent>
                 <InfoLine
@@ -48,11 +48,10 @@ export default function PricingDetail({ order, orderNo }) {
                     type={EnumLineType.CURRENCY}
                 ></InfoLine>
                 <InfoLine
-                    label="Giá theo đơn vị vận chuyển"
+                    label="Phí vận chuyển"
                     val={orderInfo.deliveryPlatformFee}
                     type={EnumLineType.CURRENCY}
                 ></InfoLine>
-                <InfoLine label="Phí vận chuyển" val={orderInfo.shippingFee} type={EnumLineType.CURRENCY}></InfoLine>
                 <InfoLine label="Tổng tiền" val={orderInfo.subTotalPrice} type={EnumLineType.CURRENCY}></InfoLine>
                 <InfoLine label="Giảm giá" val={orderInfo.totalDiscount} type={EnumLineType.CURRENCY}></InfoLine>
                 <InfoLine label="Tổng cộng" val={orderInfo.totalPrice} type={EnumLineType.CURRENCY}></InfoLine>

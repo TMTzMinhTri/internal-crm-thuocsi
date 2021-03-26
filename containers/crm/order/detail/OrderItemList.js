@@ -36,13 +36,13 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
     return (
         <MyCard>
             <MyCardHeader title="Danh sách sản phẩm" small={true}>
-                <Authorization requiredScreen="/crm/order">
+                {/* <Authorization requiredScreen="/crm/order">
                     <Link href={`/crm/order?orderNo=`} prefetch={false}>
                         <a target="_blank" className={styles.actionLink}>
                             <FontAwesomeIcon icon={faListAlt} /> Xem tất cả sản phẩm
                         </a>
                     </Link>
-                </Authorization>
+                </Authorization> */}
             </MyCardHeader>
             <MyCardContent>
                 <Table size="small">
