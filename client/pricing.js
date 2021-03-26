@@ -96,6 +96,7 @@ class PricingClient extends APIClient {
                 skus,
             }
         );
+
     }
 
     getPricingByCodesFromClient(codes) {
@@ -160,7 +161,6 @@ class PricingClient extends APIClient {
     }
 
     configPrice(data) {
-        console.log({ ...data });
         return this.callFromClient(
             "POST",
             `${prefix}/product/config`, { ...data });
