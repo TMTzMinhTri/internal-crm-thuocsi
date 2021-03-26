@@ -57,3 +57,11 @@
 .value {
     width: 60%;
 }
+
+.search [class*="MuiOutlinedInput-input"] {
+    padding: 10px 15px !important;
+}
+
+.search[class*="MuiOutlinedInput-adornedEnd"] {
+    padding-right: 0 !important;
+}

@@ -2,10 +2,6 @@ import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/
 import { Box } from "@material-ui/core";
 import { getMasterDataClient } from "client/master-data";
 import styles from "./detail.module.css";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
-import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
-import Link from "next/link";
 import { isValid } from "components/global";
 
 function InfoLine({ label, val }) {
