@@ -4,25 +4,23 @@ import { Box } from "@material-ui/core";
 import styles from "./detail.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
-import { getPricingClient } from 'client/pricing';
+import { getDeliveryClient } from 'client/delivery';
 import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
 import Link from "next/link";
 import { isValid } from "components/global";
 import OrderStatus from "./OrderStatus";
 
 export async function getDeliveryPlatformName({ ctx, data, deliveryPlatformCode }) {
-    const pricingClient = getPricingClient(ctx, data);
-    const deliveryPlatformListResult = await pricingClient.getListDeliveryPlatform();
-    const list = isValid(deliveryPlatformListResult) ? deliveryPlatformListResult.data : [];
-    return list.find(deliveryPlatform => deliveryPlatform.code === deliveryPlatformCode)?.name || '';
+    const deliveryClient = getDeliveryClient(ctx, data);
+    const deliveryPlatformListResult = await deliveryClient.getListDeliveryByCode(deliveryPlatformCode);
+    return isValid(deliveryPlatformListResult) ? deliveryPlatformListResult.data[0].name : '';
 
 }
 
 export async function getPaymentMethodName({ ctx, data, paymentMethodCode }) {
-    const pricingClient = getPricingClient(ctx, data);
-    const paymentMethodListResult = await pricingClient.getListPaymentMethod();
-    const list =  isValid(paymentMethodListResult) ? paymentMethodListResult.data : [];
-    return list.find(paymentMethod => paymentMethod.code === paymentMethodCode)?.name || '';
+    const deliveryClient = getDeliveryClient(ctx, data);
+    const paymentMethodListResult = await deliveryClient.getListPaymentMethodByCode(paymentMethodCode);
+    return isValid(paymentMethodListResult) ? paymentMethodListResult.data[0].name : '';
 }
 
 

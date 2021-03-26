@@ -40,6 +40,15 @@ class DeliveryClient extends APIClient {
             })
     }
 
+    getListPaymentMethodByCode(paymentMethodCode) {
+        return this.callFromNextJS(
+            "GET",
+            `${PREFIX}/payment-method`,
+            {
+                paymentMethodCode
+            })
+    }
+
 }
 
 export function getDeliveryClient(ctx, data = { props: {} }) {
