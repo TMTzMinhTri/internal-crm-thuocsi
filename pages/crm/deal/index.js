@@ -414,6 +414,7 @@ const render = (props) => {
                 <ModalCustom
                     open={openStatusChangeDialog}
                     title="Thông báo"
+                    primaryText="Đồng ý"
                     onClose={setOpenStatusChangeDialog}
                     onExcute={handleUpdateDealStatus}
                 >
@@ -424,6 +425,7 @@ const render = (props) => {
                 <ModalCustom
                     open={openFlashSaleChangeDialog}
                     title="Thông báo"
+                    primaryText="Đồng ý"
                     onClose={setOpenFlashSaleChangeDialog}
                     onExcute={handleUpdateDealStatus}
                 >

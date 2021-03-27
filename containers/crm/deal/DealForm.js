@@ -6,6 +6,7 @@ import {
     FormLabel,
     Grid,
     IconButton,
+    makeStyles,
     MenuItem,
     Switch,
     Table,
@@ -47,6 +48,13 @@ import {
 } from "view-models/deal";
 import Head from "next/head";
 
+const useStyles = makeStyles({
+    gridAlignTop: {
+        alignItems: "flex-start",
+        alignContent: "flex-start",
+    }
+})
+
 const defaultValuesDealForm = {
     startTime: formatDatetimeFormType(moment().add(1, "d")),
     endTime: formatDatetimeFormType(moment().add(10, "d")),
@@ -67,6 +75,7 @@ const defaultValuesSkuForm = {
     quantity: 1,
 }
 export const DealForm = (props) => {
+    const classes = useStyles();
     const router = useRouter();
     const toast = useToast();
     const isLateUpdate = props.isUpdate && moment(props.deal.startTime).isBefore(moment());
@@ -109,7 +118,7 @@ export const DealForm = (props) => {
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
         const productClient = getProductClient();
-        const skusResp = await pricingClient.searchSellingSKUsByKeyword(text);
+        const skusResp = await pricingClient.searchSellingSKUsByKeywordFromClient(text);
         if (skusResp.status !== "OK") {
             if (skusResp.status === "NOT_FOUND") {
                 return [];
@@ -246,7 +255,7 @@ export const DealForm = (props) => {
 
             <MyCardContent>
                 <Grid container spacing={8}>
-                    <Grid item xs={12} md={5} container spacing={2}>
+                    <Grid className={classes.gridAlignTop} item xs={12} md={5} container spacing={2}>
                         <Grid item xs={12}>
                             <Controller
                                 name="dealType"
@@ -264,7 +273,7 @@ export const DealForm = (props) => {
                                             shrink: true,
                                         }}
                                         SelectProps={{
-                                            readOnly: isLateUpdate,
+                                            readOnly: props.isUpdate,
                                         }}
                                         {...field}
                                         onChange={(e) => {
@@ -351,7 +360,7 @@ export const DealForm = (props) => {
                             />
                         </Grid>
                     </Grid>
-                    <Grid item xs={12} md={5} container spacing={3}>
+                    <Grid className={classes.gridAlignTop} item xs={12} md={5} container spacing={3}>
                         <Grid item xs={12} md={6}>
                             <FormControl>
                                 <FormLabel>Trạng thái</FormLabel>
@@ -445,11 +454,8 @@ export const DealForm = (props) => {
                                 })}
                             />
                         </Grid>
-                        {/* Keep to not break layout */}
-                        <Grid item xs={12} />
-                        <Grid item xs={12} />
                     </Grid>
-                    <Grid item xs={12} md={5} container spacing={2}>
+                    <Grid className={classes.gridAlignTop} item xs={12} md={5} container spacing={2}>
                         <Grid item xs={12}>
                             <Typography variant="h6">Danh sách sản phẩm thuộc deal</Typography>
                         </Grid>
@@ -549,11 +555,10 @@ export const DealForm = (props) => {
                                         disabled={props.isUpdate}
                                     />
                                 </Grid>
-                                <Grid item xs={12}></Grid>
                             </>
                         )}
                     </Grid>
-                    <Grid item xs={12} md={5} container spacing={2} alignItems="center">
+                    <Grid className={classes.gridAlignTop} item xs={12} md={5} container spacing={2} alignItems="center">
                         <Grid item xs={12}>
                             <Typography variant="h6">Tên deal</Typography>
                         </Grid>

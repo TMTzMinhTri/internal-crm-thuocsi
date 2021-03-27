@@ -235,6 +235,16 @@ class PricingClient extends APIClient {
     }
 
     searchSellingSKUsByKeyword(q) {
+        return this.callFromNextJS(
+            "GET",
+            `${prefixProduct}/deal`,
+            {
+                q
+            }
+        )
+    }
+
+    searchSellingSKUsByKeywordFromClient(q) {
         return this.callFromClient(
             "GET",
             `${prefixProduct}/deal`,
