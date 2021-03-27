@@ -20,15 +20,16 @@ const statusMap = {
 export default function CustomerStatus({ status, customerCode }) {
 
     const { error, success } = useToast();
+    const { statusInfo, setStatusInfo } = React.useState(statusMap[status])
 
     // setup display
-    let statusInfo = statusMap[status]
     if (!statusInfo) {
         statusInfo = {
             label: "Không xác định",
             color: "grey"
         }
     }
+
 
     // state
     const [openActiveAccountDialog, setOpenActiveAccountDialog] = React.useState(false);
@@ -46,6 +47,7 @@ export default function CustomerStatus({ status, customerCode }) {
             resp.data.filter(row => row.code === customerCode)[0].status = "ACTIVE";
             setActiveCustomerCode(null);
             success("Kích hoạt tài khoản thành công");
+            setStatusInfo(statusMap.ACTIVE)
         }
     }
 
