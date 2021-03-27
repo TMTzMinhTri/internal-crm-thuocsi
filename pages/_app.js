@@ -74,6 +74,11 @@ const menu = [{
         }
     ]
 },
+{
+    key: "DEAL",
+    name: "Deal",
+    link: "/crm/deal",
+},
 ]
 
 export var theme = createMuiTheme({

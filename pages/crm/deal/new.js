@@ -23,7 +23,7 @@ async function loadDealData(ctx) {
     const productResp = await productClient.getProductBySKUs(Object.keys(skuMap));
 
     props.skuOptions = productResp.data?.map(({ sku, seller, name }) => {
-        return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
+        return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku })
     }) ?? [];
 
     return {
