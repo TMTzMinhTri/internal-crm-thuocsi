@@ -39,6 +39,20 @@ const menu = [{
     name: "Đơn hàng",
     link: "/crm/order",
     icon: faDollarSign,
+    subMenu: [
+        {
+            key: "ORDER",
+            name: "Đơn hàng",
+            link: "/crm/order",
+            icon: faStore,
+        },
+        {
+            key: "ORDER_LOOKUP",
+            name: "Tra cứu",
+            link: "/crm/order/detail",
+            icon: faSearch,
+        }
+    ]
 },
 {
     key: "DISCOUNT",

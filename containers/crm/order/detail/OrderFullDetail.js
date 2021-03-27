@@ -1,14 +1,14 @@
 import { Box } from "@material-ui/core";
 import { isValid } from "components/global";
 import { getOrderClient } from "client/order";
-import DeliveryDetail, {getDeliveryPlatformName, getPaymentMethodName } from "./DeliveryDetail";
+import DeliveryDetail, { getDeliveryPlatformName, getPaymentMethodName } from "./DeliveryDetail";
 import CustomerDetail, { getMasterDataAddress } from "./CustomerDetail";
 import PricingDetail from "./PricingDetail";
 import OrderItemList, { getOrderItemList } from "./OrderItemList";
 import PromoDealDetail from "./PromoDealDetail";
 import OrderTicketList, { getTicketList } from "./OrderTicketList";
 import OrderHistory, { getOrderHistory } from "./OrderHistory";
-import { OrderAutoSearch } from './OrderAutoSearch';
+import { OrderAutoSearch } from "./OrderAutoSearch";
 import styles from "./detail.module.css";
 
 export async function getOrderFullDetail({ ctx, data, orderNo }) {
@@ -47,6 +47,7 @@ export async function getOrderFullDetail({ ctx, data, orderNo }) {
             deliveryPlatformName,
         },
         activitiesData,
+        orderNo,
     };
 }
 
@@ -58,20 +59,18 @@ function FlexContent({ children }) {
     return <Box className={styles.flexContent}>{children}</Box>;
 }
 
-export default function OrderFullDetail({ order, activitiesData }) {
+export default function OrderFullDetail({ order, activitiesData, orderNo }) {
     return (
         <Box>
             <OrderAutoSearch orderInfo={order}></OrderAutoSearch>
-            {order ? (
+            {order && (
                 <Box>
                     <FlexContainer>
                         <FlexContent>
                             <CustomerDetail order={order}></CustomerDetail>
                         </FlexContent>
                         <FlexContent>
-                            <DeliveryDetail
-                                order={order}
-                            ></DeliveryDetail>
+                            <DeliveryDetail order={order}></DeliveryDetail>
                         </FlexContent>
                     </FlexContainer>
                     <FlexContainer>
@@ -96,9 +95,8 @@ export default function OrderFullDetail({ order, activitiesData }) {
 
                     <OrderHistory activitiesData={activitiesData}></OrderHistory>
                 </Box>
-            ) : (
-                "Không tìm thấy thông tin đơn hàng"
             )}
+            {orderNo && "Không tìm thấy thông tin đơn hàng"}
         </Box>
     );
 }
