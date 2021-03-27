@@ -245,7 +245,7 @@ function render(props) {
         // let mainColor = statuses.find((e) => e.value === row.status)?.color || "grey";
         // let status = statuses.find((e) => e.value === row.status)?.label || "Chưa xác định";
         return (
-            <TableRow>
+            <TableRow key={row.code}>
                 <TableCell component="th" scope="row" onClick={() => setSelectedCustomer(row)}>
                     {row.code}
                 </TableCell>
@@ -260,19 +260,7 @@ function render(props) {
                 <TableCell align="right">{row.point}</TableCell>
                 <TableCell align="left">{row.phone}</TableCell>
                 <TableCell align="center">
-                    <CustomerStatus status={row.status} customerCode={row.code}></CustomerStatus>
-                    {/* <Button
-                        disabled={row.status == "ACTIVE"}
-                        onClick={() => {
-                            setOpenActiveAccountDialog(true);
-                            setActiveCustomerCode(row);
-                        }}
-                        size="small"
-                        variant="outlined"
-                        style={{ color: `${mainColor}`, borderColor: `${mainColor}` }}
-                    >
-                        {status}
-                    </Button> */}
+                    <CustomerStatus customer={row}></CustomerStatus>
                 </TableCell>
                 <TableCell align="center">
                     <Link href={`/crm/customer/edit?customerCode=${row.code}`}>
@@ -408,7 +396,7 @@ function render(props) {
                         {customers.length > 0 ? (
                             <TableBody>
                                 {customers.map((row, i) => (
-                                    <RenderRow key={i} row={row} i={i} />
+                                    <RenderRow key={row.code} row={row} i={i} />
                                 ))}
                             </TableBody>
                         ) : (

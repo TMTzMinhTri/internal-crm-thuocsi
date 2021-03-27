@@ -14,61 +14,60 @@ const statusMap = {
         value: "INACTIVE",
         label: "Chưa kích hoạt",
         color: "grey"
+    },
+    UNDEFINED: {
+        label: "Không xác định",
+        color: "grey"
     }
 }
 
-export default function CustomerStatus({ status, customerCode }) {
+export default function CustomerStatus({ customer }) {
 
     const { error, success } = useToast();
-    const { statusInfo, setStatusInfo } = React.useState(statusMap[status])
-
-    // setup display
-    if (!statusInfo) {
-        statusInfo = {
-            label: "Không xác định",
-            color: "grey"
-        }
-    }
-
 
     // state
     const [openActiveAccountDialog, setOpenActiveAccountDialog] = React.useState(false);
-    const [activeCustomerCode, setActiveCustomerCode] = React.useState();
+    const [customerStatus, setCustomerStatus] = React.useState(customer.status)
+
+    React.useEffect(() => {
+
+        if (!statusMap[customerStatus]) {
+            setCustomerStatus("UNDEFINED")
+        }
+
+    }, [customerStatus])
 
     // handler
     async function activeAccount() {
         const _client = getCustomerClient();
 
-        const resp = await _client.activeAccount({ code: customerCode, status: "ACTIVE" });
+        const resp = await _client.activeAccount({ code: customer.code, status: "ACTIVE" });
         if (resp.status !== "OK") {
             error(resp.message || 'Thao tác không thành công, vui lòng thử lại sau');
         } else {
+            customer.status = "ACTIVE"
             setOpenActiveAccountDialog(false);
-            resp.data.filter(row => row.code === customerCode)[0].status = "ACTIVE";
-            setActiveCustomerCode(null);
             success("Kích hoạt tài khoản thành công");
-            setStatusInfo(statusMap.ACTIVE)
         }
     }
 
     // render
     return <Box>
-        <Tooltip title={status == "INACTIVE" ? "Nhấn để kích hoạt khách hàng" : ""}>
+        <Tooltip title={customerStatus == "INACTIVE" ? "Nhấn để kích hoạt khách hàng" : ""}>
             <Button
-                disabled={status == "ACTIVE"}
+                disabled={customerStatus == "ACTIVE"}
                 onClick={() => {
                     setOpenActiveAccountDialog(true);
-                    setActiveCustomerCode(customerCode);
                 }}
                 size="small"
                 variant="outlined"
-                style={{ color: `${statusInfo.color}`, borderColor: `${statusInfo.color}` }}
+                style={{ color: statusMap[customerStatus].color, borderColor: statusMap[customerStatus].color }}
             >
-                {statusInfo.label}
+                {statusMap[customerStatus].label}
             </Button>
         </Tooltip>
         {openActiveAccountDialog && <ConfirmActiveDialog
-            open={openActiveAccountDialog}
+            open={true}
             onClose={() => setOpenActiveAccountDialog(false)}
             onConfirm={() => activeAccount()}
         />}
