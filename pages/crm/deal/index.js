@@ -199,7 +199,7 @@ const render = (props) => {
                 <title>Danh sách deal</title>
             </Head>
             <MyCard>
-                <MyCardHeader>
+                <MyCardHeader title="Danh sách deal" >
                     <Link href="/crm/deal/new">
                         <Button variant="contained" color="primary">
                             <FontAwesomeIcon
