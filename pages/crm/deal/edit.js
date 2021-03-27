@@ -33,7 +33,7 @@ async function loadDealData(ctx) {
 
     const pricingClient = getPricingClient(ctx, {});
     const productClient = getProductClient(ctx, {});
-    const skusResp = await pricingClient.getListPricingByFilter({ offset: 0, limit: 100, q: "", status: "ACTIVE" });
+    const skusResp = await pricingClient.searchSellingSKUsByKeyword("");
     const skuMap = {};
     skusResp.data?.forEach(({ sku }) => {
         if (!skuMap[sku]) {
