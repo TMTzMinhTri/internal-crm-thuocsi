@@ -23,7 +23,7 @@ export async function getOrderItemList({ ctx, data, orderItems }) {
         orderItems?.map((orderItem) => {
             return {
                 ...orderItem,
-                productInfo: mapInfoProduct[orderItem.productSku],
+                productInfo: mapInfoProduct[orderItem.productSku] || {},
             };
         }) || [];
     return orderItemList;
