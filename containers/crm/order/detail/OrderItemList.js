@@ -12,6 +12,7 @@ import styles from "./detail.module.css";
 export async function getOrderItemList({ ctx, data, orderItems }) {
     const productClient = getProductClient(ctx, data);
     const productSkus = orderItems?.map((orderItem) => orderItem.productSku) || [];
+    console.log(productSkus);
     const productsResult = await productClient.getProductBySKUs(productSkus);
     let mapInfoProduct = {};
     if (isValid(productsResult)) {
@@ -23,7 +24,7 @@ export async function getOrderItemList({ ctx, data, orderItems }) {
         orderItems?.map((orderItem) => {
             return {
                 ...orderItem,
-                productInfo: mapInfoProduct[orderItem.productSku],
+                productInfo: mapInfoProduct[orderItem.productSku] || {},
             };
         }) || [];
     return orderItemList;
