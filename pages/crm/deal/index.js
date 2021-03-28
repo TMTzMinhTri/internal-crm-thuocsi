@@ -109,8 +109,8 @@ const render = (props) => {
     const { limit, page, count } = pagination;
     const filterForm = useForm({
         defaultValues: {
-            status: "",
-            dealType: "",
+            status: router.query.status ?? "",
+            dealType: router.query.dealType ?? "",
             searchText: router.query.q ?? "",
         }
     });
@@ -123,10 +123,9 @@ const render = (props) => {
         router.push({
             pathname: "/crm/deal",
             query: {
-                q: formatUrlSearch(searchText ?? ""),
+                q: searchText,
                 status,
                 dealType,
-                searchText,
             },
         });
     }, [searchText, status, dealType]);
@@ -167,7 +166,13 @@ const render = (props) => {
     }, [props.deals, props.message]);
 
     useEffect(() => {
-        search();
+        if (
+            status !== (router.query.status ?? "")
+            || dealType !== (router.query.dealType ?? "")
+        ) {
+            console.log(status, dealType);
+            search();
+        }
     }, [status, dealType]);
 
     const handleSearch = () => {
@@ -190,11 +195,11 @@ const render = (props) => {
 
     return (
         <AppCRM breadcrumb={breadcrumb}>
-             <Head>
+            <Head>
                 <title>Danh sách deal</title>
             </Head>
             <MyCard>
-                <MyCardHeader>
+                <MyCardHeader title="Danh sách deal" >
                     <Link href="/crm/deal/new">
                         <Button variant="contained" color="primary">
                             <FontAwesomeIcon
@@ -207,13 +212,11 @@ const render = (props) => {
                 </MyCardHeader>
                 <MyCardActions>
                     <Grid container spacing={3} alignItems="center">
-                        {/* <Grid item xs={12} sm={4}> */}
-                            {/* <Paper className={styles.search}>
+                        <Grid item xs={12} sm={4}>
+                            <Paper className={styles.search}>
                                 <InputBase
-                                    id="q"
-                                    name="q"
+                                    name="searchText"
                                     className={styles.input}
-                                    value={searchText}
                                     inputRef={filterForm.register}
                                     placeholder="Nhập tên deal"
                                     fullWidth
@@ -230,8 +233,8 @@ const render = (props) => {
                                 >
                                     <SearchIcon />
                                 </IconButton>
-                            </Paper> */}
-                        {/* </Grid> */}
+                            </Paper>
+                        </Grid>
                         <Grid item xs={12} sm={2}>
                             <Controller
                                 control={filterForm.control}
@@ -411,6 +414,7 @@ const render = (props) => {
                 <ModalCustom
                     open={openStatusChangeDialog}
                     title="Thông báo"
+                    primaryText="Đồng ý"
                     onClose={setOpenStatusChangeDialog}
                     onExcute={handleUpdateDealStatus}
                 >
@@ -421,6 +425,7 @@ const render = (props) => {
                 <ModalCustom
                     open={openFlashSaleChangeDialog}
                     title="Thông báo"
+                    primaryText="Đồng ý"
                     onClose={setOpenFlashSaleChangeDialog}
                     onExcute={handleUpdateDealStatus}
                 >

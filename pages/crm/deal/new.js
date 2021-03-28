@@ -12,7 +12,7 @@ async function loadDealData(ctx) {
     };
     const pricingClient = getPricingClient(ctx, {});
     const productClient = getProductClient(ctx, {});
-    const skusResp = await pricingClient.getListPricingByFilter({ offset: 0, limit: 100, q: "", status: "ACTIVE" });
+    const skusResp = await await pricingClient.searchSellingSKUsByKeyword("");
     const skuMap = {};
     skusResp.data?.forEach(({ sku }) => {
         if (!skuMap[sku]) {
@@ -23,7 +23,7 @@ async function loadDealData(ctx) {
     const productResp = await productClient.getProductBySKUs(Object.keys(skuMap));
 
     props.skuOptions = productResp.data?.map(({ sku, seller, name }) => {
-        return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
+        return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku })
     }) ?? [];
 
     return {

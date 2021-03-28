@@ -33,7 +33,7 @@ import { formatUrlSearch } from 'components/global';
 import { MyCard, MyCardActions, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { OrderFilter } from "containers/crm/order/OrderFilter";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faFilter } from "@fortawesome/free-solid-svg-icons";
+import { faFilter, faEye } from "@fortawesome/free-solid-svg-icons";
 import { OrderStatusColor, OrderStatusLabel } from "view-models/order";
 
 export async function getServerSideProps(ctx) {
@@ -45,7 +45,7 @@ export async function getServerSideProps(ctx) {
 export async function loadOrderData(ctx) {
     let data = { props: {} };
     let query = ctx.query;
-    let q = typeof (query.q) === "undefined" ? '' : query.q;
+    let q = typeof query.q === "undefined" ? '' : query.q;
     let page = query.page || 0;
     let limit = query.limit || 20;
     let offset = page * limit;
@@ -95,9 +95,10 @@ async function getOrderByFilter(data, limit, offset) {
 const RenderRow = (row, i) => (
     <TableRow key={i}>
         <TableCell component="th" scope="row">{row.data.orderNo}</TableCell>
+        <TableCell align="left">{row.data.orderId}</TableCell>
         <TableCell align="left">{row.data.customerName}</TableCell>
         <TableCell align="left">{row.data.customerPhone}</TableCell>
-        <TableCell align="left">{row.data.customerShippingAddress}</TableCell>
+        {/* <TableCell align="left">{row.data.customerShippingAddress}</TableCell> */}
         <TableCell align="right">{formatNumber(row.data.totalFee) || 0}</TableCell>
         <TableCell align="right">{formatNumber(row.data.totalDiscount) || 0}</TableCell>
         <TableCell align="right">{formatNumber(row.data.totalPrice) || 0}</TableCell>
@@ -114,6 +115,7 @@ const RenderRow = (row, i) => (
                 {
                     OrderStatusLabel[row.data.status] ?? "Không xác định"
                 }
+
                 {/* {row.data.status === "Confirmed" ? "Đã xác nhận" : row.data.status === "WaitConfirm" ? "Chờ xác nhận"
                     : row.data.status === "Canceled" ? "Hủy bỏ" : "-"} */}
             </Button>
@@ -125,6 +127,15 @@ const RenderRow = (row, i) => (
                         <EditIcon fontSize="small" />
                     </IconButton>
                 </Tooltip>
+            </Link>
+            <Link href={`/crm/order/detail?orderNo=${row.data.orderNo}`}>
+                <a>
+                    <Tooltip title="Xem thông tin đơn hàng">
+                        <IconButton>
+                            <FontAwesomeIcon icon={faEye} size="sm" />
+                        </IconButton>
+                    </Tooltip>
+                </a>
             </Link>
         </TableCell>
     </TableRow>
@@ -167,7 +178,6 @@ function render(props) {
             limit: parseInt(router.query.limit) || 20,
             count: props.count,
         });
-
     }, [router.query.page, router.query.limit, props.count]);
 
     const handleApplyFilter = async (data) => {
@@ -212,7 +222,7 @@ function render(props) {
             </Head>
             <MyCard>
                 <MyCardHeader title="Danh sách đơn hàng">
-                    <Button variant="contained" color="primary" style={{ marginRight: 8 }}
+                <Button variant="contained" color="primary" style={{ marginRight: 8 }}
                         onClick={() => setOpenOrderFilter(!openOrderFilter)}
                     >
                         <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
@@ -231,7 +241,7 @@ function render(props) {
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
                                         inputRef={register}
-                                        onKeyPress={event => {
+                                        onKeyPress={(event) => {
                                             if (event.key === 'Enter' || event.keyCode === 13) {
                                                 onSearch();
                                             }
@@ -239,8 +249,7 @@ function render(props) {
                                         placeholder="Nhập mã đơn hàng"
                                         inputProps={{ 'aria-label': 'Nhập mã đơn hàng' }}
                                     />
-                                    <IconButton className={styles.iconButton} aria-label="search"
-                                        onClick={handleSubmit(onSearch)}>
+                                    <IconButton className={styles.iconButton} aria-label="search" onClick={handleSubmit(onSearch)}>
                                         <SearchIcon />
                                     </IconButton>
                                 </Paper>
@@ -262,7 +271,7 @@ function render(props) {
                             <col/>
                             <col/>
                             <col/>
-                            <col width="15%"/>
+                            <col width="15%" />
                             <col/>
                             <col/>
                             <col/>
@@ -270,13 +279,15 @@ function render(props) {
                             <col/>
                             <col/>
                             <col/>
+                            <col width="10%" />
                         </colgroup>
                         <TableHead>
                             <TableRow>
-                                <TableCell align="left">Mã đơn hàng</TableCell>
+                                <TableCell align="left">Order No</TableCell>
+                                <TableCell align="left">Order ID</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
-                                <TableCell align="left">Địa Chỉ</TableCell>
+                                {/* <TableCell align="left">Địa Chỉ</TableCell> */}
                                 <TableCell align="right">Phí dịch vụ</TableCell>
                                 <TableCell align="right">Khuyến mãi</TableCell>
                                 <TableCell align="right">Tổng tiền</TableCell>
@@ -293,20 +304,14 @@ function render(props) {
                                 ))}
                             </TableBody>
                         ) : (
-                                <TableBody>
+                            <TableBody>
                                     <TableRow>
                                         <TableCell colSpan={3} align="left">{message}</TableCell>
                                     </TableRow>
                                 </TableBody>
                             )}
 
-                        <MyTablePagination
-                            labelUnit="đơn hàng"
-                            count={count}
-                            rowsPerPage={limit}
-                            page={page}
-                            onChangePage={handlePageChange}
-                        />
+                        <MyTablePagination labelUnit="đơn hàng" count={count} rowsPerPage={limit} page={page} onChangePage={handlePageChange} />
                     </Table>
                 </TableContainer>
             </MyCard>

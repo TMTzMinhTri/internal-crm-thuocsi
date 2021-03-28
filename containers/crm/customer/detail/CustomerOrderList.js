@@ -42,7 +42,7 @@ export default function CustomerOrderList({ orderList, customerCode }) {
                         prefetch={false}>
                         <a target="_blank" className={styles.actionLink}>
                             <FontAwesomeIcon icon={faListAlt} /> Xem tất cả đơn
-                    </a>
+                        </a>
                     </Link>
                 </Authorization>
             </MyCardHeader>
@@ -65,7 +65,7 @@ export default function CustomerOrderList({ orderList, customerCode }) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {(orderList && orderList.length) ? orderList.map(row =>
+                    {(orderList && orderList.length) ? orderList.map(row =>
                         (<TableRow key={row.orderNo}>
                             <TableCell component="th" scope="row">
                                 {row.orderId}
@@ -78,7 +78,6 @@ export default function CustomerOrderList({ orderList, customerCode }) {
                             <TableCell colSpan="100%">Không có đơn hàng nào</TableCell>
                         </TableRow>)}
                     </TableBody>
-
                 </Table>
             </MyCardContent>
         </MyCard>

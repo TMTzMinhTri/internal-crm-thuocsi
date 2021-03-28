@@ -1,6 +1,6 @@
 export const OrderPaymentMethod = {
     PAYMENT_METHOD_BANK: "PAYMENT_METHOD_BANK",
-}
+};
 
 export const OrderStatus = {
     WAIT_TO_CONFIRM: "WAIT_TO_CONFIRM",
@@ -43,7 +43,7 @@ export const OrderValidation = {
         pattern: {
             value: /^(?!.*[ ]{2})/,
             message: "Tên không hợp lệ (không được dư khoảng trắng)."
-        }
+        },
     },
     customerPhone: {
         required: "Số điện thoại không thể để trống",
@@ -65,7 +65,7 @@ export const OrderValidation = {
         pattern: {
             value: /^(?!.*[ ]{2})/,
             message: "Địa chỉ không hợp lệ (không được dư khoảng trắng)."
-        }
+        },
     },
     province: {
         required: "Vui lòng chọn."
@@ -75,7 +75,7 @@ export const OrderValidation = {
     },
     ward: {
         required: "Vui lòng chọn."
-    }
+    },
 }
 
 export const OrderItemValidation = {

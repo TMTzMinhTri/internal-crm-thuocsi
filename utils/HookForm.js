@@ -17,3 +17,41 @@ export const formSetter = (valueObject = {}, keys = [], setter, config = {}) => 
         }
     });
 }
+
+export const filterChangedField = (values, defaultValues, ignoreFields = []) => {
+    const ignoreKeyMap = ignoreFields.reduce((acc, cur) => { acc[cur] = true; return acc; }, {});
+    const keys = Object.keys(values);
+    const filteredObject = {};
+    keys.forEach((key) => {
+        if (ignoreKeyMap[key] || (JSON.stringify(values[key]) !== JSON.stringify(defaultValues[key]))) {
+            filteredObject[key] = values[key];
+        }
+    });
+    return filteredObject;
+}
+
+export const FormCommonValidator = {
+    noDecimal: (value) => {
+        if (value.toString().indexOf(".") >= 0) {
+            return "Vui lòng không nhập số thập phân."
+        }
+    },
+    name: (value) => {
+        const validators = [
+            {
+                value: new RegExp("[\\p{P}\\p{S}]", "ug"),
+                message: "Vui lòng nhập tên không bao gồm ký tự đặc biệt."
+            },
+            {
+                value: /^(.*[ ]{2})|^ /,
+                message: "Tên không hợp lệ (dư ký tự khoảng trắng).",
+            }
+        ]
+        for (let i = 0; i < validators.length; i++) {
+            if (validators[i].value?.test(value)) {
+                return validators[i].message;
+            }
+        }
+    }
+
+}

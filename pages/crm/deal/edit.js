@@ -33,7 +33,7 @@ async function loadDealData(ctx) {
 
     const pricingClient = getPricingClient(ctx, {});
     const productClient = getProductClient(ctx, {});
-    const skusResp = await pricingClient.getListPricingByFilter({ offset: 0, limit: 100, q: "", status: "ACTIVE" });
+    const skusResp = await pricingClient.searchSellingSKUsByKeyword("");
     const skuMap = {};
     skusResp.data?.forEach(({ sku }) => {
         if (!skuMap[sku]) {
@@ -49,12 +49,14 @@ async function loadDealData(ctx) {
 
     const productResp = await productClient.getProductBySKUs(Object.keys(skuMap));
 
-    props.skuOptions = productResp.data?.map(({ sku, seller, name }) => {
-        return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
-    }) ?? [];
+    productResp.data?.forEach(({ sku, seller, name }) => {
+        skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku };
+    });
+
+    props.skuOptions = Object.values(skuMap);
 
     props.deal.skus = props.deal.skus.map((data) => {
-        const { label = "" } = props.skuOptions.find(product => product.sku === data.sku) ?? {};
+        const { label = "" } = skuMap[data.sku] ?? {};
         return { ...data, label }
     });
 

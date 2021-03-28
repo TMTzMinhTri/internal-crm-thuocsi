@@ -1,3 +1,5 @@
+import { FormCommonValidator } from "utils/HookForm";
+
 export const DealType = {
     DEAL: "DEAL",
     COMBO: "COMBO",
@@ -66,6 +68,9 @@ export const DealValidation = {
         min: {
             value: 0,
             message: "Số lượng được phép bán không được nhỏ hơn 0.",
+        },
+        validate: {
+            noDecimal: FormCommonValidator.noDecimal,
         }
     },
     price: {
@@ -73,6 +78,13 @@ export const DealValidation = {
         min: {
             value: 1,
             message: "Giá không được nhỏ hơn 1.",
+        },
+        max: {
+            value: 1000000000,
+            message: "Giá không được lớn hơn 1,000,000,000.",
+        },
+        validate: {
+            noDecimal: FormCommonValidator.noDecimal,
         }
     },
     skus: {
@@ -85,6 +97,13 @@ export const DealValidation = {
                 value: 1,
                 message: "Số lượng không được nhỏ hơn 1.",
             },
+            max: {
+                value: 1000000000,
+                message: "Số lượng không được lớn hơn 1,000,000,000.",
+            },
+            validate: {
+                noDecimal: FormCommonValidator.noDecimal,
+            }
         },
     },
     imageUrls: {
