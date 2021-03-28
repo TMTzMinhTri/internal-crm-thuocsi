@@ -20,7 +20,7 @@ export async function getOrderFullDetail({ ctx, data, orderNo }) {
         masterDataAddress,
         orderItemList,
         ticketList,
-        activitiesData,
+        // activitiesData,
         paymentMethodName,
         deliveryPlatformName,
     ] = await Promise.all([
@@ -33,7 +33,7 @@ export async function getOrderFullDetail({ ctx, data, orderNo }) {
         }),
         getOrderItemList({ ctx, data, orderItems: order.orderItems }),
         getTicketList({ ctx, data, orderNo, orderId: order.orderId }),
-        getOrderHistory({ ctx, data, orderNo }),
+        // getOrderHistory({ ctx, data, orderNo }),
         getPaymentMethodName({ ctx, data, paymentMethodCode: order.paymentMethod }),
         getDeliveryPlatformName({ ctx, data, deliveryPlatformCode: order.deliveryPlatform }),
     ]);
@@ -46,7 +46,7 @@ export async function getOrderFullDetail({ ctx, data, orderNo }) {
             paymentMethodName,
             deliveryPlatformName,
         },
-        activitiesData,
+        // activitiesData,
         orderNo,
     };
 }
@@ -59,7 +59,9 @@ function FlexContent({ children }) {
     return <Box className={styles.flexContent}>{children}</Box>;
 }
 
-export default function OrderFullDetail({ order, activitiesData, orderNo }) {
+export default function OrderFullDetail({ order,
+    // activitiesData, 
+    orderNo }) {
     return (
         <Box>
             <OrderAutoSearch orderInfo={order}></OrderAutoSearch>
@@ -87,7 +89,7 @@ export default function OrderFullDetail({ order, activitiesData, orderNo }) {
                     ></OrderItemList>
                     <OrderTicketList ticketList={order.ticketList}></OrderTicketList>
 
-                    <OrderHistory activitiesData={activitiesData}></OrderHistory>
+                    {/* <OrderHistory activitiesData={activitiesData}></OrderHistory> */}
                 </Box>
             )}
             {orderNo && "Không tìm thấy thông tin đơn hàng"}
