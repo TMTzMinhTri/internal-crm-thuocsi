@@ -25,7 +25,7 @@ function InfoLine({ label, val, type }) {
     return (
         <Box className={styles.infoLine}>
             <span className={styles.label}>{label}</span>
-            <span className={styles.value}>{val || "(Chưa có)"}</span>
+            <span className={styles.value}>{val || "-"}</span>
         </Box>
     );
 }
