@@ -25,7 +25,7 @@ function InfoLine({ customerCode = "", label, val, type }) {
         return <Box className={styles.infoLine}>
             <span className={styles.label}>{label}</span>
             <span className={styles.value}>
-                <CustomerStatus status={val} customerCode={customerCode}></CustomerStatus>
+                <CustomerStatus status={val} customer={val}></CustomerStatus>
             </span>
         </Box>
     }
@@ -79,7 +79,7 @@ export default function CustomerSimpleDetail({ customerInfo }) {
                 <InfoLine label="Cấp bậc" val={customerInfo.level} type="level"></InfoLine>
                 <InfoLine label="Email" val={customerInfo.email}></InfoLine>
                 <InfoLine label="Số điện thoại" val={customerInfo.phone}></InfoLine>
-                <InfoLine label="Trạng thái" val={customerInfo.status} type="status" customerCode={customerInfo.code}></InfoLine>
+                <InfoLine label="Trạng thái" val={customerInfo} type="status" customerCode={customerInfo.code}></InfoLine>
                 <InfoLine label="Tỉnh thành" val={customerInfo.provinceName}></InfoLine>
             </MyCardContent>
         </MyCard>
