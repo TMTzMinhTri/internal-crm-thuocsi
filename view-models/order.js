@@ -21,7 +21,7 @@ export const OrderStatusLabel = {
 }
 
 export const OrderStatusColor = {
-    [OrderStatus.WAIT_TO_CONFIRM]: "green",
+    [OrderStatus.WAIT_TO_CONFIRM]: "gray",
     [OrderStatus.CONFIRMED]: "blue",
     [OrderStatus.PROCESSING]: "blue",
     [OrderStatus.DELIVERING]: "blue",
