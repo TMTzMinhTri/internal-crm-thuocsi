@@ -222,7 +222,7 @@ function render(props) {
             </Head>
             <MyCard>
                 <MyCardHeader title="Danh sách đơn hàng">
-                <Button variant="contained" color="primary" style={{ marginRight: 8 }}
+                    <Button variant="contained" color="primary" style={{ marginRight: 8 }}
                         onClick={() => setOpenOrderFilter(!openOrderFilter)}
                     >
                         <FontAwesomeIcon icon={faFilter} style={{ marginRight: 8 }} />
@@ -268,23 +268,23 @@ function render(props) {
                 <TableContainer component={Paper}>
                     <Table size="small" aria-label="a dense table">
                         <colgroup>
-                            <col/>
-                            <col/>
-                            <col/>
+                            <col />
+                            <col />
+                            <col />
                             <col width="15%" />
-                            <col/>
-                            <col/>
-                            <col/>
-                            <col/>
-                            <col/>
-                            <col/>
-                            <col/>
+                            <col />
+                            <col />
+                            <col />
+                            <col />
+                            <col />
+                            <col />
+                            <col />
                             <col width="10%" />
                         </colgroup>
                         <TableHead>
                             <TableRow>
-                                <TableCell align="left">Order No</TableCell>
-                                <TableCell align="left">Order ID</TableCell>
+                                <TableCell align="left">Mã đơn</TableCell>
+                                <TableCell align="left">ID</TableCell>
                                 <TableCell align="left">Tên khách hàng</TableCell>
                                 <TableCell align="left">Số điện thoại</TableCell>
                                 {/* <TableCell align="left">Địa Chỉ</TableCell> */}
@@ -304,7 +304,7 @@ function render(props) {
                                 ))}
                             </TableBody>
                         ) : (
-                            <TableBody>
+                                <TableBody>
                                     <TableRow>
                                         <TableCell colSpan={3} align="left">{message}</TableCell>
                                     </TableRow>

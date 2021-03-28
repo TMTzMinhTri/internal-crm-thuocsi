@@ -16,7 +16,7 @@ function InfoLine({ label, val, type }) {
         return (
             <Box className={styles.infoLine}>
                 <span className={styles.label}>{label}</span>
-                <span className={styles.value}>{formatNumber(val)} đ</span>
+                <span className={styles.value} style={{ width: 120, textAlign: "right" }}>{formatNumber(val)} đ</span>
             </Box>
         );
     }
@@ -43,7 +43,7 @@ export default function PricingDetail({ order, orderNo }) {
             </MyCardHeader>
             <MyCardContent>
                 <InfoLine
-                    label="Giá theo hình thức thanh toán"
+                    label="Hình thức thanh toán"
                     val={orderInfo.paymentMethodFee}
                     type={EnumLineType.CURRENCY}
                 ></InfoLine>
@@ -53,7 +53,7 @@ export default function PricingDetail({ order, orderNo }) {
                     type={EnumLineType.CURRENCY}
                 ></InfoLine>
                 <InfoLine label="Tổng tiền" val={orderInfo.subTotalPrice} type={EnumLineType.CURRENCY}></InfoLine>
-                <InfoLine label="Giảm giá" val={orderInfo.totalDiscount} type={EnumLineType.CURRENCY}></InfoLine>
+                <InfoLine label="Giảm giá" val={-orderInfo.totalDiscount} type={EnumLineType.CURRENCY}></InfoLine>
                 <InfoLine label="Tổng cộng" val={orderInfo.totalPrice} type={EnumLineType.CURRENCY}></InfoLine>
             </MyCardContent>
         </MyCard>

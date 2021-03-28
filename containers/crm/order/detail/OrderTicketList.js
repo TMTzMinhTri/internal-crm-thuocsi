@@ -1,10 +1,6 @@
 import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { formatDateTime } from "components/global";
 import { Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
-import { faListAlt } from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import Authorization from "@thuocsi/nextjs-components/authorization/authorization";
-import Link from "next/link";
 import { TicketStatus } from "containers/crm/ticket/ticket-display";
 import { isValid } from "components/global";
 import { getTicketClient } from "client/ticket";
@@ -26,14 +22,7 @@ export async function getTicketList({ ctx, data, orderNo, orderId }) {
 export default function OrderTicketList({ ticketList }) {
     return (
         <MyCard>
-            <MyCardHeader title="Danh sách phản hồi" small={true}>
-                {/* <Authorization requiredScreen="/crm/order">
-                    <Link href={`/crm/order?orderNo=`} prefetch={false}>
-                        <a target="_blank" className={styles.actionLink}>
-                            <FontAwesomeIcon icon={faListAlt} /> Xem tất cả phản hồi
-                        </a>
-                    </Link>
-                </Authorization> */}
+            <MyCardHeader title="Danh sách phiếu hỗ trợ của đơn hàng" small={true}>
             </MyCardHeader>
             <MyCardContent>
                 <Table size="small">
@@ -68,10 +57,10 @@ export default function OrderTicketList({ ticketList }) {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow>
-                                <TableCell colSpan="100%">Không có sản phẩm nào</TableCell>
-                            </TableRow>
-                        )}
+                                <TableRow>
+                                    <TableCell colSpan="100%">Không có phiếu hỗ trợ nào</TableCell>
+                                </TableRow>
+                            )}
                     </TableBody>
                 </Table>
             </MyCardContent>
