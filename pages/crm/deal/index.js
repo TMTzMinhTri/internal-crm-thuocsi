@@ -46,6 +46,7 @@ import {
 import ModalCustom from "@thuocsi/nextjs-components/simple-dialog/dialogs";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import Head from "next/head";
+import { unknownErrorText } from "components/commonErrors";
 
 async function loadDealData(ctx) {
     const props = {
@@ -130,12 +131,15 @@ const render = (props) => {
         });
     }, [searchText, status, dealType]);
 
-    const updateDeal = useCallback(async () => {
+    const updateDeal = useCallback(async (field) => {
         let { code, status, isFlashSale } = selectedDeal;
         const dealClient = getDealClient();
-        const resp = await dealClient.updateDeal({ code, status, isFlashSale });
+        let resp;
+        if (field === "status") {
+            resp = await dealClient.updateDealStatus({ code, status });
+        }
         if (resp.status !== "OK") {
-            throw new Error(resp.message);
+            throw new Error(resp.message ?? unknownErrorText);
         }
     }, [selectedDeal]);
 
@@ -179,9 +183,9 @@ const render = (props) => {
         search();
     };
 
-    const handleUpdateDealStatus = async () => {
+    const handleUpdateDealStatus = async (field) => {
         try {
-            await updateDeal();
+            await updateDeal(field);
             setSelectedDeal(null);
             changePage(page, limit);
         } catch (e) {
@@ -332,7 +336,7 @@ const render = (props) => {
                                 <TableCell align="left">
                                     Thời gian hiển thị
                                 </TableCell>
-                                <TableCell align="center">Flash sale</TableCell>
+                                {/* <TableCell align="center">Flash sale</TableCell> */}
                                 <TableCell align="center">Trạng thái</TableCell>
                                 <TableCell align="center">Thao tác</TableCell>
                             </TableRow>
@@ -353,7 +357,7 @@ const render = (props) => {
                                             Đến: {formatDateTime(row.endTime)}
                                         </TableCell>
                                         <TableCell align="left">{formatDateTime(row.readyTime)}</TableCell>
-                                        <TableCell align="center">
+                                        {/* <TableCell align="center">
                                             <Switch
                                                 color="primary"
                                                 checked={row.isFlashSale}
@@ -363,7 +367,7 @@ const render = (props) => {
                                                     setOpenFlashSaleChangeDialog(true);
                                                 }}
                                             />
-                                        </TableCell>
+                                        </TableCell> */}
                                         <TableCell align="center">
                                             <Switch
                                                 color="primary"
@@ -416,7 +420,7 @@ const render = (props) => {
                     title="Thông báo"
                     primaryText="Đồng ý"
                     onClose={setOpenStatusChangeDialog}
-                    onExcute={handleUpdateDealStatus}
+                    onExcute={() => handleUpdateDealStatus("status")}
                 >
                     Bạn có muốn&nbsp;
                     <strong>{selectedDeal?.status === DealStatus.ACTIVE ? "Bật" : "Tắt"}</strong>
@@ -427,7 +431,7 @@ const render = (props) => {
                     title="Thông báo"
                     primaryText="Đồng ý"
                     onClose={setOpenFlashSaleChangeDialog}
-                    onExcute={handleUpdateDealStatus}
+                    onExcute={() => handleUpdateDealStatus("isFlashSale")}
                 >
                     Bạn có muốn&nbsp;
                     <strong>{selectedDeal?.isFlashSale ? "Bật" : "Tắt"}</strong>
