@@ -3,8 +3,19 @@ import { Box } from "@material-ui/core";
 import { getMasterDataClient } from "client/master-data";
 import styles from "./detail.module.css";
 import { isValid } from "components/global";
+import Link from "next/link";
 
-function InfoLine({ label, val }) {
+function InfoLine({ label, val, type = "" }) {
+    if (type == "customer") {
+        return <Box className={styles.infoLine}>
+            <span className={styles.label}>{label}</span>
+            <span className={styles.value}>
+                <Link href={`/crm/customer/detail?customerCode=${val}`} prefetch={false}>
+                    <a target="_blank" style={{ textDecoration: 'none', color: 'green' }}><b>{val}</b></a>
+                </Link>
+            </span>
+        </Box>
+    }
     return (
         <Box className={styles.infoLine}>
             <span className={styles.label}>{label}</span>
@@ -41,10 +52,11 @@ export default function CustomerDetail({ order }) {
                 </Authorization> */}
             </MyCardHeader>
             <MyCardContent>
-                <InfoLine label="ID" val={orderInfo.customerID}></InfoLine>
-                <InfoLine label="Mã khách hàng" val={orderInfo.customerCode}></InfoLine>
+                <InfoLine label="ID đơn hàng" val={orderInfo.orderId}></InfoLine>
+                <InfoLine label="Mã đơn hàng" val={orderInfo.orderNo}></InfoLine>
+                <InfoLine label="ID khách hàng" val={orderInfo.customerID}></InfoLine>
+                <InfoLine label="Mã khách hàng" val={orderInfo.customerCode} type="customer"></InfoLine>
                 <InfoLine label="Tên khách hàng" val={orderInfo.customerName}></InfoLine>
-                <InfoLine label="Email" val={orderInfo.customerEmail}></InfoLine>
                 <InfoLine label="Số điện thoại" val={orderInfo.customerPhone}></InfoLine>
                 <InfoLine label="Địa chỉ" val={orderInfo.customerShippingAddress}></InfoLine>
                 <InfoLine label="Khu vực" val={orderInfo.masterDataAddress}></InfoLine>

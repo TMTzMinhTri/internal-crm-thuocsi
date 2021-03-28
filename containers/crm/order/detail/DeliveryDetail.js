@@ -50,7 +50,7 @@ function InfoLine({ label, val, type }) {
     return (
         <Box className={styles.infoLine}>
             <span className={styles.label}>{label}</span>
-            <span className={styles.value}>{val || "(Chưa có)"}</span>
+            <span className={styles.value}>{val || "-"}</span>
         </Box>
     );
 }
@@ -70,10 +70,10 @@ export default function DeliveryDetail({ order, orderNo }) {
             </MyCardHeader>
             <MyCardContent>
                 <InfoLine label="Hình thức thanh toán" val={orderInfo.paymentMethodName}></InfoLine>
-                <InfoLine label="Đơn vị vận chuyển" val={orderInfo.deliveryPlatformName}></InfoLine>
+                <InfoLine label="Hình thức vận chuyển" val={orderInfo.deliveryPlatformName}></InfoLine>
                 <InfoLine label="Mã vận đơn" val={orderInfo.deliveryTrackingNumber}></InfoLine>
                 <InfoLine label="Trạng thái giao hàng" val={orderInfo.deliveryStatus}></InfoLine>
-                <InfoLine label="Ngày giao" val={orderInfo.deliveryDate} type={EnumLineType.DATE}></InfoLine>
+                <InfoLine label="Ngày giao dự kiến" val={orderInfo.deliveryDate} type={EnumLineType.DATE}></InfoLine>
                 <InfoLine
                     label="Trạng thái đơn hàng"
                     val={orderInfo.status}

@@ -35,7 +35,7 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
     };
     return (
         <MyCard>
-            <MyCardHeader title="Danh sách sản phẩm" small={true}>
+            <MyCardHeader title="Danh sách sản phẩm trong đơn hàng" small={true}>
                 {/* <Authorization requiredScreen="/crm/order">
                     <Link href={`/crm/order?orderNo=`} prefetch={false}>
                         <a target="_blank" className={styles.actionLink}>
@@ -48,7 +48,7 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                 <Table size="small">
                     <colgroup>
                         <col style={{ width: 100 }} />
-                        <col style={{ width: 350 }} />
+                        <col />
                         <col />
                         <col />
                         <col />
@@ -56,8 +56,8 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
-                            <TableCell align="center">Sản phẩm</TableCell>
-                            <TableCell align="right">Giá</TableCell>
+                            <TableCell align="left">Sản phẩm</TableCell>
+                            <TableCell align="right">Đơn giá</TableCell>
                             <TableCell align="right">Số lượng</TableCell>
                             <TableCell align="right">Thành tiền</TableCell>
                         </TableRow>
@@ -69,7 +69,7 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                                     <TableCell component="th" scope="row">
                                         {row.productID}
                                     </TableCell>
-                                    <TableCell align="center" style={{ textTransform: "capitalize" }}>
+                                    <TableCell align="left" style={{ textTransform: "capitalize" }}>
                                         {row.productInfo.name}
                                     </TableCell>
                                     <TableCell align="right">{formatNumber(row.salePrice)}</TableCell>
@@ -78,10 +78,10 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                                 </TableRow>
                             ))
                         ) : (
-                            <TableRow>
-                                <TableCell colSpan="100%">Không có sản phẩm nào</TableCell>
-                            </TableRow>
-                        )}
+                                <TableRow>
+                                    <TableCell colSpan="100%">Không có sản phẩm nào</TableCell>
+                                </TableRow>
+                            )}
                         {orderItemList && orderItemList.length && (
                             <TableRow>
                                 <TableCell></TableCell>
@@ -91,7 +91,7 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                                     {getQuantityProduct()}
                                 </TableCell>
                                 <TableCell style={{ fontWeight: 600 }} align="right">
-                                    {formatNumber(totalPrice)} đ
+                                    {formatNumber(totalPrice)}
                                 </TableCell>
                             </TableRow>
                         )}
