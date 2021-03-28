@@ -23,7 +23,7 @@ async function loadData(ctx) {
 }
 
 // do render
-function render({ order, activitiesData, paymentMethodList, deliveryPlatformList }) {
+function render({ order, activitiesData, paymentMethodList, deliveryPlatformList, orderNo }) {
     const breadcrumb = [
         {
             name: "Trang chủ",
@@ -34,14 +34,14 @@ function render({ order, activitiesData, paymentMethodList, deliveryPlatformList
             link: "/crm/order",
         },
         {
-            name: "Tra cứu đặt hàng",
+            name: "Tra cứu đơn hàng",
         },
     ];
 
     return (
         <AppCRM select="/crm/order/detail" breadcrumb={breadcrumb}>
             <Head>
-                <title>Chi tiết đặt hàng</title>
+                <title>Chi tiết đơn hàng {orderNo}</title>
             </Head>
             <OrderFullDetail order={order} activitiesData={activitiesData} paymentMethodList={paymentMethodList} deliveryPlatformList={deliveryPlatformList} />
         </AppCRM>

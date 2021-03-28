@@ -1,10 +1,11 @@
 import { MyCard, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import { formatDateTime } from "components/global";
-import { Table, TableHead, TableRow, TableCell, TableBody } from "@material-ui/core";
-import { TicketStatus } from "containers/crm/ticket/ticket-display";
+import { Table, TableHead, TableRow, TableCell, TableBody, Tooltip } from "@material-ui/core";
+import { AccountType, TicketStatus } from "containers/crm/ticket/ticket-display";
 import { isValid } from "components/global";
 import { getTicketClient } from "client/ticket";
 import styles from "./detail.module.css";
+import Link from 'next/link';
 
 export async function getTicketList({ ctx, data, orderNo, orderId }) {
     const ticketClient = getTicketClient(ctx, data);
@@ -36,9 +37,10 @@ export default function OrderTicketList({ ticketList }) {
                     <TableHead>
                         <TableRow>
                             <TableCell>Mã</TableCell>
-                            <TableCell align="right">Thời gian tạo</TableCell>
-                            <TableCell align="center">Người Xử lý</TableCell>
-                            <TableCell align="center">Trạng thái</TableCell>
+                            <TableCell align="left">Thời gian tạo</TableCell>
+                            <TableCell align="left">Người tạo</TableCell>
+                            <TableCell align="left">Người tiếp nhận</TableCell>
+                            <TableCell align="left">Trạng thái</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -46,11 +48,23 @@ export default function OrderTicketList({ ticketList }) {
                             ticketList.map((row) => (
                                 <TableRow key={row.code}>
                                     <TableCell component="th" scope="row">
-                                        {row.code}
+                                        <Link href={`/cs/ticket/my-ticket?ticketCode=${row.code}`} prefetch={false}>
+                                            <a target="_blank" style={{ textDecoration: 'none', color: 'green', fontWeight: 'bold' }}>
+                                                {row.code}
+                                            </a>
+                                        </Link>
                                     </TableCell>
 
-                                    <TableCell align="right">{formatDateTime(row.createdTime)}</TableCell>
-                                    <TableCell align="center">{row.createdBy}</TableCell>
+                                    <TableCell align="left">{formatDateTime(row.createdTime)}</TableCell>
+                                    <TableCell align="left">
+                                        <AccountType type={row.createdByType} />
+                                        <Tooltip title={row.createdByName}>
+                                            <span>{row.createdBy}</span>
+                                        </Tooltip>
+                                    </TableCell>
+                                    <TableCell align="left">
+                                        {row.assignUser} - {row.assignName}
+                                    </TableCell>
                                     <TableCell align="center">
                                         <TicketStatus status={row.status} />
                                     </TableCell>
