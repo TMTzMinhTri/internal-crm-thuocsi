@@ -12,6 +12,7 @@ import { faListAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Authorization from '@thuocsi/nextjs-components/authorization/authorization';
 import Link from 'next/link';
+import OrderStatus from "containers/crm/order/detail/OrderStatus";
 
 /**
  * Get order data of customer. This data is needed to use CustomerOrderList component.
@@ -65,7 +66,7 @@ export default function CustomerOrderList({ orderList, customerCode }) {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                    {(orderList && orderList.length) ? orderList.map(row =>
+                        {(orderList && orderList.length) ? orderList.map(row =>
                         (<TableRow key={row.orderNo}>
                             <TableCell component="th" scope="row">
                                 {row.orderId}
@@ -73,7 +74,7 @@ export default function CustomerOrderList({ orderList, customerCode }) {
                             <TableCell align="left">{row.orderNo}</TableCell>
                             <TableCell align="left">{formatDateTime(new Date(row.createdTime))}</TableCell>
                             <TableCell align="right">{formatNumber(row.totalPrice)}</TableCell>
-                            <TableCell>{row.status}</TableCell>
+                            <TableCell><OrderStatus val={row.status} /></TableCell>
                         </TableRow>)) : (<TableRow>
                             <TableCell colSpan="100%">Không có đơn hàng nào</TableCell>
                         </TableRow>)}
