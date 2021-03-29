@@ -56,6 +56,7 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                     <TableHead>
                         <TableRow>
                             <TableCell>ID</TableCell>
+                            <TableCell>SKU</TableCell>
                             <TableCell align="left">Sản phẩm</TableCell>
                             <TableCell align="right">Đơn giá</TableCell>
                             <TableCell align="right">Số lượng</TableCell>
@@ -68,6 +69,9 @@ export default function OrderItemList({ orderItemList, totalPrice }) {
                                 <TableRow key={row.productID}>
                                     <TableCell component="th" scope="row">
                                         {row.productID}
+                                    </TableCell>
+                                    <TableCell component="th" scope="row">
+                                        {row.productSku}
                                     </TableCell>
                                     <TableCell align="left" style={{ textTransform: "capitalize" }}>
                                         {row.productInfo.name}
