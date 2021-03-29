@@ -9,9 +9,8 @@ import Link from 'next/link';
 
 export async function getTicketList({ ctx, data, orderNo, orderId }) {
     const ticketClient = getTicketClient(ctx, data);
-    const ticketListResult = await ticketClient.getTicketByFilter({
-        saleOrderCode: orderNo,
-        saleOrderID: orderId,
+    const ticketListResult = await ticketClient.getTicketByOrderNo({
+        orderCode: orderNo,
     });
     let tickets = [];
     if (isValid(ticketListResult)) {

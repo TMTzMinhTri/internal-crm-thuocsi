@@ -21,7 +21,7 @@ import { TicketStatus } from "containers/crm/ticket/ticket-display";
  */
 export async function getCustomerTicketList({ ctx, data, customerCode }) {
     return await getTicketClient(ctx, data)
-        .getTicketByFilter({
+        .getTicketByCustomer({
             offset: 0,
             limit: 20,
             customerCode: customerCode
