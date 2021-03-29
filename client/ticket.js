@@ -8,7 +8,7 @@ class TicketClient extends APIClient {
         super(ctx, data)
     }
 
-    getTicketByFilter({
+    getTicketByCustomer({
         customerCode,
         limit,
         offset,
@@ -18,6 +18,23 @@ class TicketClient extends APIClient {
             `${URI}/ticket/all`,
             {
                 q: JSON.stringify({ customerCode }),
+                limit,
+                offset,
+                getTotal: true,
+            }
+        )
+    }
+
+    getTicketByOrderNo({
+        orderCode,
+        limit,
+        offset,
+    }) {
+        return this.call(
+            "GET",
+            `${URI}/ticket/all`,
+            {
+                q: JSON.stringify({ orderCode }),
                 limit,
                 offset,
                 getTotal: true,
