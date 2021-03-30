@@ -282,7 +282,6 @@ export const OrderForm = props => {
             setLoading(true);
             data.orderNo = props.order.orderNo;
             data.deliveryDate = moment(formData.deliveryDate).toISOString();
-            data.note = props.order.note + data.note;
             await updateOrder(data);
             toast.success("Cập nhật đơn hàng thành công");
             reloadOrder();
@@ -389,10 +388,18 @@ export const OrderForm = props => {
                                     </Grid>
                                     <Grid container spacing={3} item xs={12}>
                                         <Grid item xs={12} md={5}>
-                                            <Typography className={`${formStyles.fieldLabel} ${formStyles.required}`} >Mã Tracking</Typography>
+                                            <Typography className={`${formStyles.fieldLabel}`}>Mã Tracking vận chuyển</Typography>
                                         </Grid>
                                         <Grid item xs={12} md={6}>
                                             <Typography className={`${formStyles.fieldLabel}`} >{order.deliveryTrackingNumber ?? "Không xác định"}</Typography>
+                                        </Grid>
+                                    </Grid>
+                                    <Grid container spacing={3} item xs={12}>
+                                        <Grid item xs={12} md={5}>
+                                            <Typography className={`${formStyles.fieldLabel}`} >Mã SO</Typography>
+                                        </Grid>
+                                        <Grid item xs={12} md={6}>
+                                            <Typography className={`${formStyles.fieldLabel}`} >{order.saleOrderCode ?? "Không xác định"}</Typography>
                                         </Grid>
                                     </Grid>
                                     <Grid container spacing={3} item xs={12}>
@@ -487,7 +494,7 @@ export const OrderForm = props => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={7}>
+                    <Grid item xs={4}>
                         <Card className={styles.section2} variant="outlined">
                             <CardContent>
                                 <Typography variant="h6">Mã giảm giá</Typography>
@@ -502,7 +509,7 @@ export const OrderForm = props => {
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={5}>
+                    <Grid item xs={4}>
                         <Card className={styles.section2} variant="outlined">
                             <CardContent>
                                 <Typography variant="h6">Ghi chú đơn hàng</Typography>
@@ -525,6 +532,36 @@ export const OrderForm = props => {
                                             }}
                                             error={!!orderForm.errors.note}
                                             helperText={orderForm.errors.note?.message}
+                                            fullWidth
+                                            inputRef={orderForm.register}
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                    <Grid item xs={4}>
+                        <Card className={styles.section2} variant="outlined">
+                            <CardContent>
+                                <Typography variant="h6">Ghi chú nội bộ</Typography>
+                                <Grid container>
+                                    <Grid spacing={3} item xs={12}>
+                                        <TextField
+                                            name="privateNote"
+                                            variant="outlined"
+                                            size="small"
+                                            placeholder=""
+                                            multiline
+                                            rows={3}
+                                            rowsMax={6}
+                                            InputLabelProps={{
+                                                shrink: true,
+                                            }}
+                                            InputProps={{
+                                                readOnly: isDisableUpdate
+                                            }}
+                                            error={!!orderForm.errors.privateNote}
+                                            helperText={orderForm.errors.privateNote?.message}
                                             fullWidth
                                             inputRef={orderForm.register}
                                         />
