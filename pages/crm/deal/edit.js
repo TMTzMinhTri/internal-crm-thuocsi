@@ -35,23 +35,25 @@ async function loadDealData(ctx) {
     const productClient = getProductClient(ctx, {});
     const skusResp = await pricingClient.searchSellingSKUsByKeyword("");
     const skuMap = {};
-    skusResp.data?.forEach(({ sku }) => {
+    skusResp.data?.forEach(({ sku, seller, name }) => {
         if (!skuMap[sku]) {
-            skuMap[sku] = true;
+            skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku };
         }
     });
-
+    const skuCodes = [];
     props.deal.skus.forEach(({ sku }) => {
         if (!skuMap[sku]) {
-            skuMap[sku] = true;
+            skuCodes.push(sku);
         }
     });
-
-    const productResp = await productClient.getProductBySKUs(Object.keys(skuMap));
-
-    productResp.data?.forEach(({ sku, seller, name }) => {
-        skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku };
-    });
+    
+    if (skuCodes.length > 0) {
+        const productResp = await productClient.getProductBySKUs(skuCodes);
+    
+        productResp.data?.forEach(({ sku, seller, name }) => {
+            skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku };
+        });
+    }
 
     props.skuOptions = Object.values(skuMap);
 

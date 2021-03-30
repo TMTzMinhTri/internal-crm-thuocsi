@@ -4,25 +4,15 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 import AppCRM from "pages/_layout";
 import { DealForm } from "containers/crm/deal/DealForm";
 import { getPricingClient } from "client/pricing";
-import { getProductClient } from "client/product";
 
 async function loadDealData(ctx) {
     const props = {
         skuOptions: []
     };
     const pricingClient = getPricingClient(ctx, {});
-    const productClient = getProductClient(ctx, {});
     const skusResp = await await pricingClient.searchSellingSKUsByKeyword("");
-    const skuMap = {};
-    skusResp.data?.forEach(({ sku }) => {
-        if (!skuMap[sku]) {
-            skuMap[sku] = true;
-        }
-    });
 
-    const productResp = await productClient.getProductBySKUs(Object.keys(skuMap));
-
-    props.skuOptions = productResp.data?.map(({ sku, seller, name }) => {
+    props.skuOptions = skusResp.data?.map(({ sku, seller, name }) => {
         return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku })
     }) ?? [];
 
