@@ -5,6 +5,7 @@ import {
     FormHelperText,
     FormLabel,
     Grid,
+    Hidden,
     IconButton,
     makeStyles,
     MenuItem,
@@ -470,7 +471,9 @@ export const DealForm = (props) => {
                                     <TableRow>
                                         <TableCell>sku</TableCell>
                                         <TableCell align="center">Số lượng</TableCell>
-                                        <TableCell align="center">Thao tác</TableCell>
+                                        <Hidden xsUp={props.isUpdate}>
+                                            <TableCell align="center">Thao tác</TableCell>
+                                        </Hidden>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -478,63 +481,67 @@ export const DealForm = (props) => {
                                         <TableRow key={index}>
                                             <TableCell><b>{item.sku}</b> - {item.label}</TableCell>
                                             <TableCell align="center">{item.quantity}</TableCell>
+                                            <Hidden xsUp={props.isUpdate}>
+                                                <TableCell align="center">
+                                                    <IconButton
+                                                        onClick={() => handleRemoveSku(item.sku)}
+                                                        disabled={isLateUpdate}
+                                                    >
+                                                        <DeleteIcon />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </Hidden>
+                                        </TableRow>
+                                    ))}
+                                    <Hidden xsUp={props.isUpdate}>
+                                        <TableRow style={{ verticalAlign: "top" }}>
+                                            <TableCell>
+                                                <MuiSingleAuto
+                                                    name="pricing"
+                                                    options={skuOptions}
+                                                    placeholder="Tìm kiếm sku"
+                                                    required
+                                                    control={skuForm.control}
+                                                    errors={skuForm.errors}
+                                                    message={skuForm.errors.pricing?.message}
+                                                    onFieldChange={handleSearchSkus}
+                                                    disabled={isLateUpdate}
+                                                />
+                                            </TableCell>
+                                            <TableCell>
+                                                <TextField
+                                                    name="quantity"
+                                                    variant="outlined"
+                                                    size="small"
+                                                    type="number"
+                                                    fullWidth
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    InputProps={{
+                                                        readOnly: isLateUpdate,
+                                                    }}
+                                                    inputProps={{
+                                                        min: 1
+                                                    }}
+                                                    required
+                                                    error={!!skuForm.errors.quantity}
+                                                    helperText={skuForm.errors.quantity?.message}
+                                                    inputRef={skuForm.register({
+                                                        ...DealValidation.skus.quantity,
+                                                        valueAsNumber: true,
+                                                    })}
+                                                />
+                                            </TableCell>
                                             <TableCell align="center">
                                                 <IconButton
-                                                    onClick={() => handleRemoveSku(item.sku)}
-                                                    disabled={isLateUpdate}
+                                                    onClick={skuForm.handleSubmit(handleAddSku)}
                                                 >
-                                                    <DeleteIcon />
+                                                    <AddIcon />
                                                 </IconButton>
                                             </TableCell>
                                         </TableRow>
-                                    ))}
-                                    <TableRow style={{ verticalAlign: "top" }}>
-                                        <TableCell>
-                                            <MuiSingleAuto
-                                                name="pricing"
-                                                options={skuOptions}
-                                                placeholder="Tìm kiếm sku"
-                                                required
-                                                control={skuForm.control}
-                                                errors={skuForm.errors}
-                                                message={skuForm.errors.pricing?.message}
-                                                onFieldChange={handleSearchSkus}
-                                                disabled={isLateUpdate}
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <TextField
-                                                name="quantity"
-                                                variant="outlined"
-                                                size="small"
-                                                type="number"
-                                                fullWidth
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                InputProps={{
-                                                    readOnly: isLateUpdate,
-                                                }}
-                                                inputProps={{
-                                                    min: 1
-                                                }}
-                                                required
-                                                error={!!skuForm.errors.quantity}
-                                                helperText={skuForm.errors.quantity?.message}
-                                                inputRef={skuForm.register({
-                                                    ...DealValidation.skus.quantity,
-                                                    valueAsNumber: true,
-                                                })}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <IconButton
-                                                onClick={skuForm.handleSubmit(handleAddSku)}
-                                            >
-                                                <AddIcon />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
+                                    </Hidden>
                                 </TableBody>
                             </Table>
                         )}
