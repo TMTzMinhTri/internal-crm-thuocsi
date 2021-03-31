@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 const defaultValues = {
-    q: "",
+    orderSO: "",
     orderNo: "",
     customerName: "",
     customerPhone: "",
@@ -31,8 +31,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     const styles = useStyles();
     const filterForm = useForm({
         defaultValues: {
-            ...defaultValues,
-            q,
+            ...defaultValues
         },
         mode: "onChange"
     });
@@ -47,9 +46,6 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     useEffect(() => {
         filterForm.register({ name: "status" });
     }, []);
-    useEffect(() => {
-        filterForm.setValue('q', q);
-    }, [q]);
     useEffect(() => {
         if (!open) onClose?.(filterForm.getValues);
     }, [open]);
@@ -75,26 +71,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
             display: open ? "block" : "none"
         }}>
             <MyCardActions>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={4} lg={3}>
-                        <Typography
-                            className={styles.title}
-                            color="textPrimary"
-                            gutterBottom
-                        >
-                            Tìm kiếm
-                        </Typography>
-                        <TextField
-                            className={styles.textField}
-                            id="q"
-                            name="q"
-                            variant="outlined"
-                            size="small"
-                            placeholder="Nhập mã đơn hàng"
-                            fullWidth
-                            inputRef={filterForm.register}
-                        />
-                    </Grid>
+                <Grid container spacing={2}>\
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
@@ -110,6 +87,25 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             variant="outlined"
                             size="small"
                             placeholder="Nhập mã đơn hàng"
+                            fullWidth
+                            inputRef={filterForm.register}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={4} lg={3}>
+                        <Typography
+                            className={styles.title}
+                            color="textPrimary"
+                            gutterBottom
+                        >
+                            Nhập mã SO
+                        </Typography>
+                        <TextField
+                            className={styles.textField}
+                            id="orderSO"
+                            name="orderSO"
+                            variant="outlined"
+                            size="small"
+                            placeholder="Nhập mã SO"
                             fullWidth
                             inputRef={filterForm.register}
                         />
