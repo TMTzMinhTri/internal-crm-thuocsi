@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 const defaultValues = {
-    orderSO: "",
+    q: "",
     orderNo: "",
     customerName: "",
     customerPhone: "",
@@ -31,7 +31,8 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     const styles = useStyles();
     const filterForm = useForm({
         defaultValues: {
-            ...defaultValues
+            ...defaultValues,
+            q,
         },
         mode: "onChange"
     });
@@ -46,6 +47,9 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     useEffect(() => {
         filterForm.register({ name: "status" });
     }, []);
+    useEffect(() => {
+        filterForm.setValue('q', q);
+    }, [q]);
     useEffect(() => {
         if (!open) onClose?.(filterForm.getValues);
     }, [open]);
@@ -80,8 +84,8 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="orderNo"
-                            name="orderNo"
+                            id="q"
+                            name="q"
                             variant="outlined"
                             size="small"
                             placeholder="Nhập mã đơn hàng"
@@ -99,11 +103,11 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="orderSO"
-                            name="orderSO"
+                            id="orderNo"
+                            name="orderNo"
                             variant="outlined"
                             size="small"
-                            placeholder="Nhập mã SO"
+                            placeholder="Nhập mã đơn hàng"
                             fullWidth
                             inputRef={filterForm.register}
                         />
