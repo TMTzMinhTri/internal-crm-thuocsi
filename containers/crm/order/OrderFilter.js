@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 const defaultValues = {
-    orderSO: "",
+    saleOrderCode: "",
     orderNo: "",
     customerName: "",
     customerPhone: "",
@@ -101,8 +101,8 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="orderSO"
-                            name="orderSO"
+                            id="saleOrderCode"
+                            name="saleOrderCode"
                             variant="outlined"
                             size="small"
                             placeholder="Nhập mã SO"
