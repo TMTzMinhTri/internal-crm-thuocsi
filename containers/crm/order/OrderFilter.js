@@ -71,7 +71,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
             display: open ? "block" : "none"
         }}>
             <MyCardActions>
-                <Grid container spacing={2}>\
+                <Grid container spacing={2}>
                     <Grid item xs={12} sm={6} md={4} lg={3}>
                         <Typography
                             className={styles.title}
