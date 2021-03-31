@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 const defaultValues = {
-    q: "",
+    orderSO: "",
     orderNo: "",
     customerName: "",
     customerPhone: "",
@@ -23,17 +23,18 @@ const defaultValues = {
     customerShippingAddress: "",
     priceFrom: null,
     priceTo: null,
+    dateFrom: null,
+    dateTo: null,
     status: "",
 };
 export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     const styles = useStyles();
     const filterForm = useForm({
         defaultValues: {
-            ...defaultValues,
-            q,
+            ...defaultValues
         },
         mode: "onChange"
-    })
+    });
 
     const statusController = useController({
         name: "status",
@@ -45,9 +46,6 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     useEffect(() => {
         filterForm.register({ name: "status" });
     }, []);
-    useEffect(() => {
-        filterForm.setValue('q', q);
-    }, [q]);
     useEffect(() => {
         if (!open) onClose?.(filterForm.getValues);
     }, [open]);
@@ -78,12 +76,12 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Tìm kiếm
+                            Mã đơn hàng
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="q"
-                            name="q"
+                            id="orderNo"
+                            name="orderNo"
                             variant="outlined"
                             size="small"
                             placeholder="Nhập mã đơn hàng"
@@ -97,15 +95,15 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Mã đơn hàng
+                            Mã SO
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="orderNo"
-                            name="orderNo"
+                            id="orderSO"
+                            name="orderSO"
                             variant="outlined"
                             size="small"
-                            placeholder="Nhập mã đơn hàng"
+                            placeholder="Nhập mã SO"
                             fullWidth
                             inputRef={filterForm.register}
                         />
@@ -210,6 +208,57 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                                     error={!!filterForm.errors.priceTo}
                                     helperText={filterForm.errors.priceTo?.message}
                                     inputRef={filterForm.register({ ...customerValidation.point, valueAsNumber: true })}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid container item xs={12} sm={6} md={4} lg={3}>
+                        <Typography
+                            className={styles.title}
+                            color="textPrimary"
+                            gutterBottom
+                        >
+                            Ngày tạo
+                        </Typography>
+                        <Grid container spacing={1}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    className={styles.textField}
+                                    id="dateFrom"
+                                    name="dateFrom"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder="Từ ngày"
+                                    fullWidth
+                                    type="datetime-local"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    inputRef={filterForm.register()}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    className={styles.textField}
+                                    id="dateTo"
+                                    name="dateTo"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder="Đến ngày"
+                                    fullWidth
+                                    type="datetime-local"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    error={!!filterForm.errors.dateTo}
+                                    helperText={filterForm.errors.dateTo?.message}
+                                    inputRef={filterForm.register({
+                                        min: {
+                                          value: filterForm.getValues("dateFrom"),
+                                          message:
+                                            "Không được nhỏ hơn ngày tạo",
+                                        },
+                                    })}
                                 />
                             </Grid>
                         </Grid>

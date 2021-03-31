@@ -158,7 +158,7 @@ function render(props) {
     const [search, setSearch] = useState(router.query.q ?? "");
     const [orders, setOrders] = useState(props.data ?? []);
     const [message, setMessage] = useState(props.message);
-    const [openOrderFilter, setOpenOrderFilter] = useState(false);
+    const [openOrderFilter, setOpenOrderFilter] = useState(true);
     const [orderFilter, setOrderFilter] = useState();
     const [pagination, setPagination] = useState({
         page: parseInt(router.query.page) || 0,
@@ -229,7 +229,7 @@ function render(props) {
                         Bộ lọc
                     </Button>
                 </MyCardHeader>
-                <Box display={!openOrderFilter ? "block" : "none"}>
+                {/* <Box display={!openOrderFilter ? "block" : "none"}>
                     <MyCardActions>
                         <Grid container>
                             <Grid item xs={12} md={4}>
@@ -256,7 +256,7 @@ function render(props) {
                             </Grid>
                         </Grid>
                     </MyCardActions>
-                </Box>
+                </Box> */}
                 <OrderFilter
                     open={openOrderFilter}
                     onFilterChange={handleApplyFilter}
@@ -291,6 +291,7 @@ function render(props) {
                                 <TableCell align="right">Phí dịch vụ</TableCell>
                                 <TableCell align="right">Khuyến mãi</TableCell>
                                 <TableCell align="right">Tổng tiền</TableCell>
+                                <TableCell align="right">Thời gian</TableCell>
                                 <TableCell align="left">Ngày mua</TableCell>
                                 <TableCell align="left">Ngày xác nhận</TableCell>
                                 <TableCell align="center">Trạng thái</TableCell>
