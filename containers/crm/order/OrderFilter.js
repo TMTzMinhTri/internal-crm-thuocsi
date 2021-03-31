@@ -80,7 +80,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Mã đơn hàng
+                            Tìm kiếm
                         </Typography>
                         <TextField
                             className={styles.textField}
@@ -99,7 +99,7 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Mã SO
+                            Mã đơn hàng
                         </Typography>
                         <TextField
                             className={styles.textField}
