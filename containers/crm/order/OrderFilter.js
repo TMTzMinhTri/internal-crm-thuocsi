@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useController, useForm } from 'react-hook-form'
 import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core'
 import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card'
-
+import moment from "moment";
 import { orderStatus } from 'components/global'
 import { customerValidation } from 'view-models/customer'
 
@@ -55,6 +55,8 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     }, [open]);
 
     const applyFilter = async (formData) => {
+        formData.dateFrom = moment(formData.dateFrom).toISOString();
+        formData.dateTo = moment(formData.dateTo).toISOString();
         const { priceFrom, priceTo, ...others } = formData;
         await onFilterChange?.({
             price: {
