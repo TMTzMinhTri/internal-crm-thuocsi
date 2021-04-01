@@ -14,7 +14,7 @@ import { getCustomerClient } from "client/customer";
 import { getMasterDataClient } from "client/master-data";
 import { unknownErrorText } from "components/commonErrors";
 import { NotFound } from "components/components-global";
-import { scopes, statuses } from "components/global";
+import { scopes, statuses, formatDateTime } from "components/global";
 import MuiSingleAuto from "components/muiauto/single";
 import { ConfirmApproveDialog } from "containers/crm/customer/ConfirmApproveDialog";
 import { ConfirmLockDialog } from "containers/crm/customer/ConfirmLockDialog";
@@ -683,11 +683,11 @@ export default function renderForm(props, toast) {
                                 <Grid item xs={12} md={3}>
                                     Số đơn hàng: {editObject?.ordersCount || '-'}
                                 </Grid>
-                                <Grid item xs={12} md={3}>
-                                    Thời gian đặt hàng đầu tiên: {editObject?.firstOrderAt || '-'}
+                                <Grid item xs={12} md={3}> 
+                                    Thời gian đặt hàng đầu tiên: {typeof(editObject?.firstOrderAt) !== 'undefined'?formatDateTime(editObject.firstOrderAt):'-'}
                                 </Grid>
                                 <Grid item xs={12} md={3}>
-                                    Thời gian đặt hàng gần nhất: {editObject?.lastOrderAt || '-'}
+                                    Thời gian đặt hàng gần nhất: {typeof(editObject?.lastOrderAt) !== 'undefined'?formatDateTime(editObject.lastOrderAt):'-'}
                                 </Grid>
                             </Grid>
                             
