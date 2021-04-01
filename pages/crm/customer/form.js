@@ -675,6 +675,27 @@ export default function renderForm(props, toast) {
                     </MyCardContent>
                 </MyCard>
 
+                {props.isUpdate &&(
+                    <MyCard>
+                        <MyCardHeader title="Thông tin lịch sử đặt hàng" small={true}></MyCardHeader>
+                        <MyCardContent>
+                            <Grid spacing={3} container>
+                                <Grid item xs={12} md={3}>
+                                    Số đơn hàng: {editObject?.ordersCount || '-'}
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    Thời gian đặt hàng đầu tiên: {editObject?.firstOrderAt || '-'}
+                                </Grid>
+                                <Grid item xs={12} md={3}>
+                                    Thời gian đặt hàng gần nhất: {editObject?.lastOrderAt || '-'}
+                                </Grid>
+                            </Grid>
+                            
+                        </MyCardContent>
+                    </MyCard>
+                )}
+                
+
                 <MyCard>
                     <MyCardActions>
                         {props.isUpdate ? (
