@@ -252,7 +252,7 @@ export const OrderForm = props => {
         const arr = [...orderItems];
         const index = arr.findIndex(orderItem => orderItem.orderItemNo === orderItemNo);
         arr[index].quantity = value;
-        setOrderItemsError({ ...orderItemsError, [orderItemNo]: OrderItemValidation.quanitity.validate(orderItemQuantyMap[orderItemNo])(value) })
+        setOrderItemsError({ ...orderItemsError, [orderItemNo]: OrderItemValidation.quantity.validate(orderItemQuantyMap[orderItemNo])(value) })
         setOrderItems(arr);
     }
 
@@ -666,12 +666,12 @@ export const OrderForm = props => {
                                 ))}
                             </TableBody>
                         ) : (
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell colSpan={3} align="left">{props.message}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        )}
+                                <TableBody>
+                                    <TableRow>
+                                        <TableCell colSpan={3} align="left">{props.message}</TableCell>
+                                    </TableRow>
+                                </TableBody>
+                            )}
                         <TableFooter className={formStyles.tableFooter}>
                             <TableRow>
                                 <TableCell colSpan={7} align="right">Phí vận chuyển</TableCell>

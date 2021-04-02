@@ -31,6 +31,12 @@ const menu = [{
             name: "Tài khoản",
             link: "/crm/account",
             icon: faUserCircle
+        },
+        {
+            key: "ORDER",
+            name: "Đặt hàng",
+            link: "/crm/customer/order",
+            icon: faStore
         }
     ]
 },

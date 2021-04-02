@@ -108,6 +108,39 @@ class OrderClient extends APIClient {
         )
     }
 
+    getCurrentCart({ phone }) {
+        return this.callFromClient(
+            "GET",
+            `${URI}/admin/cart`,
+            {
+                phone
+            }
+        )
+    }
+
+    addProductToCart({ sku, phone, quantity }) {
+        return this.callFromClient(
+            "POST",
+            `${URI}/admin/cart/add`,
+            {
+                sku,
+                phone,
+                quantity,
+            }
+        )
+    }
+
+    removeProductFromCart({ sku, phone }) {
+        return this.callFromClient(
+            "POST",
+            `${URI}/admin/cart/remove`,
+            {
+                sku,
+                phone,
+            }
+        )
+    }
+
     getOrderItemByOrderNo(orderNo) {
         return this.callFromNextJS(
             "GET",
@@ -152,13 +185,7 @@ class OrderClient extends APIClient {
         )
     }
 
-    // updateStatus(data) {
-    //     return this.callFromClient(
-    //         "PUT",
-    //         `${URI}/account/approve`,
-    //         data
-    //     )
-    // }
+
 }
 
 export function getOrderClient(ctx, data) {
