@@ -178,6 +178,15 @@ class ProductClient extends APIClient {
       codes,
     });
   }
+
+  async getProductCacheFromClient({ phone, q, offset, limit }) {
+    return this.callFromClient("POST", `${PREFIX}/internal-products/list`, {
+      q,
+      offset,
+      limit,
+      phone
+    });
+  }
 }
 
 export function getProductClient(ctx, data) {

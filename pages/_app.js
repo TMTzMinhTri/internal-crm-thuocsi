@@ -31,7 +31,7 @@ const menu = [{
             name: "Tài khoản",
             link: "/crm/account",
             icon: faUserCircle
-        }
+        },
     ]
 },
 {

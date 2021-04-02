@@ -79,7 +79,7 @@ export const OrderValidation = {
 }
 
 export const OrderItemValidation = {
-    quanitity: {
+    quantity: {
         validate: (max) => (value) => {
             if (value <= 0) return "Số lượng sản phẩm phải lớn hơn 0.";
             if (value > max) return "Không được tăng số lượng sản phẩm.";
