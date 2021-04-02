@@ -44,6 +44,8 @@ class OrderClient extends APIClient {
         status,
         limit,
         offset,
+        dateFrom,
+        dateTo
     }) {
         return this.callFromClient(
             "POST",
@@ -60,6 +62,8 @@ class OrderClient extends APIClient {
                 status,
                 limit,
                 offset,
+                dateFrom,
+                dateTo,
                 getTotal: true,
             }
         )
