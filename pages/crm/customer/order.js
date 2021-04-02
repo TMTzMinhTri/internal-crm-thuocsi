@@ -97,7 +97,7 @@ export function renderForm(props) {
     const productClient = getProductClient()
 
     const [loading, setLoading] = useState(false);
-    console.log(router.query.phone)
+
     const [search, setSearch] = useState(router.query.phone || props.phone)
     const [customerData, setCustomerData] = useState(null)
     const [productPreview, setProductPreview] = useState(null)
