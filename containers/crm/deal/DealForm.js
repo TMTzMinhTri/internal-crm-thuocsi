@@ -37,7 +37,7 @@ import ImageUploadField from "components/image-upload-field";
 import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useController, useForm } from "react-hook-form";
 import {
     DealFlashSaleLabel,
@@ -48,6 +48,8 @@ import {
     DealValidation
 } from "view-models/deal";
 import Head from "next/head";
+import { formSetter } from "utils/HookForm";
+import { useIsFirstRender } from "utils/ReactFC";
 
 const useStyles = makeStyles({
     gridAlignTop: {
@@ -80,6 +82,22 @@ export const DealForm = (props) => {
     const router = useRouter();
     const toast = useToast();
     const isLateUpdate = props.isUpdate && moment(props.deal.startTime).isBefore(moment());
+    const isFirstRender = useIsFirstRender();
+    const defaultValuesDealForm = useMemo(() => ({
+        startTime: formatDatetimeFormType(moment().add(1, "d")),
+        endTime: formatDatetimeFormType(moment().add(10, "d")),
+        readyTime: formatDatetimeFormType(moment().add(5, "m")),
+        name: "",
+        dealType: DealType.DEAL,
+        description: "",
+        status: DealStatus.ACTIVE,
+        tags: [],
+        imageUrls: [],
+        isFlashSale: false,
+        maxQuantity: 100,
+        price: 10000,
+        skus: [],
+    }), [router.asPath]);
     const dealForm = useForm({
         defaultValues: props.isUpdate ? {
             ...props.deal,
@@ -137,7 +155,6 @@ export const DealForm = (props) => {
         const skuOptions = productResp.data?.map(({ sku, seller, name }) => {
             return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
         }) ?? [];
-        setSkuOptions(skuOptions);
         return skuOptions;
     }
 
@@ -165,6 +182,12 @@ export const DealForm = (props) => {
         return await productClient.uploadProductImage(formData);
     }
 
+    useEffect(() => {
+        if (!isFirstRender) {
+            formSetter(defaultValuesDealForm, ["startTime", "endTime", "readyTime"], dealForm.setValue);
+        }
+    }, []);
+    
     const handleSearchSkus = async (text) => {
         try {
             return await searchSkus(text);
