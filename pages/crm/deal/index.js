@@ -15,9 +15,9 @@ import {
     Button,
     Grid,
     IconButton,
-    InputBase,
+    // InputBase,
     MenuItem,
-    Paper,
+    // Paper,
     Switch,
     Table,
     TableBody,
@@ -29,11 +29,11 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Controller, useForm } from "react-hook-form";
-import { Search as SearchIcon, Edit as EditIcon } from "@material-ui/icons";
+import { /*Search as SearchIcon,*/ Edit as EditIcon } from "@material-ui/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
-import styles from "./deal.module.css";
+// import styles from "./deal.module.css";
 import { formatDateTime, formatNumber, formatUrlSearch } from "components/global";
 import AppCRM from "pages/_layout";
 import { getDealClient } from "client/deal";
@@ -132,7 +132,7 @@ const render = (props) => {
     }, [searchText, status, dealType]);
 
     const updateDeal = useCallback(async (field) => {
-        let { code, status, isFlashSale } = selectedDeal;
+        let { code, status, /*isFlashSale*/ } = selectedDeal;
         const dealClient = getDealClient();
         let resp;
         if (field === "status") {
@@ -179,9 +179,9 @@ const render = (props) => {
         }
     }, [status, dealType]);
 
-    const handleSearch = () => {
-        search();
-    };
+    // const handleSearch = () => {
+    //     search();
+    // };
 
     const handleUpdateDealStatus = async (field) => {
         try {
@@ -216,7 +216,7 @@ const render = (props) => {
                 </MyCardHeader>
                 <MyCardActions>
                     <Grid container spacing={3} alignItems="center">
-                        <Grid item xs={12} sm={4}>
+                        {/* <Grid item xs={12} sm={4}>
                             <Paper className={styles.search}>
                                 <InputBase
                                     name="searchText"
@@ -238,7 +238,7 @@ const render = (props) => {
                                     <SearchIcon />
                                 </IconButton>
                             </Paper>
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12} sm={2}>
                             <Controller
                                 control={filterForm.control}
