@@ -158,7 +158,7 @@ function render(props) {
     const [search, setSearch] = useState(router.query.q ?? "");
     const [orders, setOrders] = useState(props.data ?? []);
     const [message, setMessage] = useState(props.message);
-    const [openOrderFilter, setOpenOrderFilter] = useState(false);
+    const [openOrderFilter, setOpenOrderFilter] = useState(true);
     const [orderFilter, setOrderFilter] = useState();
     const [pagination, setPagination] = useState({
         page: parseInt(router.query.page) || 0,

@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
-import { useController, useForm } from 'react-hook-form'
-import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core'
-import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card'
-
-import { orderStatus } from 'components/global'
-import { customerValidation } from 'view-models/customer'
+import { Box, Button, Grid, makeStyles, MenuItem, TextField, Typography } from '@material-ui/core';
+import { MyCardActions } from '@thuocsi/nextjs-components/my-card/my-card';
+import { orderStatus } from 'components/global';
+import moment from "moment";
+import React, { useEffect } from 'react';
+import { useController, useForm } from 'react-hook-form';
+import { customerValidation } from 'view-models/customer';
 
 const useStyles = makeStyles(theme => ({
     title: {
@@ -15,25 +15,27 @@ const useStyles = makeStyles(theme => ({
     }
 }))
 const defaultValues = {
-    q: "",
-    orderNo: "",
+    saleOrderCode: "",
+    orderID: null,
+    saleOrderCode: "",
     customerName: "",
     customerPhone: "",
     customerEmail: "",
     customerShippingAddress: "",
     priceFrom: null,
     priceTo: null,
+    dateFrom: null,
+    dateTo: null,
     status: "",
 };
 export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
     const styles = useStyles();
     const filterForm = useForm({
         defaultValues: {
-            ...defaultValues,
-            q,
+            ...defaultValues
         },
         mode: "onChange"
-    })
+    });
 
     const statusController = useController({
         name: "status",
@@ -46,13 +48,12 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
         filterForm.register({ name: "status" });
     }, []);
     useEffect(() => {
-        filterForm.setValue('q', q);
-    }, [q]);
-    useEffect(() => {
         if (!open) onClose?.(filterForm.getValues);
     }, [open]);
 
     const applyFilter = async (formData) => {
+        formData.dateFrom = moment(formData.dateFrom).toISOString();
+        formData.dateTo = moment(formData.dateTo).toISOString();
         const { priceFrom, priceTo, ...others } = formData;
         await onFilterChange?.({
             price: {
@@ -78,17 +79,19 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Tìm kiếm
+                            Mã đơn hàng
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="q"
-                            name="q"
+                            id="orderID"
+                            name="orderID"
                             variant="outlined"
                             size="small"
                             placeholder="Nhập mã đơn hàng"
                             fullWidth
-                            inputRef={filterForm.register}
+                            inputRef={filterForm.register({
+                                valueAsNumber: true
+                            })}
                         />
                     </Grid>
                     <Grid item xs={12} sm={6} md={4} lg={3}>
@@ -97,15 +100,15 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                             color="textPrimary"
                             gutterBottom
                         >
-                            Mã đơn hàng
+                            Nhập mã SO
                         </Typography>
                         <TextField
                             className={styles.textField}
-                            id="orderNo"
-                            name="orderNo"
+                            id="saleOrderCode"
+                            name="saleOrderCode"
                             variant="outlined"
                             size="small"
-                            placeholder="Nhập mã đơn hàng"
+                            placeholder="Nhập mã SO"
                             fullWidth
                             inputRef={filterForm.register}
                         />
@@ -210,6 +213,57 @@ export const OrderFilter = ({ open, q = "", onFilterChange, onClose }) => {
                                     error={!!filterForm.errors.priceTo}
                                     helperText={filterForm.errors.priceTo?.message}
                                     inputRef={filterForm.register({ ...customerValidation.point, valueAsNumber: true })}
+                                />
+                            </Grid>
+                        </Grid>
+                    </Grid>
+                    <Grid container item xs={12} sm={6} md={4} lg={3}>
+                        <Typography
+                            className={styles.title}
+                            color="textPrimary"
+                            gutterBottom
+                        >
+                            Ngày tạo
+                        </Typography>
+                        <Grid container spacing={1}>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    className={styles.textField}
+                                    id="dateFrom"
+                                    name="dateFrom"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder="Từ ngày"
+                                    fullWidth
+                                    type="datetime-local"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    inputRef={filterForm.register()}
+                                />
+                            </Grid>
+                            <Grid item xs={12} md={6}>
+                                <TextField
+                                    className={styles.textField}
+                                    id="dateTo"
+                                    name="dateTo"
+                                    variant="outlined"
+                                    size="small"
+                                    placeholder="Đến ngày"
+                                    fullWidth
+                                    type="datetime-local"
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    error={!!filterForm.errors.dateTo}
+                                    helperText={filterForm.errors.dateTo?.message}
+                                    inputRef={filterForm.register({
+                                        min: {
+                                          value: filterForm.getValues("dateFrom"),
+                                          message:
+                                            "Không được nhỏ hơn ngày tạo",
+                                        },
+                                    })}
                                 />
                             </Grid>
                         </Grid>
