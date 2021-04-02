@@ -360,7 +360,7 @@ export default function VoucherCodeBody(props) {
                             helperText={errors.endTime?.message}
                             error={!!errors.endTime}
                             placeholder=""
-                            disabled={compareTime}
+                            // disabled={compareTime}
                             fullWidth
                             type="datetime-local"
                             InputLabelProps={{
