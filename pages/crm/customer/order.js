@@ -26,6 +26,7 @@ import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-comp
 import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
 import { getProductClient } from "client/product";
 import { getMasterDataClient } from "client/master-data";
+import { useRouter } from "next/router";
 
 const breadcrumb = [
     {
@@ -56,6 +57,13 @@ export async function loadData(ctx) {
         }
     };
 
+
+    const phone = ctx.query.phone
+    data.props.phone = ""
+    if (phone) {
+        data.props.phone = phone
+    }
+
     // get list customer level
     const customerCommon = getCommonAPI(ctx, {});
     const resLevel = await customerCommon.getListLevelCustomers();
@@ -82,13 +90,15 @@ export default function CreateCartPage(props) {
 export function renderForm(props) {
 
     const formStyles = useFormStyles();
+    const router = useRouter()
     const { error, success } = useToast();
     const customerClient = getCustomerClient()
     const orderClient = getOrderClient()
     const productClient = getProductClient()
 
     const [loading, setLoading] = useState(false);
-    const [search, setSearch] = useState('')
+    console.log(router.query.phone)
+    const [search, setSearch] = useState(router.query.phone || props.phone)
     const [customerData, setCustomerData] = useState(null)
     const [productPreview, setProductPreview] = useState(null)
     const [cartItemsError, setCartItemsError] = useState({});
@@ -110,6 +120,10 @@ export function renderForm(props) {
         getCartData()
         getProductCacheData()
     }, [customerData])
+
+    useEffect(() => {
+        onSearch()
+    }, [router.query.phone])
 
     const getCartItemQuantityStyle = useCallback(({ sku, quantity }) => {
         const oldValue = cartItemQuantityMap[sku];
@@ -156,6 +170,8 @@ export function renderForm(props) {
             formSetter(resp.data[0], ["name", "email", "phone", "address", "level", "provinceCode"], setValue)
         } else {
             setCustomerData(null)
+            reset()
+            setCart([])
         }
     }
 
@@ -263,7 +279,7 @@ export function renderForm(props) {
                                     placeholder="Nhập số điện thoại khách hàng"
                                 />
                                 <IconButton className={styles.iconButton} aria-label="search"
-                                    onClick={onSearch}>
+                                    onClick={() => { if (search?.length > 0) router.push(`/crm/customer/order?phone=${search}`) }}>
                                     <SearchIcon />
                                 </IconButton>
                             </Paper>
@@ -296,23 +312,6 @@ export function renderForm(props) {
                                         </Grid>
                                         <Grid item xs={12} md={6}>
                                             <TextField
-                                                id="email"
-                                                name="email"
-                                                label="Email"
-                                                variant="outlined"
-                                                size="small"
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                disabled
-                                                fullWidth
-                                                inputRef={register}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} md={6}>
-                                            <TextField
                                                 id="phone"
                                                 name="phone"
                                                 label="Số điện thoại"
@@ -322,23 +321,6 @@ export function renderForm(props) {
                                                     shrink: true,
                                                 }}
                                                 disabled
-                                                fullWidth
-                                                inputRef={register}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                    <Grid spacing={3} container>
-                                        <Grid item xs={12} sm={6} md={12}>
-                                            <TextField
-                                                id="address"
-                                                name="address"
-                                                label="Địa chỉ"
-                                                size="small"
-                                                InputLabelProps={{
-                                                    shrink: true,
-                                                }}
-                                                disabled
-                                                variant="outlined"
                                                 fullWidth
                                                 inputRef={register}
                                             />
