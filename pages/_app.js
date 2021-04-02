@@ -1,4 +1,4 @@
-import { faDollarSign, faGift, faPercentage, faSearch, faStore, faTag, faUserCircle, faUsers, faShoppingCart } from '@fortawesome/free-solid-svg-icons';
+import { faDollarSign, faGift, faPercentage, faSearch, faStore, faTag, faUserCircle, faUsers } from '@fortawesome/free-solid-svg-icons';
 import { createMuiTheme, ThemeProvider } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import Layout from '@thuocsi/nextjs-components/layout/layout';
@@ -32,12 +32,6 @@ const menu = [{
             link: "/crm/account",
             icon: faUserCircle
         },
-        {
-            key: "ORDER",
-            name: "Đặt hàng",
-            link: "/crm/customer/order",
-            icon: faShoppingCart
-        }
     ]
 },
 {
