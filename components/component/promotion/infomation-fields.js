@@ -130,7 +130,14 @@ const InfomationFields = (props) => {
           </Grid>
 
           <Grid container item xs={12} justify="space-between">
-            <Grid container item xs={6} spacing={3} justify="space-between">
+            <Grid
+              container
+              item
+              xs={6}
+              spacing={3}
+              alignItems="flex-end"
+              justify="space-between"
+            >
               <Grid item xs={6}>
                 <TextField
                   name="startTime"
@@ -165,9 +172,9 @@ const InfomationFields = (props) => {
                   helperText={errors.endTime?.message}
                   error={!!errors.endTime}
                   {...textfieldProps}
-                  InputProps={{
-                    readOnly: disabled,
-                  }}
+                  // InputProps={{
+                  //   readOnly: disabled,
+                  // }}
                   fullWidth
                   required
                   inputRef={register({
@@ -181,7 +188,7 @@ const InfomationFields = (props) => {
                 />
               </Grid>
             </Grid>
-            <Grid container item xs={6} spacing={3}>
+            <Grid container item xs={6} spacing={3} alignItems="flex-end">
               <Grid item xs={6}>
                 <TextField
                   name="publicTime"
