@@ -37,7 +37,7 @@ import ImageUploadField from "components/image-upload-field";
 import moment from "moment";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useController, useForm } from "react-hook-form";
 import {
     DealFlashSaleLabel,
@@ -58,21 +58,6 @@ const useStyles = makeStyles({
     }
 })
 
-const defaultValuesDealForm = {
-    startTime: formatDatetimeFormType(moment().add(1, "d")),
-    endTime: formatDatetimeFormType(moment().add(10, "d")),
-    readyTime: formatDatetimeFormType(moment().add(5, "m")),
-    name: "",
-    dealType: DealType.DEAL,
-    description: "",
-    status: DealStatus.ACTIVE,
-    tags: [],
-    imageUrls: [],
-    isFlashSale: false,
-    maxQuantity: 100,
-    price: 10000,
-    skus: [],
-}
 const defaultValuesSkuForm = {
     pricing: null,
     quantity: 1,
@@ -187,7 +172,7 @@ export const DealForm = (props) => {
             formSetter(defaultValuesDealForm, ["startTime", "endTime", "readyTime"], dealForm.setValue);
         }
     }, []);
-    
+
     const handleSearchSkus = async (text) => {
         try {
             return await searchSkus(text);
@@ -240,7 +225,7 @@ export const DealForm = (props) => {
                 data: value,
             });
             const images = [...dealForm.getValues("imageUrls"), result.data[0]];
-            dealForm.setValue("imageUrls", images);
+            dealForm.setValue("imageUrls", images, { shouldValidate: true });
             setProductImages(images);
         } catch (err) {
             toast.error(err.message || err.toString());
