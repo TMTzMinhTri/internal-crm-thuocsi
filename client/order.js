@@ -34,7 +34,8 @@ class OrderClient extends APIClient {
 
     getOrderByFilter({
         q,
-        orderNo,
+        orderID,
+        saleOrderCode,
         customerName,
         customerPhone,
         customerEmail,
@@ -49,7 +50,8 @@ class OrderClient extends APIClient {
             `${URI}/order/search`,
             {
                 q,
-                orderNo,
+                orderID,
+                saleOrderCode,
                 customerName,
                 customerPhone,
                 customerEmail,
