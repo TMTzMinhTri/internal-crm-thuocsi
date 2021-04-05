@@ -121,7 +121,6 @@ export const DealForm = (props) => {
 
     async function searchSkus(text) {
         const pricingClient = getPricingClient();
-        const productClient = getProductClient();
         const skusResp = await pricingClient.searchSellingSKUsByKeywordFromClient(text);
         if (skusResp.status !== "OK") {
             if (skusResp.status === "NOT_FOUND") {
@@ -130,14 +129,7 @@ export const DealForm = (props) => {
                 toast.error(skusResp.message ?? unknownErrorText);
             }
         }
-        const skuMap = {};
-        skusResp.data?.forEach(({ sku }) => {
-            if (!skuMap[sku] && !skuOptionMap[sku]) {
-                skuMap[sku] = true;
-            }
-        });
-        const productResp = await productClient.getProductBySKUsFromClient(Object.keys(skuMap));
-        const skuOptions = productResp.data?.map(({ sku, seller, name }) => {
+        const skuOptions = skusResp.data?.map(({ sku, seller, name }) => {
             return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
         }) ?? [];
         return skuOptions;
