@@ -170,6 +170,7 @@ export const OrderForm = props => {
                 },
                 "paymentMethod",
                 "paymentMethodFee",
+                "deliveryPlatformFee",
                 "status",
                 "totalPrice",
             ],
