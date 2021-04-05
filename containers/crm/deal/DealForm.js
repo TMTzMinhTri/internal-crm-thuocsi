@@ -130,7 +130,7 @@ export const DealForm = (props) => {
             }
         }
         const skuOptions = skusResp.data?.map(({ sku, seller, name }) => {
-            return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller.code, sku })
+            return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code ?? ""}`, sellerCode: seller?.code, sku })
         }) ?? [];
         return skuOptions;
     }
