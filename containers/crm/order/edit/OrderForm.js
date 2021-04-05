@@ -255,7 +255,6 @@ export const OrderForm = props => {
         const index = arr.findIndex(orderItem => orderItem.orderItemNo === orderItemNo);
         arr[index].quantity = value;
         let errText = OrderItemValidation.quantity.validate(orderItemQuantyMap[orderItemNo])(value) || FormCommonValidator.noDecimal(value)
-        console.log(errText)
         setOrderItemsError({ ...orderItemsError, [orderItemNo]: errText })
         setOrderItems(arr);
     }
