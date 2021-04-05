@@ -31,6 +31,7 @@ import { actionErrorText, unknownErrorText } from "components/commonErrors";
 import { formatDatetimeFormType, formatNumber, orderStatus } from "components/global";
 import { useFormStyles } from "components/MuiStyles";
 import moment from "moment";
+import { FormCommonValidator } from "utils/HookForm";
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
 import { Controller, useController, useForm } from "react-hook-form";
@@ -169,6 +170,7 @@ export const OrderForm = props => {
                 },
                 "paymentMethod",
                 "paymentMethodFee",
+                "deliveryPlatformFee",
                 "status",
                 "totalPrice",
             ],
@@ -252,7 +254,8 @@ export const OrderForm = props => {
         const arr = [...orderItems];
         const index = arr.findIndex(orderItem => orderItem.orderItemNo === orderItemNo);
         arr[index].quantity = value;
-        setOrderItemsError({ ...orderItemsError, [orderItemNo]: OrderItemValidation.quantity.validate(orderItemQuantyMap[orderItemNo])(value) })
+        let errText = OrderItemValidation.quantity.validate(orderItemQuantyMap[orderItemNo])(value) || FormCommonValidator.noDecimal(value)
+        setOrderItemsError({ ...orderItemsError, [orderItemNo]: errText })
         setOrderItems(arr);
     }
 
@@ -595,7 +598,7 @@ export const OrderForm = props => {
                                 <TableCell align="right">Giá bán (4)</TableCell>
                                 <TableCell align="right">Phí (5)</TableCell>
                                 <TableCell align="right">Giá hiển thị (6)</TableCell>
-                                <TableCell align="right">Thành tiền (7 = 3 x 4 + 5)</TableCell>
+                                <TableCell align="right">Thành tiền (7 = 3 x 6)</TableCell>
                             </TableRow>
                         </TableHead>
                         {orderItems && orderItems.length > 0 ? (
