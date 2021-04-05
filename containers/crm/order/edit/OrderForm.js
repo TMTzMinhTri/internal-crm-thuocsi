@@ -31,6 +31,7 @@ import { actionErrorText, unknownErrorText } from "components/commonErrors";
 import { formatDatetimeFormType, formatNumber, orderStatus } from "components/global";
 import { useFormStyles } from "components/MuiStyles";
 import moment from "moment";
+import { FormCommonValidator } from "utils/HookForm";
 import Link from "next/link";
 import React, { useCallback, useState } from "react";
 import { Controller, useController, useForm } from "react-hook-form";
@@ -252,7 +253,9 @@ export const OrderForm = props => {
         const arr = [...orderItems];
         const index = arr.findIndex(orderItem => orderItem.orderItemNo === orderItemNo);
         arr[index].quantity = value;
-        setOrderItemsError({ ...orderItemsError, [orderItemNo]: OrderItemValidation.quantity.validate(orderItemQuantyMap[orderItemNo])(value) })
+        let errText = OrderItemValidation.quantity.validate(orderItemQuantyMap[orderItemNo])(value) || FormCommonValidator.noDecimal(value)
+        console.log(errText)
+        setOrderItemsError({ ...orderItemsError, [orderItemNo]: errText })
         setOrderItems(arr);
     }
 
