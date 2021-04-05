@@ -598,7 +598,7 @@ export const OrderForm = props => {
                                 <TableCell align="right">Giá bán (4)</TableCell>
                                 <TableCell align="right">Phí (5)</TableCell>
                                 <TableCell align="right">Giá hiển thị (6)</TableCell>
-                                <TableCell align="right">Thành tiền (7 = 3 x 6 + 5)</TableCell>
+                                <TableCell align="right">Thành tiền (7 = 3 x 6)</TableCell>
                             </TableRow>
                         </TableHead>
                         {orderItems && orderItems.length > 0 ? (
