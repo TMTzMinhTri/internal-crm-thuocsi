@@ -37,7 +37,7 @@ async function loadDealData(ctx) {
     const skuMap = {};
     skusResp.data?.forEach(({ sku, seller, name }) => {
         if (!skuMap[sku]) {
-            skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku };
+            skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code ?? ""}`, sellerCode: seller?.code, sku };
         }
     });
     const skuCodes = [];
@@ -51,7 +51,7 @@ async function loadDealData(ctx) {
         const productResp = await productClient.getProductBySKUs(skuCodes);
     
         productResp.data?.forEach(({ sku, seller, name }) => {
-            skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code}`, sellerCode: seller?.code, sku };
+            skuMap[sku] = { value: sku, label: `${name} - ${seller?.name ?? seller?.code ?? ""}`, sellerCode: seller?.code, sku };
         });
     }
 
