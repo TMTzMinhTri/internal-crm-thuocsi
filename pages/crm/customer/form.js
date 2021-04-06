@@ -346,10 +346,10 @@ export default function renderForm(props, toast) {
                                         shrink: true,
                                     }}
                                     fullWidth
-                                    error={!!errors.email}
-                                    required
+                                    // error={!!errors.email}
+                                    // required
                                     inputRef={
-                                        register(customerValidation.email)
+                                        register()
                                     }
                                 />
                             </Grid>
@@ -487,10 +487,10 @@ export default function renderForm(props, toast) {
                                         shrink: true,
                                     }}
                                     fullWidth
-                                    error={!!errors.legalRepresentative}
-                                    required
+                                    // error={!!errors.legalRepresentative}
+                                    // required
                                     inputRef={
-                                        register(customerValidation.legalRepresentative)
+                                        register()
                                     }
                                 />
                             </Grid>
@@ -507,10 +507,10 @@ export default function renderForm(props, toast) {
                                         shrink: true,
                                     }}
                                     fullWidth
-                                    error={!!errors.mst}
-                                    required
+                                    // error={!!errors.mst}
+                                    // required
                                     inputRef={
-                                        register(customerValidation.mst)
+                                        register()
                                     }
                                 />
                             </Grid>
