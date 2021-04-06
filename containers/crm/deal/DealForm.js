@@ -129,8 +129,13 @@ export const DealForm = (props) => {
                 toast.error(skusResp.message ?? unknownErrorText);
             }
         }
+        // Filter added skus
+        if (dealType === DealType.COMBO) {
+            skusResp.data = skusResp.data?.filter(({ sku }) => !skuOptionMap[sku]) ?? [];
+        }
+        // Map data to options
         const skuOptions = skusResp.data?.map(({ sku, seller, name }) => {
-            return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code ?? ""}`, sellerCode: seller?.code, sku })
+            return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code ?? ""}`, sellerCode: seller?.code, sku, name, })
         }) ?? [];
         return skuOptions;
     }
@@ -174,8 +179,7 @@ export const DealForm = (props) => {
     }
 
     const handleAddSku = async (formData) => {
-        console.log(formData)
-        const { pricing: { sku, label, sellerCode }, quantity } = formData;
+        const { pricing: { sku, label, sellerCode, name, }, quantity, } = formData;
         if (dealType === DealType.COMBO) {
             setSkus([...skus, { sku, label, sellerCode, quantity }]);
             skuForm.reset({
@@ -183,13 +187,13 @@ export const DealForm = (props) => {
                 quantity: 0,
             });
             setSkuOptionMap({ ...skuOptionMap, [sku]: true });
+            // Remove the option in Autocomplete
+            setSkuOptions(skuOptions.filter(option => option.sku !== sku));
         } else {
             setSkus([{ sku, label, sellerCode, quantity: 1 }]);
             setSkuOptionMap({ [sku]: true });
-            dealForm.setValue("name", label);
+            dealForm.setValue("name", name);
         }
-        // Remove the option in Autocomplete
-        setSkuOptions(skuOptions.filter(option => option.sku !== sku));
     }
 
     const handleRemoveSku = async (sku) => {

@@ -13,7 +13,13 @@ async function loadDealData(ctx) {
     const skusResp = await await pricingClient.searchSellingSKUsByKeyword("");
 
     props.skuOptions = skusResp.data?.map(({ sku, seller, name }) => {
-        return ({ value: sku, label: `${name} - ${seller?.name ?? seller?.code ?? ""}`, sellerCode: seller?.code, sku })
+        return ({
+            value: sku,
+            label: `${name} - ${seller?.name ?? seller?.code ?? ""}`,
+            sellerCode: seller?.code,
+            sku,
+            name,
+        })
     }) ?? [];
 
     return {
@@ -42,7 +48,7 @@ const render = props => {
 
     return (
         <AppCRM breadcrumb={breadcrumb}>
-            <DealForm {...props}/>
+            <DealForm {...props} />
         </AppCRM>
     )
 }
