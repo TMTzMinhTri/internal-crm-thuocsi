@@ -13,12 +13,13 @@ import {
     Table,
     TableBody,
     TableCell,
+    TableFooter,
     TableHead,
     TableRow,
     TextField,
     Typography
 } from "@material-ui/core";
-import { Add as AddIcon, Delete as DeleteIcon } from "@material-ui/icons";
+import { Delete as DeleteIcon } from "@material-ui/icons";
 import LabelBox from "@thuocsi/nextjs-components/editor/label-box/index";
 import MuiSingleAuto from "@thuocsi/nextjs-components/muiauto/single";
 import {
@@ -497,6 +498,8 @@ export const DealForm = (props) => {
                                             </Hidden>
                                         </TableRow>
                                     ))}
+                                </TableBody>
+                                <TableFooter>
                                     <Hidden xsUp={props.isUpdate}>
                                         <TableRow style={{ verticalAlign: "top" }}>
                                             <TableCell>
@@ -538,15 +541,17 @@ export const DealForm = (props) => {
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
-                                                <IconButton
+                                                <Button
+                                                    variant="contained"
+                                                    color="primary"
                                                     onClick={skuForm.handleSubmit(handleAddSku)}
                                                 >
-                                                    <AddIcon />
-                                                </IconButton>
+                                                    Thêm
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     </Hidden>
-                                </TableBody>
+                                </TableFooter>
                             </Table>
                         )}
                         {dealType === DealType.DEAL && (
