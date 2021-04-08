@@ -66,8 +66,8 @@ export const DealValidation = {
     maxQuantity: {
         required: "Số lượng được phép bán không được để trống.",
         min: {
-            value: 0,
-            message: "Số lượng được phép bán không được nhỏ hơn 0.",
+            value: 1,
+            message: "Số lượng được phép bán không được nhỏ hơn 1.",
         },
         validate: {
             noDecimal: FormCommonValidator.noDecimal,

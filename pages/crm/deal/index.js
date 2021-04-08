@@ -29,7 +29,7 @@ import {
     Tooltip,
 } from "@material-ui/core";
 import { Controller, useForm } from "react-hook-form";
-import { /*Search as SearchIcon,*/ Edit as EditIcon } from "@material-ui/icons";
+import { /*Search as SearchIcon,*/ Edit as EditIcon, Visibility as VisibilityIcon } from "@material-ui/icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
@@ -47,6 +47,7 @@ import ModalCustom from "@thuocsi/nextjs-components/simple-dialog/dialogs";
 import { useToast } from "@thuocsi/nextjs-components/toast/useToast";
 import Head from "next/head";
 import { unknownErrorText } from "components/commonErrors";
+import moment from "moment";
 
 async function loadDealData(ctx) {
     const props = {
@@ -343,21 +344,23 @@ const render = (props) => {
                         </TableHead>
                         {deals.length > 0 ? (
                             <TableBody>
-                                {deals.map((row, i) => (
-                                    <TableRow key={i} row={row} i={i}>
-                                        <TableCell>{row.code}</TableCell>
-                                        <TableCell>{row.name}</TableCell>
-                                        <TableCell>{DealTypeLabel[row.dealType]}</TableCell>
-                                        <TableCell align="right">{row.quantity}</TableCell>
-                                        <TableCell align="right">{row.maxQuantity}</TableCell>
-                                        <TableCell align="right">{formatNumber(row.price ?? 0)}</TableCell>
-                                        <TableCell align="left">
-                                            Từ: {formatDateTime(row.startTime)}
-                                            <br />
-                                            Đến: {formatDateTime(row.endTime)}
-                                        </TableCell>
-                                        <TableCell align="left">{formatDateTime(row.readyTime)}</TableCell>
-                                        {/* <TableCell align="center">
+                                {deals.map((row) => {
+                                    const isExpired = moment(row.endTime).isBefore(moment());
+                                    return (
+                                        <TableRow key={`tr_${row.code}`} row={row}>
+                                            <TableCell>{row.code}</TableCell>
+                                            <TableCell>{row.name}</TableCell>
+                                            <TableCell>{DealTypeLabel[row.dealType]}</TableCell>
+                                            <TableCell align="right">{row.quantity}</TableCell>
+                                            <TableCell align="right">{row.maxQuantity}</TableCell>
+                                            <TableCell align="right">{formatNumber(row.price ?? 0)}</TableCell>
+                                            <TableCell align="left">
+                                                Từ: {formatDateTime(row.startTime)}
+                                                <br />
+                                                Đến: {formatDateTime(row.endTime)}
+                                            </TableCell>
+                                            <TableCell align="left">{formatDateTime(row.readyTime)}</TableCell>
+                                            {/* <TableCell align="center">
                                             <Switch
                                                 color="primary"
                                                 checked={row.isFlashSale}
@@ -368,33 +371,43 @@ const render = (props) => {
                                                 }}
                                             />
                                         </TableCell> */}
-                                        <TableCell align="center">
-                                            <Switch
-                                                color="primary"
-                                                checked={row.status === DealStatus.ACTIVE}
-                                                onClick={() => {
-                                                    const { status, ...others } = row;
-                                                    setSelectedDeal({
-                                                        ...others,
-                                                        status: status === DealStatus.ACTIVE ? DealStatus.INACTIVE : DealStatus.ACTIVE,
-                                                    })
-                                                    setOpenStatusChangeDialog(true);
-                                                }}
-                                            />
-                                        </TableCell>
-                                        <TableCell align="center">
-                                            <Link
-                                                href={`/crm/deal/edit?dealCode=${row.code}`}
-                                            >
-                                                <Tooltip title="Cập nhật thông tin">
-                                                    <IconButton>
-                                                        <EditIcon fontSize="small" />
-                                                    </IconButton>
-                                                </Tooltip>
-                                            </Link>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                            <TableCell align="center">
+                                                {isExpired ? (
+                                                    <Button
+                                                        variant="outlined"
+                                                        disabled
+                                                    >
+                                                        Hết hạn
+                                                    </Button>
+                                                ) : (
+                                                    <Switch
+                                                        color="primary"
+                                                        checked={row.status === DealStatus.ACTIVE}
+                                                        onClick={() => {
+                                                            const { status, ...others } = row;
+                                                            setSelectedDeal({
+                                                                ...others,
+                                                                status: status === DealStatus.ACTIVE ? DealStatus.INACTIVE : DealStatus.ACTIVE,
+                                                            })
+                                                            setOpenStatusChangeDialog(true);
+                                                        }}
+                                                    />
+                                                )}
+                                            </TableCell>
+                                            <TableCell align="center">
+                                                <Link
+                                                    href={`/crm/deal/edit?dealCode=${row.code}`}
+                                                >
+                                                    <Tooltip title={isExpired ? "Xem chi tiết" : "Cập nhật thông tin"}>
+                                                        <IconButton>
+                                                            {isExpired ? <VisibilityIcon fontSize="small" /> : <EditIcon fontSize="small" />}
+                                                        </IconButton>
+                                                    </Tooltip>
+                                                </Link>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         ) : (
                             <TableBody>
