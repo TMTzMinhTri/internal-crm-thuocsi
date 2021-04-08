@@ -41,7 +41,7 @@ import { useRouter } from "next/router";
 import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useController, useForm } from "react-hook-form";
 import {
-    DealFlashSaleLabel,
+    // DealFlashSaleLabel,
     DealStatus,
     DealStatusLabel,
     DealType,
@@ -101,6 +101,8 @@ export const DealForm = (props) => {
         rules: dealType === DealType.COMBO ? DealValidation.imageUrls.combo : {},
         defaultValue: defaultValuesDealForm.imageUrls,
     });
+    // Keep this until implement flash sale feature
+    useController({ name: "isFlashSale", control: dealForm.control })
     const [skuOptions, setSkuOptions] = useState(props.skuOptions ?? []);
     const [skuOptionMap, setSkuOptionMap] = useState(props.deal?.skus?.reduce((acc, cur) => {
         acc[cur.sku] = true;
