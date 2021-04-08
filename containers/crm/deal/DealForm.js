@@ -67,6 +67,7 @@ export const DealForm = (props) => {
     const router = useRouter();
     const toast = useToast();
     const isLateUpdate = props.isUpdate && moment(props.deal.startTime).isBefore(moment());
+    const isExpired = props.isUpdate && moment(props.deal.endTime).isBefore(moment());
     const isFirstRender = useIsFirstRender();
     const defaultValuesDealForm = useMemo(() => ({
         startTime: formatDatetimeFormType(moment().add(1, "d")),
@@ -165,10 +166,10 @@ export const DealForm = (props) => {
     }
 
     useEffect(() => {
-        if (!isFirstRender) {
+        if (!isFirstRender && !props.isUpdate) {
             formSetter(defaultValuesDealForm, ["startTime", "endTime", "readyTime"], dealForm.setValue);
         }
-    }, []);
+    }, [defaultValuesDealForm]);
 
     const handleSearchSkus = async (text) => {
         try {
@@ -325,6 +326,9 @@ export const DealForm = (props) => {
                                 InputLabelProps={{
                                     shrink: true,
                                 }}
+                                InputProps={{
+                                    readOnly: isExpired,
+                                }}
                                 required
                                 error={!!dealForm.errors.endTime}
                                 helperText={dealForm.errors.endTime?.message ?? "Tới thời gian này sẽ kết thúc deal"}
@@ -367,7 +371,7 @@ export const DealForm = (props) => {
                     </Grid>
                     <Grid className={classes.gridAlignTop} item xs={12} md={5} container spacing={3}>
                         <Grid item xs={12} md={6}>
-                            <FormControl>
+                            <FormControl disabled={isExpired}>
                                 <FormLabel>Trạng thái</FormLabel>
                                 <Controller
                                     name="status"
@@ -379,18 +383,18 @@ export const DealForm = (props) => {
                                                 <Switch
                                                     color="primary"
                                                     size="small"
-                                                    checked={value === DealStatus.ACTIVE}
+                                                    checked={value === DealStatus.ACTIVE && !isExpired}
                                                     onChange={(_, checked) => dealForm.setValue(name, checked ? DealStatus.ACTIVE : DealStatus.INACTIVE)}
                                                 />
                                             }
                                             color={value === DealStatus.ACTIVE ? "primary" : "default"}
-                                            label={DealStatusLabel[value]}
+                                            label={!isExpired ? DealStatusLabel[value] : "Hết hạn"}
                                         />
                                     )}
                                 />
                             </FormControl>
                         </Grid>
-                        <Grid item xs={12} md={6}>
+                        {/* <Grid item xs={12} md={6}>
                             <FormControl>
                                 <FormLabel component="div">Flash sale</FormLabel>
                                 <Controller
@@ -413,7 +417,7 @@ export const DealForm = (props) => {
                                     )}
                                 />
                             </FormControl>
-                        </Grid>
+                        </Grid> */}
                         <Grid item xs={12}>
                             <TextField
                                 name="readyTime"
@@ -452,7 +456,7 @@ export const DealForm = (props) => {
                                     min: 0
                                 }}
                                 error={!!dealForm.errors.maxQuantity}
-                                helperText={dealForm.errors.maxQuantity?.message ?? "Nhập = 0 là không giới hạn"}
+                                helperText={dealForm.errors.maxQuantity?.message}
                                 inputRef={dealForm.register({
                                     ...DealValidation.maxQuantity,
                                     valueAsNumber: true,
@@ -623,13 +627,15 @@ export const DealForm = (props) => {
                         Quay lại
                     </Button>
                 </Link>
-                <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={dealForm.handleSubmit(handleSubmitDealForm)}
-                >
-                    Lưu
-                </Button>
+                {!isExpired && (
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={dealForm.handleSubmit(handleSubmitDealForm)}
+                    >
+                        Lưu
+                    </Button>
+                )}
             </MyCardActions>
         </MyCard>
     );
