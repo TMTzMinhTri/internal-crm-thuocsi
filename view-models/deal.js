@@ -18,11 +18,13 @@ export const DealTypeOptions = Object.keys(DealType).map((key) => ({
 export const DealStatus = {
     ACTIVE: "ACTIVE",
     INACTIVE: "INACTIVE",
+    EXPIRED: "EXPIRED",
 };
 
 export const DealStatusLabel = {
     [DealStatus.ACTIVE]: "Đang hoạt động",
     [DealStatus.INACTIVE]: "Không hoạt động",
+    [DealStatus.EXPIRED]: "Hết hạn",
 };
 
 export const DealStatusOptions = Object.keys(DealStatus).map((key) => ({
