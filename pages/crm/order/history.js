@@ -5,6 +5,7 @@ import {
 import { MyCard, MyCardActions, MyCardContent, MyCardHeader } from "@thuocsi/nextjs-components/my-card/my-card";
 import SearchIcon from "@material-ui/icons/Search";
 import Grid from "@material-ui/core/Grid";
+import { getCommonAPI } from 'client/common';
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
 import Head from "next/head";
@@ -309,7 +310,7 @@ export function renderForm(props) {
                                                     nextOrdersItemChange++
                                                 }
                                             })
-
+                                            if (previousOrderChange + nextOrderChange + previousOrdersItemChange + nextOrdersItemChange == 0) return null
                                             return (
                                                 <TableRow key={i}>
                                                     <TableCell align="left">{formatDateTime(row.createdTime)}</TableCell>
