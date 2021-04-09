@@ -114,6 +114,13 @@ class OrderClient extends APIClient {
         )
     }
 
+    getOrderLogByOrderNo(orderNo) {
+        return this.callFromClient(
+            "GET",
+            `${URI}/order/history?orderNo=${orderNo}`,
+        )
+    }
+
     getCurrentCart({ phone }) {
         return this.callFromClient(
             "GET",
