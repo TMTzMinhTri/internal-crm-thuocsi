@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { doWithLoggedInUser, renderWithLoggedInUser } from "@thuocsi/nextjs-components/lib/login"
 
 import AppCRM from "pages/_layout";
@@ -7,8 +7,6 @@ import { getPricingClient } from "client/pricing";
 import { getDealClient } from "client/deal";
 import { unknownErrorText } from "components/commonErrors";
 import { getProductClient } from "client/product";
-import moment from "moment";
-import { DealStatus } from "view-models/deal";
 
 async function loadDealData(ctx) {
     const dealCode = ctx.query.dealCode;
@@ -101,14 +99,6 @@ const breadcrumb = [
     }
 ]
 const render = props => {
-
-    useEffect(() => {
-        const { deal } = props;
-        if (deal.status !== DealStatus.EXPIRED && moment(deal.endTime).isBefore(moment())) {
-            const dealClient = getDealClient();
-            dealClient.updateDealStatus({ code: deal.code, status: DealStatus.EXPIRED })
-        }
-    }, [props.deal.code])
 
     return (
         <AppCRM breadcrumb={breadcrumb}>
