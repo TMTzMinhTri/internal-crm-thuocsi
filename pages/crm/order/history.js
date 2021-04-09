@@ -79,6 +79,7 @@ export function renderForm(props) {
 
     const [search, setSearch] = useState(router.query.orderCode || props.orderCode)
     const [orderData, setOrderData] = useState(null)
+    const [validRow, setValidRow] = useState(0)
 
     const [orderLogData, setOrderLogData] = useState([])
     const { register, setValue, reset } = useForm({
@@ -289,6 +290,7 @@ export function renderForm(props) {
                                             let previousOrderChange = 0
                                             let nextOrdersItemChange = 0
                                             let nextOrderChange = 0
+
                                             row.previous.order?.map(item => {
                                                 if (OrderLog[item.key]) {
                                                     previousOrderChange++
@@ -310,9 +312,9 @@ export function renderForm(props) {
                                                     nextOrdersItemChange++
                                                 }
                                             })
-                                            if (previousOrderChange + nextOrderChange + previousOrdersItemChange + nextOrdersItemChange == 0) return null
+                                            // if (previousOrderChange + nextOrderChange + previousOrdersItemChange + nextOrdersItemChange == 0) return null
                                             return (
-                                                <TableRow key={i}>
+                                                <TableRow key={i} style={{ background: i % 2 == 0 ? "#d1d0cd" : "white" }}>
                                                     <TableCell align="left">{formatDateTime(row.createdTime)}</TableCell>
                                                     <TableCell align="left">{row.actionBy}</TableCell>
                                                     <TableCell align="left">{OrderAction[row.actionCode]}</TableCell>
@@ -353,7 +355,7 @@ export function renderForm(props) {
                                                         {
                                                             nextOrderChange > 0 &&
                                                             <>
-                                                                <b>Order</b>
+                                                                {/* <b>Order</b> */}
                                                                 {row.next.order?.map(item => {
                                                                     if (OrderLog[item.key]) {
                                                                         nextOrderChange++
@@ -367,7 +369,7 @@ export function renderForm(props) {
                                                         {
                                                             nextOrdersItemChange > 0 &&
                                                             <>
-                                                                <b>Order-Item</b>
+                                                                {/* <b>Order-Item</b> */}
                                                                 {row.next.orderItems?.map(item => {
                                                                     if (OrderItemLog[item.key]) {
                                                                         nextOrdersItemChange++
