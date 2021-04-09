@@ -142,6 +142,38 @@ export const sellerStatuses = [
     }
 ]
 
+export const OrderLog = {
+    "totalItems": "Số lượng sản phẩm",
+    "totalPrice": "Tổng giá trị đơn hàng",
+    "status": "Trạng thái đơn hàng",
+    "customerDistrictCode": "Quận/Huyện",
+    "customerName": "Tên khách hàng",
+    "customerPhone": "Số điện thoại khách hàng",
+    "customerProvinceCode": "Tỉnh/Thành",
+    "customerShippingAddress": "Địa chỉ giao hàng",
+    "customerWardCode": "Phường/Xã",
+    "deliveryDate": "Ngày giao hàng",
+    "deliveryPlatform": "Hình thức vận chuyển",
+    "deliveryPlatformFee": "Phí vận chuyển",
+    "deliveryStatus": "Trạng thái vận chuyển",
+    "note": "Ghi chú đơn hàng",
+    "paymentMethod": "Hình thức thanh toán",
+    "privateNote": "Ghi chú nội bộ",
+    "redeemCode": "Mã redeem",
+}
+
+export const OrderAction = {
+    "UPDATE_ORDER_INFO": "Cập nhật thông tin đơn hàng",
+    "UPDATE_QUANTITY_ITEM": "Cập nhật số lượng sản phẩm",
+    "REMOVE_ORDER_ITEM": "Xóa sản phẩm",
+    "UPDATE_ORDER_STATUS": "Cập nhật trạng thái đơn hàng",
+}
+
+export const OrderItemLog = {
+    "quantity": "Số lượng sản phẩm",
+    "totalPrice": "Tổng giá trị mặt hàng",
+}
+
 
 export const ProductStatus = {
     "NEW": "Chờ duyệt",
