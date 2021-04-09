@@ -71,6 +71,10 @@ export const DealValidation = {
             value: 1,
             message: "Số lượng được phép bán không được nhỏ hơn 1.",
         },
+        max: {
+            value: 100000,
+            message: "Giá không được lớn hơn 100,000.",
+        },
         validate: {
             noDecimal: FormCommonValidator.noDecimal,
         }
