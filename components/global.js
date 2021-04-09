@@ -169,17 +169,6 @@ export const OrderAction = {
     "UPDATE_ORDER_STATUS": "Cập nhật trạng thái đơn hàng",
 }
 
-// export const OrderStatus = {
-//     "WAIT_TO_CONFIRM": "Chờ xác nhận",
-//     "DRAFT": "Nháp",
-//     "CONFIRMED": "Đã xác nhận",
-//     "WAITING_TO_PICK": "Lấy hàng",
-//     "WAITING_TO_PACK": "Đóng gói",
-//     "WAITING_TO_DELIVERY": "Vận chuyển",
-//     "PICKED_BY_CARRIER": "Bàn giao hàng",
-//     "COMPLETED": "Hoàn thành",
-// }
-
 export const OrderItemLog = {
     "quantity": "Số lượng sản phẩm",
     "totalPrice": "Tổng giá trị mặt hàng",
