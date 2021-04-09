@@ -166,7 +166,7 @@ export const OrderAction = {
     "UPDATE_ORDER_INFO": "Cập nhật thông tin đơn hàng",
     "UPDATE_QUANTITY_ITEM": "Cập nhật số lượng sản phẩm",
     "REMOVE_ORDER_ITEM": "Xóa sản phẩm",
-    "UPDATE_ORDER_STATUS": "Cập nhật trang thái đơn hàng",
+    "UPDATE_ORDER_STATUS": "Cập nhật trạng thái đơn hàng",
 }
 
 // export const OrderStatus = {
