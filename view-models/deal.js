@@ -18,6 +18,7 @@ export const DealTypeOptions = Object.keys(DealType).map((key) => ({
 export const DealStatus = {
     ACTIVE: "ACTIVE",
     INACTIVE: "INACTIVE",
+    EXPIRED: "EXPIRED",
 };
 
 export const DealStatusLabel = {
